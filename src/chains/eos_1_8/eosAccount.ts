@@ -71,8 +71,8 @@ export class EosAccount {
     permissionsToAdd: EosPermissionSimplified[],
   ): Promise<EosActionStruct[]> {
     // Add permissions to current account structure
-    const eosHelper = new PermissionsHelper(this._chainState)
-    const updateAuthActions = await eosHelper.composeAddPermissionsActions(
+    const permissionHelper = new PermissionsHelper(this._chainState)
+    const updateAuthActions = await permissionHelper.composeAddPermissionsActions(
       payerAccountName,
       payerAccountPermissionName,
       permissionsToAdd,
