@@ -5,9 +5,10 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc --build tsconfig.json",
-    "lint": "./node_modules/.bin/eslint",
-    "lint-fix": "./node_modules/.bin/eslint --fix",
-    "prepublishOnly": "npm run build",
+    "lint": "./node_modules/.bin/eslint src",
+    "lint-fix": "./node_modules/.bin/eslint src --fix",
+    "prepare" : "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
     "test": "jest --runInBand --coverage --detectOpenHandles"
   },
   "repository": {
