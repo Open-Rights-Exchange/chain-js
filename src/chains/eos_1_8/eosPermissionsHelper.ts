@@ -11,7 +11,6 @@ import {
 } from './models'
 import { EosChainState } from './eosChainState'
 import { composeAction, ChainActionType } from './eosCompose'
-import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
 
 // OREJS Ported functions
@@ -37,8 +36,8 @@ type ReplacePermissionKeysParams = {
   permissionName: EosEntityName
   parentPermissionName: EosEntityName
   publicKeys: EosPublicKey[]
-  account?: EosAccount
-  accountName?: EosEntityName
+  accountPermissions: EosPermissionSimplified[]
+  accountName: EosEntityName
 }
 
 type UnlinkPermissionsParams = {
@@ -152,26 +151,20 @@ export class PermissionsHelper {
     return delteAuthActions
   }
 
-  /** Compose an action to replace public keys on an existing account permission
-      Accepts either an Account object or an account name */
+  /** Compose an action to replace public keys on an existing account permission */
   composeReplacePermissionKeysAction = async (
     payerAccountName: EosEntityName,
     payerAccountPermissionName: EosEntityName,
     params: ReplacePermissionKeysParams,
   ): Promise<EosActionStruct> => {
-    const { permissionName, parentPermissionName, publicKeys, accountName } = params
-    let { account } = params
-    if (!accountName && !account)
-      throwNewError('composeReplacePermissionKeysAction: Must provide either an Account object or account name.')
-    if (!account) {
-      account = new EosAccount(this._chainState)
-      await account.fetchFromChain(accountName)
-    }
-    const permission = account.permissions.find(p => p.name === permissionName)
+    const { permissionName, parentPermissionName, publicKeys, accountName, accountPermissions } = params
+    const permission = accountPermissions.find(p => p.name === permissionName)
     if (!permission)
       throwNewError(
-        `composeReplacePermissionKeysAction: Specified account ${account.name} doesn't have a permission name ${permissionName}`,
+        `composeReplacePermissionKeysAction: Specified account ${accountName} doesn't have a permission name ${permissionName}`,
       )
+    // TODO: Unlink all permissions under the permission being replaced
+    // ... otherwise RAM will be orphaned on-chain for those permisisons linked to actions
     const permissionToUpdate = this.composePermission(
       publicKeys,
       toEosEntityName(permissionName),

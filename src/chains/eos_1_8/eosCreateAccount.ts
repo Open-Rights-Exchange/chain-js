@@ -107,15 +107,6 @@ export class EosCreateAccount implements CreateAccount {
     this._chainState = chainState
   }
 
-  /** Construct an actions to update an account's active keys */
-  // private composeReplaceAccountActiveKey() {
-  //   let { payerAccountName, payerAccountPermissionName, publicKeys } = this._options;
-  //   const eosHelper = new PermissionsHelper(this._chainState)
-  //   // let ownerPermissionAction = eosHelper.composeReplacePermissionKeysAction(payerAccountName, payerAccountPermissionName, toEosEntityName('owner'), null, [toEosPublicKey(publicKeys.active)], null, this._accountName)
-  //   let activePermissionAction = eosHelper.composeReplacePermissionKeysAction(payerAccountName, payerAccountPermissionName, toEosEntityName('active'), toEosEntityName('owner'), [toEosPublicKey(publicKeys.owner)], null,this._accountName)
-  //   return activePermissionAction
-  // }
-
   /** Compose a transaction to send to the chain to create a new account */
   async composeTransaction(
     accountType: AccountType,
@@ -134,7 +125,7 @@ export class EosCreateAccount implements CreateAccount {
     } = this._options
 
     // determine account name - generate account name if once wasn't provided
-    const eosHelper = new PermissionsHelper(this._chainState)
+    const permissionHelper = new PermissionsHelper(this._chainState)
     const useAccountName = await this.determineNewAccountName(accountName)
     this._accountName = useAccountName
 
@@ -159,16 +150,18 @@ export class EosCreateAccount implements CreateAccount {
     // To recycle an account, we dont create new account, just replace keys on an existing one
     if (recycleExistingAccount) {
       // we've already confirmed (in generateAccountName) that account can be recycled
-      // Replace account permissions (see oreid.reuseAccount)
-      // composeReplacePermissionKeysAction accepts an account object or accountName
-      const replaceActivePermissionAction = await eosHelper.composeReplacePermissionKeysAction(
+      const parentAccount = new EosAccount(this._chainState)
+      // replacing the keys of an existing account, so fetch it first
+      await parentAccount.fetchFromChain(this._accountName)
+
+      const replaceActivePermissionAction = await permissionHelper.composeReplacePermissionKeysAction(
         payerAccountName,
         payerAccountPermissionName,
         {
           permissionName: toEosEntityName('active'),
           parentPermissionName: toEosEntityName('owner'),
           publicKeys: [toEosPublicKey(publicKeys.active)],
-          account: null,
+          accountPermissions: parentAccount.permissions,
           accountName: this._accountName,
         },
       )
@@ -197,7 +190,7 @@ export class EosCreateAccount implements CreateAccount {
     // add permissions - add permissions actions to the transaction if needed
     const updatePermissionsActions = await this.composeAddPermissionsActions()
     // add permissions - link permissions actions to the transaction if needed
-    const linkPermissionsActions = eosHelper.composeLinkPermissionActions(
+    const linkPermissionsActions = permissionHelper.composeLinkPermissionActions(
       payerAccountName,
       payerAccountPermissionName,
       permissionsToLink,
@@ -296,9 +289,9 @@ export class EosCreateAccount implements CreateAccount {
   private composeNewAccountPermissionStructure(): EosPermissionStruct[] {
     const { publicKeys } = this._options
     const { active, owner } = publicKeys || {}
-    const eosHelper = new PermissionsHelper(this._chainState)
-    const ownerPermission = eosHelper.composePermission([owner], toEosEntityName('owner'), null)
-    const activePermission = eosHelper.composePermission([active], toEosEntityName('active'), toEosEntityName('owner'))
+    const permissionHelper = new PermissionsHelper(this._chainState)
+    const ownerPermission = permissionHelper.composePermission([owner], toEosEntityName('owner'), null)
+    const activePermission = permissionHelper.composePermission([active], toEosEntityName('active'), toEosEntityName('owner'))
     return [ownerPermission, activePermission]
   }
 
@@ -309,14 +302,14 @@ export class EosCreateAccount implements CreateAccount {
     const { active: publicKeyActive } = publicKeys || {}
     const parentAccount = new EosAccount(this._chainState)
     await parentAccount.fetchFromChain(parentAccountName)
-    const eosHelper = new PermissionsHelper(this._chainState)
-    const { perm_name: deepestPermissionName } = eosHelper.findDeepestPermission(
+    const permissionHelper = new PermissionsHelper(this._chainState)
+    const { perm_name: deepestPermissionName } = permissionHelper.findDeepestPermission(
       parentAccount.value.permissions,
       rootPermission,
     )
     // create a new 'nested account' permission using the new account name as the permission name
     // ... and the currently deepest permission name as the parent
-    const newVirtualAccountPermission = eosHelper.composePermission(
+    const newVirtualAccountPermission = permissionHelper.composePermission(
       [publicKeyActive],
       this._accountName,
       deepestPermissionName,
@@ -356,8 +349,8 @@ export class EosCreateAccount implements CreateAccount {
     // ----- Native account
     // Add permissions to current account structure
     // NOTE: we don't add suplemental permissions to a virtual nested account
-    const eosHelper = new PermissionsHelper(this._chainState)
-    const updateAuthActions = eosHelper.composeAddPermissionsActions(
+    const permissionHelper = new PermissionsHelper(this._chainState)
+    const updateAuthActions = permissionHelper.composeAddPermissionsActions(
       payerAccountName,
       payerAccountPermissionName,
       permissionsToAdd,
