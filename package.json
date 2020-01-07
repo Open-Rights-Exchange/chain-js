@@ -1,7 +1,7 @@
 {
-  "name": "chainjs",
-  "version": "1.0.0",
-  "description": "Javascript helper library to provide plug-in interface to different block chain libraries.",
+  "name": "@open-rights-exchange/chainjs",
+  "version": "0.9.0",
+  "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc --build tsconfig.json",
@@ -12,13 +12,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/open-rights-exchange/chainjs.git"
+    "url": "git+https://github.com/open-rights-exchange/chain-js.git"
   },
   "author": "Open Rights Exchange",
   "bugs": {
-    "url": "https://github.com/open-rights-exchange/chainjs/issues"
+    "url": "https://github.com/open-rights-exchange/chain-js/issues"
   },
-  "homepage": "https://github.com/open-rights-exchange/chainjs#readme",
+  "homepage": "https://github.com/open-rights-exchange/chain-js#readme",
   "devDependencies": {
     "@types/jest": "^24.0.24",
     "@types/node": "^13.1.0",
