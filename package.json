@@ -1,0 +1,56 @@
+{
+  "name": "chainjs",
+  "version": "1.0.0",
+  "description": "Javascript helper library to provide plug-in interface to different block chain libraries.",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc --build tsconfig.json",
+    "lint": "./node_modules/.bin/eslint",
+    "lint-fix": "./node_modules/.bin/eslint --fix",
+    "prepublishOnly": "npm run build",
+    "test": "jest --runInBand --coverage --detectOpenHandles"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-rights-exchange/chainjs.git"
+  },
+  "author": "Open Rights Exchange",
+  "bugs": {
+    "url": "https://github.com/open-rights-exchange/chainjs/issues"
+  },
+  "homepage": "https://github.com/open-rights-exchange/chainjs#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.24",
+    "@types/node": "^13.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-typescript": "^6.3.1",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-jest": "^23.3.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "@types/node-fetch": "^2.5.4",
+    "@types/sjcl": "^1.0.28",
+    "@types/text-encoding": "0.0.35",
+    "dotenv": "^8.0.0",
+    "eosjs": "^20.0.0",
+    "eosjs-ecc": "^4.0.7",
+    "eosjs-keygen": "^1.3.2",
+    "flatted": "^2.0.1",
+    "hash.js": "^1.1.7",
+    "jest-fetch-mock": "^2.1.2",
+    "moment": "^2.24.0",
+    "node-fetch": "^2.6.0",
+    "sjcl": "^1.0.8",
+    "text-encoding": "^0.7.0"
+  }
+}
