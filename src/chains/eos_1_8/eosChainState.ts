@@ -1,6 +1,6 @@
 import { Api, JsonRpc, RpcInterfaces } from 'eosjs'
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
-import fetch from 'node-fetch' // node only; not needed in browsers
+import nodeFetch from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
@@ -87,7 +87,7 @@ export class EosChainState {
       this._signatureProvider = new JsSignatureProvider([])
       if (!this._rpc) {
         const url = this.determineUrl()
-        this._rpc = new JsonRpc(url, { fetch: fetch as any })
+        this._rpc = new JsonRpc(url, { fetch: this._chainSettings?.fetch || nodeFetch })
       }
       if (!this._api) {
         this._api = new Api({
