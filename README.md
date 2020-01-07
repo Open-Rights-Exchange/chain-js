@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/ore-js/tree/master.svg?style=svg&circle-token=70a414d0e86f8d125d1a16eca8ddc379aef6fd1c)](https://circleci.com/gh/Open-Rights-Exchange/ore-js/tree/master)
+[![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/chain-js.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/chain-js)
 # Overview
 
 ChainJS is a low-level Javascript helper library that helps you write code that can work with multiple blockchains. ChainJs uses a plug-in model and a unified interface to do common blockchain functions like constructing, signing, and sending blockchain transactions.
