@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "alwaysStrict": true,
+    "declaration": true,
     "downlevelIteration": true,
     "lib": [
       "es2017",

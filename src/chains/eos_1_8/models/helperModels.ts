@@ -4,13 +4,13 @@ import { EosPublicKey } from './cryptoModels'
 // using Enum 'brands' to force a string type to have a particular format
 // See - https://spin.atomicobject.com/2017/06/19/strongly-typed-date-string-typescript/
 // ... and https://basarat.gitbooks.io/typescript/docs/tips/nominalTyping.html
-enum EosDateBrand {
+export enum EosDateBrand {
   _ = '',
 }
-enum EosAssetBrand {
+export enum EosAssetBrand {
   _ = '',
 }
-enum EosEntityNameBrand {
+export enum EosEntityNameBrand {
   _ = '',
 }
 

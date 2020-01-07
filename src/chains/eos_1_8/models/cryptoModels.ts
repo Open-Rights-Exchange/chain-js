@@ -1,13 +1,13 @@
 import * as ecc from 'eosjs-ecc'
 import { EncryptedDataString } from '../../../crypto'
 
-enum EosPublicKeyBrand {
+export enum EosPublicKeyBrand {
   _ = '',
 }
-enum EosPrivateKeyBrand {
+export enum EosPrivateKeyBrand {
   _ = '',
 }
-enum EosSignatureBrand {
+export enum EosSignatureBrand {
   _ = '',
 }
 
