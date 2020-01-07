@@ -13,7 +13,11 @@
     "noImplicitAny": true,
     "outDir": "dist",
     "sourceMap": true,
-    "target": "es5"
+    "target": "es5",
+    "baseUrl": "./",
+    "paths": {
+      "*" : ["src/@customTypes/*"]
+    }
   },
   "exclude": [
     "dist",
