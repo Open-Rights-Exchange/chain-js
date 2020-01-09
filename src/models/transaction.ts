@@ -20,7 +20,7 @@ export enum ConfirmType {
 }
 
 /**
- * The Transaction interface declares the operations that all concrete chain transaction classes must implement
+ * The Transaction interface declares the operations that all concrete chain (chain)transaction classes must implement
  */
 export interface Transaction {
   /** Transaction's actions */
