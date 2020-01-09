@@ -8,10 +8,14 @@ import {
   EosActionStruct,
   EosPermissionSimplified,
   isEosPermissionStruct,
+  GenerateMissingKeysParams,
+  GeneratedPermissionKeys,
 } from './models'
 import { EosChainState } from './eosChainState'
 import { composeAction, ChainActionType } from './eosCompose'
 import { throwNewError } from '../../errors'
+import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
+import { isNullOrEmpty } from '../../helpers'
 
 // OREJS Ported functions
 //   addPermission() {} // addPermission
@@ -87,11 +91,9 @@ export class PermissionsHelper {
     return keys.map(key => ({ key, weight }))
   }
 
-  /** Compose a collection of actions to add the requested permissions
-   *  For each updateAuth action (one per permission), the prior complete auth tree must be provided
-   *  ... so we must keep the current auth state following the last added permission */
+  /** Compose a collection of actions to add the requested permissions */
   composeAddPermissionsActions(
-    payerAccountName: EosEntityName,
+    accountName: EosEntityName,
     payerAccountPermissionName: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] | EosPermissionStruct[] = [],
   ): EosActionStruct[] {
@@ -105,8 +107,8 @@ export class PermissionsHelper {
     // tell Typescript that permissionsToAdd is now always EosPermissionSimplified[]
     usePermissionsToAdd = permissionsToAdd as EosPermissionSimplified[]
 
-    // loop through each permission to add and create an updateAuth action to add it
-    // ... the next permission needs the updatedAuth which includes all permissions added so far to pass in as the most current auth to update in updateauth
+    const newPermissions: EosPermissionStruct[] = []
+    // collect an array of new permission objects
     usePermissionsToAdd.forEach(p => {
       const permissionToAdd = this.composePermission(
         [p.publicKey],
@@ -115,10 +117,14 @@ export class PermissionsHelper {
         p.threshold,
         p.publicKeyWeight,
       )
-      // compose the updateAuth action
+      newPermissions.push(permissionToAdd)
+    })
+    // compose updateAuth actions
+    // Todo: Sort newPermissions by dependencies in case one permission to add requires another one in the list as its parent
+    newPermissions.forEach(permissionToAdd => {
       const updateAuthParams = {
         auth: permissionToAdd.required_auth,
-        authAccountName: payerAccountName,
+        authAccountName: accountName,
         authPermission: payerAccountPermissionName,
         parent: permissionToAdd.parent,
         permission: permissionToAdd.perm_name,
@@ -130,7 +136,7 @@ export class PermissionsHelper {
     return updateAuthActions
   }
 
-  composeDeltePermissionActions = (
+  composeDeletePermissionActions = (
     payerAccountName: EosEntityName,
     payerAccountPermissionName: EosEntityName,
     permissionsToDelete: DeletePermissionsParams = [],
@@ -183,6 +189,7 @@ export class PermissionsHelper {
     return updateAuthAction
   }
 
+  /** Compose a collection of actions to link actions to permissions */
   composeLinkPermissionActions = (
     payerAccountName: EosEntityName,
     payerAccountPermissionName: EosEntityName,
@@ -205,6 +212,7 @@ export class PermissionsHelper {
     return linkAuthActions
   }
 
+  /** Compose a collection of actions to unlink actions to permissions */
   composeUnlinkPermissionActions = (
     payerAccountName: EosEntityName,
     payerAccountPermissionName: EosEntityName,
@@ -226,10 +234,10 @@ export class PermissionsHelper {
   }
 
   // TODO: Optimize this algorithm
-  /** Iterates over the permissions array.
-  // Maps permissions by name, and populates its children
-  // Returns the deepest permission in the tree, starting from the root permission node */
 
+  /** Iterates over the permissions array.
+   * Maps permissions by name, and populates its children
+   * Returns the deepest permission in the tree, starting from the root permission node */
   findDeepestPermission = (permissions: EosPermissionStruct[], rootPermission: EosEntityName): EosPermissionStruct => {
     // First, construct the mapping, from the array...
     const permMap: any[] = [] // Maps the permissions by name (Contructs the tree)
@@ -260,6 +268,33 @@ export class PermissionsHelper {
       depth += 1
     }
     return deepest as EosPermissionStruct
+  }
+
+  /** generate a keypair for any new permissions missing a public key */
+  static generateMissingKeysForPermissionsToAdd = async (
+    permissionsToAdd: Partial<EosPermissionSimplified>[],
+    params: GenerateMissingKeysParams,
+  ) => {
+    const generatedKeys: GeneratedPermissionKeys[] = []
+    const { newKeysOptions } = params || {}
+    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
+
+    if (isNullOrEmpty(permissionsToAdd)) {
+      return null
+    }
+
+    // add public kets to existing permissionsToAdd parameter
+    const keysToFix = permissionsToAdd.map(async p => {
+      if (!p.publicKey) {
+        const updatedPerm = p
+        const keys = await generateKeyPairAndEncryptPrivateKeys(newKeysPassword, newKeysSalt)
+        updatedPerm.publicKey = keys.public
+        updatedPerm.publicKeyWeight = 1
+        generatedKeys.push({ permissionName: updatedPerm.name, keyPair: keys })
+      }
+    })
+    await Promise.all(keysToFix)
+    return { generatedKeys, permissionsToAdd }
   }
 
   /** Converts an EosPermissionStruct to EosPermissionSimplified */
