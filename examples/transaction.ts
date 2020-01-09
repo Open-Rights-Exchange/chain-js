@@ -9,7 +9,7 @@ import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey } from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { EosTransaction } from '../src/chains/eos_1_8/eosTransaction'
-import { EosChainV18 } from '../src/chains/eos_1_8/EosChainV18'
+import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
 
 require('dotenv').config()
 
@@ -62,7 +62,7 @@ const { env } = process
   await kylin.connect()
   console.log('Chain ID:', kylin.chainId)
 
-  const orestaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings) as EosChainV18
+  const orestaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings) as ChainEosV18
   await orestaging.connect()
 
   //  ---> set transaction from serialized

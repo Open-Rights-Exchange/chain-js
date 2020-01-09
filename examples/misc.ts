@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
-import { EosChainV18 } from '../src/chains/eos_1_8/EosChainV18'
-import { EthereumChainV1 } from '../src/chains/ethereum_1/ethereumChainV1'
+import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
+import { ChainEthereumV1 } from '../src/chains/ethereum_1/ChainEthereumV1'
 
 require('dotenv').config()
 
@@ -65,6 +65,6 @@ const { env } = process
    * Create an Ethereum chain and call a few functions
    */
   // console.log('App: Create an Etehereum Chain.');
-  // const ethChain = new ChainFactory().create(ChainType.Ethereum_1, [ethEndpoint]) as EthereumChainV1
+  // const ethChain = new ChainFactory().create(ChainType.Ethereum_1, [ethEndpoint]) as ChainEthereumV1
   // console.log(ethChain.chainId)
 })()

@@ -3,12 +3,12 @@ import { Chain, ChainEndpoint, ChainInfo, ChainSettings } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
-import * as ethcrypto from './crypto'
-import { composeAction, ChainActionType } from './compose'
+import * as ethcrypto from './ethCrypto'
+import { composeAction, ChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 
-class EthereumChainV1 implements Chain {
+class ChainEthereumV1 implements Chain {
   private _endpoints: ChainEndpoint[]
 
   private _settings: ChainSettings
@@ -59,18 +59,6 @@ class EthereumChainV1 implements Chain {
     return null
   }
 
-  public newAccount = (options?: any): any => {
-    return null
-  }
-
-  public newCreateAccount = (options?: any): any => {
-    return null
-  }
-
-  public newTransaction = (options?: any): EthereumTransaction => {
-    return null
-  }
-
   public crypto = {
     decrypt: crypto.decrypt,
     encrypt: crypto.encrypt,
@@ -81,6 +69,24 @@ class EthereumChainV1 implements Chain {
     generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
     sign: ethcrypto.sign,
     verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
+  }
+
+  private newAccount = (options?: any): any => {
+    return null
+  }
+
+  private newCreateAccount = (options?: any): any => {
+    return null
+  }
+
+  private newTransaction = (options?: any): EthereumTransaction => {
+    return null
+  }
+
+  public new = {
+    account: this.newAccount,
+    createAccount: this.newCreateAccount,
+    transaction: this.newTransaction,
   }
 
   public description(): string {
@@ -94,4 +100,4 @@ class EthereumChainV1 implements Chain {
   }
 }
 
-export { EthereumChainV1 }
+export { ChainEthereumV1 }

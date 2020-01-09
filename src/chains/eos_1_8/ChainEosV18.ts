@@ -11,7 +11,7 @@ import { EosCreateAccount } from './eosCreateAccount'
 import { EosEntityName, isValidEosPublicKey, isValidEosPrivateKey } from './models'
 import { EosAccount } from './eosAccount'
 
-class EosChainV18 implements Chain {
+class ChainEosV18 implements Chain {
   private _endpoints: ChainEndpoint[]
 
   private _settings: ChainSettings
@@ -78,8 +78,8 @@ class EosChainV18 implements Chain {
   }
 
   /** Returns a chain Account class
-   * Note: Does NOT create a new account - to create an account, use newCreateAccount */
-  public async newAccount(accountName: EosEntityName): Promise<EosAccount> {
+   * Note: Does NOT create a new account - to create an account, use new.createAccount */
+  private async newAccount(accountName: EosEntityName): Promise<EosAccount> {
     this.assertIsConnected()
     const account = new EosAccount(this._chainState)
     await account.fetchFromChain(accountName)
@@ -87,28 +87,34 @@ class EosChainV18 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  public newCreateAccount(): CreateAccount {
+  private newCreateAccount(): CreateAccount {
     this.assertIsConnected()
     return new EosCreateAccount(this._chainState)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  public newTransaction(options?: TransactionOptions): EosTransaction {
+  private newTransaction(options?: TransactionOptions): EosTransaction {
     this.assertIsConnected()
     return new EosTransaction(this._chainState, options)
   }
 
+  public new = {
+    account: this.newAccount.bind(this),
+    createAccount: this.newCreateAccount.bind(this),
+    transaction: this.newTransaction.bind(this),
+  }
+
   /** Chain crytography functions */
   public crypto = {
-    decrypt: crypto.decrypt,
-    encrypt: crypto.encrypt,
-    getPublicKeyFromSignature: eoscrypto.getPublicKeyFromSignature,
-    isValidEncryptedData: crypto.isEncryptedDataString,
-    isValidPrivateKey: isValidEosPrivateKey,
-    isValidPublicKey: isValidEosPublicKey,
-    sign: eoscrypto.sign,
-    generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys,
-    verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey,
+    decrypt: crypto.decrypt.bind(this),
+    encrypt: crypto.encrypt.bind(this),
+    getPublicKeyFromSignature: eoscrypto.getPublicKeyFromSignature.bind(this),
+    isValidEncryptedData: crypto.isEncryptedDataString.bind(this),
+    isValidPrivateKey: isValidEosPrivateKey.bind(this),
+    isValidPublicKey: isValidEosPublicKey.bind(this),
+    sign: eoscrypto.sign.bind(this),
+    generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys.bind(this),
+    verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
   }
 
   /** Returns chain plug-in name */
@@ -134,4 +140,4 @@ class EosChainV18 implements Chain {
   }
 }
 
-export { EosChainV18 }
+export { ChainEosV18 }

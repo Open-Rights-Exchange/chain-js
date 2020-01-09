@@ -276,8 +276,7 @@ export class PermissionsHelper {
     params: GenerateMissingKeysParams,
   ) => {
     const generatedKeys: GeneratedPermissionKeys[] = []
-    const { newKeysOptions } = params || {}
-    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
+    const { newKeysPassword, newKeysSalt } = params || {}
 
     if (isNullOrEmpty(permissionsToAdd)) {
       return null
