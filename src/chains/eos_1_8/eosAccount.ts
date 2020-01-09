@@ -14,6 +14,7 @@ import { Account } from '../../models'
 import { throwNewError } from '../../errors'
 import { mapChainError } from './eosErrors'
 import { PermissionsHelper } from './eosPermissionsHelper'
+import { isNullOrEmpty } from '../../helpers'
 
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission
@@ -107,6 +108,18 @@ export class EosAccount implements Account {
     return this.permissions.find(p => p.name === permissionName) || null
   }
 
+  /** Both new password and salt must be provided if any permissions are missing public keys */
+  private assertValidOptionNewKeys = (
+    permissionsToAdd: Partial<EosPermissionSimplified>[],
+    generateMissingKeysParams?: GenerateMissingKeysParams,
+  ) => {
+    const isAnyPublicKeyMissing = permissionsToAdd.some(async p => !p.publicKey)
+    const { newKeysPassword, newKeysSalt } = generateMissingKeysParams || {}
+    if (isAnyPublicKeyMissing && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
+      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    }
+  }
+
   /** Compose a collection of actions to add the requested permissions
    *  Optionally generates keys if needed (required generateMissingKeysParams)
    *  Returns an array of updateAuth actions as well as any newly generated keys  */
@@ -118,6 +131,9 @@ export class EosAccount implements Account {
   ): Promise<{ generatedKeys: GeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
     // Add permissions to current account structure
     const permissionHelper = new PermissionsHelper(this._chainState)
+
+    this.assertValidOptionNewKeys(permissionsToAdd, generateMissingKeysParams)
+
     // filter out permissions already on this account
     const filteredPermissionsToAdd = permissionsToAdd.filter(pa =>
       this.permissions.find(p => !(p.name === pa.name && p.parent === pa.parent)),

@@ -1,6 +1,5 @@
 import { EosChainState } from './eosChainState'
 import {
-  EosAccountStruct,
   EosActionStruct,
   EosEntityName,
   EosPermissionStruct,
@@ -8,15 +7,13 @@ import {
   EosPublicKey,
   toEosEntityName,
   toEosPublicKey,
-  toEosPrivateKey,
   GeneratedKeys,
-  GenerateMissingKeysParams,
-  GeneratedPermissionKeys,
+  isValidEosPublicKey,
 } from './models'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
 import { CreateAccount, AccountType } from '../../models'
-import { EosTransaction, PublicKeyMapCache } from './eosTransaction'
+import { EosTransaction } from './eosTransaction'
 import { timestampEosBase32, randomEosBase32 } from './helpers'
 import {
   ACCOUNT_NAME_MAX_LENGTH,
@@ -26,10 +23,9 @@ import {
   DEFAULT_ORE_ACCOUNT_PRICEKEY,
 } from './eosConstants'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
-import { addUniqueToArray, isNullOrEmpty } from '../../helpers'
+import { isNullOrEmpty } from '../../helpers'
 import { composeAction, ChainActionType } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
-import { EncryptedDataString, decrypt } from '../../crypto'
 
 // OREJS Ported functions
 //   createAccount() {} // createOreAccount
@@ -88,8 +84,6 @@ export class EosCreateAccount implements CreateAccount {
 
   private _chainState: EosChainState
 
-  private _account: EosAccountStruct
-
   private _transaction: EosTransaction
 
   private _accountType: AccountType
@@ -113,11 +107,15 @@ export class EosCreateAccount implements CreateAccount {
     const {
       creatorAccountName,
       creatorPermission,
-      permissionsToLink,
-      oreOptions: { pricekey, referralAccountName },
+      oreOptions,
       recycleExistingAccount,
-      createEscrowOptions: { contractName, appName },
+      createEscrowOptions,
     } = this._options
+    const { pricekey, referralAccountName } = oreOptions || {}
+    const { contractName, appName } = createEscrowOptions || {}
+
+    this.assertValidOptionPublicKeys()
+    this.assertValidOptionNewKeys()
 
     // determine account name - generate account name if once wasn't provided
     const permissionHelper = new PermissionsHelper(this._chainState)
@@ -128,7 +126,6 @@ export class EosCreateAccount implements CreateAccount {
     const publicKeys = await this.getPublicKeysFromOptionsOrGenerateNewKeys()
 
     // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
-    // removing the generated key here will prevent it from being added to the transaction public key map
     if (recycleExistingAccount) {
       publicKeys.owner = null
     }
@@ -181,37 +178,23 @@ export class EosCreateAccount implements CreateAccount {
         case AccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
           // instead, we will need to add permissions (below) to the parent account
-          createAccountAction = null
+          createAccountAction = this.composeCreateVirtualNestedAction()
           break
         default:
           break
       }
     }
 
-    // add permissions - add permissions actions to the transaction if needed
-    const updatePermissionsActions = await this.composeAddPermissionsActions()
-    // add permissions - link permissions actions to the transaction if needed
-    const linkPermissionsActions = permissionHelper.composeLinkPermissionActions(
-      creatorAccountName,
-      creatorPermission,
-      permissionsToLink,
-    )
-
     // Create a transaction object to execute the updates
     const newTransaction = new EosTransaction(this._chainState)
     // newTransaction.actions = [createAccountAction, updatePermissionsActions, linkPermissionsActions]
-    let newActions: EosActionStruct[] = []
+    const newActions: EosActionStruct[] = []
     if (!isNullOrEmpty(createAccountAction)) newActions.push(createAccountAction)
-    if (!isNullOrEmpty(updatePermissionsActions)) newActions = newActions.concat(updatePermissionsActions)
-    if (!isNullOrEmpty(linkPermissionsActions)) newActions = newActions.concat(linkPermissionsActions)
     if (!isNullOrEmpty(newActions)) newTransaction.actions = newActions
 
-    // add new public keys to transaction's key map so it can map the new account/permissions to public keys
-    newTransaction.appendPublicKeyCache(this.gatherPublicKeyMapFromGeneratedKeys())
     // generate and validate the serialized tranasaction - ready to send to the chain
     await newTransaction.generateSerialized()
     await newTransaction.validate()
-    // this.addNewAccountSignaturesIfNeeded(updatePermissionsActions, newTransaction)
     this._transaction = newTransaction
   }
 
@@ -230,157 +213,6 @@ export class EosCreateAccount implements CreateAccount {
         appName: DEFAULT_CREATEESCROW_APPNAME, // TODO: reconsider whether we should default a value here
       },
       ...options,
-    }
-  }
-
-  /** If any of the actions atached to the createAccount transaction need the new account's owner or active key signature, add them  */
-  private addNewAccountSignaturesIfNeeded(updatePermissionsActions: EosActionStruct[], transaction: EosTransaction) {
-    const missingKeys = transaction.missingSignatures || []
-    if (!missingKeys) return
-
-    const keyMap = this.gatherPublicKeyMapFromGeneratedKeys()
-    missingKeys.forEach(mk => {
-      const neededKey = keyMap
-        .filter(k => k.permissionName === toEosEntityName('owner') || k.permissionName === toEosEntityName('active'))
-        .find(k => k.publicKey === mk.publicKey)
-      if (neededKey) {
-        let privateKeyEncrypted
-        const { active, owner } = this._generatedKeys.accountKeys.privateKeys // mk.permissionName is only 'owner' or 'active' here
-        if (neededKey.permissionName === toEosEntityName('owner')) privateKeyEncrypted = owner
-        if (neededKey.permissionName === toEosEntityName('active')) privateKeyEncrypted = active
-        const decrypted = this.decryptGeneratedPrivateKey(privateKeyEncrypted as EncryptedDataString)
-        transaction.sign([decrypted])
-      }
-    })
-  }
-
-  /** decrypt one of the newly generated private keys using the password and salt generated with */
-  private decryptGeneratedPrivateKey(privateKeyEncrypted: EncryptedDataString) {
-    const { newKeysOptions } = this._options
-    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
-    const decrypted = decrypt(privateKeyEncrypted, newKeysPassword, newKeysSalt)
-    return toEosPrivateKey(decrypted)
-  }
-
-  /** Gather the collection of new permission and their public keys
-   *  this is needed for the transaction object to check required signatures */
-  private gatherPublicKeyMapFromGeneratedKeys(): PublicKeyMapCache[] {
-    const accountName = toEosEntityName(this._accountName)
-    const mappedKeys: PublicKeyMapCache[] = []
-    const { owner, active } = this.generatedKeys?.accountKeys?.publicKeys || {}
-    if (owner) {
-      mappedKeys.push({
-        accountName,
-        permissionName: toEosEntityName('owner'),
-        publicKey: toEosPublicKey(owner),
-      })
-    }
-    if (active) {
-      mappedKeys.push({
-        accountName,
-        permissionName: toEosEntityName('active'),
-        publicKey: toEosPublicKey(active),
-      })
-    }
-
-    const permissionKeys = (this.generatedKeys.permissionKeys || []).map(
-      (p: { permissionName: any; keyPair: { public: any } }) => ({
-        accountName,
-        permissionName: p.permissionName,
-        publicKey: p.keyPair.public,
-      }),
-    )
-    return addUniqueToArray(mappedKeys, permissionKeys) // pooky
-  }
-
-  /** A new account will start with a permission array with owner and active keys */
-  private composeNewAccountPermissionStructure(): EosPermissionStruct[] {
-    const { publicKeys } = this._options
-    const { active, owner } = publicKeys || {}
-    const permissionHelper = new PermissionsHelper(this._chainState)
-    const ownerPermission = permissionHelper.composePermission([owner], toEosEntityName('owner'), null)
-    const activePermission = permissionHelper.composePermission(
-      [active],
-      toEosEntityName('active'),
-      toEosEntityName('owner'),
-    )
-    return [ownerPermission, activePermission]
-  }
-
-  /** For a virual nested account, we add the new account's permission on the bottom of the linked list of permissions */
-  private async composeNewVirualNestedAccountPermissionStructure(): Promise<EosPermissionStruct> {
-    const { publicKeys, createVirtualNestedOptions } = this._options
-    const { parentAccountName, rootPermission } = createVirtualNestedOptions || {}
-    const { active: publicKeyActive } = publicKeys || {}
-    const parentAccount = new EosAccount(this._chainState)
-    await parentAccount.fetchFromChain(parentAccountName)
-    const permissionHelper = new PermissionsHelper(this._chainState)
-    const { perm_name: deepestPermissionName } = permissionHelper.findDeepestPermission(
-      parentAccount.value.permissions,
-      rootPermission,
-    )
-    // create a new 'nested account' permission using the new account name as the permission name
-    // ... and the currently deepest permission name as the parent
-    const newVirtualAccountPermission = permissionHelper.composePermission(
-      [publicKeyActive],
-      this._accountName,
-      deepestPermissionName,
-    )
-    return newVirtualAccountPermission
-  }
-
-  /** Compose a collection of actions to add the requested permissions
-   *  For each updateAuth action (one per permission), the prior complete auth tree must be provided
-   *  ... so we must keep the current auth state following the last added permission */
-  private async composeAddPermissionsActions(): Promise<EosActionStruct[]> {
-    let newPermission: EosPermissionStruct
-    const { createVirtualNestedOptions, creatorPermission: authPermission, permissionsToAdd } = this._options
-    const { parentAccountName } = createVirtualNestedOptions || {}
-
-    // ----- Virtual Nested account
-    if (this._accountType === AccountType.VirtualNested) {
-      // add new 'nested' account permission at the bottom of the auth tree
-      newPermission = await this.composeNewVirualNestedAccountPermissionStructure()
-      const updateAuthParams = {
-        auth: newPermission.required_auth,
-        authAccount: parentAccountName, // TODO: Consider removing parentAccountName as a seperate parameter
-        authPermission,
-        parent: newPermission.parent,
-        permission: newPermission.perm_name,
-      }
-      const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
-      return [updateAuthAction]
-    }
-
-    // generate new permission keys if needed
-    const { generatedKeys, permissionsToAdd: updatedPermissionsToAdd } =
-      (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(
-        permissionsToAdd,
-        this._options as GenerateMissingKeysParams,
-      )) || {}
-
-    this.appendNewGeneratedPermissionKeys(generatedKeys)
-
-    // ----- Native account
-    // Add permissions to current account structure
-    // NOTE: For a virtual account, we skip this step of adding suplemental permissions
-    const permissionHelper = new PermissionsHelper(this._chainState)
-    const updateAuthActions = permissionHelper.composeAddPermissionsActions(
-      this._accountName,
-      authPermission,
-      updatedPermissionsToAdd,
-    )
-    return updateAuthActions
-  }
-
-  /** append newly generated keys to class's collection of generated keys */
-  appendNewGeneratedPermissionKeys(newGeneratedKeys: GeneratedPermissionKeys[]) {
-    const { permissionKeys } = this._generatedKeys || {}
-    if (!isNullOrEmpty(permissionKeys)) {
-      this._generatedKeys.permissionKeys = [...permissionKeys, ...newGeneratedKeys]
-    } else {
-      this._generatedKeys = this._generatedKeys ?? {}
-      this._generatedKeys.permissionKeys = newGeneratedKeys
     }
   }
 
@@ -407,6 +239,46 @@ export class EosCreateAccount implements CreateAccount {
     return newAccountName
   }
 
+  /** Compose an updateAuth command to add a permission to the virtual 'master' account */
+  private async composeCreateVirtualNestedAction(): Promise<EosActionStruct[]> {
+    const { createVirtualNestedOptions, creatorPermission: authPermission } = this._options
+    const { parentAccountName } = createVirtualNestedOptions || {}
+
+    // add new 'nested' account permission at the bottom of the auth tree
+    const newPermission = await this.composeNewVirualNestedAccountPermissionStructure()
+    const updateAuthParams = {
+      auth: newPermission.required_auth,
+      authAccount: parentAccountName, // TODO: Consider removing parentAccountName as a seperate parameter
+      authPermission,
+      parent: newPermission.parent,
+      permission: newPermission.perm_name,
+    }
+    const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
+    return updateAuthAction
+  }
+
+  /** For a virual nested account, we add the new account's permission on the bottom of the linked list of permissions */
+  private async composeNewVirualNestedAccountPermissionStructure(): Promise<EosPermissionStruct> {
+    const { publicKeys, createVirtualNestedOptions } = this._options
+    const { parentAccountName, rootPermission } = createVirtualNestedOptions || {}
+    const { active: publicKeyActive } = publicKeys || {}
+    const parentAccount = new EosAccount(this._chainState)
+    await parentAccount.fetchFromChain(parentAccountName)
+    const permissionHelper = new PermissionsHelper(this._chainState)
+    const { perm_name: deepestPermissionName } = permissionHelper.findDeepestPermission(
+      parentAccount.value.permissions,
+      rootPermission,
+    )
+    // create a new 'nested account' permission using the new account name as the permission name
+    // ... and the currently deepest permission name as the parent
+    const newVirtualAccountPermission = permissionHelper.composePermission(
+      [publicKeyActive],
+      this._accountName,
+      deepestPermissionName,
+    )
+    return newVirtualAccountPermission
+  }
+
   /** extract keys from options or generate new keys
    *  Returns publicKeys and generatedKeys if created */
   private async getPublicKeysFromOptionsOrGenerateNewKeys() {
@@ -416,19 +288,8 @@ export class EosCreateAccount implements CreateAccount {
     const { newKeysOptions } = this._options
     const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
 
-    if (publicKeys && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(!newKeysSalt))) {
-      throwNewError(
-        'Create Account compose failure - You must provide either public keys or a password AND salt to generate new keys',
-      )
-    }
-
-    if (publicKeys && (!publicKeys.owner || !publicKeys.active)) {
-      throwNewError(
-        'Create Account compose failure - If you provide public keys, you must provide both an owner and active public key',
-      )
-    }
-
-    if (!publicKeys) {
+    // generate new public keys and add to options.publicKeyss
+    if (isNullOrEmpty(publicKeys)) {
       generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt, { publicKeys })
       this._generatedKeys = {
         ...this._generatedKeys,
@@ -471,12 +332,28 @@ export class EosCreateAccount implements CreateAccount {
   /** Checks for existing account and that its active public can matches an unusedAccountPublicKey setting
    *  Throws if account does not meet these conditions */
   private async assertAccountCanBeRecycled(account: EosAccount) {
-    if (!account) throw new Error('Account name must be provided is you specify the recycle account option')
+    if (!account) throw new Error('Invalid Option - Account name must be provided with recycle account option')
     const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
     // check that the public active key matches the unused public key marker
     const { publicKey } = account.permissions.find(perm => perm.name === toEosEntityName('active'))
     if (publicKey === unusedAccountPublicKey) return
     throw new Error(`Account ${account.name} in use and can't be recycled`)
+  }
+
+  private assertValidOptionPublicKeys() {
+    const { publicKeys } = this._options
+    const { active, owner } = publicKeys || {}
+    if (!isNullOrEmpty(publicKeys) && (!isValidEosPublicKey(owner) || !isValidEosPublicKey(active))) {
+      throwNewError('Invalid Option - For publicKeys option, you must provide both owner and active valid public keys')
+    }
+  }
+
+  private assertValidOptionNewKeys() {
+    const { newKeysOptions, publicKeys } = this._options
+    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
+    if (isNullOrEmpty(publicKeys) && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
+      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    }
   }
 
   /** The keys that were generated as part of the account creation process

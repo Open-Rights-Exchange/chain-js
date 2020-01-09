@@ -47,14 +47,8 @@ export type GeneratedPermissionKeys = {
 }
 
 export type GenerateMissingKeysParams = {
-  publicKeys?: {
-    owner?: EosPublicKey
-    active?: EosPublicKey
-  }
-  newKeysOptions?: {
-    newKeysPassword?: string
-    newKeysSalt?: string
-  }
+  newKeysPassword?: string
+  newKeysSalt?: string
 }
 
 export function isValidEosDate(str: string): str is EosDate {
