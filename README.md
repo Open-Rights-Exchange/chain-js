@@ -49,3 +49,8 @@ Just install the chainjs library to get started
 ```bash
  $ yarn add @open-rights-exchange/chainjs
 ```
+
+To run ts files (and examples), use ts-node (with the --files option to include local customTypes)
+```bash
+ $ ts-node --files mycode.ts
+```
