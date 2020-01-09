@@ -41,8 +41,8 @@ import { EncryptedDataString, decrypt } from '../../crypto'
 export type CreateAccountOptions = {
   accountNamePrefix?: string // Default 'ore'
   // newAccountName: EosEntityName,      // Optional - aka oreAccountName
-  payerAccountName: EosEntityName
-  payerAccountPermissionName: EosEntityName // Default = 'active' aka permission
+  creatorAccountName: EosEntityName
+  creatorPermission: EosEntityName // Default = 'active' aka permission
   recycleExistingAccount?: boolean // aka reuseAccount
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
   publicKeys?: {
@@ -111,8 +111,8 @@ export class EosCreateAccount implements CreateAccount {
     this._accountType = accountType
     this._options = this.applyDefaultOptions(options)
     const {
-      payerAccountName,
-      payerAccountPermissionName,
+      creatorAccountName,
+      creatorPermission,
       permissionsToLink,
       oreOptions: { pricekey, referralAccountName },
       recycleExistingAccount,
@@ -127,15 +127,21 @@ export class EosCreateAccount implements CreateAccount {
     // get keys from paramters or freshly generated
     const publicKeys = await this.getPublicKeysFromOptionsOrGenerateNewKeys()
 
+    // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
+    // removing the generated key here will prevent it from being added to the transaction public key map
+    if (recycleExistingAccount) {
+      publicKeys.owner = null
+    }
+
     // compose action - call the composeAction type to generate the right transaction action
     let createAccountAction
     const { active: publicKeyActive, owner: publicKeyOwner } = publicKeys || {}
-    const args = {
+    const params = {
       accountName: useAccountName,
       contractName,
       appName,
-      payerAccountName,
-      payerAccountPermissionName,
+      creatorAccountName,
+      creatorPermission,
       pricekey,
       publicKeyActive,
       publicKeyOwner,
@@ -150,8 +156,8 @@ export class EosCreateAccount implements CreateAccount {
       await parentAccount.fetchFromChain(this._accountName)
 
       const replaceActivePermissionAction = await permissionHelper.composeReplacePermissionKeysAction(
-        payerAccountName,
-        payerAccountPermissionName,
+        creatorAccountName,
+        creatorPermission,
         {
           permissionName: toEosEntityName('active'),
           parentPermissionName: toEosEntityName('owner'),
@@ -167,10 +173,10 @@ export class EosCreateAccount implements CreateAccount {
           throwNewError('AccountType.Native not yet supported') // ToDo: implement this
           break
         case AccountType.NativeOre:
-          createAccountAction = composeAction(ChainActionType.OreCreateAccount, args)
+          createAccountAction = composeAction(ChainActionType.OreCreateAccount, params)
           break
         case AccountType.CreateEscrow:
-          createAccountAction = composeAction(ChainActionType.CreateEscrowCreate, args)
+          createAccountAction = composeAction(ChainActionType.CreateEscrowCreate, params)
           break
         case AccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
@@ -186,8 +192,8 @@ export class EosCreateAccount implements CreateAccount {
     const updatePermissionsActions = await this.composeAddPermissionsActions()
     // add permissions - link permissions actions to the transaction if needed
     const linkPermissionsActions = permissionHelper.composeLinkPermissionActions(
-      payerAccountName,
-      payerAccountPermissionName,
+      creatorAccountName,
+      creatorPermission,
       permissionsToLink,
     )
 
@@ -205,7 +211,7 @@ export class EosCreateAccount implements CreateAccount {
     // generate and validate the serialized tranasaction - ready to send to the chain
     await newTransaction.generateSerialized()
     await newTransaction.validate()
-    this.addNewAccountSignaturesIfNeeded(updatePermissionsActions, newTransaction)
+    // this.addNewAccountSignaturesIfNeeded(updatePermissionsActions, newTransaction)
     this._transaction = newTransaction
   }
 
@@ -213,7 +219,7 @@ export class EosCreateAccount implements CreateAccount {
   private applyDefaultOptions = (options: CreateAccountOptions): CreateAccountOptions => {
     return {
       accountNamePrefix: DEFAULT_ACCOUNT_NAME_PREFIX,
-      payerAccountPermissionName: 'active',
+      creatorPermission: 'active',
       recycleExistingAccount: false,
       oreOptions: {
         pricekey: DEFAULT_ORE_ACCOUNT_PRICEKEY,
@@ -260,18 +266,23 @@ export class EosCreateAccount implements CreateAccount {
    *  this is needed for the transaction object to check required signatures */
   private gatherPublicKeyMapFromGeneratedKeys(): PublicKeyMapCache[] {
     const accountName = toEosEntityName(this._accountName)
-    const mappedKeys: PublicKeyMapCache[] = [
-      {
+    const mappedKeys: PublicKeyMapCache[] = []
+    const { owner, active } = this.generatedKeys?.accountKeys?.publicKeys || {}
+    if (owner) {
+      mappedKeys.push({
         accountName,
         permissionName: toEosEntityName('owner'),
-        publicKey: toEosPublicKey(this.generatedKeys.accountKeys.publicKeys.owner),
-      },
-      {
+        publicKey: toEosPublicKey(owner),
+      })
+    }
+    if (active) {
+      mappedKeys.push({
         accountName,
         permissionName: toEosEntityName('active'),
-        publicKey: toEosPublicKey(this.generatedKeys.accountKeys.publicKeys.active),
-      },
-    ]
+        publicKey: toEosPublicKey(active),
+      })
+    }
+
     const permissionKeys = (this.generatedKeys.permissionKeys || []).map(
       (p: { permissionName: any; keyPair: { public: any } }) => ({
         accountName,
@@ -323,7 +334,7 @@ export class EosCreateAccount implements CreateAccount {
    *  ... so we must keep the current auth state following the last added permission */
   private async composeAddPermissionsActions(): Promise<EosActionStruct[]> {
     let newPermission: EosPermissionStruct
-    const { createVirtualNestedOptions, payerAccountPermissionName, permissionsToAdd } = this._options
+    const { createVirtualNestedOptions, creatorPermission: authPermission, permissionsToAdd } = this._options
     const { parentAccountName } = createVirtualNestedOptions || {}
 
     // ----- Virtual Nested account
@@ -332,8 +343,8 @@ export class EosCreateAccount implements CreateAccount {
       newPermission = await this.composeNewVirualNestedAccountPermissionStructure()
       const updateAuthParams = {
         auth: newPermission.required_auth,
-        authAccountName: parentAccountName,
-        authPermission: payerAccountPermissionName,
+        authAccount: parentAccountName, // TODO: Consider removing parentAccountName as a seperate parameter
+        authPermission,
         parent: newPermission.parent,
         permission: newPermission.perm_name,
       }
@@ -356,7 +367,7 @@ export class EosCreateAccount implements CreateAccount {
     const permissionHelper = new PermissionsHelper(this._chainState)
     const updateAuthActions = permissionHelper.composeAddPermissionsActions(
       this._accountName,
-      payerAccountPermissionName,
+      authPermission,
       updatedPermissionsToAdd,
     )
     return updateAuthActions
@@ -364,10 +375,11 @@ export class EosCreateAccount implements CreateAccount {
 
   /** append newly generated keys to class's collection of generated keys */
   appendNewGeneratedPermissionKeys(newGeneratedKeys: GeneratedPermissionKeys[]) {
-    const { permissionKeys } = this._generatedKeys
+    const { permissionKeys } = this._generatedKeys || {}
     if (!isNullOrEmpty(permissionKeys)) {
-      this._generatedKeys.permissionKeys = [...this._generatedKeys.permissionKeys, ...newGeneratedKeys]
+      this._generatedKeys.permissionKeys = [...permissionKeys, ...newGeneratedKeys]
     } else {
+      this._generatedKeys = this._generatedKeys ?? {}
       this._generatedKeys.permissionKeys = newGeneratedKeys
     }
   }
@@ -386,9 +398,9 @@ export class EosCreateAccount implements CreateAccount {
       if (exists) {
         if (recycleExistingAccount) {
           // if recylcing an account, a name will be provided and it should be on chain
-          this.assertAccountCanBeRecycled(account)
+          await this.assertAccountCanBeRecycled(account)
         } else {
-          throwNewError('Specified account name already exists on chian.')
+          throwNewError('Specified account name already exists on chain.')
         }
       }
     }
@@ -410,8 +422,14 @@ export class EosCreateAccount implements CreateAccount {
       )
     }
 
+    if (publicKeys && (!publicKeys.owner || !publicKeys.active)) {
+      throwNewError(
+        'Create Account compose failure - If you provide public keys, you must provide both an owner and active public key',
+      )
+    }
+
     if (!publicKeys) {
-      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt)
+      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt, { publicKeys })
       this._generatedKeys = {
         ...this._generatedKeys,
         accountKeys: generatedKeys,
@@ -484,7 +502,7 @@ export class EosCreateAccount implements CreateAccount {
 // ---> ORE account creation paramters
 // accountNamePrefix = 'ore'
 // payerAccountName
-// payerAccountPermissionName // aka permission
+// authPermission // aka permission
 // payer
 // newAccountName // aka oreAccountName
 // publicKeyOwner
@@ -492,7 +510,7 @@ export class EosCreateAccount implements CreateAccount {
 // pricekey = 1
 // referralAccountName = ''  //aka referral
 
-// ---> createEscrow args
+// ---> createEscrow params
 // accountName,
 // activekey,
 // contractName,  // default = 'createEscrow'

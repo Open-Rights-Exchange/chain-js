@@ -2,8 +2,8 @@ import { EosEntityName, EosPublicKey } from '../../models'
 
 interface oreCreateAccountParams {
   accountName: EosEntityName
-  payerAccountName: EosEntityName
-  payerAccountPermissionName: EosEntityName
+  creatorAccountName: EosEntityName
+  creatorPermission: EosEntityName
   publicKeyActive: EosPublicKey
   publicKeyOwner: EosPublicKey
   pricekey: string
@@ -12,8 +12,8 @@ interface oreCreateAccountParams {
 
 export const action = ({
   accountName,
-  payerAccountName,
-  payerAccountPermissionName,
+  creatorAccountName,
+  creatorPermission,
   publicKeyActive,
   publicKeyOwner,
   pricekey,
@@ -23,12 +23,12 @@ export const action = ({
   name: 'createoreacc',
   authorization: [
     {
-      actor: payerAccountName,
-      permission: payerAccountPermissionName,
+      actor: creatorAccountName,
+      permission: creatorPermission,
     },
   ],
   data: {
-    creator: payerAccountName,
+    creator: creatorAccountName,
     newname: accountName, // Some versions of the system contract are running a different version of the newaccount code
     ownerkey: publicKeyOwner,
     activekey: publicKeyActive,

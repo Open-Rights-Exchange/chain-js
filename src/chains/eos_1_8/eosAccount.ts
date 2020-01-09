@@ -111,8 +111,8 @@ export class EosAccount implements Account {
    *  Optionally generates keys if needed (required generateMissingKeysParams)
    *  Returns an array of updateAuth actions as well as any newly generated keys  */
   async composeAddPermissionsActions(
-    accountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[],
     generateMissingKeysParams?: GenerateMissingKeysParams,
   ): Promise<{ generatedKeys: GeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
@@ -130,11 +130,7 @@ export class EosAccount implements Account {
         generateMissingKeysParams,
       )) || {}
 
-    const actions = permissionHelper.composeAddPermissionsActions(
-      accountName,
-      payerAccountPermissionName,
-      usePermissionsToAdd,
-    )
+    const actions = permissionHelper.composeAddPermissionsActions(authAccount, authPermission, usePermissionsToAdd)
 
     return { generatedKeys, actions }
   }

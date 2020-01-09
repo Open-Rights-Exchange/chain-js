@@ -93,8 +93,8 @@ export class PermissionsHelper {
 
   /** Compose a collection of actions to add the requested permissions */
   composeAddPermissionsActions(
-    accountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] | EosPermissionStruct[] = [],
   ): EosActionStruct[] {
     const updateAuthActions: EosActionStruct[] = []
@@ -124,8 +124,8 @@ export class PermissionsHelper {
     newPermissions.forEach(permissionToAdd => {
       const updateAuthParams = {
         auth: permissionToAdd.required_auth,
-        authAccountName: accountName,
-        authPermission: payerAccountPermissionName,
+        authAccount,
+        authPermission,
         parent: permissionToAdd.parent,
         permission: permissionToAdd.perm_name,
       }
@@ -137,16 +137,16 @@ export class PermissionsHelper {
   }
 
   composeDeletePermissionActions = (
-    payerAccountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     permissionsToDelete: DeletePermissionsParams = [],
   ): EosActionStruct[] => {
     const delteAuthActions: EosActionStruct[] = []
 
     permissionsToDelete.forEach(auth => {
       const deleteAuthParams = {
-        authAccountName: payerAccountName,
-        authPermission: payerAccountPermissionName,
+        authAccount,
+        authPermission,
         account: auth.accountName,
         permission: auth.permissionName,
       }
@@ -159,8 +159,8 @@ export class PermissionsHelper {
 
   /** Compose an action to replace public keys on an existing account permission */
   composeReplacePermissionKeysAction = async (
-    payerAccountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     params: ReplacePermissionKeysParams,
   ): Promise<EosActionStruct> => {
     const { permissionName, parentPermissionName, publicKeys, accountName, accountPermissions } = params
@@ -180,7 +180,7 @@ export class PermissionsHelper {
     // compose the updateAuth action
     const updateAuthParams = {
       auth: permissionToUpdate.required_auth,
-      authAccountName: accountName,
+      authAccount: accountName,
       authPermission: 'owner',
       parent: permissionToUpdate.parent,
       permission: permissionToUpdate.perm_name,
@@ -191,16 +191,16 @@ export class PermissionsHelper {
 
   /** Compose a collection of actions to link actions to permissions */
   composeLinkPermissionActions = (
-    payerAccountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     permissionsToLink: LinkPermissionsParams = [],
   ): EosActionStruct[] => {
     const linkAuthActions: EosActionStruct[] = []
 
     permissionsToLink.forEach(link => {
       const linkAuthParams = {
-        authAccountName: payerAccountName,
-        authPermission: payerAccountPermissionName,
+        authAccount,
+        authPermission,
         contract: link.contract,
         action: link.action,
         permission: link.permissionName,
@@ -214,16 +214,16 @@ export class PermissionsHelper {
 
   /** Compose a collection of actions to unlink actions to permissions */
   composeUnlinkPermissionActions = (
-    payerAccountName: EosEntityName,
-    payerAccountPermissionName: EosEntityName,
+    authAccount: EosEntityName,
+    authPermission: EosEntityName,
     permissionsToUnlink: UnlinkPermissionsParams = [],
   ): EosActionStruct[] => {
     const unlinkAuthActions: EosActionStruct[] = []
     permissionsToUnlink.forEach(link => {
       const unlinkAuthParams = {
         action: link.action,
-        authAccountName: payerAccountName,
-        authPermission: payerAccountPermissionName,
+        authAccount,
+        authPermission,
         contract: link.contract,
       }
       const unlinkAuthAction = composeAction(ChainActionType.AccountUnlinkAuth, unlinkAuthParams)
