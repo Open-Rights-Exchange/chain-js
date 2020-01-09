@@ -1,5 +1,5 @@
-import { EosChainV18 } from './chains/eos_1_8/eosChainV18'
-import { EthereumChainV1 } from './chains/ethereum_1/ethereumChainV1'
+import { ChainEosV18 } from './chains/eos_1_8/ChainEosV18'
+import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
 import { Chain, ChainType, ChainEndpoint, ChainSettings } from './models'
 import { throwNewError } from './errors'
 
@@ -10,9 +10,9 @@ export class ChainFactory {
   public create = (chainType: ChainType, endpoints: ChainEndpoint[], settings: ChainSettings): Chain => {
     switch (chainType) {
       case ChainType.EosV18:
-        return new EosChainV18(endpoints, settings)
+        return new ChainEosV18(endpoints, settings)
       case ChainType.EthereumV1:
-        return new EthereumChainV1(endpoints, settings)
+        return new ChainEthereumV1(endpoints, settings)
       default:
         throwNewError(`Chain type ${chainType} is not supported`)
     }

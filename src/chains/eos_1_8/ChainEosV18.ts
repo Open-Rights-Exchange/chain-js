@@ -11,7 +11,7 @@ import { EosCreateAccount } from './eosCreateAccount'
 import { EosEntityName, isValidEosPublicKey, isValidEosPrivateKey } from './models'
 import { EosAccount } from './eosAccount'
 
-class EosChainV18 implements Chain {
+class ChainEosV18 implements Chain {
   private _endpoints: ChainEndpoint[]
 
   private _settings: ChainSettings
@@ -134,4 +134,4 @@ class EosChainV18 implements Chain {
   }
 }
 
-export { EosChainV18 }
+export { ChainEosV18 }

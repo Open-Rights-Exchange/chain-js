@@ -3,12 +3,12 @@ import { Chain, ChainEndpoint, ChainInfo, ChainSettings } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
-import * as ethcrypto from './crypto'
-import { composeAction, ChainActionType } from './compose'
+import * as ethcrypto from './ethCrypto'
+import { composeAction, ChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 
-class EthereumChainV1 implements Chain {
+class ChainEthereumV1 implements Chain {
   private _endpoints: ChainEndpoint[]
 
   private _settings: ChainSettings
@@ -94,4 +94,4 @@ class EthereumChainV1 implements Chain {
   }
 }
 
-export { EthereumChainV1 }
+export { ChainEthereumV1 }
