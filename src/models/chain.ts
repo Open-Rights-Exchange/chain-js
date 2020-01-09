@@ -1,6 +1,7 @@
 import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
+import { Account } from './account'
 
 /** Supported chain types */
 export enum ChainType {
@@ -75,6 +76,9 @@ export interface Chain {
     showPayer?: boolean,
     keyType?: string,
   ): Promise<any>
+  /** Returns a chain Account class
+   * Note: Does NOT create a new account - to create an account, use newCreateAccount */
+  newAccount(accountName: any): Promise<Account>
   /** Return a new CreateAccount class used to help with creating a new chain account */
   newCreateAccount(): CreateAccount
   /** Return a chain Transaction class used to compose and send transactions */
