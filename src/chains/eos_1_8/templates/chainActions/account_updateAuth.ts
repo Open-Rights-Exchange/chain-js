@@ -1,24 +1,24 @@
-import { EosAuthorizationStruct, EosEntityName, Authorization } from '../../models'
+import { EosAuthorizationStruct, EosEntityName } from '../../models'
 
 interface updateAuthParams {
   auth: EosAuthorizationStruct
-  authAccountName: EosEntityName
+  authAccount: EosEntityName
   authPermission: EosEntityName
   parent: EosEntityName
   permission: EosEntityName
 }
 
-export const action = ({ auth, authAccountName, authPermission, parent, permission }: updateAuthParams) => ({
+export const action = ({ auth, authAccount, authPermission, parent, permission }: updateAuthParams) => ({
   account: 'eosio',
   name: 'updateauth',
   authorization: [
     {
-      actor: authAccountName,
+      actor: authAccount,
       permission: authPermission,
     },
   ],
   data: {
-    account: authAccountName,
+    account: authAccount,
     permission,
     parent,
     auth,

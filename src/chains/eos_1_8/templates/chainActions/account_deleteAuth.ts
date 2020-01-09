@@ -2,17 +2,17 @@ import { EosEntityName } from '../../models'
 
 interface deleteAuthParams {
   account: EosEntityName
-  authAccountName: EosEntityName
+  authAccount: EosEntityName
   authPermission: EosEntityName
   permission: EosEntityName
 }
 
-export const action = ({ account, authAccountName, authPermission, permission }: deleteAuthParams) => ({
+export const action = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
   account: 'eosio',
   name: 'deleteauth',
   authorization: [
     {
-      actor: authAccountName,
+      actor: authAccount,
       permission: authPermission,
     },
   ],

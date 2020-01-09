@@ -11,8 +11,8 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
 
   // new account options
   const accounOptions = {
-    payerAccountName: 'mypayeraccnt',
-    payerAccountPermissionName: 'active'
+    creatorAccountName: 'mypayeraccnt',
+    creatorPermission: 'active'
   }
 
   // get an account creator class

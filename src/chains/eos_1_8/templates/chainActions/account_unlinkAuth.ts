@@ -2,22 +2,22 @@ import { EosEntityName } from '../../models'
 
 interface unlinkAuthParams {
   action: string
-  authAccountName: EosEntityName
+  authAccount: EosEntityName
   authPermission: EosEntityName
   contract: EosEntityName
 }
 
-export const action = ({ action, authAccountName, authPermission, contract }: unlinkAuthParams) => ({
+export const action = ({ action, authAccount, authPermission, contract }: unlinkAuthParams) => ({
   account: 'eosio',
   name: 'unlinkauth',
   authorization: [
     {
-      actor: authAccountName,
+      actor: authAccount,
       permission: authPermission,
     },
   ],
   data: {
-    account: authAccountName,
+    account: authAccount,
     code: contract,
     type: action,
   },

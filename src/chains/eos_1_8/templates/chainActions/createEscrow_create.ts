@@ -4,8 +4,8 @@ interface createEscrowCreateParams {
   accountName: EosEntityName
   contractName: EosEntityName
   appName: string
-  payerAccountName: EosEntityName
-  payerAccountPermissionName: EosEntityName
+  creatorAccountName: EosEntityName
+  creatorPermission: EosEntityName
   publicKeyActive: EosPublicKey
   publicKeyOwner: EosPublicKey
   pricekey: string
@@ -16,23 +16,23 @@ export const action = ({
   accountName,
   contractName,
   appName,
-  payerAccountName,
-  payerAccountPermissionName,
+  creatorAccountName,
+  creatorPermission,
   publicKeyActive,
   publicKeyOwner,
-  pricekey,
+  // pricekey,
   referralAccountName,
 }: createEscrowCreateParams) => ({
   account: contractName,
   name: 'create',
   authorization: [
     {
-      actor: payerAccountName,
-      permission: payerAccountPermissionName,
+      actor: creatorAccountName,
+      permission: creatorPermission,
     },
   ],
   data: {
-    memo: payerAccountName,
+    memo: creatorAccountName,
     account: accountName,
     ownerkey: publicKeyOwner,
     activekey: publicKeyActive,

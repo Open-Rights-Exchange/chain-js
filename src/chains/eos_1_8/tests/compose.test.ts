@@ -7,13 +7,13 @@ describe('Compose Chain Actions', () => {
     const expAction = {
       account: 'eosio',
       name: 'deleteauth',
-      authorization: [{ actor: 'authAccountName', permission: 'authPermission' }],
+      authorization: [{ actor: 'authAccount', permission: 'authPermission' }],
       data: { account: 'accountName', permission: 'permission' },
     }
 
     const args = {
       account: 'accountName',
-      authAccountName: 'authAccountName',
+      authAccount: 'authAccount',
       authPermission: 'authPermission',
       permission: 'permission',
     }

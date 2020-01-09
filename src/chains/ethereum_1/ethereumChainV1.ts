@@ -59,6 +59,10 @@ class EthereumChainV1 implements Chain {
     return null
   }
 
+  public newAccount = (options?: any): any => {
+    return null
+  }
+
   public newCreateAccount = (options?: any): any => {
     return null
   }
