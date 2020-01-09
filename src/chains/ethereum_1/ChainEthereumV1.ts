@@ -59,18 +59,6 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  public newAccount = (options?: any): any => {
-    return null
-  }
-
-  public newCreateAccount = (options?: any): any => {
-    return null
-  }
-
-  public newTransaction = (options?: any): EthereumTransaction => {
-    return null
-  }
-
   public crypto = {
     decrypt: crypto.decrypt,
     encrypt: crypto.encrypt,
@@ -81,6 +69,24 @@ class ChainEthereumV1 implements Chain {
     generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
     sign: ethcrypto.sign,
     verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
+  }
+
+  private newAccount = (options?: any): any => {
+    return null
+  }
+
+  private newCreateAccount = (options?: any): any => {
+    return null
+  }
+
+  private newTransaction = (options?: any): EthereumTransaction => {
+    return null
+  }
+
+  public new = {
+    account: this.newAccount,
+    createAccount: this.newCreateAccount,
+    transaction: this.newTransaction,
   }
 
   public description(): string {

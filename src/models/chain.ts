@@ -76,13 +76,6 @@ export interface Chain {
     showPayer?: boolean,
     keyType?: string,
   ): Promise<any>
-  /** Returns a chain Account class
-   * Note: Does NOT create a new account - to create an account, use newCreateAccount */
-  newAccount(accountName: any): Promise<Account>
-  /** Return a new CreateAccount class used to help with creating a new chain account */
-  newCreateAccount(): CreateAccount
-  /** Return a chain Transaction class used to compose and send transactions */
-  newTransaction(options?: any): Transaction
   /** Chain cryptography functions */
   crypto: {
     /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
@@ -104,6 +97,17 @@ export interface Chain {
     /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
     verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
   }
+  /** Returns a new instance of an object */
+  new: {
+    /** Returns a new chain Account object
+     * Note: Does NOT create a new account - to create an account, use new.createAccount */
+    account(accountName: any): Promise<Account>
+    /** Return a new CreateAccount object used to help with creating a new chain account */
+    createAccount(): CreateAccount
+    /** Return a chain Transaction object used to compose and send transactions */
+    transaction(options?: any): Transaction
+  }
+
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError
 }

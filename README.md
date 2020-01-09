@@ -16,7 +16,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   }
 
   // get an account creator class
-  const accntCreator = eosChain.newCreateAccount()
+  const accntCreator = eosChain.new.createAccount()
   // generate the transaction to create an on-chain account
   await accntCreator.composeTransaction(AccountType.Native,..., accounOptions)
   // sign and send the transaction to the chain

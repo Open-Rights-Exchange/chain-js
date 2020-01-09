@@ -127,19 +127,19 @@ const { env } = process
   ]
 
   // -----> CreateAccount - createbridge
-  // const createAccount = kylin.newCreateAccount()
-  // await createAccount.composeTransaction(AccountType.CreateEscrow, null, createAccountOptions_createBridge)
-  // // let privateKey = kylin.crypto.decrypt(env.KYLIN_moonlightore_PRIVATE_KEY_ENCRYPTED, env.ORE_TESTNET_APPOREID_PRIVATE_KEY, env.ORE_TESTNET_ENCRYPTION_SALT)
-  // // console.log('privateKey:',privateKey)
-  // createAccount.transaction.sign([env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY])
-  // console.log('missing signatures:', createAccount.transaction.missingSignatures)
-  // const response = await createAccount.transaction.send()
-  // console.log(JSON.stringify(createAccount.transaction.toJson()))
-  // console.log('response:', response)
+  const createAccount = kylin.new.createAccount()
+  await createAccount.composeTransaction(AccountType.CreateEscrow, null, createAccountOptions_createBridge)
+  // let privateKey = kylin.crypto.decrypt(env.KYLIN_moonlightore_PRIVATE_KEY_ENCRYPTED, env.ORE_TESTNET_APPOREID_PRIVATE_KEY, env.ORE_TESTNET_ENCRYPTION_SALT)
+  // console.log('privateKey:',privateKey)
+  createAccount.transaction.sign([env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY])
+  console.log('missing signatures:', createAccount.transaction.missingSignatures)
+  const response = await createAccount.transaction.send()
+  console.log(JSON.stringify(createAccount.transaction.toJson()))
+  console.log('response:', response)
 
   // -----> CreateAccount - create native ORE account
   // await oreStaging.connect()
-  // const createAccount = oreStaging.newCreateAccount()
+  // const createAccount = oreStaging.new.createAccount()
   // await createAccount.composeTransaction(AccountType.NativeOre, null, createAccountOptions_OreNative)
   // console.log('got here')
   // createAccount.transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
@@ -150,17 +150,17 @@ const { env } = process
   // console.log('createAccount response: ', response)
 
   // ------> AddPermissions to account
-  await oreStaging.connect()
-  const account = (await oreStaging.newAccount('ore1qafpgffi')) as EosAccount
-  console.log('ore1qafpgffi account permissions:', account.permissions)
-  const { generatedKeys, actions } = await account.composeAddPermissionsActions(
-    toEosEntityName('ore1qafpgffi'),
-    toEosEntityName('owner'),
-    accountNewPermissions,
-    permissionNewKeysOptions,
-  )
-  console.log('action::', JSON.stringify(actions))
-  console.log('createAccount.generatedKeys:', JSON.stringify(generatedKeys))
+  // await oreStaging.connect()
+  // const account = (await oreStaging.new.account('ore1qafpgffi')) as EosAccount
+  // console.log('ore1qafpgffi account permissions:', account.permissions)
+  // const { generatedKeys, actions } = await account.composeAddPermissionsActions(
+  //   toEosEntityName('ore1qafpgffi'),
+  //   toEosEntityName('owner'),
+  //   accountNewPermissions,
+  //   permissionNewKeysOptions,
+  // )
+  // console.log('action::', JSON.stringify(actions))
+  // console.log('createAccount.generatedKeys:', JSON.stringify(generatedKeys))
 
   // const transaction = oreStaging.newTransaction()
   // transaction.actions = actions
@@ -174,7 +174,7 @@ const { env } = process
 
   // -----> CreateAccount - create virtual nested account
   // await kylin.connect()
-  // const createAccount = kylin.newCreateAccount()
+  // const createAccount = kylin.new.createAccount()
   // await createAccount.composeTransaction(AccountType.VirtualNested, null, createAccountOptions_virtualNested)
   // createAccount.transaction.sign([env.KYLIN_moonlightore_PRIVATE_KEY])
   // const response = await createAccount.transaction.send()
@@ -220,7 +220,7 @@ const { env } = process
   //     },
   //   }
   //   await oreStaging.connect()
-  //   const recycleAccount = oreStaging.newCreateAccount()
+  //   const recycleAccount = oreStaging.new.createAccount()
   //   await recycleAccount.composeTransaction(AccountType.NativeOre, 'ore1qadesjxm', createAccountOptions_OreRecycleNative)
   //   recycleAccount.transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
   //   console.log(JSON.stringify(recycleAccount.transaction.toJson()))
