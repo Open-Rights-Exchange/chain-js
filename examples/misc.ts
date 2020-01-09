@@ -47,7 +47,7 @@ const { env } = process
   console.log('create bridge balances:', await kylin.fetchContractData('createbridge', 'balances', 'createbridge'))
 
   // compose
-  // const deleteAuthAction = kylin.composeAction(kylin.ChainActionType.Account_DeleteAuth, {authAccountName:'accountName', authPermission:'authPermission', permission:'permission'})
+  // const deleteAuthAction = kylin.composeAction(kylin.ChainActionType.Account_DeleteAuth, {authAccount:'accountName', authPermission:'authPermission', permission:'permission'})
   // console.log('deleteAuthAction action:',deleteAuthAction);
 
   // crypto

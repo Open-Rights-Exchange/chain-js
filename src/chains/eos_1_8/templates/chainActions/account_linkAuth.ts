@@ -3,23 +3,23 @@ import { EosEntityName } from '../../models'
 
 interface linkAuthParams {
   action: string
-  authAccountName: EosEntityName
+  authAccount: EosEntityName
   authPermission: EosEntityName
   contract: EosEntityName
   permission: EosEntityName
 }
 
-export const action = ({ action, authAccountName, authPermission, contract, permission }: linkAuthParams) => ({
+export const action = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
   account: 'eosio',
   name: 'linkauth',
   authorization: [
     {
-      actor: authAccountName,
+      actor: authAccount,
       permission: authPermission,
     },
   ],
   data: {
-    account: authAccountName,
+    account: authAccount,
     code: contract,
     type: action,
     requirement: permission,

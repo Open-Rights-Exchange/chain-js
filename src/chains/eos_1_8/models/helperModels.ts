@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { EosPublicKey } from './cryptoModels'
+import { EosPublicKey, AccountKeysStruct, KeyPairEncrypted } from './cryptoModels'
 
 // using Enum 'brands' to force a string type to have a particular format
 // See - https://spin.atomicobject.com/2017/06/19/strongly-typed-date-string-typescript/
@@ -34,6 +34,27 @@ export type EosPermissionSimplified = {
   publicKey: EosPublicKey
   publicKeyWeight: number
   threshold: number
+}
+
+export type GeneratedKeys = {
+  accountKeys: AccountKeysStruct
+  permissionKeys: GeneratedPermissionKeys[]
+}
+
+export type GeneratedPermissionKeys = {
+  permissionName: EosEntityName
+  keyPair: KeyPairEncrypted
+}
+
+export type GenerateMissingKeysParams = {
+  publicKeys?: {
+    owner?: EosPublicKey
+    active?: EosPublicKey
+  }
+  newKeysOptions?: {
+    newKeysPassword?: string
+    newKeysSalt?: string
+  }
 }
 
 export function isValidEosDate(str: string): str is EosDate {

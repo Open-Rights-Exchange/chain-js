@@ -1,3 +1,5 @@
+// eslint-disable-next-line spaced-comment
+/// <reference types="../../../@customTyoes/eosjs-ecc" />
 import * as ecc from 'eosjs-ecc'
 import { EncryptedDataString } from '../../../crypto'
 

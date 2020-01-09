@@ -9,6 +9,7 @@ import { composeAction, ChainActionType } from './eosCompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
 import { EosEntityName, isValidEosPublicKey, isValidEosPrivateKey } from './models'
+import { EosAccount } from './eosAccount'
 
 class EosChainV18 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -74,6 +75,15 @@ class EosChainV18 implements Chain {
   /** Compose an object for a chain contract action */
   public composeAction = (actionType: ChainActionType, args: any): any => {
     return composeAction(actionType, args)
+  }
+
+  /** Returns a chain Account class
+   * Note: Does NOT create a new account - to create an account, use newCreateAccount */
+  public async newAccount(accountName: EosEntityName): Promise<EosAccount> {
+    this.assertIsConnected()
+    const account = new EosAccount(this._chainState)
+    await account.fetchFromChain(accountName)
+    return account
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */

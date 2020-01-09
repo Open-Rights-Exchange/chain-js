@@ -1,3 +1,5 @@
+// eslint-disable-next-line spaced-comment
+/// <reference types="../../@customTyoes/eosjs-ecc" />
 import * as ecc from 'eosjs-ecc'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
@@ -10,6 +12,8 @@ import {
   toEosPublicKey,
   KeyPairEncrypted,
 } from './models'
+import { throwNewError } from '../../errors'
+import { isNullOrEmpty } from '../../helpers'
 
 const { Keygen } = require('eosjs-keygen')
 
@@ -90,6 +94,8 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
 
 /** Generate a random private/public key pair and encrypt using provided password and salt */
 export async function generateKeyPairAndEncryptPrivateKeys(password: string, salt: string): Promise<KeyPairEncrypted> {
+  if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
+  if (isNullOrEmpty(salt)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide salt for new keys')
   const keys = await generateRawKeyPair()
   return {
     public: toEosPublicKey(keys.public),
