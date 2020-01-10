@@ -13,7 +13,12 @@ import {
 import { Account } from '../../models'
 import { throwNewError } from '../../errors'
 import { mapChainError } from './eosErrors'
-import { PermissionsHelper } from './eosPermissionsHelper'
+import {
+  PermissionsHelper,
+  DeletePermissionsParams,
+  LinkPermissionsParams,
+  UnlinkPermissionsParams,
+} from './eosPermissionsHelper'
 import { isNullOrEmpty } from '../../helpers'
 
 // OREJS Ported functions
@@ -26,8 +31,11 @@ export class EosAccount implements Account {
 
   private _generatedKeys: Partial<GeneratedKeys>
 
+  private _permHelper: PermissionsHelper
+
   constructor(chainState: EosChainState) {
     this._chainState = chainState
+    this._permHelper = new PermissionsHelper(this._chainState)
   }
 
   /** Account name */
@@ -113,7 +121,7 @@ export class EosAccount implements Account {
     permissionsToAdd: Partial<EosPermissionSimplified>[],
     generateMissingKeysParams?: GenerateMissingKeysParams,
   ) => {
-    const isAnyPublicKeyMissing = permissionsToAdd.some(async p => !p.publicKey)
+    const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
     const { newKeysPassword, newKeysSalt } = generateMissingKeysParams || {}
     if (isAnyPublicKeyMissing && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
       throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
@@ -122,32 +130,59 @@ export class EosAccount implements Account {
 
   /** Compose a collection of actions to add the requested permissions
    *  Optionally generates keys if needed (required generateMissingKeysParams)
-   *  Returns an array of updateAuth actions as well as any newly generated keys  */
+   *  Returns an array of updateAuth actions as well as any newly generated keys */
   async composeAddPermissionsActions(
-    authAccount: EosEntityName,
     authPermission: EosEntityName,
-    permissionsToAdd: Partial<EosPermissionSimplified>[],
+    permissionsToUpdate: Partial<EosPermissionSimplified>[],
     generateMissingKeysParams?: GenerateMissingKeysParams,
   ): Promise<{ generatedKeys: GeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
     // Add permissions to current account structure
-    const permissionHelper = new PermissionsHelper(this._chainState)
-
-    this.assertValidOptionNewKeys(permissionsToAdd, generateMissingKeysParams)
-
+    this.assertValidOptionNewKeys(permissionsToUpdate, generateMissingKeysParams)
     // filter out permissions already on this account
-    const filteredPermissionsToAdd = permissionsToAdd.filter(pa =>
-      this.permissions.find(p => !(p.name === pa.name && p.parent === pa.parent)),
+    const filteredPermissions = permissionsToUpdate.filter(
+      pu => !this.permissions.some(p => p.name === pu.name && p.parent === pu.parent && p.publicKey === pu.publicKey),
     )
-
     // generate new keys for each new permission if needed
     const { generatedKeys, permissionsToAdd: usePermissionsToAdd } =
       (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(
-        filteredPermissionsToAdd,
+        filteredPermissions,
         generateMissingKeysParams,
       )) || {}
-
-    const actions = permissionHelper.composeAddPermissionsActions(authAccount, authPermission, usePermissionsToAdd)
-
+    const actions = this._permHelper.composeAddPermissionActions(this.name, authPermission, usePermissionsToAdd)
     return { generatedKeys, actions }
+  }
+
+  /** Compose a collection of actions to delete the specified permissions
+   *  Returns an array of deleteAuth actions */
+  async composeDeletePermissionsActions(
+    authPermission: EosEntityName,
+    permissionsToUpdate: Partial<DeletePermissionsParams>[],
+  ): Promise<EosActionStruct[]> {
+    // filter out permissions already not on this account and add this account name
+    const deletePermissions = permissionsToUpdate
+      .filter(pu => this.permissions.some(p => p.name === pu.permissionName))
+      .map(p => ({ accountName: this.name, permissionName: p.permissionName }))
+    const actions = this._permHelper.composeDeletePermissionActions(this.name, authPermission, deletePermissions)
+    return actions
+  }
+
+  /** Compose a collection of actions to link permissions to contract actions
+   *  Returns an array of linkAuth actions */
+  async composeLinkPermissionsActions(
+    authPermission: EosEntityName,
+    permissionsToUpdate: LinkPermissionsParams[],
+  ): Promise<EosActionStruct[]> {
+    const actions = this._permHelper.composeLinkPermissionActions(this.name, authPermission, permissionsToUpdate)
+    return actions
+  }
+
+  /** Compose a collection of actions to unlink permissions to contract actions
+   *  Returns an array of unlinkAuth actions */
+  async composeUnlinkPermissionsActions(
+    authPermission: EosEntityName,
+    permissionsToUpdate: UnlinkPermissionsParams[],
+  ): Promise<EosActionStruct[]> {
+    const actions = this._permHelper.composeUnlinkPermissionActions(this.name, authPermission, permissionsToUpdate)
+    return actions
   }
 }

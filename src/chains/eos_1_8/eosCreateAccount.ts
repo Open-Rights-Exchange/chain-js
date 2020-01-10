@@ -9,6 +9,7 @@ import {
   toEosPublicKey,
   GeneratedKeys,
   isValidEosPublicKey,
+  EosAsset,
 } from './models'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -61,6 +62,12 @@ export type CreateAccountOptions = {
     parentAccountName: EosEntityName
     rootPermission?: EosEntityName
   }
+  resourcesOptions?: {
+    ramBytes: number
+    stakeNetQuantity: EosAsset
+    stakeCpuQuantity: EosAsset
+    transfer: boolean
+  }
   // firstAuthorizer?: {               // move first authorizer to higher-level function
   //   accountName: EosEntityName,
   //   permissionName: EosEntityName,
@@ -110,9 +117,11 @@ export class EosCreateAccount implements CreateAccount {
       oreOptions,
       recycleExistingAccount,
       createEscrowOptions,
+      resourcesOptions,
     } = this._options
     const { pricekey, referralAccountName } = oreOptions || {}
     const { contractName, appName } = createEscrowOptions || {}
+    const { ramBytes, stakeNetQuantity, stakeCpuQuantity, transfer } = resourcesOptions || {}
 
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
@@ -131,7 +140,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // compose action - call the composeAction type to generate the right transaction action
-    let createAccountAction
+    let createAccountActions
     const { active: publicKeyActive, owner: publicKeyOwner } = publicKeys || {}
     const params = {
       accountName: useAccountName,
@@ -143,6 +152,10 @@ export class EosCreateAccount implements CreateAccount {
       publicKeyActive,
       publicKeyOwner,
       referralAccountName,
+      ramBytes,
+      stakeNetQuantity,
+      stakeCpuQuantity,
+      transfer,
     }
 
     // To recycle an account, we dont create new account, just replace keys on an existing one
@@ -163,22 +176,22 @@ export class EosCreateAccount implements CreateAccount {
           accountName: this._accountName,
         },
       )
-      createAccountAction = replaceActivePermissionAction
+      createAccountActions = [replaceActivePermissionAction]
     } else {
       switch (accountType) {
         case AccountType.Native:
-          throwNewError('AccountType.Native not yet supported') // ToDo: implement this
+          createAccountActions = composeAction(ChainActionType.AccountCreate, params)
           break
         case AccountType.NativeOre:
-          createAccountAction = composeAction(ChainActionType.OreCreateAccount, params)
+          createAccountActions = [composeAction(ChainActionType.OreCreateAccount, params)]
           break
         case AccountType.CreateEscrow:
-          createAccountAction = composeAction(ChainActionType.CreateEscrowCreate, params)
+          createAccountActions = [composeAction(ChainActionType.CreateEscrowCreate, params)]
           break
         case AccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
           // instead, we will need to add permissions (below) to the parent account
-          createAccountAction = this.composeCreateVirtualNestedAction()
+          createAccountActions = [await this.composeCreateVirtualNestedAction()]
           break
         default:
           break
@@ -188,8 +201,8 @@ export class EosCreateAccount implements CreateAccount {
     // Create a transaction object to execute the updates
     const newTransaction = new EosTransaction(this._chainState)
     // newTransaction.actions = [createAccountAction, updatePermissionsActions, linkPermissionsActions]
-    const newActions: EosActionStruct[] = []
-    if (!isNullOrEmpty(createAccountAction)) newActions.push(createAccountAction)
+    let newActions: EosActionStruct[] = []
+    if (!isNullOrEmpty(createAccountActions)) newActions = [...newActions, ...createAccountActions]
     if (!isNullOrEmpty(newActions)) newTransaction.actions = newActions
 
     // generate and validate the serialized tranasaction - ready to send to the chain

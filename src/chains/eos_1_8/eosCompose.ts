@@ -1,3 +1,4 @@
+import { action as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { action as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
 import { action as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
 import { action as AccountUnlinkAuthTemplate } from './templates/chainActions/account_unlinkAuth'
@@ -19,6 +20,7 @@ import { action as TokenTransferFromTemplate } from './templates/chainActions/to
 
 // map a key name to a function that returns an object
 export const ChainAction: { [key: string]: (args: any) => any } = {
+  AccountCreate: AccountCreateTemplate,
   AccountDeleteAuth: AccountDeleteAuthTemplate,
   AccountLinkAuth: AccountLinkAuthTemplate,
   AccountUnlinkAuth: AccountUnlinkAuthTemplate,
@@ -40,6 +42,7 @@ export const ChainAction: { [key: string]: (args: any) => any } = {
 }
 
 export enum ChainActionType {
+  AccountCreate = 'AccountCreate',
   AccountDeleteAuth = 'AccountDeleteAuth',
   AccountLinkAuth = 'AccountLinkAuth',
   AccountUnlinkAuth = 'AccountUnlinkAuth',
