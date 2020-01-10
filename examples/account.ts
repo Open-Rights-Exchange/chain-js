@@ -4,13 +4,43 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
-import { toEosEntityName, toEosPrivateKey, toEosPublicKey } from '../src/chains/eos_1_8/models'
+import {
+  toEosEntityName,
+  toEosPrivateKey,
+  toEosPublicKey,
+  toEosAsset,
+  EosPrivateKey,
+} from '../src/chains/eos_1_8/models'
 import { CreateAccountOptions } from '../src/chains/eos_1_8/eosCreateAccount'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
+import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
+import { DeletePermissionsParams, LinkPermissionsParams } from '../src/chains/eos_1_8/eosPermissionsHelper'
 
 require('dotenv').config()
 
 // Example client code
+
+const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
+  console.log('actions:', transactionActions)
+  const transaction = (chain as ChainEosV18).new.transaction()
+  transaction.actions = transactionActions
+  await transaction.generateSerialized()
+  await transaction.validate()
+  transaction.sign([key])
+  if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
+  console.log(JSON.stringify(transaction.toJson()))
+  return transaction
+}
+
+const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
+  console.log('actions:', transaction.actions)
+  await transaction.generateSerialized()
+  await transaction.validate()
+  transaction.sign([key])
+  if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
+  console.log(JSON.stringify(transaction.toJson()))
+  return transaction
+}
 
 const { env } = process
 ;(async () => {
@@ -71,20 +101,6 @@ const { env } = process
       newKeysPassword: '2233',
       newKeysSalt: env.ORE_TESTNET_PK_SALT_V0, // ore staging
     },
-    // permissionsToAdd: [
-    //   // {
-    //   //   name: toEosEntityName('nwpermission'),
-    //   //   parent: toEosEntityName('active'),
-    //   // },
-    //   // {
-    //   //   name: toEosEntityName('n2permission'),
-    //   //   parent: toEosEntityName('active'),
-    //   // },
-    //   // {
-    //   //   name: toEosEntityName('n3permission'),
-    //   //   parent: toEosEntityName('nwpermission'),
-    //   // },
-    // ],
   }
 
   // kylin virutal account - moonlighting
@@ -106,6 +122,46 @@ const { env } = process
     },
   }
 
+  const createAccountOptions_EosNative = {
+    accountNamePrefix: 'ore',
+    // accountName: null,
+    creatorAccountName: 'proppropprop',
+    creatorPermission: 'active',
+    newKeysOptions: {
+      newKeysPassword: '2233',
+      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
+    },
+    publicKeys: {
+      owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+      active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+    },
+    resourcesOptions: {
+      ramBytes: 4000,
+      stakeNetQuantity: toEosAsset(10, 'EOS'),
+      stakeCpuQuantity: toEosAsset(10, 'EOS'),
+      transfer: false,
+    },
+  }
+
+  const createAccountOptions_OreRecycleNative = {
+    recycleExistingAccount: true,
+    accountNamePrefix: 'ore',
+    creatorAccountName: 'ore1qadesjxm',
+    creatorPermission: 'owner',
+    newKeysOptions: {
+      newKeysPassword: '2233',
+      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // ore staging
+    },
+  }
+
+  const resetPermissions = [
+    {
+      name: toEosEntityName('active'),
+      parent: toEosEntityName('owner'),
+      publicKey: toEosPublicKey(chainSettings.unusedAccountPublicKey),
+    },
+  ]
+
   const permissionNewKeysOptions = {
     newKeysPassword: '2233',
     newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
@@ -126,107 +182,97 @@ const { env } = process
     },
   ]
 
+  const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
+    {
+      permissionName: toEosEntityName('nwpermission'),
+    },
+    {
+      permissionName: toEosEntityName('n2permission'),
+    },
+    // {
+    //   permissionName: toEosEntityName('n3permission'),
+    // },
+  ]
+
+  const accountLinkPermissions: LinkPermissionsParams[] = [
+    {
+      permissionName: toEosEntityName('nwpermission'),
+      contract: toEosEntityName('createbridge'),
+      action: toEosEntityName('create'),
+    },
+    {
+      permissionName: toEosEntityName('n2permission'),
+      contract: toEosEntityName('createbridge'),
+      action: toEosEntityName('define'),
+    },
+  ]
+
+  // -------------------- Create Account -----------------------
+
   // -----> CreateAccount - createbridge
-  const createAccount = kylin.new.createAccount()
-  await createAccount.composeTransaction(AccountType.CreateEscrow, null, createAccountOptions_createBridge)
-  // let privateKey = kylin.crypto.decrypt(env.KYLIN_moonlightore_PRIVATE_KEY_ENCRYPTED, env.ORE_TESTNET_APPOREID_PRIVATE_KEY, env.ORE_TESTNET_ENCRYPTION_SALT)
-  // console.log('privateKey:',privateKey)
-  createAccount.transaction.sign([env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY])
-  console.log('missing signatures:', createAccount.transaction.missingSignatures)
-  const response = await createAccount.transaction.send()
-  console.log(JSON.stringify(createAccount.transaction.toJson()))
-  console.log('response:', response)
+  // const createAccount = kylin.new.createAccount()
+  // await createAccount.composeTransaction(AccountType.CreateEscrow, null, createAccountOptions_createBridge)
+  // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+  // console.log('createAccount response: ', await createAccount.transaction.send())
 
-  // -----> CreateAccount - create native ORE account
-  // await oreStaging.connect()
-  // const createAccount = oreStaging.new.createAccount()
-  // await createAccount.composeTransaction(AccountType.NativeOre, null, createAccountOptions_OreNative)
-  // console.log('got here')
-  // createAccount.transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
-  // console.log('missing sigs:', createAccount.transaction.missingSignatures)
-  // console.log('transction:', JSON.stringify(createAccount.transaction.toJson()))
-  // console.log('createAccount.generatedKeys:', JSON.stringify(createAccount.generatedKeys))
-  // const response = await createAccount.transaction.send()
-  // console.log('createAccount response: ', response)
+  // -----> CreateAccount - create native kylin account
+  // const createAccount = kylin.new.createAccount()
+  // await createAccount.composeTransaction(AccountType.Native, null, createAccountOptions_EosNative)
+  // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
+  // console.log('createAccount response: ', await createAccount.transaction.send())
 
-  // ------> AddPermissions to account
-  // await oreStaging.connect()
-  // const account = (await oreStaging.new.account('ore1qafpgffi')) as EosAccount
-  // console.log('ore1qafpgffi account permissions:', account.permissions)
+  // -----> CreateAccount - create virtual nested account
+  // const createAccount = kylin.new.createAccount()
+  // await createAccount.composeTransaction(AccountType.VirtualNested, null, createAccountOptions_virtualNested)
+  // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_moonlightore_PRIVATE_KEY)
+  // console.log('createAccount response: ', await createAccount.transaction.send())
+
+  // // -----> Reset account to be recyclable
+  // const recycleAccount = (await kylin.new.account('ore1qadesjxm')) as EosAccount
+  // console.log('ore1qadesjxm account permissions:', recycleAccount.permissions)
+  // const { generatedKeys, actions } = await recycleAccount.composeAddPermissionsActions(
+  //   toEosEntityName('owner'),
+  //   resetPermissions,
+  // )
+  // const transaction = await prepTransactionFromActions(kylin, actions, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
+
+  // // -----> CreateAccount - recycle native ORE account
+  // const recycleAccount = kylin.new.createAccount()
+  // await recycleAccount.composeTransaction(AccountType.Native, 'ore1qadesjxm', createAccountOptions_OreRecycleNative)
+  // await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+  // console.log('createAccount response: ', await recycleAccount.transaction.send())
+
+  // -------------------- Permissions -----------------------
+
+  // // ------> AddPermissions to account
+  // const account = (await kylin.new.account('ore1qbmd2nvu')) as EosAccount
+  // console.log('ore1qbmd2nvu account permissions:', account.permissions)
   // const { generatedKeys, actions } = await account.composeAddPermissionsActions(
-  //   toEosEntityName('ore1qafpgffi'),
   //   toEosEntityName('owner'),
   //   accountNewPermissions,
   //   permissionNewKeysOptions,
   // )
-  // console.log('action::', JSON.stringify(actions))
   // console.log('createAccount.generatedKeys:', JSON.stringify(generatedKeys))
+  // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
 
-  // const transaction = oreStaging.newTransaction()
-  // transaction.actions = actions
-  // await transaction.generateSerialized()
-  // await transaction.validate()
-  // transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
-  // const response = await transaction.send()
-  // // console.log('permission add actions:', generatedKeys, JSON.stringify(actions))
-  // console.log('transaction response:', response)
-  // console.log('transaction:', JSON.stringify(transaction.toJson()))
+  // -----> Delete Permissions
+  // const account = (await kylin.new.account('ore1qbmd2nvu')) as EosAccount
+  // const actions = await account.composeDeletePermissionsActions(toEosEntityName('owner'), accountDeletePermissions)
+  // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
 
-  // -----> CreateAccount - create virtual nested account
-  // await kylin.connect()
-  // const createAccount = kylin.new.createAccount()
-  // await createAccount.composeTransaction(AccountType.VirtualNested, null, createAccountOptions_virtualNested)
-  // createAccount.transaction.sign([env.KYLIN_moonlightore_PRIVATE_KEY])
-  // const response = await createAccount.transaction.send()
-  // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
-  // console.log(JSON.stringify(createAccount.transaction.toJson()))
-  // console.log('response: ', response)
+  // -----> link Permissions
+  // const account = (await kylin.new.account('ore1qbmd2nvu')) as EosAccount
+  // const actions = await account.composeLinkPermissionsActions(toEosEntityName('owner'), accountLinkPermissions)
+  // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
 
-  // // -----> Reset account to be recyclable
-
-  // const resetPermissions = [
-  //   {
-  //     name: toEosEntityName('active'),
-  //     parent: toEosEntityName('owner'),
-  //     publicKey: toEosPublicKey(chainSettings.unusedAccountPublicKey),
-  //   },
-  // ]
-  // await oreStaging.connect()
-  // const recycleAccount = (await oreStaging.newAccount('ore1qadesjxm')) as EosAccount
-  // console.log('ore1qadesjxm account permissions:', recycleAccount.permissions)
-  // const { generatedKeys, actions } = await recycleAccount.composeAddPermissionsActions(
-  //   toEosEntityName('ore1qadesjxm'),
-  //   toEosEntityName('owner'),
-  //   resetPermissions,
-  // )
-  // const transaction = oreStaging.newTransaction()
-  // transaction.actions = actions
-  // await transaction.generateSerialized()
-  // await transaction.validate()
-  // transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
-  // const response = await transaction.send()
-  // console.log('createAccount response: ', response)
-
-  // // -----> CreateAccount - recycle native ORE account
-  // ore-staging native account
-  //   const createAccountOptions_OreRecycleNative = {
-  //     recycleExistingAccount: true,
-  //     accountNamePrefix: 'ore',
-  //     creatorAccountName: 'ore1qadesjxm',
-  //     creatorPermission: 'owner',
-  //     newKeysOptions: {
-  //       newKeysPassword: '2233',
-  //       newKeysSalt: env.ORE_TESTNET_PK_SALT_V0, // ore staging
-  //     },
-  //   }
-  //   await oreStaging.connect()
-  //   const recycleAccount = oreStaging.new.createAccount()
-  //   await recycleAccount.composeTransaction(AccountType.NativeOre, 'ore1qadesjxm', createAccountOptions_OreRecycleNative)
-  //   recycleAccount.transaction.sign([env.ORE_TESTNET_APPOREID_PRIVATE_KEY])
-  //   console.log(JSON.stringify(recycleAccount.transaction.toJson()))
-  //   // const response = await recycleAccount.transaction.send()
-  //   // console.log('createAccount response: ', response)
-  //   console.log(JSON.stringify(recycleAccount.transaction.actions))
-  //   console.log('signatures:', recycleAccount.transaction.signatures)
-  //   console.log('missing sigs:', recycleAccount.transaction.missingSignatures)
+  // -----> unlink Permissions
+  // const account = (await kylin.new.account('ore1qbmd2nvu')) as EosAccount
+  // const actions = await account.composeUnlinkPermissionsActions(toEosEntityName('owner'), accountLinkPermissions)
+  // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
 })()
