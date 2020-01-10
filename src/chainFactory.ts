@@ -1,6 +1,7 @@
 import { ChainEosV18 } from './chains/eos_1_8/ChainEosV18'
 import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
-import { Chain, ChainType, ChainEndpoint, ChainSettings } from './models'
+import { Chain } from './interfaces'
+import { ChainType, ChainEndpoint, ChainSettings } from './models'
 import { throwNewError } from './errors'
 
 /**

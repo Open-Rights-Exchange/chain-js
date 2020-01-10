@@ -1,4 +1,7 @@
 import { ChainFactory } from './chainFactory'
-import { Chain, ChainType, Transaction } from './models'
+import { ChainType } from './models'
+import { Account, Chain, CreateAccount, Transaction } from './interfaces'
+import { ChainEosV18 } from './chains/eos_1_8/ChainEosV18'
+import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
 
-export { Chain, ChainFactory, Transaction, ChainType }
+export { Account, Chain, ChainEosV18, ChainEthereumV1, ChainFactory, CreateAccount, Transaction, ChainType }

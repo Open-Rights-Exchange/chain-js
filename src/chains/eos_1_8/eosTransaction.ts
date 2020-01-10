@@ -1,22 +1,14 @@
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosChainState } from './eosChainState'
-import {
-  Authorization,
-  EosActionStruct,
-  EosPublicKey,
-  EosEntityName,
-  EosSignature,
-  isValidEosSignature,
-  EosPrivateKey,
-  isValidEosPrivateKey,
-  toEosPublicKey,
-} from './models'
+import { Authorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK, DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS } from './eosConstants'
 import { EosAccount } from './eosAccount'
 import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
-import { Transaction, ConfirmType, TransactionOptions } from '../../models'
+import { ConfirmType, TransactionOptions } from '../../models'
+import { Transaction } from '../../interfaces'
+import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './helpers'
 
 export type PublicKeyMapCache = {
   accountName: EosEntityName

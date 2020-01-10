@@ -1,3 +1,4 @@
+export * from './accountModels'
 export * from './eosStructures'
-export * from './helperModels'
+export * from './generalModels'
 export * from './cryptoModels'

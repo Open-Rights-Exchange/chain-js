@@ -4,13 +4,12 @@ import {
   EosAccountStruct,
   EosPermissionSimplified,
   EosActionStruct,
-  toEosEntityName,
   EosPublicKey,
   GenerateMissingKeysParams,
   GeneratedPermissionKeys,
   GeneratedKeys,
 } from './models'
-import { Account } from '../../models'
+import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { mapChainError } from './eosErrors'
 import {
@@ -20,6 +19,7 @@ import {
   UnlinkPermissionsParams,
 } from './eosPermissionsHelper'
 import { isNullOrEmpty } from '../../helpers'
+import { toEosEntityName } from './helpers'
 
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission

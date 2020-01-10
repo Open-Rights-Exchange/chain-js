@@ -1,4 +1,4 @@
-import { EosEntityName, EosAsset, EosDate } from './helperModels'
+import { EosEntityName, EosAsset, EosDate } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
 // Raw data Types from the EOS Chain
@@ -114,8 +114,4 @@ export interface EosTransactionStruct {
   context_free_actions: EosTransactionStruct[]
   actions: EosTransactionStruct[]
   available_keys: EosPublicKey[]
-}
-
-export function isEosPermissionStruct(object: any): object is EosPermissionStruct {
-  return 'perm_name' in object
 }

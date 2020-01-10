@@ -1,21 +1,11 @@
 import { EosChainState } from './eosChainState'
-import {
-  EosActionStruct,
-  EosEntityName,
-  EosPermissionStruct,
-  EosPermissionSimplified,
-  EosPublicKey,
-  toEosEntityName,
-  toEosPublicKey,
-  GeneratedKeys,
-  isValidEosPublicKey,
-  EosAsset,
-} from './models'
+import { CreateAccountOptions, EosActionStruct, EosEntityName, EosPermissionStruct, GeneratedKeys } from './models'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
-import { CreateAccount, AccountType } from '../../models'
+import { AccountType } from '../../models'
+import { CreateAccount } from '../../interfaces'
 import { EosTransaction } from './eosTransaction'
-import { timestampEosBase32, randomEosBase32 } from './helpers'
+import { isValidEosPublicKey, timestampEosBase32, randomEosBase32, toEosEntityName, toEosPublicKey } from './helpers'
 import {
   ACCOUNT_NAME_MAX_LENGTH,
   DEFAULT_ACCOUNT_NAME_PREFIX,
@@ -34,53 +24,6 @@ import { PermissionsHelper } from './eosPermissionsHelper'
 //   createAccountNested() {} // createKeyPair
 // Obsolete - no longer needed:
 //   checkIfAccountNameUsable() {} // checkIfAccountNameUsable
-
-export type CreateAccountOptions = {
-  accountNamePrefix?: string // Default 'ore'
-  // newAccountName: EosEntityName,      // Optional - aka oreAccountName
-  creatorAccountName: EosEntityName
-  creatorPermission: EosEntityName // Default = 'active' aka permission
-  recycleExistingAccount?: boolean // aka reuseAccount
-  /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
-  publicKeys?: {
-    owner?: EosPublicKey
-    active?: EosPublicKey
-  }
-  newKeysOptions?: {
-    newKeysPassword?: string
-    newKeysSalt?: string
-  }
-  oreOptions?: {
-    pricekey?: number // default = 1
-    referralAccountName?: EosEntityName // default = ''  // aka referral
-  }
-  createEscrowOptions?: {
-    contractName: EosEntityName // default = 'createescrow'
-    appName: string // aka 'origin' field
-  }
-  createVirtualNestedOptions?: {
-    parentAccountName: EosEntityName
-    rootPermission?: EosEntityName
-  }
-  resourcesOptions?: {
-    ramBytes: number
-    stakeNetQuantity: EosAsset
-    stakeCpuQuantity: EosAsset
-    transfer: boolean
-  }
-  // firstAuthorizer?: {               // move first authorizer to higher-level function
-  //   accountName: EosEntityName,
-  //   permissionName: EosEntityName,
-  //   Action?: EosActionStruct,
-  // },
-  /** to generate a new key (using newKeysOptions), leave both publicKeys as null */
-  permissionsToAdd?: Partial<EosPermissionSimplified>[]
-  permissionsToLink?: {
-    permissionName: EosEntityName
-    contract: EosEntityName
-    action: string
-  }[]
-}
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native, virtual, and createEscrow accounts

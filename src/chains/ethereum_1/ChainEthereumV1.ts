@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Chain, ChainEndpoint, ChainInfo, ChainSettings } from '../../models'
+import { Chain } from '../../interfaces'
+import { ChainEndpoint, ChainInfo, ChainSettings } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -8,6 +9,9 @@ import { composeAction, ChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 
+/** Provides support for the Ethereum blockchain
+ *  Provides Ethereum-specific implementations of the Chain interface
+ *  Also includes some features only available on this platform */
 class ChainEthereumV1 implements Chain {
   private _endpoints: ChainEndpoint[]
 

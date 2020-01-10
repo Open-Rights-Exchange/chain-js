@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Account } from '../../models'
+import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { EthereumChainState } from './ethChainState'
 
