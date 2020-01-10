@@ -58,7 +58,7 @@ export function isValidEosDate(str: string): str is EosDate {
 // ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
-  return str.match(/^\d{1}\.\d{4} [A-Z]{3}$/) !== null
+  return str.match(/^\d{1,}\.\d{4} [A-Z]{3}$/) !== null
 }
 
 export function isValidEosEntityName(str: EosEntityName | string): str is EosEntityName {

@@ -25,18 +25,18 @@ import { isNullOrEmpty } from '../../helpers'
 //   unlinkActionsToPermission() {} // unlinkActionsToPermission
 //   replaceAccountPublicKeys() {} // exportAccount, reuseAccount
 
-type LinkPermissionsParams = {
+export type LinkPermissionsParams = {
   permissionName: EosEntityName
   contract: EosEntityName
   action: string
-}[]
+}
 
-type DeletePermissionsParams = {
+export type DeletePermissionsParams = {
   accountName: EosEntityName
   permissionName: EosEntityName
-}[]
+}
 
-type ReplacePermissionKeysParams = {
+export type ReplacePermissionKeysParams = {
   permissionName: EosEntityName
   parentPermissionName: EosEntityName
   publicKeys: EosPublicKey[]
@@ -44,20 +44,14 @@ type ReplacePermissionKeysParams = {
   accountName: EosEntityName
 }
 
-type UnlinkPermissionsParams = {
+export type UnlinkPermissionsParams = {
   permissionName: EosEntityName
   contract: EosEntityName
   action: string
-}[]
+}
 
 export class PermissionsHelper {
   private _chainState: EosChainState
-
-  private _name: EosEntityName
-
-  private _parent: EosEntityName
-
-  private _requiredAuthorizations: EosAuthorizationStruct[]
 
   constructor(chainState: EosChainState) {
     this._chainState = chainState
@@ -92,7 +86,7 @@ export class PermissionsHelper {
   }
 
   /** Compose a collection of actions to add the requested permissions */
-  composeAddPermissionsActions(
+  composeAddPermissionActions(
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] | EosPermissionStruct[] = [],
@@ -139,7 +133,7 @@ export class PermissionsHelper {
   composeDeletePermissionActions = (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
-    permissionsToDelete: DeletePermissionsParams = [],
+    permissionsToDelete: DeletePermissionsParams[] = [],
   ): EosActionStruct[] => {
     const delteAuthActions: EosActionStruct[] = []
 
@@ -150,7 +144,7 @@ export class PermissionsHelper {
         account: auth.accountName,
         permission: auth.permissionName,
       }
-      const deleteAuthAction = composeAction(ChainActionType.AccountLinkAuth, deleteAuthParams)
+      const deleteAuthAction = composeAction(ChainActionType.AccountDeleteAuth, deleteAuthParams)
       delteAuthActions.push(deleteAuthAction)
     })
 
@@ -193,7 +187,7 @@ export class PermissionsHelper {
   composeLinkPermissionActions = (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
-    permissionsToLink: LinkPermissionsParams = [],
+    permissionsToLink: LinkPermissionsParams[] = [],
   ): EosActionStruct[] => {
     const linkAuthActions: EosActionStruct[] = []
 
@@ -216,7 +210,7 @@ export class PermissionsHelper {
   composeUnlinkPermissionActions = (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
-    permissionsToUnlink: UnlinkPermissionsParams = [],
+    permissionsToUnlink: UnlinkPermissionsParams[] = [],
   ): EosActionStruct[] => {
     const unlinkAuthActions: EosActionStruct[] = []
     permissionsToUnlink.forEach(link => {
