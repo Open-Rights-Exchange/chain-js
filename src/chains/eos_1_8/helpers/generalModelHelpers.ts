@@ -1,17 +1,21 @@
 import moment from 'moment'
 import { EosDate, EosAsset, EosEntityName } from '../models/generalModels'
+import { isNullOrEmpty } from '../../../helpers'
 
 export function isValidEosDate(str: string): str is EosDate {
+  if (isNullOrEmpty(str)) return false
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
 // A string representation of an EOSIO symbol, composed of a float with a precision of 4
 // ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
+  if (isNullOrEmpty(str)) return false
   return str.match(/^\d{1,}\.\d{4} [A-Z]{3}$/) !== null
 }
 
 export function isValidEosEntityName(str: EosEntityName | string): str is EosEntityName {
+  if (isNullOrEmpty(str)) return false
   return str.match(/(^[a-z1-5.]{1,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)/i) !== null
 }
 
