@@ -1,4 +1,4 @@
-import { EosEntityName, EosAsset, EosPermissionSimplified } from './generalModels'
+import { EosEntityName, EosAsset } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
 export type CreateAccountOptions = {
@@ -33,16 +33,4 @@ export type CreateAccountOptions = {
     stakeCpuQuantity: EosAsset
     transfer: boolean
   }
-  // firstAuthorizer?: {               // move first authorizer to higher-level function
-  //   accountName: EosEntityName,
-  //   permissionName: EosEntityName,
-  //   Action?: EosActionStruct,
-  // },
-  /** to generate a new key (using newKeysOptions), leave both publicKeys as null */
-  permissionsToAdd?: Partial<EosPermissionSimplified>[]
-  permissionsToLink?: {
-    permissionName: EosEntityName
-    contract: EosEntityName
-    action: string
-  }[]
 }
