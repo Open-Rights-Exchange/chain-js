@@ -6,7 +6,6 @@ export type CreateAccountOptions = {
   // newAccountName: EosEntityName,      // Optional - aka oreAccountName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName // Default = 'active' aka permission
-  recycleExistingAccount?: boolean // aka reuseAccount
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
   publicKeys?: {
     owner?: EosPublicKey

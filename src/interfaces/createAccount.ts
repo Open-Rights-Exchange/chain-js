@@ -11,8 +11,10 @@ export interface CreateAccount {
   composeTransaction(accountType: AccountType, accountName?: string, options?: CreateAccountOptions): Promise<void>
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
-   *  If recycleExistingAccount is specified, checks if the name can be reused */
-  determineNewAccountName(accountName: string): Promise<string>
+   *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
+  determineNewAccountName(
+    accountName: string,
+  ): Promise<{ alreadyExists: boolean; newAccountName: string; canRecycle: boolean }>
   /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
    *  If already in use, this function is called recursively until a unique name is generated */
   generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean): Promise<string>
