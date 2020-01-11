@@ -1,13 +1,10 @@
 /* eslint-disable no-restricted-syntax */
 import {
-  EosAuthorizationStruct,
   EosEntityName,
   EosPermissionStruct,
   EosPublicKey,
-  toEosEntityName,
   EosActionStruct,
   EosPermissionSimplified,
-  isEosPermissionStruct,
   GenerateMissingKeysParams,
   GeneratedPermissionKeys,
 } from './models'
@@ -16,6 +13,8 @@ import { composeAction, ChainActionType } from './eosCompose'
 import { throwNewError } from '../../errors'
 import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
+import { toEosEntityName } from './helpers'
+import { isEosPermissionStruct } from './helpers/eosStructuresHelpers'
 
 // OREJS Ported functions
 //   addPermission() {} // addPermission

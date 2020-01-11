@@ -1,21 +1,18 @@
 import { EosChainState } from './eosChainState'
-import {
-  EosActionStruct,
-  EosEntityName,
-  EosPermissionStruct,
-  EosPermissionSimplified,
-  EosPublicKey,
-  toEosEntityName,
-  toEosPublicKey,
-  GeneratedKeys,
-  isValidEosPublicKey,
-  EosAsset,
-} from './models'
+import { CreateAccountOptions, EosActionStruct, EosEntityName, EosPermissionStruct, GeneratedKeys } from './models'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
-import { CreateAccount, AccountType } from '../../models'
+import { AccountType } from '../../models'
+import { CreateAccount } from '../../interfaces'
 import { EosTransaction } from './eosTransaction'
-import { timestampEosBase32, randomEosBase32 } from './helpers'
+import {
+  isValidEosPublicKey,
+  timestampEosBase32,
+  randomEosBase32,
+  toEosEntityName,
+  toEosPublicKey,
+  isValidEosAsset,
+} from './helpers'
 import {
   ACCOUNT_NAME_MAX_LENGTH,
   DEFAULT_ACCOUNT_NAME_PREFIX,
@@ -24,7 +21,7 @@ import {
   DEFAULT_ORE_ACCOUNT_PRICEKEY,
 } from './eosConstants'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
-import { isNullOrEmpty } from '../../helpers'
+import { isNullOrEmpty, isANumber } from '../../helpers'
 import { composeAction, ChainActionType } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
 
@@ -34,53 +31,6 @@ import { PermissionsHelper } from './eosPermissionsHelper'
 //   createAccountNested() {} // createKeyPair
 // Obsolete - no longer needed:
 //   checkIfAccountNameUsable() {} // checkIfAccountNameUsable
-
-export type CreateAccountOptions = {
-  accountNamePrefix?: string // Default 'ore'
-  // newAccountName: EosEntityName,      // Optional - aka oreAccountName
-  creatorAccountName: EosEntityName
-  creatorPermission: EosEntityName // Default = 'active' aka permission
-  recycleExistingAccount?: boolean // aka reuseAccount
-  /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
-  publicKeys?: {
-    owner?: EosPublicKey
-    active?: EosPublicKey
-  }
-  newKeysOptions?: {
-    newKeysPassword?: string
-    newKeysSalt?: string
-  }
-  oreOptions?: {
-    pricekey?: number // default = 1
-    referralAccountName?: EosEntityName // default = ''  // aka referral
-  }
-  createEscrowOptions?: {
-    contractName: EosEntityName // default = 'createescrow'
-    appName: string // aka 'origin' field
-  }
-  createVirtualNestedOptions?: {
-    parentAccountName: EosEntityName
-    rootPermission?: EosEntityName
-  }
-  resourcesOptions?: {
-    ramBytes: number
-    stakeNetQuantity: EosAsset
-    stakeCpuQuantity: EosAsset
-    transfer: boolean
-  }
-  // firstAuthorizer?: {               // move first authorizer to higher-level function
-  //   accountName: EosEntityName,
-  //   permissionName: EosEntityName,
-  //   Action?: EosActionStruct,
-  // },
-  /** to generate a new key (using newKeysOptions), leave both publicKeys as null */
-  permissionsToAdd?: Partial<EosPermissionSimplified>[]
-  permissionsToLink?: {
-    permissionName: EosEntityName
-    contract: EosEntityName
-    action: string
-  }[]
-}
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native, virtual, and createEscrow accounts
@@ -111,14 +61,7 @@ export class EosCreateAccount implements CreateAccount {
   ): Promise<void> {
     this._accountType = accountType
     this._options = this.applyDefaultOptions(options)
-    const {
-      creatorAccountName,
-      creatorPermission,
-      oreOptions,
-      recycleExistingAccount,
-      createEscrowOptions,
-      resourcesOptions,
-    } = this._options
+    const { creatorAccountName, creatorPermission, oreOptions, createEscrowOptions, resourcesOptions } = this._options
     const { pricekey, referralAccountName } = oreOptions || {}
     const { contractName, appName } = createEscrowOptions || {}
     const { ramBytes, stakeNetQuantity, stakeCpuQuantity, transfer } = resourcesOptions || {}
@@ -128,22 +71,32 @@ export class EosCreateAccount implements CreateAccount {
 
     // determine account name - generate account name if once wasn't provided
     const permissionHelper = new PermissionsHelper(this._chainState)
-    const useAccountName = await this.determineNewAccountName(accountName)
-    this._accountName = useAccountName
+    const { alreadyExists, newAccountName, canRecycle: recycleAccount } = await this.determineNewAccountName(
+      accountName,
+    )
+
+    if (alreadyExists) throwNewError(`Account ${accountName} name already in use`)
+
+    this._accountName = newAccountName
 
     // get keys from paramters or freshly generated
     const publicKeys = await this.getPublicKeysFromOptionsOrGenerateNewKeys()
 
     // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
-    if (recycleExistingAccount) {
+    if (recycleAccount) {
       publicKeys.owner = null
+    }
+
+    // check that we have account resource options for a native account (not needed if we are recycling)
+    if (!recycleAccount && (accountType === AccountType.Native || accountType === AccountType.NativeOre)) {
+      this.assertValidOptionsResources()
     }
 
     // compose action - call the composeAction type to generate the right transaction action
     let createAccountActions
     const { active: publicKeyActive, owner: publicKeyOwner } = publicKeys || {}
     const params = {
-      accountName: useAccountName,
+      accountName: newAccountName,
       contractName,
       appName,
       creatorAccountName,
@@ -159,7 +112,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // To recycle an account, we dont create new account, just replace keys on an existing one
-    if (recycleExistingAccount) {
+    if (recycleAccount) {
       // we've already confirmed (in generateAccountName) that account can be recycled
       const parentAccount = new EosAccount(this._chainState)
       // replacing the keys of an existing account, so fetch it first
@@ -216,7 +169,6 @@ export class EosCreateAccount implements CreateAccount {
     return {
       accountNamePrefix: DEFAULT_ACCOUNT_NAME_PREFIX,
       creatorPermission: 'active',
-      recycleExistingAccount: false,
       oreOptions: {
         pricekey: DEFAULT_ORE_ACCOUNT_PRICEKEY,
         referralAccountName: null,
@@ -231,25 +183,24 @@ export class EosCreateAccount implements CreateAccount {
 
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
-   *  If recycleExistingAccount is specified, checks if the name can be reused */
-  async determineNewAccountName(accountName: EosEntityName): Promise<EosEntityName> {
+   *  Checks if provided account is unused and can be recycled */
+  async determineNewAccountName(accountName: EosEntityName) {
+    let canRecycle = false
+    let alreadyExists
     let newAccountName = accountName
-    const { accountNamePrefix, recycleExistingAccount } = this._options
+    const { accountNamePrefix } = this._options
 
     if (!accountName) {
       newAccountName = await this.generateAccountName(accountNamePrefix, true)
     } else {
       const { exists, account } = await this.doesAccountExist(accountName)
       if (exists) {
-        if (recycleExistingAccount) {
-          // if recylcing an account, a name will be provided and it should be on chain
-          await this.assertAccountCanBeRecycled(account)
-        } else {
-          throwNewError('Specified account name already exists on chain.')
-        }
+        // check if this account is an unused, recyclable account
+        canRecycle = this.canRecycleAccount(account)
+        if (!canRecycle) alreadyExists = exists
       }
     }
-    return newAccountName
+    return { alreadyExists, newAccountName, canRecycle }
   }
 
   /** Compose an updateAuth command to add a permission to the virtual 'master' account */
@@ -297,12 +248,13 @@ export class EosCreateAccount implements CreateAccount {
   private async getPublicKeysFromOptionsOrGenerateNewKeys() {
     let generatedKeys: any
     // generate new account owner/active keys if they weren't provided
-    let { publicKeys } = this._options
+    let { publicKeys } = this._options || {}
+    const { owner, active } = publicKeys
     const { newKeysOptions } = this._options
     const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
 
     // generate new public keys and add to options.publicKeyss
-    if (isNullOrEmpty(publicKeys)) {
+    if (!owner || !active) {
       generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt, { publicKeys })
       this._generatedKeys = {
         ...this._generatedKeys,
@@ -342,22 +294,24 @@ export class EosCreateAccount implements CreateAccount {
     return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
   }
 
-  /** Checks for existing account and that its active public can matches an unusedAccountPublicKey setting
-   *  Throws if account does not meet these conditions */
-  private async assertAccountCanBeRecycled(account: EosAccount) {
-    if (!account) throw new Error('Invalid Option - Account name must be provided with recycle account option')
+  /** Whether an existing account is currently unused and can be reused
+   *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
+  private canRecycleAccount(account: EosAccount) {
     const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
+    if (!account) return false
     // check that the public active key matches the unused public key marker
     const { publicKey } = account.permissions.find(perm => perm.name === toEosEntityName('active'))
-    if (publicKey === unusedAccountPublicKey) return
-    throw new Error(`Account ${account.name} in use and can't be recycled`)
+    return publicKey === unusedAccountPublicKey
   }
 
   private assertValidOptionPublicKeys() {
     const { publicKeys } = this._options
     const { active, owner } = publicKeys || {}
-    if (!isNullOrEmpty(publicKeys) && (!isValidEosPublicKey(owner) || !isValidEosPublicKey(active))) {
-      throwNewError('Invalid Option - For publicKeys option, you must provide both owner and active valid public keys')
+    if (active && !isValidEosPublicKey(active)) {
+      throwNewError('Invalid Option - Provided active publicKey isnt valid')
+    }
+    if (owner && !isValidEosPublicKey(owner)) {
+      throwNewError('Invalid Option - Provided owner publicKey isnt valid')
     }
   }
 
@@ -366,6 +320,16 @@ export class EosCreateAccount implements CreateAccount {
     const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
     if (isNullOrEmpty(publicKeys) && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
       throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    }
+  }
+
+  private assertValidOptionsResources() {
+    const { resourcesOptions } = this._options || {}
+    const { ramBytes, stakeNetQuantity, stakeCpuQuantity } = resourcesOptions || {}
+    if (!isValidEosAsset(stakeNetQuantity) || !isValidEosAsset(stakeCpuQuantity) || !isANumber(ramBytes)) {
+      throwNewError(
+        'Invalid Option - For this type of account, You must provide valid values for ramBytes(number), stakeNetQuantity(EOSAsset), stakeCpuQuantity(EOSAsset)',
+      )
     }
   }
 

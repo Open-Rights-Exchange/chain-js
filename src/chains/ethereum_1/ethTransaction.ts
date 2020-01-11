@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { EthereumChainState } from './ethChainState'
-import { Transaction, ConfirmType, TransactionOptions } from '../../models'
+import { Transaction } from '../../interfaces'
+import { ConfirmType, TransactionOptions } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, getUniqueValues } from '../../helpers'
 

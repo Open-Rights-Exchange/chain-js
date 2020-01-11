@@ -214,8 +214,8 @@ export class EosChainState {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
 
-    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After_001) {
-      throwNewError('Only ConfirmType.None or .After_001 are currently supported for waitForConfirm parameters')
+    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
+      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
 
     const signedTransaction = { signatures, serializedTransaction }
@@ -251,7 +251,7 @@ export class EosChainState {
     }
     const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
 
-    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After_001) {
+    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
 

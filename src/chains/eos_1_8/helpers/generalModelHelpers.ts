@@ -1,67 +1,21 @@
 import moment from 'moment'
-import { EosPublicKey, AccountKeysStruct, KeyPairEncrypted } from './cryptoModels'
-
-// using Enum 'brands' to force a string type to have a particular format
-// See - https://spin.atomicobject.com/2017/06/19/strongly-typed-date-string-typescript/
-// ... and https://basarat.gitbooks.io/typescript/docs/tips/nominalTyping.html
-export enum EosDateBrand {
-  _ = '',
-}
-export enum EosAssetBrand {
-  _ = '',
-}
-export enum EosEntityNameBrand {
-  _ = '',
-}
-
-// EOS Account name has no more than 13 characters
-// Last character can't be '.'
-// 13th character can only be [1-5] or [a-j]
-export type EosEntityName = string & EosEntityNameBrand
-export type EosDate = string & EosDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
-export type EosAsset = string & EosAssetBrand
-
-/** A simple container for account, permission, and public key */
-export type Authorization = {
-  account: EosEntityName
-  permission: EosEntityName
-  publicKey?: EosPublicKey
-}
-
-export type EosPermissionSimplified = {
-  name: EosEntityName
-  parent: EosEntityName
-  publicKey: EosPublicKey
-  publicKeyWeight: number
-  threshold: number
-}
-
-export type GeneratedKeys = {
-  accountKeys: AccountKeysStruct
-  permissionKeys: GeneratedPermissionKeys[]
-}
-
-export type GeneratedPermissionKeys = {
-  permissionName: EosEntityName
-  keyPair: KeyPairEncrypted
-}
-
-export type GenerateMissingKeysParams = {
-  newKeysPassword?: string
-  newKeysSalt?: string
-}
+import { EosDate, EosAsset, EosEntityName } from '../models/generalModels'
+import { isNullOrEmpty } from '../../../helpers'
 
 export function isValidEosDate(str: string): str is EosDate {
+  if (isNullOrEmpty(str)) return false
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
 // A string representation of an EOSIO symbol, composed of a float with a precision of 4
 // ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
+  if (isNullOrEmpty(str)) return false
   return str.match(/^\d{1,}\.\d{4} [A-Z]{3}$/) !== null
 }
 
 export function isValidEosEntityName(str: EosEntityName | string): str is EosEntityName {
+  if (isNullOrEmpty(str)) return false
   return str.match(/(^[a-z1-5.]{1,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)/i) !== null
 }
 

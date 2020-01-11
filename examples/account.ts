@@ -4,17 +4,11 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
-import {
-  toEosEntityName,
-  toEosPrivateKey,
-  toEosPublicKey,
-  toEosAsset,
-  EosPrivateKey,
-} from '../src/chains/eos_1_8/models'
-import { CreateAccountOptions } from '../src/chains/eos_1_8/eosCreateAccount'
+import { EosPrivateKey } from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
 import { DeletePermissionsParams, LinkPermissionsParams } from '../src/chains/eos_1_8/eosPermissionsHelper'
+import { toEosEntityName, toEosAsset, toEosPublicKey } from '../src/chains/eos_1_8/helpers'
 
 require('dotenv').config()
 
@@ -133,18 +127,18 @@ const { env } = process
     },
     publicKeys: {
       owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
-      active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+      // active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
     },
     resourcesOptions: {
       ramBytes: 4000,
-      stakeNetQuantity: toEosAsset(10, 'EOS'),
-      stakeCpuQuantity: toEosAsset(10, 'EOS'),
+      stakeNetQuantity: toEosAsset(1, 'EOS'),
+      stakeCpuQuantity: toEosAsset(1, 'EOS'),
       transfer: false,
     },
   }
 
+  // to recylce an account, specify an existing account with an active key of unusedAccountPublicKey
   const createAccountOptions_OreRecycleNative = {
-    recycleExistingAccount: true,
     accountNamePrefix: 'ore',
     creatorAccountName: 'ore1qadesjxm',
     creatorPermission: 'owner',
@@ -216,11 +210,11 @@ const { env } = process
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create native kylin account
-  // const createAccount = kylin.new.createAccount()
-  // await createAccount.composeTransaction(AccountType.Native, null, createAccountOptions_EosNative)
-  // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
-  // console.log('createAccount response: ', await createAccount.transaction.send())
+  const createAccount = kylin.new.createAccount()
+  await createAccount.composeTransaction(AccountType.Native, null, createAccountOptions_EosNative)
+  await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
+  createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
+  console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create virtual nested account
   // const createAccount = kylin.new.createAccount()

@@ -1,5 +1,6 @@
 import { RpcError } from 'eosjs'
-import { Chain, ChainEndpoint, ChainInfo, ChainSettings, CreateAccount, TransactionOptions } from '../../models'
+import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
+import { Chain, CreateAccount } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as eoscrypto from './eosCrypto'
@@ -8,9 +9,13 @@ import { mapChainError } from './eosErrors'
 import { composeAction, ChainActionType } from './eosCompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
-import { EosEntityName, isValidEosPublicKey, isValidEosPrivateKey } from './models'
 import { EosAccount } from './eosAccount'
+import { isValidEosPrivateKey, isValidEosPublicKey } from './helpers'
+import { EosEntityName } from './models'
 
+/** Provides support for the EOS blockchain
+ *  Provides EOS-specific implementations of the Chain interface
+ *  Also includes some features only available on this platform */
 class ChainEosV18 implements Chain {
   private _endpoints: ChainEndpoint[]
 
@@ -117,8 +122,15 @@ class ChainEosV18 implements Chain {
     verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
   }
 
+  /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
+  // eslint-disable-next-line class-methods-use-this
+  public get chainType(): ChainType {
+    return ChainType.EosV18
+  }
+
   /** Returns chain plug-in name */
-  public description = (): string => {
+  // eslint-disable-next-line class-methods-use-this
+  public get description(): string {
     return 'EOS 1.8 Chain'
   }
 
