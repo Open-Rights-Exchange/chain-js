@@ -4,17 +4,11 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
-import {
-  toEosEntityName,
-  toEosPrivateKey,
-  toEosPublicKey,
-  toEosAsset,
-  EosPrivateKey,
-} from '../src/chains/eos_1_8/models'
-import { CreateAccountOptions } from '../src/chains/eos_1_8/eosCreateAccount'
+import { EosPrivateKey } from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
 import { DeletePermissionsParams, LinkPermissionsParams } from '../src/chains/eos_1_8/eosPermissionsHelper'
+import { toEosEntityName, toEosAsset, toEosPublicKey } from '../src/chains/eos_1_8/helpers'
 
 require('dotenv').config()
 
@@ -137,14 +131,14 @@ const { env } = process
     },
     resourcesOptions: {
       ramBytes: 4000,
-      stakeNetQuantity: toEosAsset(10, 'EOS'),
-      stakeCpuQuantity: toEosAsset(10, 'EOS'),
+      stakeNetQuantity: toEosAsset(1, 'EOS'),
+      stakeCpuQuantity: toEosAsset(1, 'EOS'),
       transfer: false,
     },
   }
 
+  // to recylce an account, specify an existing account with an active key of unusedAccountPublicKey
   const createAccountOptions_OreRecycleNative = {
-    recycleExistingAccount: true,
     accountNamePrefix: 'ore',
     creatorAccountName: 'ore1qadesjxm',
     creatorPermission: 'owner',
