@@ -248,12 +248,13 @@ export class EosCreateAccount implements CreateAccount {
   private async getPublicKeysFromOptionsOrGenerateNewKeys() {
     let generatedKeys: any
     // generate new account owner/active keys if they weren't provided
-    let { publicKeys } = this._options
+    let { publicKeys } = this._options || {}
+    const { owner, active } = publicKeys
     const { newKeysOptions } = this._options
     const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
 
     // generate new public keys and add to options.publicKeyss
-    if (isNullOrEmpty(publicKeys)) {
+    if (!owner || !active) {
       generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt, { publicKeys })
       this._generatedKeys = {
         ...this._generatedKeys,
@@ -306,8 +307,11 @@ export class EosCreateAccount implements CreateAccount {
   private assertValidOptionPublicKeys() {
     const { publicKeys } = this._options
     const { active, owner } = publicKeys || {}
-    if (!isNullOrEmpty(publicKeys) && (!isValidEosPublicKey(owner) || !isValidEosPublicKey(active))) {
-      throwNewError('Invalid Option - For publicKeys option, you must provide both owner and active valid public keys')
+    if (active && !isValidEosPublicKey(active)) {
+      throwNewError('Invalid Option - Provided active publicKey isnt valid')
+    }
+    if (owner && !isValidEosPublicKey(owner)) {
+      throwNewError('Invalid Option - Provided owner publicKey isnt valid')
     }
   }
 

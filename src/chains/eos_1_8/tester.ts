@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { toEosDate, toEosAsset, isValidEosEntityName, isValidEosPublicKey, toEosPublicKey } from './models'
+import { toEosDate, toEosAsset, isValidEosEntityName, isValidEosPublicKey, toEosPublicKey } from './helpers'
 
 const eosDate = toEosDate(new Date())
 console.log(eosDate)
