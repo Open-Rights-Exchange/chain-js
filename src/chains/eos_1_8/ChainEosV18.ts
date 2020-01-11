@@ -1,5 +1,5 @@
 import { RpcError } from 'eosjs'
-import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions } from '../../models'
+import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
 import { Chain, CreateAccount } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -122,8 +122,15 @@ class ChainEosV18 implements Chain {
     verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
   }
 
+  /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
+  // eslint-disable-next-line class-methods-use-this
+  public get chainType(): ChainType {
+    return ChainType.EosV18
+  }
+
   /** Returns chain plug-in name */
-  public description = (): string => {
+  // eslint-disable-next-line class-methods-use-this
+  public get description(): string {
     return 'EOS 1.8 Chain'
   }
 

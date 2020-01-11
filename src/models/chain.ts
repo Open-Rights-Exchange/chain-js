@@ -1,7 +1,7 @@
 /** Supported chain types */
 export enum ChainType {
-  EosV18 = 'eos v1.8',
-  EthereumV1 = 'ethereum v1.0',
+  EosV18 = 'eos',
+  EthereumV1 = 'ethereum',
 }
 
 /** Monitor services listenting to the chain */

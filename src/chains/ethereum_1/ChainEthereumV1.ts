@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainEndpoint, ChainInfo, ChainSettings } from '../../models'
+import { ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -31,6 +31,12 @@ class ChainEthereumV1 implements Chain {
 
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
 
+  /** Returns chain type enum - resolves to chain family as a string e.g. 'ethereum' */
+  // eslint-disable-next-line class-methods-use-this
+  public get chainType(): ChainType {
+    return ChainType.EthereumV1
+  }
+
   public connect(): Promise<void> {
     return this._chainState.connect()
   }
@@ -45,6 +51,11 @@ class ChainEthereumV1 implements Chain {
 
   public composeAction = (actionType: ChainActionType, args: any): any => {
     return composeAction(actionType, args)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public get description(): string {
+    return 'Etereum 1.0 Chain'
   }
 
   /** Fetch data from an on-chain contract table */
@@ -91,11 +102,6 @@ class ChainEthereumV1 implements Chain {
     account: this.newAccount,
     createAccount: this.newCreateAccount,
     transaction: this.newTransaction,
-  }
-
-  public description(): string {
-    if (!this.isConnected) throwNewError('Chain not connected. Call connect() to initialize chain first')
-    return 'Etereum 1.0 Chain'
   }
 
   public mapChainError = (error: Error): ChainError => {

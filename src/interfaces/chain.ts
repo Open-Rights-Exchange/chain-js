@@ -2,7 +2,7 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
-import { ChainInfo } from '../models'
+import { ChainInfo, ChainType } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
@@ -14,11 +14,12 @@ export interface Chain {
   chainInfo: ChainInfo
   /** Returns last datetime chain info was retrieved */
   isConnected: boolean
-  /** Connect to chain endpoint to verify that it is operational and to get latest block info */
-
-  connect(): Promise<void>
+  /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
+  chainType: ChainType
   /** Returns chain plug-in name */
-  description(): string
+  description: string
+  /** Connect to chain endpoint to verify that it is operational and to get latest block info */
+  connect(): Promise<void>
   /** Compose an object for a chain contract action */
   composeAction(chainActionType: any, args: any): any
   /** Fetch data from an on-chain contract table */
