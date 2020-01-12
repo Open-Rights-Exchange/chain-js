@@ -210,11 +210,11 @@ const { env } = process
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create native kylin account
-  const createAccount = kylin.new.createAccount()
-  await createAccount.composeTransaction(AccountType.Native, null, createAccountOptions_EosNative)
-  await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
-  console.log('createAccount response: ', await createAccount.transaction.send())
+  // const createAccount = kylin.new.createAccount()
+  // await createAccount.composeTransaction(AccountType.Native, null, createAccountOptions_EosNative)
+  // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
+  // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create virtual nested account
   // const createAccount = kylin.new.createAccount()
