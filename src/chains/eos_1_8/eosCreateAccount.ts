@@ -1,5 +1,5 @@
 import { EosChainState } from './eosChainState'
-import { CreateAccountOptions, EosActionStruct, EosEntityName, EosPermissionStruct, GeneratedKeys } from './models'
+import { EosCreateAccountOptions, EosActionStruct, EosEntityName, EosPermissionStruct, GeneratedKeys } from './models'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
 import { AccountType } from '../../models'
@@ -47,7 +47,7 @@ export class EosCreateAccount implements CreateAccount {
 
   private _accountType: AccountType
 
-  private _options: CreateAccountOptions
+  private _options: EosCreateAccountOptions
 
   private _generatedKeys: Partial<GeneratedKeys>
 
@@ -59,7 +59,7 @@ export class EosCreateAccount implements CreateAccount {
   async composeTransaction(
     accountType: AccountType,
     accountName?: EosEntityName | null,
-    options?: CreateAccountOptions,
+    options?: EosCreateAccountOptions,
   ): Promise<void> {
     this._accountType = accountType
     this._options = this.applyDefaultOptions(options)
@@ -77,7 +77,7 @@ export class EosCreateAccount implements CreateAccount {
       accountName,
     )
 
-    if (alreadyExists) throwNewError(`Account ${accountName} name already in use`)
+    if (alreadyExists) throwNewError(`Account name ${accountName} already in use`)
 
     this._accountName = newAccountName
 
@@ -168,7 +168,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** merge default options and incoming options */
-  private applyDefaultOptions = (options: CreateAccountOptions): CreateAccountOptions => {
+  private applyDefaultOptions = (options: EosCreateAccountOptions): EosCreateAccountOptions => {
     return {
       accountNamePrefix: DEFAULT_ACCOUNT_NAME_PREFIX,
       creatorPermission: 'active',
@@ -252,7 +252,7 @@ export class EosCreateAccount implements CreateAccount {
     let generatedKeys: any
     // generate new account owner/active keys if they weren't provided
     let { publicKeys } = this._options || {}
-    const { owner, active } = publicKeys
+    const { owner, active } = publicKeys || {}
     const { newKeysOptions } = this._options
     const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
 

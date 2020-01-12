@@ -1,7 +1,7 @@
 import { EosEntityName, EosAsset } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
-export type CreateAccountOptions = {
+export type EosCreateAccountOptions = {
   accountNamePrefix?: string // Default 'ore'
   // newAccountName: EosEntityName,      // Optional - aka oreAccountName
   creatorAccountName: EosEntityName
