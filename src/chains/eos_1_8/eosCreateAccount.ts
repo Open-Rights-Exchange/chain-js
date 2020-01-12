@@ -5,10 +5,10 @@ import {
   EosEntityName,
   EosPermissionStruct,
   EosGeneratedKeys,
+  EosAccountType,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
-import { AccountType } from '../../models'
 import { CreateAccount } from '../../interfaces'
 import { EosTransaction } from './eosTransaction'
 import {
@@ -51,7 +51,7 @@ export class EosCreateAccount implements CreateAccount {
 
   private _transaction: EosTransaction
 
-  private _accountType: AccountType
+  private _accountType: EosAccountType
 
   private _options: EosCreateAccountOptions
 
@@ -63,7 +63,7 @@ export class EosCreateAccount implements CreateAccount {
 
   /** Compose a transaction to send to the chain to create a new account */
   async composeTransaction(
-    accountType: AccountType,
+    accountType: EosAccountType,
     accountName?: EosEntityName | null,
     options?: EosCreateAccountOptions,
   ): Promise<void> {
@@ -96,7 +96,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // check that we have account resource options for a native account (not needed if we are recycling)
-    if (!recycleAccount && (accountType === AccountType.Native || accountType === AccountType.NativeOre)) {
+    if (!recycleAccount && (accountType === EosAccountType.Native || accountType === EosAccountType.NativeOre)) {
       this.assertValidOptionsResources()
     }
 
@@ -141,16 +141,16 @@ export class EosCreateAccount implements CreateAccount {
       this._didRecycleAccount = true
     } else {
       switch (accountType) {
-        case AccountType.Native:
+        case EosAccountType.Native:
           createAccountActions = composeAction(ChainActionType.AccountCreate, params)
           break
-        case AccountType.NativeOre:
+        case EosAccountType.NativeOre:
           createAccountActions = [composeAction(ChainActionType.OreCreateAccount, params)]
           break
-        case AccountType.CreateEscrow:
+        case EosAccountType.CreateEscrow:
           createAccountActions = [composeAction(ChainActionType.CreateEscrowCreate, params)]
           break
-        case AccountType.VirtualNested:
+        case EosAccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
           // instead, we will need to add permissions (below) to the parent account
           createAccountActions = await this.composeCreateVirtualNestedActions()
@@ -370,7 +370,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Account type to be created */
-  get accountType(): AccountType {
+  get accountType(): EosAccountType {
     return this._accountType
   }
 

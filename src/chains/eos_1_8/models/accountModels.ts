@@ -1,6 +1,18 @@
 import { EosEntityName, EosAsset } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
+/** Type of account to craate */
+export enum EosAccountType {
+  /** Native account for chain tyep (EOS, Ethereum, etc.) */
+  Native,
+  /** Native account on ORE chain */
+  NativeOre,
+  /** Native account created by calling a proxy (escrow) contract that actually creates the account */
+  CreateEscrow,
+  /** Virtual account - if supported by chain */
+  VirtualNested,
+}
+
 export type EosCreateAccountOptions = {
   accountNamePrefix?: string // Default 'ore'
   // newAccountName: EosEntityName,      // Optional - aka oreAccountName

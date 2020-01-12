@@ -9,7 +9,7 @@ export interface CreateAccount {
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   accountName: String
   /** Account type to be created */
-  accountType: AccountType
+  accountType: AccountType | any
   /** Account will be recycled (accountName must be specified via composeTransaction()
    * This is set by composeTransaction()
    * ... if the account name provided has the 'unused' key as its active public key */
@@ -24,7 +24,11 @@ export interface CreateAccount {
    *  This should be signed and sent to the chain to create the account */
   transaction: Transaction
   /** Compose a transaction to send to the chain to create a new account */
-  composeTransaction(accountType: AccountType, accountName?: string, options?: CreateAccountOptions): Promise<void>
+  composeTransaction(
+    accountType: AccountType | any,
+    accountName?: string,
+    options?: CreateAccountOptions,
+  ): Promise<void>
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
    *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
