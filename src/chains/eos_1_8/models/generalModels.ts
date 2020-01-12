@@ -13,7 +13,7 @@ export type EosDate = string & ChainDateBrand // Datetime string in the format Y
 export type EosAsset = string & ChainAssetBrand
 
 /** A simple container for account, permission, and public key */
-export type Authorization = {
+export type EosAuthorization = {
   account: EosEntityName
   permission: EosEntityName
   publicKey?: EosPublicKey
@@ -27,17 +27,17 @@ export type EosPermissionSimplified = {
   threshold: number
 }
 
-export type GeneratedKeys = {
+export type EosGeneratedKeys = {
   accountKeys: EosAccountKeysStruct
-  permissionKeys: GeneratedPermissionKeys[]
+  permissionKeys: EosGeneratedPermissionKeys[]
 }
 
-export type GeneratedPermissionKeys = {
+export type EosGeneratedPermissionKeys = {
   permissionName: EosEntityName
   keyPair: KeyPairEncrypted
 }
 
-export type GenerateMissingKeysParams = {
+export type EosGenerateMissingKeysParams = {
   newKeysPassword?: string
   newKeysSalt?: string
 }

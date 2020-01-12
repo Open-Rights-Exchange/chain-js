@@ -5,9 +5,9 @@ import {
   EosPermissionSimplified,
   EosActionStruct,
   EosPublicKey,
-  GenerateMissingKeysParams,
-  GeneratedPermissionKeys,
-  GeneratedKeys,
+  EosGenerateMissingKeysParams,
+  EosGeneratedPermissionKeys,
+  EosGeneratedKeys,
 } from './models'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
@@ -29,7 +29,7 @@ export class EosAccount implements Account {
 
   private _chainState: EosChainState
 
-  private _generatedKeys: Partial<GeneratedKeys>
+  private _generatedKeys: Partial<EosGeneratedKeys>
 
   private _permHelper: PermissionsHelper
 
@@ -119,7 +119,7 @@ export class EosAccount implements Account {
   /** Both new password and salt must be provided if any permissions are missing public keys */
   private assertValidOptionNewKeys = (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: GenerateMissingKeysParams,
+    generateMissingKeysParams?: EosGenerateMissingKeysParams,
   ) => {
     const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
     const { newKeysPassword, newKeysSalt } = generateMissingKeysParams || {}
@@ -134,8 +134,8 @@ export class EosAccount implements Account {
   async composeAddPermissionsActions(
     authPermission: EosEntityName,
     permissionsToUpdate: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: GenerateMissingKeysParams,
-  ): Promise<{ generatedKeys: GeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
+    generateMissingKeysParams?: EosGenerateMissingKeysParams,
+  ): Promise<{ generatedKeys: EosGeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
     // Add permissions to current account structure
     this.assertValidOptionNewKeys(permissionsToUpdate, generateMissingKeysParams)
     // filter out permissions already on this account
