@@ -41,6 +41,8 @@ export class EosCreateAccount implements CreateAccount {
 
   private _chainState: EosChainState
 
+  private _didRecycleAccount: boolean = false
+
   private _transaction: EosTransaction
 
   private _accountType: AccountType
@@ -130,6 +132,7 @@ export class EosCreateAccount implements CreateAccount {
         },
       )
       createAccountActions = [replaceActivePermissionAction]
+      this._didRecycleAccount = true
     } else {
       switch (accountType) {
         case AccountType.Native:
@@ -333,6 +336,29 @@ export class EosCreateAccount implements CreateAccount {
     }
   }
 
+  /** Account name for the account to be created
+   *  May be automatically generated (or otherwise changed) by composeTransaction() */
+  get accountName(): EosEntityName {
+    return this._accountName
+  }
+
+  /** Account type to be created */
+  get accountType(): AccountType {
+    return this._accountType
+  }
+
+  /** Account creation options */
+  get options() {
+    return this._options
+  }
+
+  /** Account will be recycled (accountName must be specified via composeTransaction()
+   * This is set by composeTransaction()
+   * ... if the account name provided has the 'unused' key as its active public key */
+  get didRecycleAccount() {
+    return this._didRecycleAccount
+  }
+
   /** The keys that were generated as part of the account creation process
    *  IMPORTANT: Bes ure to always read and store these keys after creating an account
    *  This is the only way to retrieve the auto-generated private keys after an account is created */
@@ -343,6 +369,8 @@ export class EosCreateAccount implements CreateAccount {
     return null
   }
 
+  /** The transaction with all actions needed to create the account
+   *  This should be signed and sent to the chain to create the account */
   get transaction() {
     if (!this._transaction) {
       this._transaction = new EosTransaction(this._chainState)
