@@ -15,9 +15,13 @@ export enum EncryptedDataStringBrand {
   _ = '',
 }
 
+/** Stringified JSON ciphertext (used for private keys) */
 export type EncryptedDataString = string & EncryptedDataStringBrand
+/** a public key string - formatted correctly for the chain */
 export type PublicKey = string & PublicKeyBrand
+/** a private key string - formatted correctly for the chain */
 export type PrivateKey = string & PrivateKeyBrand
+/** a signature string - formatted correcly for the chain */
 export type Signature = string & SignatureBrand
 
 export type KeyPair = {
