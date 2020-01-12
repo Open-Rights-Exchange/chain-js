@@ -1,10 +1,5 @@
 import sjcl from 'sjcl'
-
-enum EncryptedDataStringBrand {
-  _ = '',
-}
-
-export type EncryptedDataString = string & EncryptedDataStringBrand
+import { EncryptedDataString } from './models'
 
 export function stringToBitArray(value: string): sjcl.BitArray {
   return sjcl.codec.base64.toBits(value)
