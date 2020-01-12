@@ -31,5 +31,6 @@ export function verifySignedWithPublicKey(
   data: string | Buffer,
   encoding: string,
 ): boolean {
+  throwNewError('Not implemented')
   return false
 }
