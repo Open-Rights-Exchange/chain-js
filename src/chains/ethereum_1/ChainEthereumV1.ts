@@ -87,8 +87,6 @@ class ChainEthereumV1 implements Chain {
     isValidPublicKey: ethcrypto.isValidPublicKey,
     generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
     sign: ethcrypto.sign,
-    toPublicKey: notImplemented,
-    toPrivateKey: notImplemented,
     verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
   }
 
@@ -100,6 +98,8 @@ class ChainEthereumV1 implements Chain {
     toEntityName: notImplemented,
     toAsset: notImplemented,
     toDate: notImplemented,
+    toPublicKey: notImplemented,
+    toPrivateKey: notImplemented,
   }
 
   private newAccount = (options?: any): any => {

@@ -129,8 +129,6 @@ class ChainEosV18 implements Chain {
     isValidPrivateKey: isValidEosPrivateKey.bind(this),
     isValidPublicKey: isValidEosPublicKey.bind(this),
     sign: eoscrypto.sign.bind(this),
-    toPublicKey: toEosPublicKey.bind(this),
-    toPrivateKey: toEosPrivateKey.bind(this),
     generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys.bind(this),
     verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
   }
@@ -143,6 +141,8 @@ class ChainEosV18 implements Chain {
     toEntityName: toEosEntityName.bind(this),
     toAsset: toEosAsset.bind(this),
     toDate: toEosDate.bind(this),
+    toPublicKey: toEosPublicKey.bind(this),
+    toPrivateKey: toEosPrivateKey.bind(this),
   }
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */

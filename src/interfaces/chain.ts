@@ -53,10 +53,6 @@ export interface Chain {
     isValidPublicKey(value: string): boolean
     /** Generate a signature given some data and a private key */
     sign(data: string | Buffer, privateKey: string, encoding: string): string
-    /** Ensures that the value comforms to a well-formed public Key */
-    toPublicKey(value: string): string
-    /** Ensures that the value comforms to a well-formed public Key */
-    toPrivateKey(value: string): string
     /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
     verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
   }
@@ -74,6 +70,10 @@ export interface Chain {
     toAsset(amount: number, symbol: string): ChainAsset
     /** Ensures that the value comforms to a well-formed chain date string */
     toDate(value: string): ChainDate
+    /** Ensures that the value comforms to a well-formed public Key */
+    toPublicKey(value: string): string
+    /** Ensures that the value comforms to a well-formed public Key */
+    toPrivateKey(value: string): string
   }
   /** Returns a new instance of an object */
   new: {
