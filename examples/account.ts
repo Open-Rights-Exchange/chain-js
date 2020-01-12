@@ -113,6 +113,16 @@ const { env } = process
     createVirtualNestedOptions: {
       parentAccountName: 'moonlightore',
       rootPermission: toEosEntityName('mloreidusers'),
+      actionsToLink: [
+        {
+          contract: 'dsptestacc11',
+          action: 'addwhitelist',
+        },
+        {
+          contract: 'dsptestacc11',
+          action: 'claimhash',
+        },
+      ],
     },
   }
 

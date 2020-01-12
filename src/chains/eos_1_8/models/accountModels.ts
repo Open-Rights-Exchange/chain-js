@@ -26,6 +26,10 @@ export type EosCreateAccountOptions = {
   createVirtualNestedOptions?: {
     parentAccountName: EosEntityName
     rootPermission?: EosEntityName
+    actionsToLink?: {
+      contract: EosEntityName
+      action: string
+    }[]
   }
   resourcesOptions?: {
     ramBytes: number

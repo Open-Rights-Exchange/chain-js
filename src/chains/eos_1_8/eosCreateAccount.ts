@@ -1,5 +1,11 @@
 import { EosChainState } from './eosChainState'
-import { EosCreateAccountOptions, EosActionStruct, EosEntityName, EosPermissionStruct, GeneratedKeys } from './models'
+import {
+  EosCreateAccountOptions,
+  EosActionStruct,
+  EosEntityName,
+  EosPermissionStruct,
+  EosGeneratedKeys,
+} from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
 import { AccountType } from '../../models'
@@ -49,7 +55,7 @@ export class EosCreateAccount implements CreateAccount {
 
   private _options: EosCreateAccountOptions
 
-  private _generatedKeys: Partial<GeneratedKeys>
+  private _generatedKeys: Partial<EosGeneratedKeys>
 
   constructor(chainState: EosChainState) {
     this._chainState = chainState
@@ -147,7 +153,7 @@ export class EosCreateAccount implements CreateAccount {
         case AccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
           // instead, we will need to add permissions (below) to the parent account
-          createAccountActions = [await this.composeCreateVirtualNestedAction()]
+          createAccountActions = await this.composeCreateVirtualNestedActions()
           break
         default:
           break
@@ -207,9 +213,10 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Compose an updateAuth command to add a permission to the virtual 'master' account */
-  private async composeCreateVirtualNestedAction(): Promise<EosActionStruct[]> {
+  private async composeCreateVirtualNestedActions(): Promise<EosActionStruct[]> {
     const { createVirtualNestedOptions, creatorPermission: authPermission } = this._options
-    const { parentAccountName } = createVirtualNestedOptions || {}
+    const { parentAccountName, actionsToLink } = createVirtualNestedOptions || {}
+    let actionsToReturn: EosActionStruct[]
 
     // add new 'nested' account permission at the bottom of the auth tree
     const newPermission = await this.composeNewVirualNestedAccountPermissionStructure()
@@ -220,8 +227,28 @@ export class EosCreateAccount implements CreateAccount {
       parent: newPermission.parent,
       permission: newPermission.perm_name,
     }
+    // add the permission to the bottom of the linked chain of permissions
     const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
-    return updateAuthAction
+    actionsToReturn = [updateAuthAction]
+    // add actions to link the contract actions to this new permission
+    // ... this enables calling of these contract actions by this permission and any of its upstream parents (i.e. all the other nexted virtual accounts)
+    if (actionsToLink) {
+      const permissionHelper = new PermissionsHelper(this._chainState)
+      const permissionsToLink = actionsToLink.map(a => ({
+        permissionName: newPermission.perm_name,
+        contract: a.contract,
+        action: a.action,
+      }))
+      const linkAuthActions = permissionHelper.composeLinkPermissionActions(
+        parentAccountName,
+        authPermission,
+        permissionsToLink,
+      )
+      if (!isNullOrEmpty(linkAuthActions)) {
+        actionsToReturn = [...actionsToReturn, ...linkAuthActions]
+      }
+    }
+    return actionsToReturn
   }
 
   /** For a virual nested account, we add the new account's permission on the bottom of the linked list of permissions */
