@@ -1,3 +1,4 @@
+import { isArray } from 'util'
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosChainState } from './eosChainState'
 import { Authorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
@@ -151,6 +152,9 @@ export class EosTransaction implements Transaction {
   /** Sets the Array of actions */
   public set actions(actions: EosActionStruct[]) {
     this.assertNoSignatures()
+    if (isNullOrEmpty(actions) || !isArray(actions)) {
+      throwNewError('actions must be an array and have at least one value')
+    }
     this._actions = actions
     this._isValidated = false
   }
