@@ -2,7 +2,7 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
-import { ChainInfo, ChainType } from '../models'
+import { ChainAsset, ChainDate, ChainEntityName, ChainInfo, ChainType } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
@@ -53,8 +53,27 @@ export interface Chain {
     isValidPublicKey(value: string): boolean
     /** Generate a signature given some data and a private key */
     sign(data: string | Buffer, privateKey: string, encoding: string): string
+    /** Ensures that the value comforms to a well-formed public Key */
+    toPublicKey(value: string): string
+    /** Ensures that the value comforms to a well-formed public Key */
+    toPrivateKey(value: string): string
     /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
     verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
+  }
+  /** Helper functions */
+  helpers: {
+    /** Verifies that the value is a valid chain entity name (e.g. an account name) */
+    isValidEntityName(value: string): boolean
+    /** Verifies that the value is a valid chain asset string */
+    isValidAsset(value: string): boolean
+    /** Verifies that the value is a valid chain date */
+    isValidDate(value: string): boolean
+    /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
+    toEntityName(value: string): ChainEntityName
+    /** Ensures that the value comforms to a well-formed chain asset string */
+    toAsset(amount: number, symbol: string): ChainAsset
+    /** Ensures that the value comforms to a well-formed chain date string */
+    toDate(value: string): ChainDate
   }
   /** Returns a new instance of an object */
   new: {

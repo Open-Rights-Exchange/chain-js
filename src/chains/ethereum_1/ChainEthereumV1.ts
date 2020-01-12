@@ -9,6 +9,10 @@ import { composeAction, ChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 
+const notImplemented = () => {
+  throw new Error('Not Implemented')
+}
+
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -83,18 +87,33 @@ class ChainEthereumV1 implements Chain {
     isValidPublicKey: ethcrypto.isValidPublicKey,
     generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
     sign: ethcrypto.sign,
+    toPublicKey: notImplemented,
+    toPrivateKey: notImplemented,
     verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
   }
 
+  /** Chain helper functions */
+  public helpers = {
+    isValidEntityName: notImplemented,
+    isValidAsset: notImplemented,
+    isValidDate: notImplemented,
+    toEntityName: notImplemented,
+    toAsset: notImplemented,
+    toDate: notImplemented,
+  }
+
   private newAccount = (options?: any): any => {
+    notImplemented()
     return null
   }
 
   private newCreateAccount = (options?: any): any => {
+    notImplemented()
     return null
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
+    notImplemented()
     return null
   }
 
@@ -105,7 +124,7 @@ class ChainEthereumV1 implements Chain {
   }
 
   public mapChainError = (error: Error): ChainError => {
-    throwNewError('Not Implemented')
+    notImplemented()
     return new ChainError(null, null, null)
   }
 }

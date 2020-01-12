@@ -1,6 +1,6 @@
 import { RpcError } from 'eosjs'
 import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
-import { Chain, CreateAccount } from '../../interfaces'
+import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as eoscrypto from './eosCrypto'
@@ -10,7 +10,18 @@ import { composeAction, ChainActionType } from './eosCompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
 import { EosAccount } from './eosAccount'
-import { isValidEosPrivateKey, isValidEosPublicKey } from './helpers'
+import {
+  isValidEosPrivateKey,
+  isValidEosPublicKey,
+  toEosPublicKey,
+  toEosPrivateKey,
+  isValidEosEntityName,
+  isValidEosAsset,
+  isValidEosDate,
+  toEosEntityName,
+  toEosAsset,
+  toEosDate,
+} from './helpers'
 import { EosEntityName } from './models'
 
 /** Provides support for the EOS blockchain
@@ -92,7 +103,7 @@ class ChainEosV18 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): CreateAccount {
+  private newCreateAccount(): EosCreateAccount {
     this.assertIsConnected()
     return new EosCreateAccount(this._chainState)
   }
@@ -118,8 +129,20 @@ class ChainEosV18 implements Chain {
     isValidPrivateKey: isValidEosPrivateKey.bind(this),
     isValidPublicKey: isValidEosPublicKey.bind(this),
     sign: eoscrypto.sign.bind(this),
+    toPublicKey: toEosPublicKey.bind(this),
+    toPrivateKey: toEosPrivateKey.bind(this),
     generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys.bind(this),
     verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
+  }
+
+  /** Chain helper functions */
+  public helpers = {
+    isValidEntityName: isValidEosEntityName.bind(this),
+    isValidAsset: isValidEosAsset.bind(this),
+    isValidDate: isValidEosDate.bind(this),
+    toEntityName: toEosEntityName.bind(this),
+    toAsset: toEosAsset.bind(this),
+    toDate: toEosDate.bind(this),
   }
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
