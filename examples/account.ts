@@ -12,9 +12,10 @@ import { toEosEntityName, toEosAsset, toEosPublicKey } from '../src/chains/eos_1
 
 require('dotenv').config()
 
-// Example client code
+export const { env } = process
 
-const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
+// Helper functions
+export const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
   const transaction = (chain as ChainEosV18).new.transaction()
   transaction.actions = transactionActions
@@ -26,7 +27,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
   return transaction
 }
 
-const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
+export const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
   console.log('actions:', transaction.actions)
   await transaction.generateSerialized()
   await transaction.validate()
@@ -36,29 +37,173 @@ const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
   return transaction
 }
 
-const { env } = process
+// Reusable Settings
+export const kylinEndpoints = [
+  {
+    url: new URL('https:api-kylin.eosasia.one:443'),
+    chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
+  },
+]
+export const oreStagingEndpoints = [
+  {
+    url: new URL('https://ore-staging.openrights.exchange/'),
+    chainId: 'a6df478d5593b4efb1ea20d13ba8a3efc1364ee0bf7dbd85d8d756831c0e3256',
+  },
+]
+export const ethEndpoint = {
+  url: new URL('https://main-rpc.linkpool.io/'),
+}
+
+export const chainSettings = { unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' }
+
+// Kylin createbridge - moonlighting
+export const createAccountOptions_createBridge = {
+  accountNamePrefix: 'ore',
+  creatorAccountName: toEosEntityName('oreidfunding'),
+  creatorPermission: toEosEntityName('active'),
+  newKeysOptions: {
+    newKeysPassword: '2233',
+    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
+  },
+  createEscrowOptions: {
+    contractName: toEosEntityName('createbridge'),
+    appName: 'appmoonlight',
+  },
+}
+
+// ore-staging native account
+export const createAccountOptions_OreNative = {
+  accountNamePrefix: 'ore',
+  creatorAccountName: 'app.oreid',
+  creatorPermission: 'active',
+  publicKeys: {
+    owner: 'EOS7rNR9AhgcqkmMAoUSHrjTXgxM4PnpGYDXhS3B4UW3jjZgBATXL',
+  },
+  newKeysOptions: {
+    newKeysPassword: '2233',
+    newKeysSalt: env.$ORE_TESTNET_PK_SALT_V0, // ore staging
+  },
+}
+
+// kylin virutal account - moonlighting
+export const createAccountOptions_virtualNested = {
+  accountNamePrefix: 'ore',
+  creatorAccountName: 'moonlightore',
+  creatorPermission: 'active',
+  newKeysOptions: {
+    newKeysPassword: '2233',
+    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
+  },
+  createEscrowOptions: {
+    contractName: 'createbridge',
+    appName: 'free',
+  },
+  createVirtualNestedOptions: {
+    parentAccountName: 'moonlightore',
+    rootPermission: toEosEntityName('mloreidusers'),
+    actionsToLink: [
+      {
+        contract: 'dsptestacc11',
+        action: 'addwhitelist',
+      },
+      {
+        contract: 'dsptestacc11',
+        action: 'claimhash',
+      },
+    ],
+  },
+}
+
+export const createAccountOptions_EosNative = {
+  accountNamePrefix: 'ore',
+  // accountName: null,
+  creatorAccountName: 'proppropprop',
+  creatorPermission: 'active',
+  newKeysOptions: {
+    newKeysPassword: '2233',
+    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
+  },
+  publicKeys: {
+    owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+    // active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+  },
+  resourcesOptions: {
+    ramBytes: 4000,
+    stakeNetQuantity: toEosAsset(1, 'EOS'),
+    stakeCpuQuantity: toEosAsset(1, 'EOS'),
+    transfer: false,
+  },
+}
+
+// to recylce an account, specify an existing account with an active key of unusedAccountPublicKey
+export const createAccountOptions_OreRecycleNative = {
+  accountNamePrefix: 'ore',
+  creatorAccountName: 'ore1qadesjxm',
+  creatorPermission: 'owner',
+  newKeysOptions: {
+    newKeysPassword: '2233',
+    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // ore staging
+  },
+}
+
+export const resetPermissions = [
+  {
+    name: toEosEntityName('active'),
+    parent: toEosEntityName('owner'),
+    publicKey: toEosPublicKey(chainSettings.unusedAccountPublicKey),
+  },
+]
+
+export const permissionNewKeysOptions = {
+  newKeysPassword: '2233',
+  newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
+}
+
+export const accountNewPermissions = [
+  {
+    name: toEosEntityName('nwpermission'),
+    parent: toEosEntityName('active'),
+  },
+  {
+    name: toEosEntityName('n2permission'),
+    parent: toEosEntityName('active'),
+  },
+  {
+    name: toEosEntityName('n3permission'),
+    parent: toEosEntityName('nwpermission'),
+  },
+]
+
+export const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
+  {
+    permissionName: toEosEntityName('nwpermission'),
+  },
+  {
+    permissionName: toEosEntityName('n2permission'),
+  },
+  // {
+  //   permissionName: toEosEntityName('n3permission'),
+  // },
+]
+
+export const accountLinkPermissions: LinkPermissionsParams[] = [
+  {
+    permissionName: toEosEntityName('nwpermission'),
+    contract: toEosEntityName('createbridge'),
+    action: toEosEntityName('create'),
+  },
+  {
+    permissionName: toEosEntityName('n2permission'),
+    contract: toEosEntityName('createbridge'),
+    action: toEosEntityName('define'),
+  },
+]
 ;(async () => {
-  // Reusable Settings
-  const kylinEndpoints = [
-    {
-      url: new URL('https:api-kylin.eosasia.one:443'),
-      chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
-    },
-  ]
-  const oreStagingEndpoints = [
-    {
-      url: new URL('https://ore-staging.openrights.exchange/'),
-      chainId: 'a6df478d5593b4efb1ea20d13ba8a3efc1364ee0bf7dbd85d8d756831c0e3256',
-    },
-  ]
-  const ethEndpoint = {
-    url: new URL('https://main-rpc.linkpool.io/'),
-  }
-
-  const chainSettings = { unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' }
-
-  // const oreStagingPrivateKey_apporeid = toEosPrivateKey('xxxx')
-  // const moonlightorePrivateKey_apporeid = toEosPrivateKey('xxxx')
+  //
+  // Example funcions - uncomment and run
+  // You must first create an .env file in the root of the examples folder with the private keys and other secrets
+  // e.g. env.KYLIN_proppropprop_PRIVATE_KEY
+  // then from the command line inside this directory, run using ... npx ts-node --files ./thisfilename.ts
 
   // Create an EOS chain and call a few functions
   const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
@@ -66,149 +211,6 @@ const { env } = process
 
   const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
-
-  // Kylin createbridge - moonlighting
-  const createAccountOptions_createBridge = {
-    accountNamePrefix: 'ore',
-    creatorAccountName: toEosEntityName('oreidfunding'),
-    creatorPermission: toEosEntityName('active'),
-    newKeysOptions: {
-      newKeysPassword: '2233',
-      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
-    },
-    createEscrowOptions: {
-      contractName: toEosEntityName('createbridge'),
-      appName: 'appmoonlight',
-    },
-  }
-
-  // ore-staging native account
-  const createAccountOptions_OreNative = {
-    accountNamePrefix: 'ore',
-    creatorAccountName: 'app.oreid',
-    creatorPermission: 'active',
-    publicKeys: {
-      owner: 'EOS7rNR9AhgcqkmMAoUSHrjTXgxM4PnpGYDXhS3B4UW3jjZgBATXL',
-    },
-    newKeysOptions: {
-      newKeysPassword: '2233',
-      newKeysSalt: env.$ORE_TESTNET_PK_SALT_V0, // ore staging
-    },
-  }
-
-  // kylin virutal account - moonlighting
-  const createAccountOptions_virtualNested = {
-    accountNamePrefix: 'ore',
-    creatorAccountName: 'moonlightore',
-    creatorPermission: 'active',
-    newKeysOptions: {
-      newKeysPassword: '2233',
-      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
-    },
-    createEscrowOptions: {
-      contractName: 'createbridge',
-      appName: 'free',
-    },
-    createVirtualNestedOptions: {
-      parentAccountName: 'moonlightore',
-      rootPermission: toEosEntityName('mloreidusers'),
-      actionsToLink: [
-        {
-          contract: 'dsptestacc11',
-          action: 'addwhitelist',
-        },
-        {
-          contract: 'dsptestacc11',
-          action: 'claimhash',
-        },
-      ],
-    },
-  }
-
-  const createAccountOptions_EosNative = {
-    accountNamePrefix: 'ore',
-    // accountName: null,
-    creatorAccountName: 'proppropprop',
-    creatorPermission: 'active',
-    newKeysOptions: {
-      newKeysPassword: '2233',
-      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
-    },
-    publicKeys: {
-      owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
-      // active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
-    },
-    resourcesOptions: {
-      ramBytes: 4000,
-      stakeNetQuantity: toEosAsset(1, 'EOS'),
-      stakeCpuQuantity: toEosAsset(1, 'EOS'),
-      transfer: false,
-    },
-  }
-
-  // to recylce an account, specify an existing account with an active key of unusedAccountPublicKey
-  const createAccountOptions_OreRecycleNative = {
-    accountNamePrefix: 'ore',
-    creatorAccountName: 'ore1qadesjxm',
-    creatorPermission: 'owner',
-    newKeysOptions: {
-      newKeysPassword: '2233',
-      newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // ore staging
-    },
-  }
-
-  const resetPermissions = [
-    {
-      name: toEosEntityName('active'),
-      parent: toEosEntityName('owner'),
-      publicKey: toEosPublicKey(chainSettings.unusedAccountPublicKey),
-    },
-  ]
-
-  const permissionNewKeysOptions = {
-    newKeysPassword: '2233',
-    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
-  }
-
-  const accountNewPermissions = [
-    {
-      name: toEosEntityName('nwpermission'),
-      parent: toEosEntityName('active'),
-    },
-    {
-      name: toEosEntityName('n2permission'),
-      parent: toEosEntityName('active'),
-    },
-    {
-      name: toEosEntityName('n3permission'),
-      parent: toEosEntityName('nwpermission'),
-    },
-  ]
-
-  const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
-    {
-      permissionName: toEosEntityName('nwpermission'),
-    },
-    {
-      permissionName: toEosEntityName('n2permission'),
-    },
-    // {
-    //   permissionName: toEosEntityName('n3permission'),
-    // },
-  ]
-
-  const accountLinkPermissions: LinkPermissionsParams[] = [
-    {
-      permissionName: toEosEntityName('nwpermission'),
-      contract: toEosEntityName('createbridge'),
-      action: toEosEntityName('create'),
-    },
-    {
-      permissionName: toEosEntityName('n2permission'),
-      contract: toEosEntityName('createbridge'),
-      action: toEosEntityName('define'),
-    },
-  ]
 
   // -------------------- Create Account -----------------------
 
