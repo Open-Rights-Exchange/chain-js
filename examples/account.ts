@@ -89,11 +89,10 @@ const { env } = process
     creatorPermission: 'active',
     publicKeys: {
       owner: 'EOS7rNR9AhgcqkmMAoUSHrjTXgxM4PnpGYDXhS3B4UW3jjZgBATXL',
-      active: 'EOS5GaFNg8Vdmddg5NSLUvixsVJtMrWvEWUD2hqJz59wH2vcZTqxj',
     },
     newKeysOptions: {
       newKeysPassword: '2233',
-      newKeysSalt: env.ORE_TESTNET_PK_SALT_V0, // ore staging
+      newKeysSalt: env.$ORE_TESTNET_PK_SALT_V0, // ore staging
     },
   }
 
@@ -223,7 +222,12 @@ const { env } = process
   // const createAccount = kylin.new.createAccount()
   // await createAccount.composeTransaction(EosAccountType.Native, null, createAccountOptions_EosNative)
   // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // createAccount.transaction.sign([env.KYLIN_proppropprop_PRIVATE_KEY])
+  // console.log('createAccount response: ', await createAccount.transaction.send())
+
+  // -----> CreateAccount - create native ore-staging account
+  // const createAccount = oreStaging.new.createAccount()
+  // await createAccount.composeTransaction(EosAccountType.NativeOre, null, createAccountOptions_OreNative)
+  // await prepTransaction(oreStaging, createAccount.transaction, env.ORE_TESTNET_APPOREID_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create virtual nested account

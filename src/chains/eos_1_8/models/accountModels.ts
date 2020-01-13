@@ -4,18 +4,18 @@ import { EosPublicKey } from './cryptoModels'
 /** Type of account to craate */
 export enum EosAccountType {
   /** Native account for chain tyep (EOS, Ethereum, etc.) */
-  Native,
+  Native = 'Native',
   /** Native account on ORE chain */
-  NativeOre,
+  NativeOre = 'NativeOre',
   /** Native account created by calling a proxy (escrow) contract that actually creates the account */
-  CreateEscrow,
+  CreateEscrow = 'CreateEscrow',
   /** Virtual account - if supported by chain */
-  VirtualNested,
+  VirtualNested = 'VirtualNested',
 }
 
 export type EosCreateAccountOptions = {
   accountNamePrefix?: string // Default 'ore'
-  // newAccountName: EosEntityName,      // Optional - aka oreAccountName
+  newAccountName: EosEntityName // Optional - aka oreAccountName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName // Default = 'active' aka permission
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */

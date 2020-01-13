@@ -1,9 +1,9 @@
 /** Type of account to craate */
 export enum AccountType {
   /** Native account for chain tyep (EOS, Ethereum, etc.) */
-  Native,
+  Native = 'Native',
   /** Native account created by calling a proxy (escrow) contract that actually creates the account */
-  CreateEscrow,
+  CreateEscrow = 'CreateEscrow',
 }
 
 /** Brand signifiying a valid value - assigned by using toChainDate */
