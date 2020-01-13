@@ -96,7 +96,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // check that we have account resource options for a native account (not needed if we are recycling)
-    if (!recycleAccount && (accountType === EosAccountType.Native || accountType === EosAccountType.NativeOre)) {
+    if (!recycleAccount && accountType === EosAccountType.Native) {
       this.assertValidOptionsResources()
     }
 
