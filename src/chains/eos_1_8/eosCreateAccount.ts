@@ -205,7 +205,7 @@ export class EosCreateAccount implements CreateAccount {
       const { exists, account } = await this.doesAccountExist(accountName)
       if (exists) {
         // check if this account is an unused, recyclable account
-        canRecycle = this.canRecycleAccount(account)
+        canRecycle = await account.canBeRecycled
         if (!canRecycle) alreadyExists = exists
       }
     }
@@ -322,16 +322,6 @@ export class EosCreateAccount implements CreateAccount {
   */
   generateAccountNameString = (prefix: string = ''): EosEntityName => {
     return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
-  }
-
-  /** Whether an existing account is currently unused and can be reused
-   *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
-  private canRecycleAccount(account: EosAccount) {
-    const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
-    if (!account) return false
-    // check that the public active key matches the unused public key marker
-    const { publicKey } = account.permissions.find(perm => perm.name === toEosEntityName('active'))
-    return publicKey === unusedAccountPublicKey
   }
 
   private assertValidOptionPublicKeys() {

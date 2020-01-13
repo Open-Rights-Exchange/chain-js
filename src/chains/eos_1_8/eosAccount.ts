@@ -38,6 +38,16 @@ export class EosAccount implements Account {
     this._permHelper = new PermissionsHelper(this._chainState)
   }
 
+  /** Whether the account is currently unused and can be reused
+   *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
+  get canBeRecycled(): boolean {
+    const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
+    this.assertHasAccount()
+    // check that the public active key matches the unused public key marker
+    const { publicKey } = this.permissions.find(perm => perm.name === toEosEntityName('active'))
+    return publicKey === unusedAccountPublicKey
+  }
+
   /** Account name */
   get name() {
     return this._account?.account_name
