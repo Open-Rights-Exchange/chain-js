@@ -1,4 +1,6 @@
+/* eslint-disable quotes */
 import { encrypt, decrypt, deriveKey, decryptWithKey } from '../crypto'
+// import { rejects } from 'assert';
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
   let privateKey: string
@@ -27,35 +29,32 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       expect(decrypted.toString()).toMatch(privateKey)
     })
 
-    // it('does not return privateKey with a bad key', () => {
-    //   // const badPassword = 'BadPassword'
-    //   const key = deriveKey(walletPassword, salt)
-    //   expect(decryptWithKey(encrypted, key)).toThrow(expect.objectContaining({ message: 'gcm: tag doesn' }))
-    // })
-  })
-
-  describe('encrypt', () => {
-    it('returns an encrypted string', () => {
-      expect(encrypted).toEqual(expect.not.stringContaining(privateKey))
-    })
-  })
-
-  describe('decrypt', () => {
-    it('returns the original privateKey', () => {
-      const decrypted = decrypt(encrypted, walletPassword, salt)
-      expect(decrypted.toString()).toMatch(privateKey)
+    it('does not return privateKey with a bad key', () => {
+      const badPassword = 'BadPassword'
+      const key = deriveKey(badPassword, salt)
+      expect(() => decryptWithKey(encrypted, key)).toThrow(
+        expect.objectContaining({ message: "gcm: tag doesn't match" }),
+      )
     })
 
-    // it('does not return privateKey with a bad password', () => {
-    //   const badPassword = 'BadPassword'
-    //   const decrypted = decrypt(encrypted, badPassword, salt)
-    //   expect(decrypted.toString()).not.toMatch(privateKey)
-    // })
+    describe('encrypt', () => {
+      it('returns an encrypted string', () => {
+        expect(encrypted).toEqual(expect.not.stringContaining(privateKey))
+      })
+    })
 
-    // it('does not return privateKey with a bad salt', () => {
-    //   // const badPassword = 'BadPassword'
-    //   const decrypted = decrypt(encrypted, walletPassword, '')
-    //   expect(decrypted.toString()).not.toMatch(privateKey)
-    // })
+    describe('decrypt', () => {
+      it('returns the original privateKey', () => {
+        const decrypted = decrypt(encrypted, walletPassword, salt)
+        expect(decrypted.toString()).toMatch(privateKey)
+      })
+
+      it('does not return privateKey with a bad salt', () => {
+        const badSalt = ''
+        expect(() => decrypt(encrypted, walletPassword, badSalt)).toThrow(
+          expect.objectContaining({ message: "gcm: tag doesn't match" }),
+        )
+      })
+    })
   })
 })
