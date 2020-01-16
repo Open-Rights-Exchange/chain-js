@@ -21,11 +21,11 @@ export enum ChainAssetBrand {
 /** Parameters used to create an account on the chain */
 export type CreateAccountOptions = any
 /** Date string formatted corectly for the type of chain */
-export type ChainDate = string
+export type ChainDate = string & ChainDateBrand
 /** Name string formatted corectly for the type of chain */
-export type ChainEntityName = string
+export type ChainEntityName = string & ChainEntityNameBrand
 /** Token Asset string formatted corectly for the type of chain */
-export type ChainAsset = string
+export type ChainAsset = string & ChainAssetBrand
 
 /** Supported chain types */
 export enum ChainType {
@@ -51,13 +51,12 @@ export type ChainSettings = {
   fetch?: any
   monitorType?: ChainMonitorType
   monitorUrl?: URL
-  unusedAccountPublicKey: string
+  unusedAccountPublicKey?: string
 }
 
 /** Chain urls and related details used to connect to chain */
 export type ChainEndpoint = {
   url: URL
-  chainId?: string
   health?: number /** between 0 and 1 - 0 is not responding, 1 is very fast */
   settings?: ChainSettings
 }
