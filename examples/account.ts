@@ -4,7 +4,7 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
-import { EosPrivateKey, EosAccountType } from '../src/chains/eos_1_8/models'
+import { EosPrivateKey, EosAccountType, EosActionStruct } from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
 import { DeletePermissionsParams, LinkPermissionsParams } from '../src/chains/eos_1_8/eosPermissionsHelper'
@@ -41,13 +41,11 @@ export const prepTransaction = async (chain: Chain, transaction: any, key: strin
 export const kylinEndpoints = [
   {
     url: new URL('https:api-kylin.eosasia.one:443'),
-    chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
   },
 ]
 export const oreStagingEndpoints = [
   {
     url: new URL('https://ore-staging.openrights.exchange/'),
-    chainId: 'a6df478d5593b4efb1ea20d13ba8a3efc1364ee0bf7dbd85d8d756831c0e3256',
   },
 ]
 export const ethEndpoint = {
@@ -230,6 +228,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const createAccount = oreStaging.new.createAccount()
   // await createAccount.composeTransaction(EosAccountType.NativeOre, null, createAccountOptions_OreNative)
   // await prepTransaction(oreStaging, createAccount.transaction, env.ORE_TESTNET_APPOREID_PRIVATE_KEY)
+  // console.log(JSON.stringify(createAccount.transaction.toJson()))
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create virtual nested account
@@ -240,11 +239,13 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
 
   // // -----> Reset account to be recyclable
   // const recycleAccount = (await kylin.new.account('ore1qadesjxm')) as EosAccount
+
   // console.log('ore1qadesjxm account permissions:', recycleAccount.permissions)
   // const { generatedKeys, actions } = await recycleAccount.composeAddPermissionsActions(
   //   toEosEntityName('owner'),
   //   resetPermissions,
   // )
+  // console.log('generated Keys:', generatedKeys)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('response:', await transaction.send())
 
