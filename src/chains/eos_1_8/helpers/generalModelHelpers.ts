@@ -19,7 +19,7 @@ export function isValidEosEntityName(str: EosEntityName | string): str is EosEnt
   return str.match(/(^[a-z1-5.]{1,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)/i) !== null
 }
 
-export function toEosDate(date: Date | moment.Moment | EosDate): EosDate {
+export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDate {
   if (typeof date === 'string') {
     if (isValidEosDate(date)) {
       return date
@@ -34,6 +34,8 @@ export function toEosDate(date: Date | moment.Moment | EosDate): EosDate {
   throw new Error(`Should not get here. (invalid toDateStr provided): ${date}`)
 }
 
+/** Construct a well-formatted EOS Asset string *
+ *  e.g. '1.0000 EOS' */
 export function toEosAsset(amount: number, symbol: string): EosAsset {
   if (symbol.length !== 3) throw new Error('symbol must be 3 characters long')
   const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4 }).format(amount)
