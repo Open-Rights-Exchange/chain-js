@@ -78,30 +78,6 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  public crypto = {
-    decrypt: crypto.decrypt,
-    encrypt: crypto.encrypt,
-    getPublicKeyFromSignature: ethcrypto.getPublicKeyFromSignature,
-    isValidEncryptedData: crypto.isEncryptedDataString,
-    isValidPrivateKey: ethcrypto.isValidPrivateKey,
-    isValidPublicKey: ethcrypto.isValidPublicKey,
-    generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
-    sign: ethcrypto.sign,
-    verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
-  }
-
-  /** Chain helper functions */
-  public helpers = {
-    isValidEntityName: notImplemented,
-    isValidAsset: notImplemented,
-    isValidDate: notImplemented,
-    toEntityName: notImplemented,
-    toAsset: notImplemented,
-    toDate: notImplemented,
-    toPublicKey: notImplemented,
-    toPrivateKey: notImplemented,
-  }
-
   private newAccount = (options?: any): any => {
     notImplemented()
     return null
@@ -122,6 +98,44 @@ class ChainEthereumV1 implements Chain {
     createAccount: this.newCreateAccount,
     transaction: this.newTransaction,
   }
+
+  // Chain Crypto Functions
+
+  decrypt = crypto.decrypt
+
+  encrypt = crypto.encrypt
+
+  getPublicKeyFromSignature = ethcrypto.getPublicKeyFromSignature
+
+  isValidEncryptedData = crypto.isEncryptedDataString
+
+  isValidPrivateKey = ethcrypto.isValidPrivateKey
+
+  isValidPublicKey = ethcrypto.isValidPublicKey
+
+  generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
+
+  sign = ethcrypto.sign
+
+  verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
+
+  // Chain Helper Functions
+
+  isValidEntityName = notImplemented
+
+  isValidAsset = notImplemented
+
+  isValidDate = notImplemented
+
+  toChainEntityName = notImplemented
+
+  toChainAsset = notImplemented
+
+  toChainDate = notImplemented
+
+  toPublicKey = notImplemented
+
+  toPrivateKey = notImplemented
 
   public mapChainError = (error: Error): ChainError => {
     notImplemented()

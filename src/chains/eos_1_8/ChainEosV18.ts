@@ -128,29 +128,44 @@ class ChainEosV18 implements Chain {
   }
 
   /** Chain crytography functions */
-  public crypto = {
-    decrypt: crypto.decrypt.bind(this),
-    encrypt: crypto.encrypt.bind(this),
-    getPublicKeyFromSignature: eoscrypto.getPublicKeyFromSignature.bind(this),
-    isValidEncryptedData: crypto.isEncryptedDataString.bind(this),
-    isValidPrivateKey: isValidEosPrivateKey.bind(this),
-    isValidPublicKey: isValidEosPublicKey.bind(this),
-    sign: eoscrypto.sign.bind(this),
-    generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys.bind(this),
-    verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
-  }
+
+  decrypt = crypto.decrypt
+
+  encrypt = crypto.encrypt
+
+  getPublicKeyFromSignature = eoscrypto.getPublicKeyFromSignature
+
+  isValidEncryptedData = crypto.isEncryptedDataString
+
+  isValidPrivateKey = isValidEosPrivateKey
+
+  isValidPublicKey = isValidEosPublicKey
+
+  sign = eoscrypto.sign
+
+  generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
+
+  verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
 
   /** Chain helper functions */
-  public helpers = {
-    isValidEntityName: isValidEosEntityName.bind(this),
-    isValidAsset: isValidEosAsset.bind(this),
-    isValidDate: isValidEosDate.bind(this),
-    toEntityName: toEosEntityName.bind(this),
-    toAsset: toEosAsset.bind(this),
-    toDate: toEosDate.bind(this),
-    toPublicKey: toEosPublicKey.bind(this),
-    toPrivateKey: toEosPrivateKey.bind(this),
-  }
+
+  isValidEntityName = isValidEosEntityName
+
+  isValidAsset = isValidEosAsset
+
+  isValidDate = isValidEosDate
+
+  toEntityName = toEosEntityName
+
+  toChainAsset = toEosAsset
+
+  toChainEntityName = toEosEntityName
+
+  toChainDate = toEosDate
+
+  toPublicKey = toEosPublicKey
+
+  toPrivateKey = toEosPrivateKey
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this

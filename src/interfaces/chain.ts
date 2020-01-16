@@ -2,7 +2,7 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
-import { ChainAsset, ChainDate, ChainEntityName, ChainInfo, ChainType } from '../models'
+import { ChainAsset, ChainDate, ChainEntityName, ChainInfo, ChainType, PublicKey, PrivateKey } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
@@ -35,46 +35,6 @@ export interface Chain {
     showPayer?: boolean,
     keyType?: string,
   ): Promise<any>
-  /** Chain cryptography functions */
-  crypto: {
-    /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
-     * Expects the encrypted value to be a stringified JSON object */
-    decrypt(encrypted: string, password: string, salt: string): string
-    /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
-     * The returned, encrypted value is a stringified JSON object */
-    encrypt(unencrypted: string, password: string, salt: string): string
-    /** Returns a public key given a signature and the original data was signed */
-    getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): string
-    /** Verifies that the value is a valid, stringified JSON ciphertext */
-    isValidEncryptedData(value: string): boolean
-    /** Generate a signature given some data and a private key */
-    isValidPrivateKey(value: string): boolean
-    /** Verifies that the value is a valid public key for the chain */
-    isValidPublicKey(value: string): boolean
-    /** Generate a signature given some data and a private key */
-    sign(data: string | Buffer, privateKey: string, encoding: string): string
-    /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-    verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
-  }
-  /** Helper functions */
-  helpers: {
-    /** Verifies that the value is a valid chain entity name (e.g. an account name) */
-    isValidEntityName(value: string): boolean
-    /** Verifies that the value is a valid chain asset string */
-    isValidAsset(value: string): boolean
-    /** Verifies that the value is a valid chain date */
-    isValidDate(value: string): boolean
-    /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
-    toEntityName(value: string): ChainEntityName
-    /** Ensures that the value comforms to a well-formed chain asset string */
-    toAsset(amount: number, symbol: string): ChainAsset
-    /** Ensures that the value comforms to a well-formed chain date string */
-    toDate(value: string): ChainDate
-    /** Ensures that the value comforms to a well-formed public Key */
-    toPublicKey(value: string): string
-    /** Ensures that the value comforms to a well-formed public Key */
-    toPrivateKey(value: string): string
-  }
   /** Returns a new instance of an object */
   new: {
     /** Returns a new chain Account object
@@ -86,6 +46,46 @@ export interface Chain {
     /** Return a chain Transaction object used to compose and send transactions */
     transaction(options?: any): Transaction
   }
+
+  // Chain Crypto functions
+
+  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+   * Expects the encrypted value to be a stringified JSON object */
+  decrypt(encrypted: string, password: string, salt: string): string
+  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+   * The returned, encrypted value is a stringified JSON object */
+  encrypt(unencrypted: string, password: string, salt: string): string
+  /** Returns a public key given a signature and the original data was signed */
+  getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): string
+  /** Verifies that the value is a valid, stringified JSON ciphertext */
+  isValidEncryptedData(value: string): boolean
+  /** Generate a signature given some data and a private key */
+  isValidPrivateKey(value: string): boolean
+  /** Verifies that the value is a valid public key for the chain */
+  isValidPublicKey(value: string): boolean
+  /** Generate a signature given some data and a private key */
+  sign(data: string | Buffer, privateKey: string, encoding: string): string
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+  verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
+
+  // Chain Helper functions
+
+  /** Verifies that the value is a valid chain entity name (e.g. an account name) */
+  isValidEntityName(value: string): boolean
+  /** Verifies that the value is a valid chain asset string */
+  isValidAsset(value: string): boolean
+  /** Verifies that the value is a valid chain date */
+  isValidDate(value: string): boolean
+  /** Ensures that the value comforms to a well-formed chain asset string */
+  toChainAsset(amount: number, symbol: string): ChainAsset
+  /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
+  toChainEntityName(value: string): ChainEntityName
+  /** Ensures that the value comforms to a well-formed chain date string */
+  toChainDate(value: string): ChainDate
+  /** Ensures that the value comforms to a well-formed public Key */
+  toPublicKey(value: string): PublicKey
+  /** Ensures that the value comforms to a well-formed public Key */
+  toPrivateKey(value: string): PrivateKey
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError
