@@ -56,7 +56,7 @@ export class EosAccount implements Account {
   /** Public Key(s) associated with the account */
   get publicKeys(): EosPublicKey[] {
     this.assertHasAccount()
-    return this.permissions.map(p => p.publicKey)
+    return this.permissions?.map(p => p.publicKey)
   }
 
   /** Tries to retrieve the account from the chain
@@ -123,7 +123,7 @@ export class EosAccount implements Account {
   /** Return permission details if account has it attached 
       Or null otherwise */
   hasPermission(permissionName: EosEntityName): EosPermissionSimplified {
-    return this.permissions.find(p => p.name === permissionName) || null
+    return this.permissions?.find(p => p.name === permissionName) || null
   }
 
   /** Both new password and salt must be provided if any permissions are missing public keys */

@@ -39,7 +39,7 @@ export interface Transaction {
   addAction(action: any, asFirstAction?: boolean): void
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignature(signature: string): void
-  /** Whether there is an attached signature for the publicKey for the authoization (e.g. account/permission)
+  /** Whether there is an attached signature for the publicKey for the authorization (e.g. account/permission)
    *  May need to call chain (async) to fetch publicKey(s) for authorization(s) */
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
