@@ -2,12 +2,20 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
-import { ChainAsset, ChainDate, ChainEntityName, ChainInfo, ChainType, PublicKey, PrivateKey } from '../models'
+import {
+  ChainAsset,
+  ChainDate,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  PublicKey,
+  PrivateKey,
+  Signature,
+  EncryptedDataString,
+} from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
-  // Enum list of chain actions that can be generated using composeAction()
-  ChainActionType: any
   /** Return unique chain ID string */
   chainId: string
   /** Retrieve lastest chain info including head block number and time */
@@ -54,9 +62,9 @@ export interface Chain {
   decrypt(encrypted: string, password: string, salt: string): string
   /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt(unencrypted: string, password: string, salt: string): string
+  encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString
   /** Returns a public key given a signature and the original data was signed */
-  getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): string
+  getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */
   isValidEncryptedData(value: string): boolean
   /** Generate a signature given some data and a private key */
@@ -64,7 +72,7 @@ export interface Chain {
   /** Verifies that the value is a valid public key for the chain */
   isValidPublicKey(value: string): boolean
   /** Generate a signature given some data and a private key */
-  sign(data: string | Buffer, privateKey: string, encoding: string): string
+  sign(data: string | Buffer, privateKey: string, encoding: string): Signature
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
 
