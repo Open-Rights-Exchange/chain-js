@@ -9,12 +9,13 @@ import {
   EosGeneratedPermissionKeys,
 } from './models'
 import { EosChainState } from './eosChainState'
-import { composeAction, ChainActionType } from './eosCompose'
+import { composeAction } from './eosCompose'
 import { throwNewError } from '../../errors'
 import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
 import { toEosEntityName } from './helpers'
 import { isEosPermissionStruct } from './helpers/eosStructuresHelpers'
+import { ChainActionType } from '../../models'
 
 // OREJS Ported functions
 //   addPermission() {} // addPermission

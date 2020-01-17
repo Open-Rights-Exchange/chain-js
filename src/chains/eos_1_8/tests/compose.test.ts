@@ -1,5 +1,6 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
-import { ChainActionType, composeAction } from '../eosCompose'
+import { composeAction } from '../eosCompose'
+import { ChainActionType } from '../../../models'
 
 describe('Compose Chain Actions', () => {
   // sets fetchMock to throw an error on the next call to fetch (jsonRpc.get_abi calls fetch and triggers the error to be thrown)

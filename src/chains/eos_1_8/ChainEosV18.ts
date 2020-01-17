@@ -1,12 +1,12 @@
 import { RpcError } from 'eosjs'
-import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
+import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as eoscrypto from './eosCrypto'
 import { EosChainState } from './eosChainState'
 import { mapChainError } from './eosErrors'
-import { composeAction, ChainActionType } from './eosCompose'
+import { EosChainActionType, composeAction } from './eosCompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
 import { EosAccount } from './eosAccount'
@@ -45,9 +45,6 @@ class ChainEosV18 implements Chain {
   public connect(): Promise<void> {
     return this._chainState.connect()
   }
-
-  /** Enum of contract actions supported by chain */
-  public ChainActionType = ChainActionType
 
   /** Return unique chain ID string */
   public get chainId(): string {
@@ -89,7 +86,7 @@ class ChainEosV18 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType, args: any): any => {
+  public composeAction = (actionType: ChainActionType | EosChainActionType, args: any): any => {
     return composeAction(actionType, args)
   }
 

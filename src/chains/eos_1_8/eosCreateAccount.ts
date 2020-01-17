@@ -28,8 +28,9 @@ import {
 } from './eosConstants'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty, isANumber } from '../../helpers'
-import { composeAction, ChainActionType } from './eosCompose'
+import { composeAction } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
+import { ChainActionType } from '../../models'
 
 // OREJS Ported functions
 //   createAccount() {} // createOreAccount

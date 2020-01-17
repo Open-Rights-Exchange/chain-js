@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
+import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as ethcrypto from './ethCrypto'
-import { composeAction, ChainActionType } from './ethCompose'
+import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 
@@ -29,8 +29,6 @@ class ChainEthereumV1 implements Chain {
     this._chainState = new EthereumChainState(endpoints, settings)
   }
 
-  public ChainActionType = ChainActionType
-
   public isConnected = this._chainState.isConnected
 
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
@@ -53,7 +51,7 @@ class ChainEthereumV1 implements Chain {
     return this._chainState.chainInfo
   }
 
-  public composeAction = (actionType: ChainActionType, args: any): any => {
+  public composeAction = (actionType: ChainActionType | EthereumChainActionType, args: any): any => {
     return composeAction(actionType, args)
   }
 

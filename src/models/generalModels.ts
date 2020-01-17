@@ -68,3 +68,25 @@ export type ChainInfo = {
   version: string
   nativeInfo: any
 }
+
+export enum ChainActionType {
+  AccountCreate = 'AccountCreate',
+  AccountDeleteAuth = 'AccountDeleteAuth',
+  AccountLinkAuth = 'AccountLinkAuth',
+  AccountUnlinkAuth = 'AccountUnlinkAuth',
+  AccountUpdateAuth = 'AccountUpdateAuth',
+  CreateEscrowCreate = 'CreateEscrowCreate',
+  CreateEscrowDefine = 'CreateEscrowDefine',
+  CreateEscrowInit = 'CreateEscrowInit',
+  CreateEscrowReclaim = 'CreateEscrowReclaim',
+  CreateEscrowTransfer = 'CreateEscrowTransfer',
+  CreateEscrowWhitelist = 'CreateEscrowWhitelist',
+  OreCreateAccount = 'OreCreateAccount',
+  OreUpsertRight = 'OreUpsertRight',
+  TokenApprove = 'TokenApprove',
+  TokenCreate = 'TokenCreate',
+  TokenIssue = 'TokenIssue',
+  TokenRetire = 'TokenRetire',
+  TokenTransfer = 'TokenTransfer',
+  TokenTransferFrom = 'TokenTransferFrom',
+}

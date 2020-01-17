@@ -5,12 +5,11 @@
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainEndpoint, ChainSettings, AccountType } from '../src/models'
+import { ChainActionType, ChainEndpoint, ChainSettings, AccountType } from '../src/models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../src/chains/eos_1_8/helpers'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { EosTransaction } from '../src/chains/eos_1_8/eosTransaction'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
-import { ChainActionType } from '../src/chains/eos_1_8/eosCompose'
 
 require('dotenv').config()
 
