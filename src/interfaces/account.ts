@@ -1,15 +1,21 @@
+import { ChainEntityName, PublicKey } from '../models'
+
 /**
  * The Account interface declares the operations that all concrete (chain)account classes must implement
  */
 export interface Account {
   /** Account name */
-  name: any
+  name: ChainEntityName
   /** Public Key(s) associated with the account */
-  publicKeys: string[]
+  publicKeys: PublicKey[]
   /** Returns the underlying raw data from the chain's account structure */
   value: any
 
-  /** Sign the transaction body with private key(s) and add to attached signatures */
+  /** Whether the account is currently unused and can be reused
+   *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
+  canBeRecycled: boolean
+  /** Tries to retrieve the account from the chain
+   *  Returns { exists:true|false, account } */
   doesAccountExist(accountName: string): Promise<{ exists: boolean; account: Account }>
   /** Retrieves account value from chain and populates this account object */
   fetchFromChain(accountName?: string): Promise<void>

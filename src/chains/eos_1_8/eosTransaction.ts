@@ -1,6 +1,7 @@
+import { isArray } from 'util'
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosChainState } from './eosChainState'
-import { Authorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
+import { EosAuthorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK, DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS } from './eosConstants'
@@ -35,7 +36,7 @@ export class EosTransaction implements Transaction {
 
   private _signBuffer: Buffer
 
-  private _requiredAuthorizations: Authorization[]
+  private _requiredAuthorizations: EosAuthorization[]
 
   private _isValidated: boolean
 
@@ -151,6 +152,9 @@ export class EosTransaction implements Transaction {
   /** Sets the Array of actions */
   public set actions(actions: EosActionStruct[]) {
     this.assertNoSignatures()
+    if (isNullOrEmpty(actions) || !isArray(actions)) {
+      throwNewError('actions must be an array and have at least one value')
+    }
     this._actions = actions
     this._isValidated = false
   }
@@ -261,7 +265,7 @@ export class EosTransaction implements Transaction {
 
   /** An array of authorizations (e.g. account/permission) that do not have an attached signature
    *  Retuns null if no signatures are missing */
-  public get missingSignatures(): Authorization[] {
+  public get missingSignatures(): EosAuthorization[] {
     this.assertIsValidated()
     const missing = this._requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(auth.publicKey))
     return isNullOrEmpty(missing) ? null : missing // if no values, return null instead of empty array
@@ -278,7 +282,7 @@ export class EosTransaction implements Transaction {
 
   /** Whether there is an attached signature for the publicKey for the authoization (e.g. account/permission)
    *  May need to call chain (async) to fetch publicKey(s) for authorization(s) */
-  public async hasSignatureForAuthorization(authorization: Authorization): Promise<boolean> {
+  public async hasSignatureForAuthorization(authorization: EosAuthorization): Promise<boolean> {
     const { account, permission } = authorization
     let { publicKey } = authorization
     if (!authorization.publicKey) {
@@ -321,8 +325,8 @@ export class EosTransaction implements Transaction {
 
   /** Collect unique set of account/permission for all actions in transaction
    * Retrieves public keys from the chain by retrieving account(s) when needed */
-  private async fetchAuthorizationsRequired(): Promise<Authorization[]> {
-    const requiredAuths = new Set<Authorization>()
+  private async fetchAuthorizationsRequired(): Promise<EosAuthorization[]> {
+    const requiredAuths = new Set<EosAuthorization>()
     const actions = this._actions
     if (actions) {
       actions
@@ -335,7 +339,7 @@ export class EosTransaction implements Transaction {
         })
     }
     // get the unique set of account/permissions
-    const requiredAuthsArray = getUniqueValues<Authorization>(Array.from(requiredAuths))
+    const requiredAuthsArray = getUniqueValues<EosAuthorization>(Array.from(requiredAuths))
     // attach public keys for each account/permission - fetches accounts from chain where necessary
     return this.addPublicKeysToAuths(requiredAuthsArray)
   }
@@ -388,8 +392,8 @@ export class EosTransaction implements Transaction {
   /** Fetches public keys (from the chain) for each account/permission pair
    *   Fetches accounts from the chain (if not already cached)
    */
-  private async addPublicKeysToAuths(auths: Authorization[]) {
-    const returnedAuth: Authorization[] = []
+  private async addPublicKeysToAuths(auths: EosAuthorization[]) {
+    const returnedAuth: EosAuthorization[] = []
 
     const keysToGet = auths.map(async auth => {
       const publicKey = await this.getPublicKeyForAuthorization(auth.account, auth.permission)

@@ -1,30 +1,14 @@
-import { EncryptedDataString } from '../../../crypto'
+import { EncryptedDataString, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
 
-export enum EosPublicKeyBrand {
-  _ = '',
-}
-export enum EosPrivateKeyBrand {
-  _ = '',
-}
-export enum EosSignatureBrand {
-  _ = '',
-}
+/** a public key string - formatted correctly for EOS */
+export type EosPublicKey = string & PublicKeyBrand
+/** a private key string - formatted correctly for EOS */
+export type EosPrivateKey = string & PrivateKeyBrand
+/** a signature string - formatted correcly for EOS */
+export type EosSignature = string & SignatureBrand
 
-export type EosPublicKey = string & EosPublicKeyBrand
-export type EosPrivateKey = string & EosPrivateKeyBrand
-export type EosSignature = string & EosSignatureBrand
-
-export type KeyPair = {
-  public: EosPublicKey
-  private: EosPrivateKey
-}
-
-export type KeyPairEncrypted = {
-  public: EosPublicKey
-  privateEncrypted: EncryptedDataString
-}
-
-export type AccountKeysStruct = {
+/** An object containing public and private keys for owner and active permissions */
+export type EosAccountKeysStruct = {
   publicKeys: {
     owner: EosPublicKey
     active: EosPublicKey

@@ -1,10 +1,5 @@
 import sjcl from 'sjcl'
-
-enum EncryptedDataStringBrand {
-  _ = '',
-}
-
-export type EncryptedDataString = string & EncryptedDataStringBrand
+import { EncryptedDataString } from './models'
 
 export function stringToBitArray(value: string): sjcl.BitArray {
   return sjcl.codec.base64.toBits(value)
@@ -12,6 +7,20 @@ export function stringToBitArray(value: string): sjcl.BitArray {
 
 export function bitArrayToString(value: sjcl.BitArray): string {
   return sjcl.codec.base64.fromBits(value)
+}
+
+// casting and type conversion
+
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^"\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}"$/i) !== null
+}
+
+export function toEncryptedDataString(data: string): EncryptedDataString {
+  if (isEncryptedDataString(data)) {
+    return data
+  }
+  throw new Error(`Not valid encrypted data string:${data}.`)
 }
 
 // Derive the key used for encryption/decryption
@@ -46,20 +55,6 @@ export function encryptWithKey(unencrypted: string, derivedKey: string): sjcl.Sj
 }
 
 // Encrypts a string using a password and salt
-export function encrypt(unencrypted: string, password: string, salt: string): string {
-  return JSON.stringify(encryptWithKey(unencrypted, deriveKey(password, salt)))
-}
-
-// casting and type conversion
-
-export function isEncryptedDataString(value: string): value is EncryptedDataString {
-  // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^"\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}"$/i) !== null
-}
-
-export function toEncryptedDataString(data: string): EncryptedDataString {
-  if (isEncryptedDataString(data)) {
-    return data
-  }
-  throw new Error(`Not valid encrypted data string:${data}.`)
+export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
+  return toEncryptedDataString(JSON.stringify(encryptWithKey(unencrypted, deriveKey(password, salt))))
 }

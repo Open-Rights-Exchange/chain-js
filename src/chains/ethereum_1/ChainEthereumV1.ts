@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
+import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as ethcrypto from './ethCrypto'
-import { composeAction, ChainActionType } from './ethCompose'
+import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
+
+const notImplemented = () => {
+  throw new Error('Not Implemented')
+}
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -24,8 +28,6 @@ class ChainEthereumV1 implements Chain {
     this._settings = settings
     this._chainState = new EthereumChainState(endpoints, settings)
   }
-
-  public ChainActionType = ChainActionType
 
   public isConnected = this._chainState.isConnected
 
@@ -49,7 +51,7 @@ class ChainEthereumV1 implements Chain {
     return this._chainState.chainInfo
   }
 
-  public composeAction = (actionType: ChainActionType, args: any): any => {
+  public composeAction = (actionType: ChainActionType | EthereumChainActionType, args: any): any => {
     return composeAction(actionType, args)
   }
 
@@ -74,27 +76,18 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  public crypto = {
-    decrypt: crypto.decrypt,
-    encrypt: crypto.encrypt,
-    getPublicKeyFromSignature: ethcrypto.getPublicKeyFromSignature,
-    isValidEncryptedData: crypto.isEncryptedDataString,
-    isValidPrivateKey: ethcrypto.isValidPrivateKey,
-    isValidPublicKey: ethcrypto.isValidPublicKey,
-    generateNewAccountKeysWithEncryptedPrivateKeys: ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys,
-    sign: ethcrypto.sign,
-    verifySignedWithPublicKey: ethcrypto.verifySignedWithPublicKey,
-  }
-
   private newAccount = (options?: any): any => {
+    notImplemented()
     return null
   }
 
   private newCreateAccount = (options?: any): any => {
+    notImplemented()
     return null
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
+    notImplemented()
     return null
   }
 
@@ -104,8 +97,46 @@ class ChainEthereumV1 implements Chain {
     transaction: this.newTransaction,
   }
 
+  // Chain Crypto Functions
+
+  decrypt = crypto.decrypt
+
+  encrypt = crypto.encrypt
+
+  getPublicKeyFromSignature = ethcrypto.getPublicKeyFromSignature
+
+  isValidEncryptedData = crypto.isEncryptedDataString
+
+  isValidPrivateKey = ethcrypto.isValidPrivateKey
+
+  isValidPublicKey = ethcrypto.isValidPublicKey
+
+  generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
+
+  sign = ethcrypto.sign
+
+  verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
+
+  // Chain Helper Functions
+
+  isValidEntityName = notImplemented
+
+  isValidAsset = notImplemented
+
+  isValidDate = notImplemented
+
+  toChainEntityName = notImplemented
+
+  toChainAsset = notImplemented
+
+  toChainDate = notImplemented
+
+  toPublicKey = notImplemented
+
+  toPrivateKey = notImplemented
+
   public mapChainError = (error: Error): ChainError => {
-    throwNewError('Not Implemented')
+    notImplemented()
     return new ChainError(null, null, null)
   }
 }

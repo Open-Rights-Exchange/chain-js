@@ -1,0 +1,36 @@
+{
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.implicitProjectConfig.experimentalDecorators": true,
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#188262",
+    "titleBar.inactiveBackground": "#188262",
+    "titleBar.activeBackground": "#188262"
+  },
+  "git.autofetch": true,
+  "window.zoomLevel": 1,
+  "editor.tabSize": 2,
+  "code-runner.executorMap": {
+      "javascript": "node",
+      "php": "C:\\php\\php.exe",
+      "python": "python",
+      "perl": "perl",
+      "ruby": "C:\\Ruby23-x64\\bin\\ruby.exe",
+      "go": "go run",
+      "html": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\"",
+      "java": "cd $dir && javac $fileName && java $fileNameWithoutExt",
+      "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.validate": [
+      "javascript",
+      "typescript",
+  ],
+  "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+}

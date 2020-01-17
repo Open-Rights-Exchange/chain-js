@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { PublicKey, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 
-export function sign(data: string | Buffer, privateKey: string): string {
+export function sign(data: string | Buffer, privateKey: string): Signature {
   throwNewError('Not implemented')
-  return 'string'
+  return null
 }
 
 export function isValidPrivateKey(value: string): boolean {
@@ -16,14 +17,18 @@ export function isValidPublicKey(value: string): boolean {
   return false
 }
 
-export function getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): string {
+export function getPublicKeyFromSignature(
+  signature: string | Buffer,
+  data: string | Buffer,
+  encoding: string,
+): PublicKey {
   throwNewError('Not implemented')
-  return 'string'
+  return null
 }
 
 export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string, overrideKeys: any): any {
   throwNewError('Not implemented')
-  return {}
+  return null
 }
 
 export function verifySignedWithPublicKey(
@@ -31,5 +36,6 @@ export function verifySignedWithPublicKey(
   data: string | Buffer,
   encoding: string,
 ): boolean {
+  throwNewError('Not implemented')
   return false
 }

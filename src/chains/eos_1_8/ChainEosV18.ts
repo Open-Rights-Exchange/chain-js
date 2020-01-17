@@ -1,16 +1,27 @@
 import { RpcError } from 'eosjs'
-import { ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
-import { Chain, CreateAccount } from '../../interfaces'
+import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
+import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
 import * as eoscrypto from './eosCrypto'
 import { EosChainState } from './eosChainState'
 import { mapChainError } from './eosErrors'
-import { composeAction, ChainActionType } from './eosCompose'
+import { EosChainActionType, composeAction } from './eosCompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
 import { EosAccount } from './eosAccount'
-import { isValidEosPrivateKey, isValidEosPublicKey } from './helpers'
+import {
+  isValidEosPrivateKey,
+  isValidEosPublicKey,
+  toEosPublicKey,
+  toEosPrivateKey,
+  isValidEosEntityName,
+  isValidEosAsset,
+  isValidEosDate,
+  toEosEntityName,
+  toEosAsset,
+  toEosDate,
+} from './helpers'
 import { EosEntityName } from './models'
 
 /** Provides support for the EOS blockchain
@@ -34,9 +45,6 @@ class ChainEosV18 implements Chain {
   public connect(): Promise<void> {
     return this._chainState.connect()
   }
-
-  /** Enum of contract actions supported by chain */
-  public ChainActionType = ChainActionType
 
   /** Return unique chain ID string */
   public get chainId(): string {
@@ -78,21 +86,23 @@ class ChainEosV18 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType, args: any): any => {
+  public composeAction = (actionType: ChainActionType | EosChainActionType, args: any): any => {
     return composeAction(actionType, args)
   }
 
   /** Returns a chain Account class
    * Note: Does NOT create a new account - to create an account, use new.createAccount */
-  private async newAccount(accountName: EosEntityName): Promise<EosAccount> {
+  private async newAccount(accountName?: EosEntityName): Promise<EosAccount> {
     this.assertIsConnected()
     const account = new EosAccount(this._chainState)
-    await account.fetchFromChain(accountName)
+    if (accountName) {
+      await account.fetchFromChain(accountName)
+    }
     return account
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): CreateAccount {
+  private newCreateAccount(): EosCreateAccount {
     this.assertIsConnected()
     return new EosCreateAccount(this._chainState)
   }
@@ -104,23 +114,55 @@ class ChainEosV18 implements Chain {
   }
 
   public new = {
+    /** Returns a new chain Account object
+     * If an account name is provided, it will be fetched from the chain and loaded into the returned account object
+     * Note: Does NOT create a new account - to create an account, use new.createAccount */
     account: this.newAccount.bind(this),
+    /** Return a new CreateAccount object used to help with creating a new chain account */
     createAccount: this.newCreateAccount.bind(this),
+    /** Return a chain Transaction object used to compose and send transactions */
     transaction: this.newTransaction.bind(this),
   }
 
   /** Chain crytography functions */
-  public crypto = {
-    decrypt: crypto.decrypt.bind(this),
-    encrypt: crypto.encrypt.bind(this),
-    getPublicKeyFromSignature: eoscrypto.getPublicKeyFromSignature.bind(this),
-    isValidEncryptedData: crypto.isEncryptedDataString.bind(this),
-    isValidPrivateKey: isValidEosPrivateKey.bind(this),
-    isValidPublicKey: isValidEosPublicKey.bind(this),
-    sign: eoscrypto.sign.bind(this),
-    generateNewAccountKeysWithEncryptedPrivateKeys: eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys.bind(this),
-    verifySignedWithPublicKey: eoscrypto.verifySignedWithPublicKey.bind(this),
-  }
+
+  decrypt = crypto.decrypt
+
+  encrypt = crypto.encrypt
+
+  getPublicKeyFromSignature = eoscrypto.getPublicKeyFromSignature
+
+  isValidEncryptedData = crypto.isEncryptedDataString
+
+  isValidPrivateKey = isValidEosPrivateKey
+
+  isValidPublicKey = isValidEosPublicKey
+
+  sign = eoscrypto.sign
+
+  generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
+
+  verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
+
+  /** Chain helper functions */
+
+  isValidEntityName = isValidEosEntityName
+
+  isValidAsset = isValidEosAsset
+
+  isValidDate = isValidEosDate
+
+  toEntityName = toEosEntityName
+
+  toChainAsset = toEosAsset
+
+  toChainEntityName = toEosEntityName
+
+  toChainDate = toEosDate
+
+  toPublicKey = toEosPublicKey
+
+  toPrivateKey = toEosPrivateKey
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this

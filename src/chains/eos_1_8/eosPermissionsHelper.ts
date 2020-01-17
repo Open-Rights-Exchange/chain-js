@@ -5,16 +5,17 @@ import {
   EosPublicKey,
   EosActionStruct,
   EosPermissionSimplified,
-  GenerateMissingKeysParams,
-  GeneratedPermissionKeys,
+  EosGenerateMissingKeysParams,
+  EosGeneratedPermissionKeys,
 } from './models'
 import { EosChainState } from './eosChainState'
-import { composeAction, ChainActionType } from './eosCompose'
+import { composeAction } from './eosCompose'
 import { throwNewError } from '../../errors'
 import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
 import { toEosEntityName } from './helpers'
 import { isEosPermissionStruct } from './helpers/eosStructuresHelpers'
+import { ChainActionType } from '../../models'
 
 // OREJS Ported functions
 //   addPermission() {} // addPermission
@@ -266,9 +267,9 @@ export class PermissionsHelper {
   /** generate a keypair for any new permissions missing a public key */
   static generateMissingKeysForPermissionsToAdd = async (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
-    params: GenerateMissingKeysParams,
+    params: EosGenerateMissingKeysParams,
   ) => {
-    const generatedKeys: GeneratedPermissionKeys[] = []
+    const generatedKeys: EosGeneratedPermissionKeys[] = []
     const { newKeysPassword, newKeysSalt } = params || {}
 
     if (isNullOrEmpty(permissionsToAdd)) {

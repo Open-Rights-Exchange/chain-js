@@ -15,6 +15,9 @@ export class EthAccount implements Account {
     this._chainState = chainState
   }
 
+  /** Whether the account is currently unused and can be reused - not supported in Ethereum */
+  canBeRecycled = false
+
   /** Account name */
   get name() {
     return this._account?.account_name

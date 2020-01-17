@@ -1,3 +1,5 @@
+import { ChainActionType } from '../../models'
+
 import { action as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { action as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
 import { action as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
@@ -17,6 +19,8 @@ import { action as TokenIssueTemplate } from './templates/chainActions/token_iss
 import { action as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { action as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { action as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+
+export const enum EosChainActionType {}
 
 // map a key name to a function that returns an object
 export const ChainAction: { [key: string]: (args: any) => any } = {
@@ -41,29 +45,7 @@ export const ChainAction: { [key: string]: (args: any) => any } = {
   TokenTransferFrom: TokenTransferFromTemplate,
 }
 
-export enum ChainActionType {
-  AccountCreate = 'AccountCreate',
-  AccountDeleteAuth = 'AccountDeleteAuth',
-  AccountLinkAuth = 'AccountLinkAuth',
-  AccountUnlinkAuth = 'AccountUnlinkAuth',
-  AccountUpdateAuth = 'AccountUpdateAuth',
-  CreateEscrowCreate = 'CreateEscrowCreate',
-  CreateEscrowDefine = 'CreateEscrowDefine',
-  CreateEscrowInit = 'CreateEscrowInit',
-  CreateEscrowReclaim = 'CreateEscrowReclaim',
-  CreateEscrowTransfer = 'CreateEscrowTransfer',
-  CreateEscrowWhitelist = 'CreateEscrowWhitelist',
-  OreCreateAccount = 'OreCreateAccount',
-  OreUpsertRight = 'OreUpsertRight',
-  TokenApprove = 'TokenApprove',
-  TokenCreate = 'TokenCreate',
-  TokenIssue = 'TokenIssue',
-  TokenRetire = 'TokenRetire',
-  TokenTransfer = 'TokenTransfer',
-  TokenTransferFrom = 'TokenTransferFrom',
-}
-
-export function composeAction(actionType: ChainActionType, args: any): any {
+export function composeAction(actionType: ChainActionType | EosChainActionType, args: any): any {
   // const composerFunction = ChainActionType[actionType];
   const composerFunction = ChainAction[actionType as string]
   return composerFunction(args)

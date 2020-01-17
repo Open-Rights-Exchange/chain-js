@@ -5,9 +5,9 @@ import {
   EosPermissionSimplified,
   EosActionStruct,
   EosPublicKey,
-  GenerateMissingKeysParams,
-  GeneratedPermissionKeys,
-  GeneratedKeys,
+  EosGenerateMissingKeysParams,
+  EosGeneratedPermissionKeys,
+  EosGeneratedKeys,
 } from './models'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
@@ -29,13 +29,23 @@ export class EosAccount implements Account {
 
   private _chainState: EosChainState
 
-  private _generatedKeys: Partial<GeneratedKeys>
+  private _generatedKeys: Partial<EosGeneratedKeys>
 
   private _permHelper: PermissionsHelper
 
   constructor(chainState: EosChainState) {
     this._chainState = chainState
     this._permHelper = new PermissionsHelper(this._chainState)
+  }
+
+  /** Whether the account is currently unused and can be reused
+   *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
+  get canBeRecycled(): boolean {
+    const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
+    this.assertHasAccount()
+    // check that the public active key matches the unused public key marker
+    const { publicKey } = this.permissions.find(perm => perm.name === toEosEntityName('active'))
+    return publicKey === unusedAccountPublicKey
   }
 
   /** Account name */
@@ -46,7 +56,7 @@ export class EosAccount implements Account {
   /** Public Key(s) associated with the account */
   get publicKeys(): EosPublicKey[] {
     this.assertHasAccount()
-    return this.permissions.map(p => p.publicKey)
+    return this.permissions?.map(p => p.publicKey)
   }
 
   /** Tries to retrieve the account from the chain
@@ -113,13 +123,13 @@ export class EosAccount implements Account {
   /** Return permission details if account has it attached 
       Or null otherwise */
   hasPermission(permissionName: EosEntityName): EosPermissionSimplified {
-    return this.permissions.find(p => p.name === permissionName) || null
+    return this.permissions?.find(p => p.name === permissionName) || null
   }
 
   /** Both new password and salt must be provided if any permissions are missing public keys */
   private assertValidOptionNewKeys = (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: GenerateMissingKeysParams,
+    generateMissingKeysParams?: EosGenerateMissingKeysParams,
   ) => {
     const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
     const { newKeysPassword, newKeysSalt } = generateMissingKeysParams || {}
@@ -134,8 +144,8 @@ export class EosAccount implements Account {
   async composeAddPermissionsActions(
     authPermission: EosEntityName,
     permissionsToUpdate: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: GenerateMissingKeysParams,
-  ): Promise<{ generatedKeys: GeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
+    generateMissingKeysParams?: EosGenerateMissingKeysParams,
+  ): Promise<{ generatedKeys: EosGeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
     // Add permissions to current account structure
     this.assertValidOptionNewKeys(permissionsToUpdate, generateMissingKeysParams)
     // filter out permissions already on this account
