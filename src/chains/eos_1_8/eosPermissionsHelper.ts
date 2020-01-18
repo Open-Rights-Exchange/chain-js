@@ -13,8 +13,7 @@ import { composeAction } from './eosCompose'
 import { throwNewError } from '../../errors'
 import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
-import { toEosEntityName } from './helpers'
-import { isEosPermissionStruct } from './helpers/eosStructuresHelpers'
+import { isEosPermissionStruct, toEosEntityName } from './helpers'
 import { ChainActionType } from '../../models'
 
 // OREJS Ported functions
