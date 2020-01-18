@@ -146,7 +146,7 @@ export const createAccountOptions_OreRecycleNative = {
   creatorPermission: 'owner',
   newKeysOptions: {
     newKeysPassword: '2233',
-    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // ore staging
+    newKeysSalt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
 }
 
@@ -216,7 +216,6 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
 
-
   // -------------------- Create Account -----------------------
 
   // -----> CreateAccount - createbridge
@@ -256,7 +255,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const transaction = await prepTransactionFromActions(kylin, actions, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('response:', await transaction.send())
 
-  // // -----> CreateAccount - recycle native ORE account
+  // // -----> CreateAccount - recycle native Kylin account
   // const recycleAccount = kylin.new.createAccount()
   // await recycleAccount.composeTransaction(EosAccountType.Native, createAccountOptions_OreRecycleNative)
   // await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
