@@ -4,7 +4,7 @@ import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeysStruct, EosSignature, EosPublicKey, EosPrivateKey } from './models'
 import { KeyPair, KeyPairEncrypted, Signature } from '../../models'
 import { throwNewError } from '../../errors'
-import { isNullOrEmpty } from '../../helpers'
+import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
 
 const { Keygen } = require('eosjs-keygen')
@@ -68,6 +68,9 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
   salt: string,
   overrideKeys: any = {},
 ) {
+  // remove any empty values passed-in (e.g. active=undefined or '' )
+  removeEmptyValuesInJsonObject(overrideKeys)
+
   // Formally named generateEncryptedKeys
   const keys: EosAccountKeysStruct = await Keygen.generateMasterKeys()
   const replacedKeys = {

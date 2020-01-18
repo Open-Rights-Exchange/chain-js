@@ -56,7 +56,7 @@ export const ethEndpoint = {
 }
 
 export const chainSettings = {
-  unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' 
+  unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
 }
 
 // Kylin createbridge - moonlighting
@@ -70,7 +70,7 @@ export const createAccountOptions_createBridge = {
   },
   createEscrowOptions: {
     contractName: toEosEntityName('createbridge'),
-    appName: 'appmoonlight',
+    appName: 'free',
   },
 }
 
@@ -220,7 +220,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
 
   // -----> CreateAccount - createbridge
   // const createAccount = kylin.new.createAccount()
-  // await createAccount.composeTransaction(EosAccountType.CreateEscrow, null, createAccountOptions_createBridge)
+  // await createAccount.composeTransaction(EosAccountType.CreateEscrow, createAccountOptions_createBridge)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
