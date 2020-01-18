@@ -4,7 +4,7 @@ import nodeFetch from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
-import { trimTrailingChars } from '../../helpers'
+import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
 import { mapChainError } from './eosErrors'
 import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './eosConstants'
@@ -121,7 +121,11 @@ export class EosChainState {
   // TODO: sort based on health info
   /** Choose the best Chain endpoint based on health and response time */
   private determineUrl(): string {
-    const url = this.endpoints[0].url.href
+    // Allow 'empty' list of endpoints - the fetch module might have its own approach for providing urls
+    if (isNullOrEmpty(this.endpoints)) {
+      return ''
+    }
+    const url = this.endpoints[0]?.url?.href
     return trimTrailingChars(url, '/')
   }
 
