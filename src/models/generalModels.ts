@@ -6,15 +6,15 @@ export enum AccountType {
   CreateEscrow = 'CreateEscrow',
 }
 
-/** Brand signifiying a valid value - assigned by using toChainDate */
+/** Brand signifiying a valid value - assigned by using toDate */
 export enum ChainDateBrand {
   _ = '',
 }
-/** Brand signifiying a valid value - assigned by using toChainEntity */
+/** Brand signifiying a valid value - assigned by using toEntity */
 export enum ChainEntityNameBrand {
   _ = '',
 }
-/** Brand signifiying a valid value - assigned by using toChainAsset */
+/** Brand signifiying a valid value - assigned by using toAsset */
 export enum ChainAssetBrand {
   _ = '',
 }

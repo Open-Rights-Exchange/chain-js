@@ -85,14 +85,14 @@ export interface Chain {
   /** Verifies that the value is a valid chain date */
   isValidDate(value: string): boolean
   /** Ensures that the value comforms to a well-formed chain asset string */
-  toChainAsset(amount: number, symbol: string): ChainAsset
+  toAsset(amount: number, symbol: string): ChainAsset
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
-  toChainEntityName(value: string): ChainEntityName
+  toEntityName(value: string): ChainEntityName
   /** Ensures that the value comforms to a well-formed chain date string */
-  toChainDate(value: string): ChainDate
+  toDate(value: string): ChainDate
   /** Ensures that the value comforms to a well-formed public Key */
   toPublicKey(value: string): PublicKey
-  /** Ensures that the value comforms to a well-formed public Key */
+  /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */

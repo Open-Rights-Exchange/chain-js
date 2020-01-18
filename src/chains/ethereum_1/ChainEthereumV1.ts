@@ -125,11 +125,11 @@ class ChainEthereumV1 implements Chain {
 
   isValidDate = notImplemented
 
-  toChainEntityName = notImplemented
+  toEntityName = notImplemented
 
-  toChainAsset = notImplemented
+  toAsset = notImplemented
 
-  toChainDate = notImplemented
+  toDate = notImplemented
 
   toPublicKey = notImplemented
 
