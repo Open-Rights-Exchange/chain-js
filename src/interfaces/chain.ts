@@ -59,7 +59,7 @@ export interface Chain {
 
   /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt(encrypted: string, password: string, salt: string): string
+  decrypt(encrypted: EncryptedDataString, password: string, salt: string): string
   /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
   encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString
