@@ -2,7 +2,7 @@ import * as ecc from 'eosjs-ecc'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeysStruct, EosSignature, EosPublicKey, EosPrivateKey } from './models'
-import { KeyPair, KeyPairEncrypted } from '../../models'
+import { KeyPair, KeyPairEncrypted, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty } from '../../helpers'
 import { toEosPublicKey } from './helpers'
@@ -21,7 +21,7 @@ export function sign(
 }
 
 export function getPublicKeyFromSignature(
-  signature: EosSignature | Buffer,
+  signature: Signature | EosSignature | string | Buffer,
   data: string | Buffer,
   encoding: string = TRANSACTION_ENCODING,
 ): EosPublicKey {
