@@ -1,4 +1,3 @@
-import { isArray } from 'util'
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosChainState } from './eosChainState'
 import { EosAuthorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
@@ -152,7 +151,7 @@ export class EosTransaction implements Transaction {
   /** Sets the Array of actions */
   public set actions(actions: EosActionStruct[]) {
     this.assertNoSignatures()
-    if (isNullOrEmpty(actions) || !isArray(actions)) {
+    if (isNullOrEmpty(actions) || !Array.isArray(actions)) {
       throwNewError('actions must be an array and have at least one value')
     }
     this._actions = actions
@@ -302,6 +301,7 @@ export class EosTransaction implements Transaction {
   /** Sign the transaction body with private key(s) and add to attached signatures */
   public sign(privateKeys: EosPrivateKey[]): void {
     this.assertIsValidated()
+    if (isNullOrEmpty(privateKeys)) return
     privateKeys.forEach(pk => {
       if (!isValidEosPrivateKey) {
         throwNewError(`Sign Transaction Failure - Private key :${pk} is not valid EOS private key`)

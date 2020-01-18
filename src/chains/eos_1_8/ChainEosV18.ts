@@ -1,5 +1,17 @@
 import { RpcError } from 'eosjs'
-import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, TransactionOptions, ChainType } from '../../models'
+import {
+  ChainActionType,
+  ChainEndpoint,
+  ChainInfo,
+  ChainSettings,
+  TransactionOptions,
+  ChainType,
+  ChainEntityName,
+  ChainAsset,
+  ChainDate,
+  PublicKey,
+  PrivateKey,
+} from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -124,45 +136,121 @@ class ChainEosV18 implements Chain {
     transaction: this.newTransaction.bind(this),
   }
 
-  /** Chain crytography functions */
+  // --------- Chain crytography functions */
 
+  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+   * Expects the encrypted value to be a stringified JSON object */
   decrypt = crypto.decrypt
 
+  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+   * The returned, encrypted value is a stringified JSON object */
   encrypt = crypto.encrypt
 
-  getPublicKeyFromSignature = eoscrypto.getPublicKeyFromSignature
+  /** Returns a public key given a signature and the original data was signed */
+  public getPublicKeyFromSignature = (
+    signature: string | Buffer,
+    data: string | Buffer,
+    encoding: string,
+  ): PublicKey => {
+    return eoscrypto.getPublicKeyFromSignature(signature, data, encoding) as PublicKey
+  }
 
+  /** Verifies that the value is a valid, stringified JSON ciphertext */
   isValidEncryptedData = crypto.isEncryptedDataString
 
-  isValidPrivateKey = isValidEosPrivateKey
+  /** Ensures that the value comforms to a well-formed private Key */
+  public isValidPrivateKey = (value: string): boolean => {
+    return !!isValidEosPrivateKey(value)
+  }
 
-  isValidPublicKey = isValidEosPublicKey
+  /** Ensures that the value comforms to a well-formed Eos private Key */
+  isValidEosPrivateKey = isValidEosPrivateKey
 
+  /** Ensures that the value comforms to a well-formed public Key */
+  public isValidPublicKey = (value: string): boolean => {
+    return !!isValidEosPublicKey(value)
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS public Key */
+  isValidEosPublicKey = isValidEosPublicKey
+
+  /** Generate a signature given some data and a private key */
   sign = eoscrypto.sign
 
+  /** Generates new owner and active key pairs (public and private)
+   *  Encrypts private keys with provided password and salt
+   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
 
-  /** Chain helper functions */
+  // --------- Chain helper functions
 
-  isValidEntityName = isValidEosEntityName
+  /** Verifies that the value is a valid chain entity name (e.g. an account name) */
+  public isValidEntityName = (value: string): boolean => {
+    return !!isValidEosEntityName(value)
+  }
 
-  isValidAsset = isValidEosAsset
+  /** Verifies that the value is a valid EOS entity name (e.g. an account name) */
+  isValidEosEntityName = isValidEosEntityName
 
-  isValidDate = isValidEosDate
+  /** Verifies that the value is a valid chain asset string */
+  public isValidAsset = (value: string): boolean => {
+    return !!isValidEosAsset(value)
+  }
 
-  toEntityName = toEosEntityName
+  /** Verifies that the value is a valid EOS asset string */
+  isValidEosAsset = isValidEosAsset
 
-  toChainAsset = toEosAsset
+  /** Verifies that the value is a valid chain date */
+  public isValidDate = (value: string): boolean => {
+    return !!isValidEosDate(value)
+  }
 
-  toChainEntityName = toEosEntityName
+  /** Verifies that the value is a valid EOS date */
+  isValidEosDate = isValidEosDate
 
-  toChainDate = toEosDate
+  /** Ensures that the value comforms to a well-formed chain asset string */
+  public toAsset = (amount: number, symbol: string): ChainAsset => {
+    return toEosAsset(amount, symbol) as ChainAsset
+  }
 
-  toPublicKey = toEosPublicKey
+  /** Ensures that the value comforms to a well-formed EOS asset string */
+  toEosAsset = toEosAsset
 
-  toPrivateKey = toEosPrivateKey
+  /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
+  public toEntityName = (value: string): ChainEntityName => {
+    return toEosEntityName(value) as ChainEntityName
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS entity name
+   *  e.g. account, permission, or contract name */
+  toEosEntityName = toEosEntityName
+
+  /** Ensures that the value comforms to a well-formed chain date string */
+  public toDate = (value: string): ChainDate => {
+    return toEosDate(value) as ChainDate
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS date string */
+  toEosDate = toEosDate
+
+  /** Ensures that the value comforms to a well-formed public Key */
+  public toPublicKey = (value: string): PublicKey => {
+    return toEosPublicKey(value) as PublicKey
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS public Key */
+  toEosPublicKey = toEosPublicKey
+
+  /** Ensures that the value comforms to a well-formed private Key */
+  public toPrivateKey = (value: string): PrivateKey => {
+    return toEosPrivateKey(value) as PrivateKey
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS private Key */
+  toEosPrivateKey = toEosPrivateKey
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this

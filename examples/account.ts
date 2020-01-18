@@ -47,12 +47,17 @@ export const oreStagingEndpoints = [
   {
     url: new URL('https://ore-staging.openrights.exchange/'),
   },
+  {
+    url: new URL('https://ore-staging2.openrights.exchange/'),
+  },
 ]
 export const ethEndpoint = {
   url: new URL('https://main-rpc.linkpool.io/'),
 }
 
-export const chainSettings = { unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' }
+export const chainSettings = {
+  unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' 
+}
 
 // Kylin createbridge - moonlighting
 export const createAccountOptions_createBridge = {
@@ -114,7 +119,7 @@ export const createAccountOptions_virtualNested = {
 
 export const createAccountOptions_EosNative = {
   accountNamePrefix: 'ore',
-  // accountName: null,
+  accountName: 'ore1qcfacksc',
   creatorAccountName: 'proppropprop',
   creatorPermission: 'active',
   newKeysOptions: {
@@ -135,6 +140,7 @@ export const createAccountOptions_EosNative = {
 
 // to recylce an account, specify an existing account with an active key of unusedAccountPublicKey
 export const createAccountOptions_OreRecycleNative = {
+  accountName: 'ore1qadesjxm',
   accountNamePrefix: 'ore',
   creatorAccountName: 'ore1qadesjxm',
   creatorPermission: 'owner',
@@ -210,6 +216,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
 
+
   // -------------------- Create Account -----------------------
 
   // -----> CreateAccount - createbridge
@@ -220,20 +227,20 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
 
   // -----> CreateAccount - create native kylin account
   // const createAccount = kylin.new.createAccount()
-  // await createAccount.composeTransaction(EosAccountType.Native, null, createAccountOptions_EosNative)
+  // await createAccount.composeTransaction(EosAccountType.Native, createAccountOptions_EosNative)
   // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create native ore-staging account
   // const createAccount = oreStaging.new.createAccount()
-  // await createAccount.composeTransaction(EosAccountType.NativeOre, null, createAccountOptions_OreNative)
+  // await createAccount.composeTransaction(EosAccountType.NativeOre, createAccountOptions_OreNative)
   // await prepTransaction(oreStaging, createAccount.transaction, env.ORE_TESTNET_APPOREID_PRIVATE_KEY)
   // console.log(JSON.stringify(createAccount.transaction.toJson()))
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
   // -----> CreateAccount - create virtual nested account
   // const createAccount = kylin.new.createAccount()
-  // await createAccount.composeTransaction(EosAccountType.VirtualNested, null, createAccountOptions_virtualNested)
+  // await createAccount.composeTransaction(EosAccountType.VirtualNested, createAccountOptions_virtualNested)
   // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_moonlightore_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
 
@@ -251,7 +258,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
 
   // // -----> CreateAccount - recycle native ORE account
   // const recycleAccount = kylin.new.createAccount()
-  // await recycleAccount.composeTransaction(EosAccountType.Native, 'ore1qadesjxm', createAccountOptions_OreRecycleNative)
+  // await recycleAccount.composeTransaction(EosAccountType.Native, createAccountOptions_OreRecycleNative)
   // await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('createAccount response: ', await recycleAccount.transaction.send())
 

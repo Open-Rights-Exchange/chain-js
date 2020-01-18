@@ -5,7 +5,7 @@ export enum EthereumAccountType {
 }
 
 export type EthereumCreateAccountOptions = {
-  // newAccountName: EthereumEntityName,
+  // accountName: EthereumEntityName,
   // creatorAccountName: EthereumEntityName
   // creatorPermission: EthereumEntityName
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */

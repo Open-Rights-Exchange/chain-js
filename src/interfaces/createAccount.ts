@@ -24,11 +24,7 @@ export interface CreateAccount {
    *  This should be signed and sent to the chain to create the account */
   transaction: Transaction
   /** Compose a transaction to send to the chain to create a new account */
-  composeTransaction(
-    accountType: AccountType | any,
-    accountName?: ChainEntityName,
-    options?: CreateAccountOptions,
-  ): Promise<void>
+  composeTransaction(accountType: AccountType | any, options?: CreateAccountOptions): Promise<void>
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
    *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
