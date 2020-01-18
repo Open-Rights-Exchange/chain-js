@@ -46,15 +46,6 @@ export function addUniqueToArray<T>(array: T[], values: T[]) {
   return [...set]
 }
 
-export function getUniqueValues<T>(array: T[]) {
-  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
-}
-
-export function trimTrailingChars(string: string, charToTrim: string) {
-  const regExp = new RegExp(`${charToTrim}+$`)
-  return string.replace(regExp, '')
-}
-
 export function isAString(value: any) {
   if (!value) {
     return false
@@ -77,4 +68,14 @@ export function isANumber(value: any) {
 
 export function isAnObject(obj: any) {
   return obj !== null && typeof obj === 'object'
+}
+
+export function getUniqueValues<T>(array: T[]) {
+  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
+}
+
+export function trimTrailingChars(value: string, charToTrim: string) {
+  if (isNullOrEmpty(value) || !isAString(value)) return value
+  const regExp = new RegExp(`${charToTrim}+$`)
+  return value.replace(regExp, '')
 }
