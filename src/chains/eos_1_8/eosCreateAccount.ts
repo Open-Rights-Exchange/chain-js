@@ -63,14 +63,17 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Compose a transaction to send to the chain to create a new account */
-  async composeTransaction(
-    accountType: EosAccountType,
-    accountName?: EosEntityName | null,
-    options?: EosCreateAccountOptions,
-  ): Promise<void> {
+  async composeTransaction(accountType: EosAccountType, options?: EosCreateAccountOptions): Promise<void> {
     this._accountType = accountType
     this._options = this.applyDefaultOptions(options)
-    const { creatorAccountName, creatorPermission, oreOptions, createEscrowOptions, resourcesOptions } = this._options
+    const {
+      accountName,
+      creatorAccountName,
+      creatorPermission,
+      oreOptions,
+      createEscrowOptions,
+      resourcesOptions,
+    } = this._options
     const { pricekey, referralAccountName } = oreOptions || {}
     const { contractName, appName } = createEscrowOptions || {}
     const { ramBytes, stakeNetQuantity, stakeCpuQuantity, transfer } = resourcesOptions || {}
@@ -196,7 +199,7 @@ export class EosCreateAccount implements CreateAccount {
    *  Checks if provided account is unused and can be recycled */
   async determineNewAccountName(accountName: EosEntityName) {
     let canRecycle = false
-    let alreadyExists
+    let alreadyExists = false
     let newAccountName = accountName
     const { accountNamePrefix } = this._options
 

@@ -14,8 +14,8 @@ export enum EosAccountType {
 }
 
 export type EosCreateAccountOptions = {
+  accountName: EosEntityName // Optional - aka oreAccountName
   accountNamePrefix?: string // Default 'ore'
-  newAccountName: EosEntityName // Optional - aka oreAccountName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName // Default = 'active' aka permission
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
