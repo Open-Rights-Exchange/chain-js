@@ -32,13 +32,6 @@ import { composeAction } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
 import { ChainActionType } from '../../models'
 
-// OREJS Ported functions
-//   createAccount() {} // createOreAccount
-//   createAccountcreateEscrow() {} // createEscrowAccount
-//   createAccountNested() {} // createKeyPair
-// Obsolete - no longer needed:
-//   checkIfAccountNameUsable() {} // checkIfAccountNameUsable
-
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native, virtual, and createEscrow accounts
  *  Generates new account keys if not provide
@@ -399,38 +392,3 @@ export class EosCreateAccount implements CreateAccount {
     return this._transaction
   }
 }
-
-// Create account parameters discovered
-
-// ---> ORE account creation paramters
-// accountNamePrefix = 'ore'
-// payerAccountName
-// authPermission // aka permission
-// payer
-// newAccountName // aka oreAccountName
-// publicKeyOwner
-// publicKeyActive
-// pricekey = 1
-// referralAccountName = ''  //aka referral
-
-// ---> createEscrow params
-// accountName,
-// activekey,
-// contractName,  // default = 'createEscrow'
-// oreAccountName,
-// origin,
-// ownerkey,
-// permission,
-// referral
-
-// ---> ??not sure??
-// newAccountDetails : {
-//   bytes : number,
-//   stakedCpu : number,
-//   stakedNet : number
-// },
-// tokenSymbol
-// createOnChainAccount = true
-// airdrop = true
-// migratingAccountName
-// migrating

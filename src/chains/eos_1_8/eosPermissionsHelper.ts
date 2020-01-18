@@ -16,14 +16,6 @@ import { isNullOrEmpty } from '../../helpers'
 import { isEosPermissionStruct, toEosEntityName } from './helpers'
 import { ChainActionType } from '../../models'
 
-// OREJS Ported functions
-//   addPermission() {} // addPermission
-//   addPermissionAndLinkActions() {} // addPermission (with links options)
-//   deletePermissions() {} // deletePermissions
-//   linkActionsToPermission() {} // linkActionsToPermission
-//   unlinkActionsToPermission() {} // unlinkActionsToPermission
-//   replaceAccountPublicKeys() {} // exportAccount, reuseAccount
-
 export type LinkPermissionsParams = {
   permissionName: EosEntityName
   contract: EosEntityName
