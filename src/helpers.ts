@@ -79,3 +79,12 @@ export function trimTrailingChars(value: string, charToTrim: string) {
   const regExp = new RegExp(`${charToTrim}+$`)
   return value.replace(regExp, '')
 }
+
+export const removeEmptyValuesInJsonObject = (obj: { [x: string]: any }) => {
+  Object.keys(obj).forEach(key => {
+    if (obj[key] && typeof obj[key] === 'object') removeEmptyValuesInJsonObject(obj[key])
+    // recurse
+    // eslint-disable-next-line no-param-reassign
+    else if (isNullOrEmpty(obj[key])) delete obj[key] // delete the property
+  })
+}

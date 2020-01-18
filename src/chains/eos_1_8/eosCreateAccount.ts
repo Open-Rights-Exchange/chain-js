@@ -294,7 +294,7 @@ export class EosCreateAccount implements CreateAccount {
         ...this._generatedKeys,
         accountKeys: generatedKeys,
       }
-      publicKeys = generatedKeys.publicKeys
+      publicKeys = this._generatedKeys.accountKeys.publicKeys
       this._options.publicKeys = publicKeys // replace working keys with new ones
     }
     return publicKeys
