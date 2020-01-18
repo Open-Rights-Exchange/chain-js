@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -5,6 +6,8 @@
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
 import { ChainEthereumV1 } from '../src/chains/ethereum_1/ChainEthereumV1'
+import { RpcError } from 'eosjs'
+import { ChainActionType } from '../src/models'
 
 require('dotenv').config()
 
@@ -47,24 +50,43 @@ const { env } = process
   console.log('create bridge balances:', await kylin.fetchContractData('createbridge', 'balances', 'createbridge'))
 
   // compose
-  // const deleteAuthAction = kylin.composeAction(kylin.ChainActionType.Account_DeleteAuth, {authAccount:'accountName', authPermission:'authPermission', permission:'permission'})
-  // console.log('deleteAuthAction action:',deleteAuthAction);
+  // const deleteAuthAction = kylin.composeAction(ChainActionType.AccountDeleteAuth, {
+  //   authAccount: 'accountName',
+  //   authPermission: 'authPermission',
+  //   permission: 'permission',
+  // })
+  // console.log('deleteAuthAction action:', deleteAuthAction)
 
   // crypto
-  // const encrypted = kylin.crypto.encrypt('mystring','password', 'mysalt');
-  // console.log('encrypted text:',encrypted);
-  // const decrypted = kylin.crypto.decrypt(encrypted, 'password', 'mysalt');
-  // console.log('decrypted text:',decrypted);
+  const encrypted = kylin.encrypt('mystring', 'password', 'mysalt')
+  console.log('encrypted text:', encrypted)
+  const decrypted = kylin.decrypt(encrypted, 'password', 'mysalt')
+  console.log('decrypted text:', decrypted)
 
   // error mapping
-  // const err = new RpcError({message:"Internal Service Error", error:{code:3080002,name:"tx_net_usage_exceeded",what:"Transaction exceeded the current network usage limit imposed on the transaction",details:[{message:"transaction net usage is too high: 120 > 0",file:"transaction_context.cpp",line_number:"462",method:"check_net_usage"}]}});
-  // const chainError = kylin.mapChainError(err);
-  // console.log('chainError type is:', chainError.errorType);
+  // const err = new RpcError({
+  //   message: 'Internal Service Error',
+  //   error: {
+  //     code: 3080002,
+  //     name: 'tx_net_usage_exceeded',
+  //     what: 'Transaction exceeded the current network usage limit imposed on the transaction',
+  //     details: [
+  //       {
+  //         message: 'transaction net usage is too high: 120 > 0',
+  //         file: 'transaction_context.cpp',
+  //         line_number: '462',
+  //         method: 'check_net_usage',
+  //       },
+  //     ],
+  //   },
+  // })
+  // const chainError = kylin.mapChainError(err)
+  // console.log('chainError type is:', chainError.errorType)
 
   /**
    * Create an Ethereum chain and call a few functions
    */
-  // console.log('App: Create an Etehereum Chain.');
-  // const ethChain = new ChainFactory().create(ChainType.Ethereum_1, [ethEndpoint]) as ChainEthereumV1
+  // console.log('App: Create an Etehereum Chain.')
+  // const ethChain = new ChainFactory().create(ChainType.EthereumV1, [ethEndpoint], {}) as ChainEthereumV1
   // console.log(ethChain.chainId)
 })()
