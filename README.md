@@ -10,7 +10,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   const eosChain = new ChainFactory().create(ChainType.ChainEosV1_8, kylinEndpoints, chainSettings)
 
   // new account options
-  const accounOptions = {
+  const accountOptions = {
     accountName: 'abcdefghijkl'
     creatorAccountName: 'mypayeraccnt',
     creatorPermission: 'active',
@@ -20,7 +20,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   // get an account creator class
   const accntCreator = eosChain.new.createAccount()
   // generate the transaction to create an on-chain account
-  await accntCreator.composeTransaction(AccountType.Native, accounOptions)
+  await accntCreator.composeTransaction(AccountType.Native, accountOptions)
   // sign and send the transaction to the chain
   accntCreator.transaction.sign([{myPrivateKeys}])
   accntCreator.transaction.send()
