@@ -1,8 +1,8 @@
-import { EosEntityName, EosAsset } from './generalModels'
+import { EosEntityName, EosAsset, EosNewKeysOptions } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
-/** Type of account to craate */
-export enum EosAccountType {
+/** Type of account to create */
+export enum EosNewAccountType {
   /** Native account for chain tyep (EOS, Ethereum, etc.) */
   Native = 'Native',
   /** Native account on ORE chain */
@@ -23,10 +23,7 @@ export type EosCreateAccountOptions = {
     owner?: EosPublicKey
     active?: EosPublicKey
   }
-  newKeysOptions?: {
-    newKeysPassword?: string
-    newKeysSalt?: string
-  }
+  newKeysOptions?: EosNewKeysOptions
   oreOptions?: {
     pricekey?: number // default = 1
     referralAccountName?: EosEntityName // default = ''  // aka referral

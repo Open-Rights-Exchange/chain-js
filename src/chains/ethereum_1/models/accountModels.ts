@@ -14,7 +14,7 @@ export type EthereumCreateAccountOptions = {
     // active?: EthereumPublicKey
   }
   newKeysOptions?: {
-    newKeysPassword?: string
-    newKeysSalt?: string
+    password?: string
+    salt?: string
   }
 }
