@@ -5,7 +5,7 @@ import {
   EosPermissionSimplified,
   EosActionStruct,
   EosPublicKey,
-  EosGenerateMissingKeysParams,
+  EosNewKeysOptions,
   EosGeneratedPermissionKeys,
   EosGeneratedKeys,
 } from './models'
@@ -129,11 +129,11 @@ export class EosAccount implements Account {
   /** Both new password and salt must be provided if any permissions are missing public keys */
   private assertValidOptionNewKeys = (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: EosGenerateMissingKeysParams,
+    newKeysOptions?: EosNewKeysOptions,
   ) => {
     const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
-    const { newKeysPassword, newKeysSalt } = generateMissingKeysParams || {}
-    if (isAnyPublicKeyMissing && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
+    const { password, salt } = newKeysOptions || {}
+    if (isAnyPublicKeyMissing && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
       throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
     }
   }
@@ -144,20 +144,22 @@ export class EosAccount implements Account {
   async composeAddPermissionsActions(
     authPermission: EosEntityName,
     permissionsToUpdate: Partial<EosPermissionSimplified>[],
-    generateMissingKeysParams?: EosGenerateMissingKeysParams,
+    newKeysOptions?: EosNewKeysOptions,
+    /** don't return an action for a permission that is already on the account with the same parent and publicKey */
+    skipExistingPermissions: boolean = true,
   ): Promise<{ generatedKeys: EosGeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
+    let usePermissionsToUpdate = permissionsToUpdate
     // Add permissions to current account structure
-    this.assertValidOptionNewKeys(permissionsToUpdate, generateMissingKeysParams)
+    this.assertValidOptionNewKeys(permissionsToUpdate, newKeysOptions)
     // filter out permissions already on this account
-    const filteredPermissions = permissionsToUpdate.filter(
-      pu => !this.permissions.some(p => p.name === pu.name && p.parent === pu.parent && p.publicKey === pu.publicKey),
-    )
+    if (skipExistingPermissions) {
+      usePermissionsToUpdate = permissionsToUpdate.filter(
+        pu => !this.permissions.some(p => p.name === pu.name && p.parent === pu.parent && p.publicKey === pu.publicKey),
+      )
+    }
     // generate new keys for each new permission if needed
     const { generatedKeys, permissionsToAdd: usePermissionsToAdd } =
-      (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(
-        filteredPermissions,
-        generateMissingKeysParams,
-      )) || {}
+      (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(usePermissionsToUpdate, newKeysOptions)) || {}
     const actions = this._permHelper.composeAddPermissionActions(this.name, authPermission, usePermissionsToAdd)
     return { generatedKeys, actions }
   }
