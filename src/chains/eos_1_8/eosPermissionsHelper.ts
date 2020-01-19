@@ -5,7 +5,7 @@ import {
   EosPublicKey,
   EosActionStruct,
   EosPermissionSimplified,
-  EosGenerateMissingKeysParams,
+  EosNewKeysOptions,
   EosGeneratedPermissionKeys,
 } from './models'
 import { EosChainState } from './eosChainState'
@@ -81,6 +81,7 @@ export class PermissionsHelper {
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] | EosPermissionStruct[] = [],
+    appendKeyToExistingPermission: boolean = false
   ): EosActionStruct[] {
     const updateAuthActions: EosActionStruct[] = []
     let usePermissionsToAdd = permissionsToAdd
@@ -93,6 +94,7 @@ export class PermissionsHelper {
     usePermissionsToAdd = permissionsToAdd as EosPermissionSimplified[]
 
     const newPermissions: EosPermissionStruct[] = []
+    // TODO: if appendKeyToExistingPermission = true, add the new key to the existing permission's require_auth array
     // collect an array of new permission objects
     usePermissionsToAdd.forEach(p => {
       const permissionToAdd = this.composePermission(
@@ -258,10 +260,10 @@ export class PermissionsHelper {
   /** generate a keypair for any new permissions missing a public key */
   static generateMissingKeysForPermissionsToAdd = async (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
-    params: EosGenerateMissingKeysParams,
+    newKeysOptions: EosNewKeysOptions,
   ) => {
     const generatedKeys: EosGeneratedPermissionKeys[] = []
-    const { newKeysPassword, newKeysSalt } = params || {}
+    const { password, salt } = newKeysOptions || {}
 
     if (isNullOrEmpty(permissionsToAdd)) {
       return null
@@ -271,7 +273,7 @@ export class PermissionsHelper {
     const keysToFix = permissionsToAdd.map(async p => {
       if (!p.publicKey) {
         const updatedPerm = p
-        const keys = await generateKeyPairAndEncryptPrivateKeys(newKeysPassword, newKeysSalt)
+        const keys = await generateKeyPairAndEncryptPrivateKeys(password, salt)
         updatedPerm.publicKey = keys.public
         updatedPerm.publicKeyWeight = 1
         generatedKeys.push({ permissionName: updatedPerm.name, keyPair: keys })
