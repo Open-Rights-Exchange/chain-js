@@ -37,7 +37,7 @@ export type EosGeneratedPermissionKeys = {
   keyPair: KeyPairEncrypted
 }
 
-export type EosGenerateMissingKeysParams = {
-  newKeysPassword?: string
-  newKeysSalt?: string
+export type EosNewKeysOptions = {
+  password?: string
+  salt?: string
 }

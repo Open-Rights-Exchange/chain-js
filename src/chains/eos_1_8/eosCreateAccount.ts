@@ -5,7 +5,7 @@ import {
   EosEntityName,
   EosPermissionStruct,
   EosGeneratedKeys,
-  EosAccountType,
+  EosNewAccountType,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -45,7 +45,7 @@ export class EosCreateAccount implements CreateAccount {
 
   private _transaction: EosTransaction
 
-  private _accountType: EosAccountType
+  private _accountType: EosNewAccountType
 
   private _options: EosCreateAccountOptions
 
@@ -56,7 +56,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Compose a transaction to send to the chain to create a new account */
-  async composeTransaction(accountType: EosAccountType, options?: EosCreateAccountOptions): Promise<void> {
+  async composeTransaction(accountType: EosNewAccountType, options?: EosCreateAccountOptions): Promise<void> {
     this._accountType = accountType
     this._options = this.applyDefaultOptions(options)
     const {
@@ -93,7 +93,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // check that we have account resource options for a native account (not needed if we are recycling)
-    if (!recycleAccount && accountType === EosAccountType.Native) {
+    if (!recycleAccount && accountType === EosNewAccountType.Native) {
       this.assertValidOptionsResources()
     }
 
@@ -138,16 +138,16 @@ export class EosCreateAccount implements CreateAccount {
       this._didRecycleAccount = true
     } else {
       switch (accountType) {
-        case EosAccountType.Native:
+        case EosNewAccountType.Native:
           createAccountActions = composeAction(ChainActionType.AccountCreate, params)
           break
-        case EosAccountType.NativeOre:
+        case EosNewAccountType.NativeOre:
           createAccountActions = [composeAction(ChainActionType.OreCreateAccount, params)]
           break
-        case EosAccountType.CreateEscrow:
+        case EosNewAccountType.CreateEscrow:
           createAccountActions = [composeAction(ChainActionType.CreateEscrowCreate, params)]
           break
-        case EosAccountType.VirtualNested:
+        case EosNewAccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
           // instead, we will need to add permissions (below) to the parent account
           createAccountActions = await this.composeCreateVirtualNestedActions()
@@ -278,11 +278,11 @@ export class EosCreateAccount implements CreateAccount {
     let { publicKeys } = this._options || {}
     const { owner, active } = publicKeys || {}
     const { newKeysOptions } = this._options
-    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
+    const { password, salt } = newKeysOptions || {}
 
     // generate new public keys and add to options.publicKeyss
     if (!owner || !active) {
-      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(newKeysPassword, newKeysSalt, { publicKeys })
+      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, { publicKeys })
       this._generatedKeys = {
         ...this._generatedKeys,
         accountKeys: generatedKeys,
@@ -334,8 +334,8 @@ export class EosCreateAccount implements CreateAccount {
 
   private assertValidOptionNewKeys() {
     const { newKeysOptions, publicKeys } = this._options
-    const { newKeysPassword, newKeysSalt } = newKeysOptions || {}
-    if (isNullOrEmpty(publicKeys) && (isNullOrEmpty(newKeysPassword) || isNullOrEmpty(newKeysSalt))) {
+    const { password, salt } = newKeysOptions || {}
+    if (isNullOrEmpty(publicKeys) && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
       throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
     }
   }
@@ -357,7 +357,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Account type to be created */
-  get accountType(): EosAccountType {
+  get accountType(): EosNewAccountType {
     return this._accountType
   }
 

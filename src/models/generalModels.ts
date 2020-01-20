@@ -1,5 +1,5 @@
 /** Type of account to craate */
-export enum AccountType {
+export enum NewAccountType {
   /** Native account for chain tyep (EOS, Ethereum, etc.) */
   Native = 'Native',
   /** Native account created by calling a proxy (escrow) contract that actually creates the account */
