@@ -289,7 +289,7 @@ export class EosChainState {
           blockNumToCheck += 1
         } catch (error) {
           const mappedError = mapChainError(error)
-          if (mappedError.name === 'BlockDoesNotExist') {
+          if (mappedError.errorType === 'BlockDoesNotExist') {
             // Try to read the specific block - up to getBlockAttempts times
             if (getBlockAttempt >= maxBlockReadAttempts) {
               this.rejectAwaitTransaction(
