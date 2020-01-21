@@ -94,6 +94,8 @@ export interface Chain {
   toPublicKey(value: string): PublicKey
   /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
+  /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
+  toEncryptedDataString(value: any): EncryptedDataString
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError

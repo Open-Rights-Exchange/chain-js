@@ -107,6 +107,8 @@ class ChainEthereumV1 implements Chain {
 
   isValidEncryptedData = crypto.isEncryptedDataString
 
+  toEncryptedDataString = crypto.toEncryptedDataString
+
   isValidPrivateKey = ethcrypto.isValidPrivateKey
 
   isValidPublicKey = ethcrypto.isValidPublicKey
