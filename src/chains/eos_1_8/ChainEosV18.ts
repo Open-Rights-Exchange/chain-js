@@ -159,6 +159,9 @@ class ChainEosV18 implements Chain {
   isValidEncryptedData = crypto.isEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
+  toEncryptedDataString = crypto.toEncryptedDataString
+
+  /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {
     return !!isValidEosPrivateKey(value)
   }
