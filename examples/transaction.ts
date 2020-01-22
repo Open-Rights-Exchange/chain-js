@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainActionType, ChainEndpoint, ChainSettings, AccountType } from '../src/models'
+import { ChainActionType, ChainEndpoint, ChainSettings, NewAccountType } from '../src/models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../src/chains/eos_1_8/helpers'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { EosTransaction } from '../src/chains/eos_1_8/eosTransaction'
@@ -17,7 +17,7 @@ require('dotenv').config()
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV18).new.transaction()
+  const transaction = (chain as ChainEosV18).new.Transaction()
   transaction.actions = transactionActions
   await transaction.generateSerialized()
   await transaction.validate()
@@ -80,7 +80,7 @@ const { env } = process
   await kylin.connect()
 
   //  ---> set transaction from serialized
-  // let transaction = kylin.new.transaction({ blocksBehind: 10 })
+  // let transaction = kylin.new.Transaction({ blocksBehind: 10 })
   // await transaction.setSerialized(serializedTransaction)
   // await transaction.validate()
   // console.log('missing signatures:', transaction.missingSignatures)
@@ -95,7 +95,7 @@ const { env } = process
 
   // ---> set transaction from actions
 
-  // const transaction = kylin.new.transaction()
+  // const transaction = kylin.new.Transaction()
   // transaction.actions = [sampleActionFirstAuth]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.generateSerialized()
@@ -105,7 +105,7 @@ const { env } = process
   // console.log('send response:', await transaction.send())
 
   // ---> send token
-  // const transaction = kylin.new.transaction()
+  // const transaction = kylin.new.Transaction()
   // transaction.actions = [kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.generateSerialized()
