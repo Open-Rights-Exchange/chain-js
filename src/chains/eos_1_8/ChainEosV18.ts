@@ -103,7 +103,7 @@ class ChainEosV18 implements Chain {
   }
 
   /** Returns a chain Account class
-   * Note: Does NOT create a new account - to create an account, use new.createAccount */
+   * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
   private async newAccount(accountName?: EosEntityName): Promise<EosAccount> {
     this.assertIsConnected()
     const account = new EosAccount(this._chainState)
@@ -128,12 +128,12 @@ class ChainEosV18 implements Chain {
   public new = {
     /** Returns a new chain Account object
      * If an account name is provided, it will be fetched from the chain and loaded into the returned account object
-     * Note: Does NOT create a new account - to create an account, use new.createAccount */
-    account: this.newAccount.bind(this),
+     * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
+    Account: this.newAccount.bind(this),
     /** Return a new CreateAccount object used to help with creating a new chain account */
-    createAccount: this.newCreateAccount.bind(this),
+    CreateAccount: this.newCreateAccount.bind(this),
     /** Return a chain Transaction object used to compose and send transactions */
-    transaction: this.newTransaction.bind(this),
+    Transaction: this.newTransaction.bind(this),
   }
 
   // --------- Chain crytography functions */

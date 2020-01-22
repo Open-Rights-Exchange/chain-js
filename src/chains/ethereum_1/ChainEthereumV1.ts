@@ -92,9 +92,9 @@ class ChainEthereumV1 implements Chain {
   }
 
   public new = {
-    account: this.newAccount,
-    createAccount: this.newCreateAccount,
-    transaction: this.newTransaction,
+    Account: this.newAccount,
+    CreateAccount: this.newCreateAccount,
+    Transaction: this.newTransaction,
   }
 
   // Chain Crypto Functions

@@ -47,12 +47,12 @@ export interface Chain {
   new: {
     /** Returns a new chain Account object
      * If an account name is provided, it will be fetched from the chain and loaded into the returned account object
-     * Note: Does NOT create a new account - to create an account, use new.createAccount */
-    account(accountName?: string): Promise<Account>
+     * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
+    Account(accountName?: string): Promise<Account>
     /** Return a new CreateAccount object used to help with creating a new chain account */
-    createAccount(): CreateAccount
+    CreateAccount(): CreateAccount
     /** Return a chain Transaction object used to compose and send transactions */
-    transaction(options?: any): Transaction
+    Transaction(options?: any): Transaction
   }
 
   // Chain Crypto functions
