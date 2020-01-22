@@ -8,18 +8,16 @@ import {
   EosNewKeysOptions,
   EosGeneratedPermissionKeys,
   EosGeneratedKeys,
+  LinkPermissionsParams,
+  DeletePermissionsParams,
+  UnlinkPermissionsParams,
 } from './models'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { mapChainError } from './eosErrors'
-import {
-  PermissionsHelper,
-  DeletePermissionsParams,
-  LinkPermissionsParams,
-  UnlinkPermissionsParams,
-} from './eosPermissionsHelper'
 import { isNullOrEmpty } from '../../helpers'
 import { toEosEntityName } from './helpers'
+import { PermissionsHelper } from './eosPermissionsHelper'
 
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission
@@ -93,6 +91,7 @@ export class EosAccount implements Account {
 
   /** Returns the raw value from the chain */
   get value(): EosAccountStruct {
+    this.assertHasAccount()
     return this._account
   }
 
@@ -111,31 +110,13 @@ export class EosAccount implements Account {
    *  Hint: if publicKeyWeight != 1, then there might be another key for that permission
    */
   get permissions(): EosPermissionSimplified[] {
-    return this._account?.permissions.map(p => ({
-      name: p.perm_name,
-      parent: p.parent,
-      publicKey: p.required_auth.keys[0].key,
-      publicKeyWeight: p.required_auth.keys[0].weight,
-      threshold: p.required_auth.threshold,
-    }))
+    return this._account?.permissions.map(p => this._permHelper.permissionsStructToSimplified(p))
   }
 
   /** Return permission details if account has it attached 
       Or null otherwise */
   hasPermission(permissionName: EosEntityName): EosPermissionSimplified {
     return this.permissions?.find(p => p.name === permissionName) || null
-  }
-
-  /** Both new password and salt must be provided if any permissions are missing public keys */
-  private assertValidOptionNewKeys = (
-    permissionsToAdd: Partial<EosPermissionSimplified>[],
-    newKeysOptions?: EosNewKeysOptions,
-  ) => {
-    const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
-    const { password, salt } = newKeysOptions || {}
-    if (isAnyPublicKeyMissing && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
-      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
-    }
   }
 
   /** Compose a collection of actions to add the requested permissions
@@ -196,5 +177,17 @@ export class EosAccount implements Account {
   ): Promise<EosActionStruct[]> {
     const actions = this._permHelper.composeUnlinkPermissionActions(this.name, authPermission, permissionsToUpdate)
     return actions
+  }
+
+  /** Both new password and salt must be provided if any permissions are missing public keys */
+  private assertValidOptionNewKeys = (
+    permissionsToAdd: Partial<EosPermissionSimplified>[],
+    newKeysOptions?: EosNewKeysOptions,
+  ) => {
+    const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
+    const { password, salt } = newKeysOptions || {}
+    if (isAnyPublicKeyMissing && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
+      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    }
   }
 }
