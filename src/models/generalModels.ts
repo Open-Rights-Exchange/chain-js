@@ -20,11 +20,11 @@ export enum ChainAssetBrand {
 }
 /** Parameters used to create an account on the chain */
 export type CreateAccountOptions = any
-/** Date string formatted corectly for the type of chain */
+/** Date string formatted correctly for the type of chain */
 export type ChainDate = string & ChainDateBrand
-/** Name string formatted corectly for the type of chain */
+/** Name string formatted correctly for the type of chain */
 export type ChainEntityName = string & ChainEntityNameBrand
-/** Token Asset string formatted corectly for the type of chain */
+/** Token Asset string formatted correctly for the type of chain */
 export type ChainAsset = string & ChainAssetBrand
 
 /** Supported chain types */

@@ -7,6 +7,10 @@ import {
   EosPermissionSimplified,
   EosNewKeysOptions,
   EosGeneratedPermissionKeys,
+  DeletePermissionsParams,
+  ReplacePermissionKeysParams,
+  LinkPermissionsParams,
+  UnlinkPermissionsParams,
 } from './models'
 import { EosChainState } from './eosChainState'
 import { composeAction } from './eosCompose'
@@ -15,31 +19,6 @@ import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
 import { isEosPermissionStruct, toEosEntityName } from './helpers'
 import { ChainActionType } from '../../models'
-
-export type LinkPermissionsParams = {
-  permissionName: EosEntityName
-  contract: EosEntityName
-  action: string
-}
-
-export type DeletePermissionsParams = {
-  accountName: EosEntityName
-  permissionName: EosEntityName
-}
-
-export type ReplacePermissionKeysParams = {
-  permissionName: EosEntityName
-  parentPermissionName: EosEntityName
-  publicKeys: EosPublicKey[]
-  accountPermissions: EosPermissionSimplified[]
-  accountName: EosEntityName
-}
-
-export type UnlinkPermissionsParams = {
-  permissionName: EosEntityName
-  contract: EosEntityName
-  action: string
-}
 
 export class PermissionsHelper {
   private _chainState: EosChainState
@@ -284,6 +263,7 @@ export class PermissionsHelper {
   }
 
   /** Converts an EosPermissionStruct to EosPermissionSimplified */
+  // TODO - support more than one key er struct
   permissionsStructToSimplified = (permissionStruct: EosPermissionStruct): EosPermissionSimplified => {
     const { parent, perm_name: name, required_auth: requiredAuth } = permissionStruct
     const firstPublicKey: any = requiredAuth.keys[0] || {}
