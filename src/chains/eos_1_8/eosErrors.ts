@@ -1,13 +1,15 @@
 /* eslint-disable no-restricted-syntax */
 import { RpcError } from 'eosjs'
-import { ChainError, ChainErrorType } from '../../errors'
+import { ChainError } from '../../errors'
 import { stringifySafe } from '../../helpers'
+import { ChainErrorType } from '../../models'
 
 // subset of errors from EOS chain - https://github.com/EOSIO/eos/blob/master/libraries/chain/include/eosio/chain/exceptions.hpp
 // IMPORTANT: These are in order of importance
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export const ChainErrorRegExs: { [key: string]: string } = {
   AccountCreationFailedAlreadyExists: 'account_name_exists_exception',
+  AuthInvalid: 'authority_type_exception', // the permission isnt valid (or permission already exists in an account)
   AuthUnsatisfied: 'unsatisfied_authorization', // all permission or keys needed for transaction weren't provided
   AuthMissing: 'missing_auth_exception', // missing permission or key
   BlockDoesNotExist: 'unknown_block_exception',

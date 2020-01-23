@@ -58,6 +58,9 @@ export class PermissionsHelper {
     return keys.map(key => ({ key, weight }))
   }
 
+  // TODO: Allow more than one public key to be passed-in to be added to required_auth
+  // Currently only using the public key for the permission
+
   /** Compose a collection of actions to add the requested permissions */
   composeAddPermissionActions(
     authAccount: EosEntityName,

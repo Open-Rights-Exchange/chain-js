@@ -23,8 +23,8 @@ export type EosPermissionSimplified = {
   name: EosEntityName
   parent: EosEntityName
   publicKey: EosPublicKey
-  publicKeyWeight: number
-  threshold: number
+  publicKeyWeight?: number
+  threshold?: number
 }
 
 export type EosGeneratedKeys = {

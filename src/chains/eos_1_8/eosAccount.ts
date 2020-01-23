@@ -131,6 +131,7 @@ export class EosAccount implements Account {
     newKeysOptions?: EosNewKeysOptions,
     /** don't return an action for a permission that is already on the account with the same parent and publicKey */
     skipExistingPermissions: boolean = true,
+    appendKeyToExistingPermission: boolean = false,
   ): Promise<{ generatedKeys: EosGeneratedPermissionKeys[]; actions: EosActionStruct[] }> {
     let usePermissionsToUpdate = permissionsToUpdate
     // Add permissions to current account structure
@@ -147,7 +148,12 @@ export class EosAccount implements Account {
     // generate new keys for each new permission if needed
     const { generatedKeys, permissionsToAdd: usePermissionsToAdd } =
       (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(usePermissionsToUpdate, newKeysOptions)) || {}
-    const actions = this._permHelper.composeAddPermissionActions(this.name, authPermission, usePermissionsToAdd)
+    const actions = this._permHelper.composeAddPermissionActions(
+      this.name,
+      authPermission,
+      usePermissionsToAdd,
+      appendKeyToExistingPermission,
+    )
     return { generatedKeys, actions }
   }
 

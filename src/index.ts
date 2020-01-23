@@ -1,5 +1,6 @@
 import * as crypto from './crypto'
 import { ChainFactory } from './chainFactory'
+import { ChainError } from './errors'
 import { Account, Chain, CreateAccount, Transaction } from './interfaces'
 import * as EosV18 from './chains/eos_1_8'
 import { ChainEosV18 } from './chains/eos_1_8/ChainEosV18'
@@ -16,6 +17,7 @@ export {
   Chain,
   ChainEosV18,
   ChainEthereumV1,
+  ChainError,
   ChainFactory,
   ChainType,
   CreateAccount,

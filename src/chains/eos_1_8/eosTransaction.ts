@@ -346,7 +346,6 @@ export class EosTransaction implements Transaction {
     return this.addPublicKeysToAuths(requiredAuthsArray)
   }
 
-
   // TODO: This code only works if the firstPublicKey is the only required Key
   // ... this function and hasSignatureForAuthorization must be rewritten to look for weights
   // ... and the publicKeyCache approach needs to handle multiple keys per permission
