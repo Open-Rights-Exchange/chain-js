@@ -8,6 +8,7 @@ import { stringifySafe } from '../../helpers'
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export const ChainErrorRegExs: { [key: string]: string } = {
   AccountCreationFailedAlreadyExists: 'account_name_exists_exception',
+  AuthInvalid: 'authority_type_exception', // the permission isnt valid (or permission already exists in an account)
   AuthUnsatisfied: 'unsatisfied_authorization', // all permission or keys needed for transaction weren't provided
   AuthMissing: 'missing_auth_exception', // missing permission or key
   BlockDoesNotExist: 'unknown_block_exception',

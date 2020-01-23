@@ -1,4 +1,4 @@
-import { EosEntityName, EosPermissionSimplified, EosPermission } from './generalModels'
+import { EosEntityName, EosPermission } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
 
 export type LinkPermissionsParams = {

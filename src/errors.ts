@@ -5,10 +5,15 @@ import { stringifySafe } from './helpers'
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export enum ChainErrorType {
   AccountCreationFailedAlreadyExists = 'AccountCreationFailedAlreadyExists',
-  AuthUnsatisfied = 'AuthUnsatisfied', // all permission or keys needed for transaction weren't provided
-  AuthMissing = 'AuthMissing', // missing permission or key
+  /** authority is not valid */
+  AuthInvalid = 'AuthInvalid',
+  /** missing permission or key */
+  AuthMissing = 'AuthMissing',
+  /** all permission or keys needed for transaction weren't provided */
+  AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
-  TxExceededResources = 'TxExceededResources', // includes all EOS resources
+  /** includes all EOS resources */
+  TxExceededResources = 'TxExceededResources',
   PermissionAlreadyLinked = 'PermissionAlreadyLinked',
   PermissionNotLinked = 'PermissionNotLinked',
   PermissionDeleteFailedInUse = 'PermissionDeleteFailedInUse',
@@ -22,7 +27,8 @@ export enum ChainErrorType {
   MiscBlockProducerError = 'MiscBlockProducerError',
   MiscWhitelistBlackListError = 'MiscWhitelistBlackListError',
   MiscNodeError = 'MiscNodeError',
-  UnknownError = 'UnknownError', // matches anything - this is the catch all if nothing else matches
+  /** matches anything - this is the catch all if nothing else matches */
+  UnknownError = 'UnknownError',
 }
 
 /** Holds detailed error information */
