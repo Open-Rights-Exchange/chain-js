@@ -248,6 +248,8 @@ export class EosTransaction implements Transaction {
     return !isNullOrEmpty(this.signatures)
   }
 
+  // TODO: Fix this logic - should evaluate the weights of keys in each EOSAuthorization
+  // As written, the assumption is that if a public key is in the auth, it is required, but no neccesarily - if the threshold is already met with existing keys
   /** Whether there is an attached signature for every authorization (e.g. account/permission) in all actions */
   public get hasAllRequiredSignatures(): boolean {
     this.assertIsValidated()
@@ -344,6 +346,10 @@ export class EosTransaction implements Transaction {
     return this.addPublicKeysToAuths(requiredAuthsArray)
   }
 
+
+  // TODO: This code only works if the firstPublicKey is the only required Key
+  // ... this function and hasSignatureForAuthorization must be rewritten to look for weights
+  // ... and the publicKeyCache approach needs to handle multiple keys per permission
   /** Fetch the public key (from the chain) for the provided account and permission
    *  Also caches permission/publicKey mappings - the cache can be set externally via appendPublicKeyCache
    */
@@ -357,7 +363,7 @@ export class EosTransaction implements Transaction {
     } else {
       const account = await this.getAccount(accountName)
       const permission = account?.permissions.find(p => p.name === permissionName)
-      publicKey = toEosPublicKey(permission?.publicKey)
+      publicKey = toEosPublicKey(permission?.firstPublicKey)
       // save key to map cache
       this.appendPublicKeyCache([{ accountName, permissionName, publicKey }])
     }

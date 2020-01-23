@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-restricted-syntax */
 import {
   EosEntityName,
@@ -11,13 +12,15 @@ import {
   ReplacePermissionKeysParams,
   LinkPermissionsParams,
   UnlinkPermissionsParams,
+  EosPermission,
+  EosRequiredAuthorization,
 } from './models'
 import { EosChainState } from './eosChainState'
 import { composeAction } from './eosCompose'
 import { throwNewError } from '../../errors'
 import { generateKeyPairAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty } from '../../helpers'
-import { isEosPermissionStruct, toEosEntityName } from './helpers'
+import { toEosEntityName } from './helpers'
 import { ChainActionType } from '../../models'
 
 export class PermissionsHelper {
@@ -59,16 +62,12 @@ export class PermissionsHelper {
   composeAddPermissionActions(
     authAccount: EosEntityName,
     authPermission: EosEntityName,
-    permissionsToAdd: Partial<EosPermissionSimplified>[] | EosPermissionStruct[] = [],
-    appendKeyToExistingPermission: boolean = false
+    permissionsToAdd: Partial<EosPermissionSimplified>[] = [],
+    appendKeyToExistingPermission: boolean = false,
   ): EosActionStruct[] {
     const updateAuthActions: EosActionStruct[] = []
     let usePermissionsToAdd = permissionsToAdd
 
-    // convert struct to simplified
-    if (isEosPermissionStruct(permissionsToAdd)) {
-      usePermissionsToAdd = (permissionsToAdd as EosPermissionStruct[]).map(p => this.permissionsStructToSimplified(p))
-    }
     // tell Typescript that permissionsToAdd is now always EosPermissionSimplified[]
     usePermissionsToAdd = permissionsToAdd as EosPermissionSimplified[]
 
@@ -262,18 +261,19 @@ export class PermissionsHelper {
     return { generatedKeys, permissionsToAdd }
   }
 
-  /** Converts an EosPermissionStruct to EosPermissionSimplified */
-  // TODO - support more than one key er struct
-  permissionsStructToSimplified = (permissionStruct: EosPermissionStruct): EosPermissionSimplified => {
-    const { parent, perm_name: name, required_auth: requiredAuth } = permissionStruct
-    const firstPublicKey: any = requiredAuth.keys[0] || {}
-    const { key, weight } = firstPublicKey
-    return {
-      name,
-      parent,
-      publicKey: key,
-      publicKeyWeight: weight,
-      threshold: requiredAuth.threshold,
+  /** Convert raw account permissions strucutre to EOSPermission */
+  static mapPermissionStructToEosPermission = (accountPermissionStruct: EosPermissionStruct): EosPermission => {
+    const { parent, perm_name: name, required_auth } = accountPermissionStruct
+    const requiredAuth: EosRequiredAuthorization = {
+      ...required_auth,
+      // only field that needs to change is to rename camel case wait_sec
+      waits: required_auth.waits.map(w => ({ waitSec: w.wait_sec, weight: w.weight })),
     }
+    const { threshold, keys } = requiredAuth
+    const { key: firstPublicKey, weight: firstPublicWeight } = keys[0] || {}
+    const firstPublicKeyMeetsThreshold = firstPublicWeight >= threshold
+    const eosPermission = { firstPublicKey, firstPublicKeyMeetsThreshold, name, parent, requiredAuth }
+
+    return eosPermission
   }
 }
