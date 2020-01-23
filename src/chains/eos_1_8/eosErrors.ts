@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 import { RpcError } from 'eosjs'
-import { ChainError, ChainErrorType } from '../../errors'
+import { ChainError } from '../../errors'
 import { stringifySafe } from '../../helpers'
+import { ChainErrorType } from '../../models'
 
 // subset of errors from EOS chain - https://github.com/EOSIO/eos/blob/master/libraries/chain/include/eosio/chain/exceptions.hpp
 // IMPORTANT: These are in order of importance

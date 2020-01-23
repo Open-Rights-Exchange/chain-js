@@ -1,7 +1,7 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
 import { JsonRpc, RpcError } from 'eosjs'
 import { mapChainError } from '../eosErrors'
-import { ChainErrorType } from '../../../errors'
+import { ChainErrorType } from '../../../models'
 
 describe('Error mapping', () => {
   const endpoint = 'http://localhost'
