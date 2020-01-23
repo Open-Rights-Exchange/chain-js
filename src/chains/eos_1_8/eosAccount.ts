@@ -11,6 +11,7 @@ import {
   LinkPermissionsParams,
   DeletePermissionsParams,
   UnlinkPermissionsParams,
+  EosPermission,
 } from './models'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
@@ -42,8 +43,8 @@ export class EosAccount implements Account {
     const unusedAccountPublicKey = this._chainState?.chainSettings?.unusedAccountPublicKey
     this.assertHasAccount()
     // check that the public active key matches the unused public key marker
-    const { publicKey } = this.permissions.find(perm => perm.name === toEosEntityName('active'))
-    return publicKey === unusedAccountPublicKey
+    const { firstPublicKey } = this.permissions.find(perm => perm.name === toEosEntityName('active'))
+    return firstPublicKey === unusedAccountPublicKey
   }
 
   /** Account name */
@@ -54,7 +55,9 @@ export class EosAccount implements Account {
   /** Public Key(s) associated with the account */
   get publicKeys(): EosPublicKey[] {
     this.assertHasAccount()
-    return this.permissions?.map(p => p.publicKey)
+    const allPublicKeys: EosPublicKey[] = []
+    this.permissions?.forEach(p => p.requiredAuth.keys.forEach(k => allPublicKeys.concat(k.key)))
+    return allPublicKeys
   }
 
   /** Tries to retrieve the account from the chain
@@ -109,13 +112,13 @@ export class EosAccount implements Account {
    *  only returns the first key for each permission
    *  Hint: if publicKeyWeight != 1, then there might be another key for that permission
    */
-  get permissions(): EosPermissionSimplified[] {
-    return this._account?.permissions.map(p => this._permHelper.permissionsStructToSimplified(p))
+  get permissions(): EosPermission[] {
+    return this._account?.permissions.map(p => PermissionsHelper.mapPermissionStructToEosPermission(p))
   }
 
   /** Return permission details if account has it attached 
       Or null otherwise */
-  hasPermission(permissionName: EosEntityName): EosPermissionSimplified {
+  hasPermission(permissionName: EosEntityName): EosPermission {
     return this.permissions?.find(p => p.name === permissionName) || null
   }
 
@@ -135,7 +138,10 @@ export class EosAccount implements Account {
     // filter out permissions already on this account
     if (skipExistingPermissions) {
       usePermissionsToUpdate = permissionsToUpdate.filter(
-        pu => !this.permissions.some(p => p.name === pu.name && p.parent === pu.parent && p.publicKey === pu.publicKey),
+        pu =>
+          !this.permissions.some(
+            p => p.name === pu.name && p.parent === pu.parent && p.requiredAuth.keys.some(k => k.key === pu.publicKey),
+          ),
       )
     }
     // generate new keys for each new permission if needed

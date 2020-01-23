@@ -41,3 +41,31 @@ export type EosNewKeysOptions = {
   password?: string
   salt?: string
 }
+
+export type EosPermission = {
+  name: EosEntityName
+  parent: EosEntityName
+  firstPublicKey: EosPublicKey
+  firstPublicKeyMeetsThreshold: boolean
+  requiredAuth: EosRequiredAuthorization
+}
+
+/** EOS Data Structure for the Required Authorization for a permission - i.e. includes required accounts, permissions, and weights */
+export type EosRequiredAuthorization = {
+  threshold: number
+  accounts: {
+    permission: {
+      actor: EosEntityName
+      permission: EosEntityName
+    }
+    weight: number
+  }[]
+  keys: {
+    key: EosPublicKey
+    weight: number
+  }[]
+  waits: {
+    waitSec: number
+    weight: number
+  }[]
+}

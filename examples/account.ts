@@ -4,10 +4,15 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
 import { ChainEndpoint, ChainSettings, NewAccountType } from '../src/models'
-import { EosPrivateKey, EosNewAccountType, EosActionStruct } from '../src/chains/eos_1_8/models'
+import {
+  EosPrivateKey,
+  EosNewAccountType,
+  EosActionStruct,
+  LinkPermissionsParams,
+  DeletePermissionsParams,
+} from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
-import { DeletePermissionsParams, LinkPermissionsParams } from '../src/chains/eos_1_8/eosPermissionsHelper'
 import { toEosEntityName, toEosAsset, toEosPublicKey } from '../src/chains/eos_1_8/helpers'
 
 require('dotenv').config()
