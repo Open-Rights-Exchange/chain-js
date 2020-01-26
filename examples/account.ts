@@ -10,6 +10,7 @@ import {
   EosActionStruct,
   LinkPermissionsParams,
   DeletePermissionsParams,
+  UnlinkPermissionsParams,
 } from '../src/chains/eos_1_8/models'
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
@@ -190,9 +191,23 @@ export const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
   {
     permissionName: toEosEntityName('n2permission'),
   },
-  // {
-  //   permissionName: toEosEntityName('n3permission'),
-  // },
+  {
+    permissionName: toEosEntityName('n3permission'),
+  },
+]
+
+export const accountDeleteDemoPermissions: Partial<DeletePermissionsParams>[] = [
+  {
+    permissionName: toEosEntityName('appdemoappli'),
+  },
+]
+
+export const accountUnlinkDemoPermissions: UnlinkPermissionsParams[] = [
+  {
+    permissionName: toEosEntityName('appdemoappli'),
+    contract: toEosEntityName('demoapphello'),
+    action: toEosEntityName('hi'),
+  },
 ]
 
 export const accountLinkPermissions: LinkPermissionsParams[] = [
@@ -290,6 +305,14 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
   // const actions = await account.composeDeletePermissionsActions(toEosEntityName('owner'), accountDeletePermissions)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
+  // console.log('response:', await transaction.send())
+
+  // -----> Unlink and Delete Permissions
+  // const account = (await kylin.new.Account('ore1qctfkfhw')) as EosAccount
+  // const actionsUnlink = await account.composeUnlinkPermissionsActions(toEosEntityName('owner'), accountUnlinkDemoPermissions)
+  // const actionsDelete = await account.composeDeletePermissionsActions(toEosEntityName('owner'), accountDeleteDemoPermissions)
+  // const transaction = await prepTransactionFromActions(kylin, [...actionsUnlink, ...actionsDelete], env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+  // console.log('actionsDelete:', JSON.stringify(actionsDelete))
   // console.log('response:', await transaction.send())
 
   // -----> link Permissions
