@@ -1,4 +1,4 @@
-import { TransactionOptions, ConfirmType } from '../models'
+import { TransactionOptions, ConfirmType, Signature, PublicKey, PrivateKey } from '../models'
 
 /**
  * The Transaction interface declares the operations that all concrete chain (chain)transaction classes must implement
@@ -38,12 +38,12 @@ export interface Transaction {
    *  since it would invalidate existing signatures. */
   addAction(action: any, asFirstAction?: boolean): void
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignature(signature: string): void
+  addSignatures(signature: Signature[]): void
   /** Whether there is an attached signature for the publicKey for the authorization (e.g. account/permission)
    *  May need to call chain (async) to fetch publicKey(s) for authorization(s) */
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
-  hasSignatureForPublicKey(publicKey: string): boolean
+  hasSignatureForPublicKey(publicKey: PublicKey): boolean
   /** Generates a serialized transaction (using actions already attached)
    *  uses eosjs.transact which fetches action and account info from the chain */
   generateSerialized(): Promise<void>
@@ -54,7 +54,7 @@ export interface Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
   send(waitForConfirm?: ConfirmType): Promise<any>
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  sign(privateKeys: string[]): void
+  sign(privateKeys: PrivateKey[]): void
   /** JSON representation of transaction data */
   toJson(): ConfirmType.None
   /** Verifies that all accounts and permisison for actions exist on chain.

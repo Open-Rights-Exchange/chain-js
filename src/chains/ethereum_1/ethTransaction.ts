@@ -174,13 +174,8 @@ export class EthereumTransaction implements Transaction {
     this._signatures = new Set<any>(signatures)
   }
 
-  addSignature(signature: any): void {
-    this.assertValidSignature(signature)
-    if (this._signatures) {
-      this._signatures.add(signature)
-    } else {
-      this._signatures = new Set<any>([signature])
-    }
+  addSignatures = (signatures: any[]): void => {
+    throwNewError('Not Implemented')
   }
 
   private assertValidSignature = (signature: any) => {
