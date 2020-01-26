@@ -99,8 +99,8 @@ export type EosActionStruct = {
     actor: EosEntityName
     permission: EosEntityName
   }[]
-  data: any
-  hex_data: string
+  data?: any
+  hex_data?: string
 }
 
 /** EOS Raw Data Structure for chain transaction - i.e. including header, actions, and keys */
