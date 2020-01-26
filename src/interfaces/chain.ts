@@ -12,6 +12,7 @@ import {
   PrivateKey,
   Signature,
   EncryptedDataString,
+  TransactionOptions,
 } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
@@ -52,7 +53,7 @@ export interface Chain {
     /** Return a new CreateAccount object used to help with creating a new chain account */
     CreateAccount(): CreateAccount
     /** Return a chain Transaction object used to compose and send transactions */
-    Transaction(options?: any): Transaction
+    Transaction(options?: TransactionOptions): Transaction
   }
 
   // Chain Crypto functions
@@ -96,6 +97,8 @@ export interface Chain {
   toPrivateKey(value: string): PrivateKey
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
   toEncryptedDataString(value: any): EncryptedDataString
+  /** Ensures that the value comforms to a well-formed signature */
+  toSignature(value: string): Signature
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError
