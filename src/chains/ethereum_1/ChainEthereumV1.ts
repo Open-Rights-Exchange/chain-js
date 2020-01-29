@@ -137,6 +137,8 @@ class ChainEthereumV1 implements Chain {
 
   toPrivateKey = notImplemented
 
+  toSignature = notImplemented
+
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
     return new ChainError(null, null, null)

@@ -33,3 +33,10 @@ export function toEosPrivateKey(value: string): EosPrivateKey {
   }
   throw new Error(`Not a valid EOS private key:${value}.`)
 }
+
+export function toEosSignature(value: string): EosSignature {
+  if (isValidEosSignature(value)) {
+    return value
+  }
+  throw new Error(`Not a valid EOS signature:${value}.`)
+}

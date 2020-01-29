@@ -10,6 +10,7 @@ import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '..
 import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
 import { EosTransaction } from '../src/chains/eos_1_8/eosTransaction'
 import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
+import { toEncryptedDataString } from '../src/crypto'
 
 require('dotenv').config()
 
@@ -51,10 +52,10 @@ const { env } = process
   const sampleSerializedTransaction =
     '{"serializedTransaction":{"0":46,"1":143,"2":11,"3":94,"4":147,"5":127,"6":71,"7":23,"8":9,"9":176,"10":0,"11":0,"12":0,"13":0,"14":1,"15":64,"16":99,"17":84,"18":173,"19":86,"20":67,"21":165,"22":74,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":128,"30":107,"31":1,"32":224,"33":214,"34":98,"35":117,"36":25,"37":27,"38":212,"39":165,"40":224,"41":98,"42":173,"43":134,"44":74,"45":149,"46":106,"47":53,"48":8,"49":224,"50":214,"51":98,"52":117,"53":25,"54":27,"55":212,"56":165,"57":0},"signatures":["SIG_K1_K7dahqzaYaZYCqvYFW2jEPMPZS5etQHAbgYu9CTFwvJy7xSzuZ3u7oAuSkrNEo4ZXUMqZpeAmpvqEbd3bfpCHdHHXRGavc"]}'
   const sampleActionsDemoApp = JSON.parse(
-    '{"account":"demoapphello","name":"hi","authorization":[{"actor":"ore1qafpgffi","permission":"appdemoappli"}],"data":{"user":"ore1qafpgffi"}}',
+    '{"account":"demoapphello","name":"hi","authorization":[{"actor":"ore1qctfkfhw","permission":"appdemoappli"}],"data":{"user":"ore1qctfkfhw"}}',
   )
   const sampleActionFirstAuth = JSON.parse(
-    '{"account":"createbridge","name":"ping","authorization":[{"actor":"proppropprop","permission":"active"}],"data":{"from":"ore1qafpgffi"}}',
+    '{"account":"createbridge","name":"ping","authorization":[{"actor":"proppropprop","permission":"active"}],"data":{"from":"ore1qctfkfhw"}}',
   )
   const sampleActionData_UpdateAuthSetActiveToUnused = JSON.parse(
     '{"account":"eosio","name":"updateauth","authorization":[{"actor":"ore1qadesjxm","permission":"owner"}],"data":{"account":"ore1qadesjxm","permission":"active","parent":"owner","auth":{"accounts":[],"keys":[{"key":"EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma","weight":1}],"threshold":1,"waits":[]}}}',
@@ -62,9 +63,10 @@ const { env } = process
   const { serializedTransaction, signatures } = JSON.parse(sampleSerializedTransaction)
 
   // privateKeyEncryptionMethod salt - eks0
-  const ore1qafpgffi_privateKeyEncrypted =
-    '{"iv":"khoV+oSVlnBFK4YsUC+15Q==","v":1,"iter":10000,"ks":128,"ts":64,"mode":"gcm","adata":"","cipher":"aes","ct":"K2b/Zcrnby9wF8GAUd6HQyQW2fwACCK/UvjORd3jqApXm71nQhDZUtHu2C3ljjYb2JpvBt7jRvBzqWQ="}'
-  const ore1qafpgffi_salt = env.EOS_KYLIN_PW_SALT_V0
+  const ore1qctfkfhw_privateKeyEncrypted = toEncryptedDataString(
+    '{"iv":"hc3XuKumuzYchpF2Rfa5bw==","v":1,"iter":10000,"ks":128,"ts":64,"mode":"gcm","adata":"","cipher":"aes","salt":"gZ3SFYyR6ZU=","ct":"/0dtw1W3L2fekTZl5/mQ6Ulx7acSHZ0GOfv3vvdE8OgwuRD9KwsWKJbQhKizwsQoMyoyGiIXsXasB7o="}',
+  )
+  const ore1qctfkfhw_salt = env.EOS_KYLIN_PW_SALT_V0
 
   const transferTokenOptions = {
     contractName: toEosEntityName('eosio.token'),
@@ -101,7 +103,7 @@ const { env } = process
   // await transaction.generateSerialized()
   // await transaction.validate()
   // transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
-  // console.log('missing signatures:', await transaction.missingSignatures)
+  // console.log('missing signatures:', transaction.missingSignatures)
   // console.log('send response:', await transaction.send())
 
   // ---> send token
@@ -115,10 +117,23 @@ const { env } = process
   // console.log('send response:', await transaction.send())
   // ----<
 
+  // ---> demo transaction
+  // const transaction = kylin.new.Transaction()
+  // transaction.actions = [sampleActionsDemoApp]
+  // // transaction.addAction(sampleActionFirstAuth, true)
+  // await transaction.generateSerialized()
+  // await transaction.validate()
+  // transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
+  // console.log('missing signatures:', await transaction.missingSignatures)
+  // console.log('send response:', await transaction.send())
+  // ----<
+
   // add user's signature from encrypted key
-  // const ore1qafpgffi_sig = kylin.crypto.decrypt(ore1qafpgffi_privateKeyEncrypted, '2233', ore1qafpgffi_salt)
-  // console.log('ore1qafpgffi_sig:', ore1qafpgffi_sig)
-  // transaction.addSignature(ore1qafpgffi_sig)
+  // const ore1qctfkfhw_sig = kylin.toPrivateKey(
+  //   kylin.decrypt(ore1qctfkfhw_privateKeyEncrypted, '2233', ore1qctfkfhw_salt),
+  // )
+  // console.log('ore1qctfkfhw_sig:', ore1qctfkfhw_sig)
+  // transaction.sign([ore1qctfkfhw_sig])
   // console.log('sign buffer', transaction.signBuffer)
 
   // ----<

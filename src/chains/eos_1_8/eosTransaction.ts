@@ -218,13 +218,17 @@ export class EosTransaction implements Transaction {
   }
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignature(signature: EosSignature): void {
-    this.assertValidSignature(signature)
-    if (this._signatures) {
-      this._signatures.add(signature)
-    } else {
-      this._signatures = new Set<EosSignature>([signature])
-    }
+  addSignatures(signatures: EosSignature[]): void {
+    if (isNullOrEmpty(signatures)) return
+    signatures.forEach(signature => {
+      this.assertValidSignature(signature)
+    })
+    const newSignatures = new Set<EosSignature>()
+    signatures.forEach(signature => {
+      newSignatures.add(signature)
+    })
+    // add to existing collection of signatures
+    this._signatures = new Set<EosSignature>([...(this._signatures || []), ...newSignatures])
   }
 
   /** Throws if signatures isn't properly formatted */
@@ -312,7 +316,7 @@ export class EosTransaction implements Transaction {
     // sign the signBuffer using the private key
     privateKeys.forEach(pk => {
       const signature = cryptoSign(this._signBuffer, pk)
-      this.addSignature(signature)
+      this.addSignatures([signature])
     })
   }
 
@@ -362,6 +366,9 @@ export class EosTransaction implements Transaction {
     } else {
       const account = await this.getAccount(accountName)
       const permission = account?.permissions.find(p => p.name === permissionName)
+      if (!permission?.firstPublicKey) {
+        throwNewError(`Account ${accountName} doesn't have a permission named ${permissionName}.`)
+      }
       publicKey = toEosPublicKey(permission?.firstPublicKey)
       // save key to map cache
       this.appendPublicKeyCache([{ accountName, permissionName, publicKey }])

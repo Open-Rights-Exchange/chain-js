@@ -11,6 +11,7 @@ import {
   ChainDate,
   PublicKey,
   PrivateKey,
+  Signature,
 } from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
@@ -27,6 +28,7 @@ import {
   isValidEosPublicKey,
   toEosPublicKey,
   toEosPrivateKey,
+  toEosSignature,
   isValidEosEntityName,
   isValidEosAsset,
   isValidEosDate,
@@ -254,6 +256,14 @@ class ChainEosV18 implements Chain {
 
   /** Ensures that the value comforms to a well-formed EOS private Key */
   toEosPrivateKey = toEosPrivateKey
+
+  /** Ensures that the value comforms to a well-formed EOS signature */
+  public toSignature = (value: string): Signature => {
+    return this.toEosSignature(value) as Signature
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS private Key */
+  toEosSignature = toEosSignature
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this
