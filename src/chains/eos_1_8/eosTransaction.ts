@@ -366,6 +366,9 @@ export class EosTransaction implements Transaction {
     } else {
       const account = await this.getAccount(accountName)
       const permission = account?.permissions.find(p => p.name === permissionName)
+      if (!permission?.firstPublicKey) {
+        throwNewError(`Account ${accountName} doesn't have a permission named ${permissionName}.`)
+      }
       publicKey = toEosPublicKey(permission?.firstPublicKey)
       // save key to map cache
       this.appendPublicKeyCache([{ accountName, permissionName, publicKey }])
