@@ -117,6 +117,17 @@ const { env } = process
   // console.log('send response:', await transaction.send())
   // ----<
 
+  // ---> demo transaction
+  // const transaction = kylin.new.Transaction()
+  // transaction.actions = [sampleActionsDemoApp]
+  // // transaction.addAction(sampleActionFirstAuth, true)
+  // await transaction.generateSerialized()
+  // await transaction.validate()
+  // transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
+  // console.log('missing signatures:', await transaction.missingSignatures)
+  // console.log('send response:', await transaction.send())
+  // ----<
+
   // add user's signature from encrypted key
   // const ore1qctfkfhw_sig = kylin.toPrivateKey(
   //   kylin.decrypt(ore1qctfkfhw_privateKeyEncrypted, '2233', ore1qctfkfhw_salt),

@@ -243,6 +243,10 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow, createAccountOptions_createBridge)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
+  // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
+  // console.log('deserialized transaction: ', createAccount.transaction.toJson())
+  // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
+
 
   // -----> CreateAccount - create native kylin account
   // const createAccount = kylin.new.CreateAccount()
