@@ -21,7 +21,6 @@ export type ReplacePermissionKeysParams = {
 }
 
 export type UnlinkPermissionsParams = {
-  permissionName: EosEntityName
   contract: EosEntityName
   action: string
 }
