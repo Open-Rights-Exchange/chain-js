@@ -54,12 +54,12 @@ export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey:
 }
 
 /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
- * The encrypted value is a stringified JSON object */
+ * The encrypted value is either a stringified JSON object or a JSON object */
 export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
   return decryptWithKey(encrypted, deriveKey(password, salt))
 }
 
-/** Encrypts the EOS private key with the derived key  */
+/** Encrypts the private key with the derived key  */
 export function encryptWithKey(unencrypted: string, derivedKey: sjcl.BitArray): sjcl.SjclCipherEncrypted {
   const params = { mode: 'gcm' } as sjcl.SjclCipherEncryptParams
   const encrypted = JSON.parse(sjcl.encrypt(derivedKey, unencrypted, params) as any)
