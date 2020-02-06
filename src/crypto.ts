@@ -1,5 +1,6 @@
 import sjcl from 'sjcl'
 import { EncryptedDataString } from './models'
+import { isAString } from './helpers'
 
 /** Convert a string to a sjcl.BitArray */
 export function stringToBitArray(value: string): sjcl.BitArray {
@@ -15,6 +16,7 @@ export function bitArrayToString(value: sjcl.BitArray): string {
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
   return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/i) !== null
 }
@@ -27,32 +29,38 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
   throw new Error(`Not valid encrypted data string:${value}`)
 }
 
+// NOTE Passing in at least an empty string for the salt, will prevent cached keys, which can lead to false positives in the test suite
 /** Derive the key used for encryption/decryption */
-export function deriveKey(password: string, salt: string): string {
-  // NOTE Passing in at least an empty string for the salt, will prevent cached keys, which can lead to false positives in the test suite
-  const saltArray = stringToBitArray(salt || '')
-  const params = { iter: 1000, salt: saltArray }
+export function deriveKey(password: string, salt: string): sjcl.BitArray {
+  // Alternative way of handling salt - does not work with existing encypted values
+  // const saltArray = stringToBitArray(salt || '')
+  // const params = { iter: 1000, salt: saltArray }
+  const params = { iter: 1000, salt }
   const { key } = sjcl.misc.cachedPbkdf2(password, params)
-  // convert the key:BitArray returned from cachedPbkdf2 into a string
-  const keyString = bitArrayToString(key)
-  return keyString
+  // Alternative way of handling salt - part 2 - convert the key:BitArray returned from cachedPbkdf2 into a string
+  // const keyString = bitArrayToString(key); return keyString;
+  return key
 }
 
 /** Decrypts the encrypted value with the derived key */
-export function decryptWithKey(encrypted: EncryptedDataString, derivedKey: string): string {
-  const parsedObject = JSON.parse(encrypted)
+export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey: sjcl.BitArray): string {
+  let parsedObject = encrypted
+  if (isAString) {
+    parsedObject = JSON.parse(encrypted)
+  }
   const encryptedData = { ...parsedObject, mode: 'gcm' } as sjcl.SjclCipherEncrypted
-  return sjcl.decrypt(derivedKey, JSON.stringify(encryptedData))
+  const encryptedDataString = JSON.stringify(encryptedData)
+  return sjcl.decrypt(derivedKey, encryptedDataString)
 }
 
 /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
  * The encrypted value is a stringified JSON object */
-export function decrypt(encrypted: EncryptedDataString, password: string, salt: string): string {
+export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
   return decryptWithKey(encrypted, deriveKey(password, salt))
 }
 
 /** Encrypts the EOS private key with the derived key  */
-export function encryptWithKey(unencrypted: string, derivedKey: string): sjcl.SjclCipherEncrypted {
+export function encryptWithKey(unencrypted: string, derivedKey: sjcl.BitArray): sjcl.SjclCipherEncrypted {
   const params = { mode: 'gcm' } as sjcl.SjclCipherEncryptParams
   const encrypted = JSON.parse(sjcl.encrypt(derivedKey, unencrypted, params) as any)
   return encrypted
