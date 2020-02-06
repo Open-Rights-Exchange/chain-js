@@ -36,7 +36,7 @@ import {
   toEosAsset,
   toEosDate,
 } from './helpers'
-import { EosEntityName } from './models'
+import { EosEntityName, EosDate } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -234,7 +234,7 @@ class ChainEosV18 implements Chain {
   toEosEntityName = toEosEntityName
 
   /** Ensures that the value comforms to a well-formed chain date string */
-  public toDate = (value: string): ChainDate => {
+  public toDate = (value: string | Date | EosDate): ChainDate => {
     return toEosDate(value) as ChainDate
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@open-rights-exchange/chainjs",
-  "version": "0.9.18",
+  "version": "0.9.20",
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "main": "./dist/index.js",
   "scripts": {
@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "@types/node-fetch": "^2.5.4",
-    "@types/sjcl": "^1.0.28",
     "@types/text-encoding": "0.0.35",
     "dotenv": "^8.0.0",
     "eosjs": "^20.0.0",

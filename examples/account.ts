@@ -204,7 +204,6 @@ export const accountDeleteDemoPermissions: Partial<DeletePermissionsParams>[] = 
 
 export const accountUnlinkDemoPermissions: UnlinkPermissionsParams[] = [
   {
-    permissionName: toEosEntityName('appdemoappli'),
     contract: toEosEntityName('demoapphello'),
     action: toEosEntityName('hi'),
   },
@@ -246,7 +245,6 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
   // console.log('deserialized transaction: ', createAccount.transaction.toJson())
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
-
 
   // -----> CreateAccount - create native kylin account
   // const createAccount = kylin.new.CreateAccount()

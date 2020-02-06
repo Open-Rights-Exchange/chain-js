@@ -90,7 +90,7 @@ export interface Chain {
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
   toEntityName(value: string): ChainEntityName
   /** Ensures that the value comforms to a well-formed chain date string */
-  toDate(value: string): ChainDate
+  toDate(value: string | Date): ChainDate
   /** Ensures that the value comforms to a well-formed public Key */
   toPublicKey(value: string): PublicKey
   /** Ensures that the value comforms to a well-formed private Key */
