@@ -79,7 +79,7 @@ export class EosAccount implements Account {
       account = await this._chainState.rpc.get_account(accountName)
     } catch (error) {
       const chainError = mapChainError(error)
-      chainError.message = `problem fetching account:${accountName} from chain`
+      chainError.message = `problem fetching account:${accountName} from chain: ${chainError.message}`
       throw chainError
     }
 
