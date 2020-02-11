@@ -85,6 +85,10 @@ export class EosTransaction implements Transaction {
 
   public async generateSerialized(): Promise<void> {
     this.assertIsConnected()
+    // if already serialized, then dont do it again
+    if (this._serialized) {
+      return
+    }
     this.assertNoSignatures()
     if (!this._actions) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
@@ -116,7 +120,7 @@ export class EosTransaction implements Transaction {
       const { actions: txActions, deserializedTransaction: txHeader } = await this.deserializeWithActions(useSerialized)
       this._header = txHeader
       this._actions = txActions
-      this._serialized = serialized
+      this._serialized = useSerialized
       this._isValidated = false
       this.setSignBuffer()
     }
