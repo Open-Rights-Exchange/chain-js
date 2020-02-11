@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-useless-escape */
 /* eslint-disable import/order */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/camelcase */

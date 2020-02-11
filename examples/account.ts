@@ -237,6 +237,11 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
 
   // -------------------- Create Account -----------------------
 
+  // -----> List public keys in account
+  // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
+  // console.log('account permissions :', account.permissions)
+  // console.log('account public keys:', account.publicKeys)
+
   // -----> CreateAccount - createbridge
   // const createAccount = kylin.new.CreateAccount()
   // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow, createAccountOptions_createBridge)

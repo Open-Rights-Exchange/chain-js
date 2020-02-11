@@ -55,9 +55,10 @@ export class EosAccount implements Account {
   /** Public Key(s) associated with the account */
   get publicKeys(): EosPublicKey[] {
     this.assertHasAccount()
-    const allPublicKeys: EosPublicKey[] = []
-    this.permissions?.forEach(p => p.requiredAuth.keys.forEach(k => allPublicKeys.concat(k.key)))
-    return allPublicKeys
+    // unique set of public keys across all permissions
+    const allPublicKeys = new Set<EosPublicKey>()
+    this.permissions?.forEach(p => p.requiredAuth.keys.forEach(k => allPublicKeys.add(k.key)))
+    return [...allPublicKeys]
   }
 
   /** Tries to retrieve the account from the chain
@@ -79,7 +80,7 @@ export class EosAccount implements Account {
       account = await this._chainState.rpc.get_account(accountName)
     } catch (error) {
       const chainError = mapChainError(error)
-      chainError.message = `problem fetching account:${accountName} from chain`
+      chainError.message = `problem fetching account:${accountName} from chain: ${chainError.message}`
       throw chainError
     }
 

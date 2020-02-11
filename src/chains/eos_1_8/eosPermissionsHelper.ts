@@ -68,11 +68,11 @@ export class PermissionsHelper {
     permissionsToAdd: Partial<EosPermissionSimplified>[] = [],
     appendKeyToExistingPermission: boolean = false,
   ): EosActionStruct[] {
+    if (isNullOrEmpty(permissionsToAdd)) return null
     const updateAuthActions: EosActionStruct[] = []
-    let usePermissionsToAdd = permissionsToAdd
 
     // tell Typescript that permissionsToAdd is now always EosPermissionSimplified[]
-    usePermissionsToAdd = permissionsToAdd as EosPermissionSimplified[]
+    const usePermissionsToAdd = permissionsToAdd as EosPermissionSimplified[]
 
     const newPermissions: EosPermissionStruct[] = []
     // TODO: if appendKeyToExistingPermission = true, add the new key to the existing permission's require_auth array
@@ -110,6 +110,7 @@ export class PermissionsHelper {
     permissionsToDelete: DeletePermissionsParams[] = [],
   ): EosActionStruct[] => {
     const delteAuthActions: EosActionStruct[] = []
+    if (isNullOrEmpty(permissionsToDelete)) return null
 
     permissionsToDelete.forEach(auth => {
       const deleteAuthParams = {
@@ -132,6 +133,8 @@ export class PermissionsHelper {
     params: ReplacePermissionKeysParams,
   ): Promise<EosActionStruct> => {
     const { permissionName, parentPermissionName, publicKeys, accountName, accountPermissions } = params
+    if (isNullOrEmpty(accountPermissions)) return null
+
     const permission = accountPermissions.find(p => p.name === permissionName)
     if (!permission)
       throwNewError(
@@ -164,6 +167,7 @@ export class PermissionsHelper {
     permissionsToLink: LinkPermissionsParams[] = [],
   ): EosActionStruct[] => {
     const linkAuthActions: EosActionStruct[] = []
+    if (isNullOrEmpty(permissionsToLink)) return null
 
     permissionsToLink.forEach(link => {
       const linkAuthParams = {
@@ -186,7 +190,9 @@ export class PermissionsHelper {
     authPermission: EosEntityName,
     permissionsToUnlink: UnlinkPermissionsParams[] = [],
   ): EosActionStruct[] => {
+    if (isNullOrEmpty(permissionsToUnlink)) return null
     const unlinkAuthActions: EosActionStruct[] = []
+
     permissionsToUnlink.forEach(link => {
       const unlinkAuthParams = {
         action: link.action,
@@ -267,6 +273,8 @@ export class PermissionsHelper {
   /** Convert raw account permissions strucutre to EOSPermission */
   static mapPermissionStructToEosPermission = (accountPermissionStruct: EosPermissionStruct): EosPermission => {
     const { parent, perm_name: name, required_auth } = accountPermissionStruct
+    if (isNullOrEmpty(required_auth)) return null
+
     const requiredAuth: EosRequiredAuthorization = {
       ...required_auth,
       // only field that needs to change is to rename camel case wait_sec
