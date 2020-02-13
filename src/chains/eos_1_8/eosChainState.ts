@@ -225,6 +225,8 @@ export class EosChainState {
     const signedTransaction = { signatures, serializedTransaction }
     let transaction
 
+    const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
+
     try {
       transaction = await this.rpc.push_transaction(signedTransaction)
     } catch (error) {
@@ -233,7 +235,12 @@ export class EosChainState {
     }
 
     if (useWaitForConfirm !== ConfirmType.None) {
-      transaction = await this.awaitTransaction(transaction, useWaitForConfirm, communicationSettings)
+      transaction = await this.awaitTransaction(
+        transaction,
+        useWaitForConfirm,
+        preCommitHeadBlockNum,
+        communicationSettings,
+      )
     }
 
     return transaction
@@ -247,7 +254,12 @@ export class EosChainState {
         checkInterval = the time between block checks in MS
         getBlockAttempts = the number of failed attempts at retrieving a particular block, before giving up
   */
-  async awaitTransaction(transactionResponse: any, waitForConfirm: ConfirmType, communicationSettings: any) {
+  async awaitTransaction(
+    transactionResponse: any,
+    waitForConfirm: ConfirmType,
+    preCommitHeadBlockNum: number,
+    communicationSettings: any,
+  ) {
     // use default communicationSettings or whatever was passed-in in ChainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
       ...EosChainState.defaultCommunicationSettings,
@@ -259,17 +271,15 @@ export class EosChainState {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
 
-    const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
-
     return new Promise((resolve, reject) => {
       let getBlockAttempt = 1
       // get the chain's current head block number...
       const { processed, transaction_id: transactionId } = transactionResponse || {}
       // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
-      const { block_num: blockNum = preCommitHeadBlockNum } = processed || {}
-      const startingBlockNumToCheck = blockNum - 1
+      const { block_num: blockNumFromTxReceipt } = processed || {}
+      const startingBlockNumToCheck = blockNumFromTxReceipt || preCommitHeadBlockNum
+      let nextBlockNumToCheck = startingBlockNumToCheck - 1
 
-      let blockNumToCheck = startingBlockNumToCheck
       let inProgress = false
 
       // Keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
@@ -279,14 +289,15 @@ export class EosChainState {
           if (inProgress) return
           inProgress = true
           const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
-            blockNumToCheck,
+            nextBlockNumToCheck,
             transactionId,
             waitForConfirm,
           )
           if (hasReachedConfirmLevel) {
             this.resolveAwaitTransaction(resolve, timer, transactionResponse)
           }
-          blockNumToCheck += 1
+          nextBlockNumToCheck += 1
+          inProgress = false
         } catch (error) {
           const mappedError = mapChainError(error)
           if (mappedError.errorType === 'BlockDoesNotExist') {
@@ -296,7 +307,7 @@ export class EosChainState {
                 reject,
                 timer,
                 'maxBlockReadAttemptsTimeout',
-                `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
+                `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${nextBlockNumToCheck}.`,
               )
               return
             }
@@ -305,10 +316,10 @@ export class EosChainState {
             // re-throw error - not one we can handle here
             throw mappedError
           }
-        } finally {
           inProgress = false
         }
-        if (blockNumToCheck > startingBlockNumToCheck + blocksToCheck) {
+
+        if (nextBlockNumToCheck > startingBlockNumToCheck + blocksToCheck) {
           this.rejectAwaitTransaction(
             reject,
             timer,
