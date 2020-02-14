@@ -1,7 +1,6 @@
 [![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/chain-js.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/chain-js)
 
-
-<img src="./docs/images/chainjs_logo.png" width="140" >
+<img src="./docs/images/chainjs_logo.png" width="200" >
 
 # Overview
 
