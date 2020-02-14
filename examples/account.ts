@@ -65,8 +65,8 @@ export const chainSettings = {
   unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
 }
 
-// Kylin createbridge - moonlighting
-export const createAccountOptions_createBridge = {
+// Kylin createescrow - moonlighting
+export const createAccountOptions_createescrow = {
   accountNamePrefix: 'ore',
   creatorAccountName: toEosEntityName('oreidfunding'),
   creatorPermission: toEosEntityName('active'),
@@ -75,7 +75,7 @@ export const createAccountOptions_createBridge = {
     salt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
   createEscrowOptions: {
-    contractName: toEosEntityName('createbridge'),
+    contractName: toEosEntityName('createescrow'),
     appName: 'free',
   },
 }
@@ -104,7 +104,7 @@ export const createAccountOptions_virtualNested = {
     salt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
   createEscrowOptions: {
-    contractName: 'createbridge',
+    contractName: 'createescrow',
     appName: 'free',
   },
   createVirtualNestedOptions: {
@@ -212,12 +212,12 @@ export const accountUnlinkDemoPermissions: UnlinkPermissionsParams[] = [
 export const accountLinkPermissions: LinkPermissionsParams[] = [
   {
     permissionName: toEosEntityName('nwpermission'),
-    contract: toEosEntityName('createbridge'),
+    contract: toEosEntityName('createescrow'),
     action: toEosEntityName('create'),
   },
   {
     permissionName: toEosEntityName('n2permission'),
-    contract: toEosEntityName('createbridge'),
+    contract: toEosEntityName('createescrow'),
     action: toEosEntityName('define'),
   },
 ]
@@ -242,9 +242,9 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('account permissions :', account.permissions)
   // console.log('account public keys:', account.publicKeys)
 
-  // -----> CreateAccount - createbridge
+  // -----> CreateAccount - createescrow
   // const createAccount = kylin.new.CreateAccount()
-  // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow, createAccountOptions_createBridge)
+  // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow, createAccountOptions_createescrow)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('createAccount response: ', await createAccount.transaction.send())
   // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
