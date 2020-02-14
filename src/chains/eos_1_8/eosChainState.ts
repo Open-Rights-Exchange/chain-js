@@ -29,7 +29,9 @@ export class EosChainState {
   private _api: Api // EOSJS chain API endpoint
 
   constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+    // TODO chainjs check for valid settings and throw if bad
     this._endpoints = endpoints
+    // TODO chainjs check for valid settings and throw if bad
     this._chainSettings = settings
   }
 
@@ -223,27 +225,22 @@ export class EosChainState {
     }
 
     const signedTransaction = { signatures, serializedTransaction }
-    let transaction
+    let sendReceipt
 
     const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
 
     try {
-      transaction = await this.rpc.push_transaction(signedTransaction)
+      sendReceipt = await this.rpc.push_transaction(signedTransaction)
     } catch (error) {
       const chainError = mapChainError(error)
       throw chainError
     }
 
     if (useWaitForConfirm !== ConfirmType.None) {
-      transaction = await this.awaitTransaction(
-        transaction,
-        useWaitForConfirm,
-        preCommitHeadBlockNum,
-        communicationSettings,
-      )
+      await this.awaitTransaction(sendReceipt, useWaitForConfirm, preCommitHeadBlockNum, communicationSettings)
     }
 
-    return transaction
+    return sendReceipt
   }
 
   /** Polls the chain until it finds a block that includes the specific transaction
