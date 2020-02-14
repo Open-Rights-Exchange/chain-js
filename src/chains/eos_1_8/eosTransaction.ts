@@ -31,6 +31,8 @@ export class EosTransaction implements Transaction {
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
+  private _sendReceipt: any
+
   private _serialized: Uint8Array
 
   private _signBuffer: Buffer
@@ -72,6 +74,10 @@ export class EosTransaction implements Transaction {
       )
     }
     return this._serialized
+  }
+
+  get sendReceipt() {
+    return this._sendReceipt
   }
 
   /** Whether the transaction has been serialized yet */
@@ -422,10 +428,11 @@ export class EosTransaction implements Transaction {
   // send
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
-  public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
+  public async send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    return this._chainState.sendTransaction(this._serialized, this.signatures, waitForConfirm)
+    this._sendReceipt = await this._chainState.sendTransaction(this._serialized, this.signatures, waitForConfirm)
+    return this._sendReceipt
   }
 
   // helpers
