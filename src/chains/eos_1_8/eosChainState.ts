@@ -227,8 +227,6 @@ export class EosChainState {
     const signedTransaction = { signatures, serializedTransaction }
     let sendReceipt
 
-    const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
-
     try {
       sendReceipt = await this.rpc.push_transaction(signedTransaction)
     } catch (error) {
@@ -237,9 +235,14 @@ export class EosChainState {
     }
 
     if (useWaitForConfirm !== ConfirmType.None) {
-      await this.awaitTransaction(sendReceipt, useWaitForConfirm, preCommitHeadBlockNum, communicationSettings)
+      // starting block number should be the block number in the transaction receipt
+      // ...if it doesnt have one (which can happen), get the latest head block from the chain via get info
+      let startFromBlockNumber = sendReceipt?.processed?.block_num
+      if (!startFromBlockNumber) {
+        ;({ head_block_num: startFromBlockNumber } = await this.getChainInfo())
+      }
+      await this.awaitTransaction(sendReceipt, useWaitForConfirm, startFromBlockNumber, communicationSettings)
     }
-
     return sendReceipt
   }
 
@@ -247,14 +250,15 @@ export class EosChainState {
         Useful when committing sequential transactions with inter-dependencies (must wait for the first one to commit before submitting the next one)
         transactionResponse: The response body from submitting the transaction to the chain (includes transaction Id and most recent chain block number)
         waitForConfirm an enum that specifies how long to wait before 'confirming transaction' and resolving the promise with the tranasction results
+        startFromBlockNumber = first block to start looking for the transaction to appear in
         blocksToCheck = the number of blocks to check, after committing the transaction, before giving up
         checkInterval = the time between block checks in MS
         getBlockAttempts = the number of failed attempts at retrieving a particular block, before giving up
   */
-  async awaitTransaction(
+  private async awaitTransaction(
     transactionResponse: any,
     waitForConfirm: ConfirmType,
-    preCommitHeadBlockNum: number,
+    startFromBlockNumber: number,
     communicationSettings: any,
   ) {
     // use default communicationSettings or whatever was passed-in in ChainSettings (via constructor)
@@ -268,14 +272,16 @@ export class EosChainState {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
 
+    if (!startFromBlockNumber || startFromBlockNumber <= 1) {
+      throwNewError('A valid number (greater than 1) must be provided for startFromBlockNumber param')
+    }
+
     return new Promise((resolve, reject) => {
       let getBlockAttempt = 1
       // get the chain's current head block number...
-      const { processed, transaction_id: transactionId } = transactionResponse || {}
+      const { transaction_id: transactionId } = transactionResponse || {}
       // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
-      const { block_num: blockNumFromTxReceipt } = processed || {}
-      const startingBlockNumToCheck = blockNumFromTxReceipt || preCommitHeadBlockNum
-      let nextBlockNumToCheck = startingBlockNumToCheck - 1
+      let nextBlockNumToCheck = startFromBlockNumber - 1
 
       let inProgress = false
 
@@ -316,13 +322,13 @@ export class EosChainState {
           inProgress = false
         }
 
-        if (nextBlockNumToCheck > startingBlockNumToCheck + blocksToCheck) {
+        if (nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
           this.rejectAwaitTransaction(
             reject,
             timer,
             'maxBlocksTimeout',
             `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-              blocksToCheck} seconds) starting with block num: ${startingBlockNumToCheck}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+              blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
           )
         }
       }, checkInterval)

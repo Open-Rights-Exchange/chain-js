@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainEndpoint, ChainSettings, NewAccountType } from '../src/models'
+import { ChainEndpoint, ChainSettings, NewAccountType, ConfirmType } from '../src/models'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -246,7 +246,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const createAccount = kylin.new.CreateAccount()
   // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow, createAccountOptions_createescrow)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-  // console.log('createAccount response: ', await createAccount.transaction.send())
+  // console.log('createAccount response: ', await createAccount.transaction.send(ConfirmType.After001))
   // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
   // console.log('deserialized transaction: ', createAccount.transaction.toJson())
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
