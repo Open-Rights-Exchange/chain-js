@@ -227,6 +227,8 @@ export class EosChainState {
     const signedTransaction = { signatures, serializedTransaction }
     let sendReceipt
 
+    // get the head block just before sending the transaction
+    const currentHeadBlock = await this.getChainInfo()
     try {
       sendReceipt = await this.rpc.push_transaction(signedTransaction)
     } catch (error) {
@@ -239,7 +241,7 @@ export class EosChainState {
       // ...if it doesnt have one (which can happen), get the latest head block from the chain via get info
       let startFromBlockNumber = sendReceipt?.processed?.block_num
       if (!startFromBlockNumber) {
-        ;({ head_block_num: startFromBlockNumber } = await this.getChainInfo())
+        startFromBlockNumber = currentHeadBlock
       }
       await this.awaitTransaction(sendReceipt, useWaitForConfirm, startFromBlockNumber, communicationSettings)
     }
