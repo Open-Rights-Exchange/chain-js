@@ -2,8 +2,8 @@ import { Api, JsonRpc, RpcInterfaces } from 'eosjs'
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
-import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
+import { ChainError, throwNewError, throwAndLogError } from '../../errors'
+import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, ChainErrorType } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
 import { mapChainError } from './eosErrors'
@@ -305,7 +305,7 @@ export class EosChainState {
           inProgress = false
         } catch (error) {
           const mappedError = mapChainError(error)
-          if (mappedError.errorType === 'BlockDoesNotExist') {
+          if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
             // Try to read the specific block - up to getBlockAttempts times
             if (getBlockAttempt >= maxBlockReadAttempts) {
               this.rejectAwaitTransaction(
@@ -353,10 +353,9 @@ export class EosChainState {
     resolve(transaction)
   }
 
-  rejectAwaitTransaction = (reject: any, timer: NodeJS.Timeout, errorName: string, errorMessage: string) => {
+  rejectAwaitTransaction = (reject: any, timer: NodeJS.Timeout, errorCode: string, errorMessage: string) => {
     clearInterval(timer)
-    const error = new Error(errorMessage)
-    error.name = errorName
+    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorCode })
     reject(error)
   }
 
