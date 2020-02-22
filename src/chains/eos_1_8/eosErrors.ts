@@ -18,7 +18,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   PermissionNotLinked: 'Attempting to unlink authority, but no link found',
   PermissionDeleteFailedInUse:
     '(Cannot delete a linked authority. Unlink the authority first|Cannot delete active authority|Cannot delete owner authority)',
-  TokenBalanceTooLow: '*this is set within chainState code*',
+  TokenBalanceTooLow: 'this is set within chainState code',
   TxConfirmFailure: 'TxConfirmFailure',
   TxExceededResources: '_exceeded', // includes all EOS resources
   MiscChainError: 'chain_type_exception',
