@@ -195,7 +195,7 @@ export class EosChainState {
   }
 
   /** Retrieve a specific block from the chain */
-  public blockHasTransaction = (block: any, transactionId: number): boolean => {
+  public blockHasTransaction = (block: any, transactionId: string): boolean => {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction?.trx?.id === transactionId)
     return !!result
@@ -219,9 +219,12 @@ export class EosChainState {
   ) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-
-    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
-      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
+    if (
+      waitForConfirm !== ConfirmType.None &&
+      waitForConfirm !== ConfirmType.After001 &&
+      waitForConfirm !== ConfirmType.Final
+    ) {
+      throwNewError('EOS plugin only supports ConfirmType.None, .After001, and .Final')
     }
 
     const signedTransaction = { signatures, serializedTransaction }
@@ -279,82 +282,163 @@ export class EosChainState {
     }
 
     return new Promise((resolve, reject) => {
-      let getBlockAttempt = 1
+      const getBlockAttempt = 1
       // get the chain's current head block number...
       const { transaction_id: transactionId } = transactionResponse || {}
       // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
-      let nextBlockNumToCheck = startFromBlockNumber - 1
+      const nextBlockNumToCheck = startFromBlockNumber - 1
 
-      let inProgress = false
-
-      // Keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
+      // Schedule first call of recursive function
+      // if will keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
       // ... or until we reach a max number of blocks or block read attempts
-      const timer = setInterval(async () => {
-        try {
-          if (inProgress) return
-          inProgress = true
-          const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
-            nextBlockNumToCheck,
-            transactionId,
-            waitForConfirm,
-          )
-          if (hasReachedConfirmLevel) {
-            this.resolveAwaitTransaction(resolve, timer, transactionResponse)
-          }
-          nextBlockNumToCheck += 1
-          inProgress = false
-        } catch (error) {
-          const mappedError = mapChainError(error)
-          if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
-            // Try to read the specific block - up to getBlockAttempts times
-            if (getBlockAttempt >= maxBlockReadAttempts) {
-              this.rejectAwaitTransaction(
-                reject,
-                timer,
-                'maxBlockReadAttemptsTimeout',
-                `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${nextBlockNumToCheck}.`,
-              )
-              return
-            }
-            getBlockAttempt += 1
-          } else {
-            // re-throw error - not one we can handle here
-            throw mappedError
-          }
-          inProgress = false
-        }
-
-        if (nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
-          this.rejectAwaitTransaction(
+      setTimeout(
+        async () =>
+          this.checkIfAwaitConditionsReached(
             reject,
-            timer,
-            'maxBlocksTimeout',
-            `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-              blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
-          )
-        }
-      }, checkInterval)
+            resolve,
+            blocksToCheck,
+            checkInterval,
+            getBlockAttempt,
+            maxBlockReadAttempts,
+            nextBlockNumToCheck,
+            startFromBlockNumber,
+            null,
+            transactionId,
+            transactionResponse,
+            waitForConfirm,
+          ),
+        checkInterval,
+      )
     })
   }
 
-  /** block has reached the confirmation level requested
-   *  Currently  only supports checking for first block confirm */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async hasReachedConfirmLevel(blockNum: number, transactionId: number, waitForConfirm: ConfirmType): Promise<boolean> {
-    const possibleTransactionBlock = await this.rpc.get_block(blockNum)
-    const blockHasTransaction = this.blockHasTransaction(possibleTransactionBlock, transactionId)
-    // TODO: Implement support for waitForConfirm types
-    // Currently only supports checking for first block confirm
-    return !!blockHasTransaction
+  /** While processing awaitTransaction, check if we've reached our limits to wait
+   *  Otherwise, schedule next check  */
+  private async checkIfAwaitConditionsReached(
+    reject: (value?: unknown) => void,
+    resolve: (value?: unknown) => void,
+    blocksToCheck: number,
+    checkInterval: number,
+    getBlockAttempt: number,
+    maxBlockReadAttempts: number,
+    blockNumToCheck: number,
+    startFromBlockNumber: number,
+    transactionBlockNumberParam: number,
+    transactionId: string,
+    transactionResponse: any,
+    waitForConfirm: ConfirmType,
+  ) {
+    let transactionBlockNumber = transactionBlockNumberParam
+    let nextGetBlockAttempt: number
+    let nextBlockNumToCheck: number
+    let possibleTransactionBlock: RpcInterfaces.GetBlockResult
+    // let transactionHistoryRecord: any
+    try {
+      // attempt to get the transaction from the history plug-in - only supported by some block producers
+      // try {
+      //   // we only need to get the history record if we dont yet know what block the tx is in
+      //   if (!transactionBlockNumber) {
+      //     transactionHistoryRecord = await this.rpc.history_get_transaction(transactionId)
+      //     transactionBlockNumber = transactionHistoryRecord?.block_num
+      //   }
+      // } catch (error) {
+      //   // if can't find - RpcError.json.code = 500 RpcError.json.error.name = 'tx_not_found' //
+      //   // if no history plug-in - 404
+      //   // do nothing - EOS endpoint doesnt have history plug-in installed or transactionId can't be found
+      // }
+
+      // if we cant get the transaction, read the next block and check if it has our transaction
+      if (!transactionBlockNumber) {
+        possibleTransactionBlock = await this.rpc.get_block(blockNumToCheck)
+        if (this.blockHasTransaction(possibleTransactionBlock, transactionId)) {
+          transactionBlockNumber = possibleTransactionBlock.block_num
+        }
+      }
+      // check if we've met our limit rules
+      const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(transactionBlockNumber, waitForConfirm)
+      if (hasReachedConfirmLevel) {
+        this.resolveAwaitTransaction(resolve, transactionResponse)
+        return
+      }
+      nextBlockNumToCheck = blockNumToCheck + 1
+    } catch (error) {
+      const mappedError = mapChainError(error)
+      if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
+        // Try to read the specific block - up to getBlockAttempts times
+        if (getBlockAttempt >= maxBlockReadAttempts) {
+          this.rejectAwaitTransaction(
+            reject,
+            'maxBlockReadAttemptsTimeout',
+            `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
+          )
+          return
+        }
+        nextGetBlockAttempt = getBlockAttempt + 1
+      } else {
+        // re-throw error - not one we can handle here
+        throw mappedError
+      }
+    }
+
+    if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
+      this.rejectAwaitTransaction(
+        reject,
+        'maxBlocksTimeout',
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
+          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+      )
+      return
+    }
+    // not yet reached limit - set a timer to call this function again (in checkInterval ms)
+    const checkAgainInMs = checkInterval
+    setTimeout(
+      async () =>
+        this.checkIfAwaitConditionsReached(
+          reject,
+          resolve,
+          blocksToCheck,
+          checkInterval,
+          nextGetBlockAttempt,
+          maxBlockReadAttempts,
+          nextBlockNumToCheck,
+          startFromBlockNumber,
+          transactionBlockNumber,
+          transactionId,
+          transactionResponse,
+          waitForConfirm,
+        ),
+      checkAgainInMs,
+    )
   }
 
-  resolveAwaitTransaction = (resolve: any, timer: NodeJS.Timeout, transaction: any) => {
-    clearInterval(timer)
+  /** block has reached the confirmation level requested */
+  hasReachedConfirmLevel = async (transactionBlockNumber: number, waitForConfirm: ConfirmType): Promise<boolean> => {
+    // check that we've reached the required number of confirms
+    let chainInfo
+    switch (waitForConfirm) {
+      case ConfirmType.None:
+        return true
+      case ConfirmType.After001:
+        // confirmed at least once if in a block
+        return !!transactionBlockNumber
+      case ConfirmType.After007:
+        throw new Error('Not Implemented')
+      case ConfirmType.After010:
+        throw new Error('Not Implemented')
+      // ConfirmType.Final is impractical to use - would wait for 2mins on EOS chain
+      case ConfirmType.Final:
+        chainInfo = await this.getChainInfo()
+        return transactionBlockNumber <= chainInfo?.last_irreversible_block_num
+      default:
+        return false
+    }
+  }
+
+  resolveAwaitTransaction = (resolve: any, transaction: any) => {
     resolve(transaction)
   }
 
-  rejectAwaitTransaction = (reject: any, timer: NodeJS.Timeout, errorCode: string, errorMessage: string) => {
-    clearInterval(timer)
+  rejectAwaitTransaction = (reject: any, errorCode: string, errorMessage: string) => {
     const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorCode })
     reject(error)
   }
