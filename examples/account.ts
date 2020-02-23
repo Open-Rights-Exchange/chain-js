@@ -48,7 +48,20 @@ export const kylinEndpoints = [
   {
     url: new URL('https:api-kylin.eosasia.one:443'),
   },
+  {
+    url: new URL('https:api-kylin.eoslaomao.com:443'),
+  },
+  {
+    url: new URL('https:kylin.eosusa.news'),
+  },
 ]
+
+export const eosMainEndpoints = [
+  {
+    url: new URL('https:mainnet.eos.dfuse.io:443'),
+  },
+]
+
 export const oreStagingEndpoints = [
   {
     url: new URL('https://ore-staging.openrights.exchange/'),
@@ -231,6 +244,9 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // Create an EOS chain and call a few functions
   const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
   await kylin.connect()
+
+  const eosMain = new ChainFactory().create(ChainType.EosV18, eosMainEndpoints, chainSettings)
+  await eosMain.connect()
 
   const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
