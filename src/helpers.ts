@@ -30,6 +30,11 @@ export function parseSafe(string: string): any {
   return parse(string)
 }
 
+// it converts the input data with the optionalspecified encoding  into a buffer object
+export function toBuffer(data: any, encoding: any) {
+  return Buffer.from(data, encoding)
+}
+
 /** filter values in array down to an array of a single, uniques value
  * e.g. if array = [{value:'A', other}, {value:'B'}, {value:'A', other}]
  * distinct(array, uniqueKey:'value') => ['A','B']
