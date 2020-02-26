@@ -29,7 +29,9 @@ class ChainEthereumV1 implements Chain {
     this._chainState = new EthereumChainState(endpoints, settings)
   }
 
-  public isConnected = this._chainState.isConnected
+  public get isConnected(): boolean {
+    return this._chainState?.isConnected
+  }
 
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
 

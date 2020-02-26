@@ -73,7 +73,7 @@ export class EthereumChainState {
     try {
       if (!this._web3) {
         const url = this.determineUrl()
-        this._web3 = new Web3.providers.HttpProvider(url)
+        this._web3 = new Web3(url)
       }
       await this.getChainInfo()
       this._isConnected = true
