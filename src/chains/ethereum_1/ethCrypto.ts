@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import ethUtil from 'ethereumjs-util'
+import { isAString } from '../../helpers'
 import { PublicKey, Signature } from '../../models'
 import { throwNewError } from '../../errors'
+import { EthSignature } from './models/cryptoModels'
 
-export function sign(data: string | Buffer, privateKey: string): Signature {
-  throwNewError('Not implemented')
-  return null
+// TODO
+export function sign(data: string | Buffer, privateKey: string): EthSignature {
+  const dataBuffer = ethUtil.toBuffer(data)
+  const keyBuffer = Buffer.from(privateKey, 'hex')
+  return ethUtil.ecsign(dataBuffer, keyBuffer)
 }
 
 export function isValidPrivateKey(value: string): boolean {

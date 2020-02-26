@@ -107,9 +107,9 @@ export class EthereumChainState {
   }
 
   /* Retrieve a specific block from the chain */
-  public async getBlock(blockNumber: number): Promise<any> {
+  public async getBlock(blockNumber: number | string): Promise<any> {
     this.assertIsConnected()
-    const block = await this._web3.get_block(blockNumber)
+    const block = await this._web3.eth.getBlock(blockNumber)
     return block
   }
 
@@ -123,7 +123,7 @@ export class EthereumChainState {
   /*  Retrieve a specific block from the chain */
   public blockHasTransaction = (block: any, transactionId: number): boolean => {
     const { transactions } = block
-    const result = transactions?.find((transaction: any) => transaction?.trx?.id === transactionId)
+    const result = transactions?.includes(transactionId)
     return !!result
   }
 
@@ -136,6 +136,7 @@ export class EthereumChainState {
     }
   }
 
+  // TODO
   /** Broadcast a signed transaction to the chain */
   async sendTransaction(
     serializedTransaction: any,
