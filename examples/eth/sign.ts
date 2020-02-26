@@ -1,10 +1,10 @@
 import { Chain, ChainFactory, ChainType } from '../../src/index'
 
-import { ChainSettings } from '../../src/models/generalModels'
+import { ChainSettings, ChainEndpoint } from '../../src/models/generalModels'
 
 import { ChainEthereumV1 } from '../../src/chains/ethereum_1/ChainEthereumV1'
 
-export const ropstenEndpoints = [
+export const ropstenEndpoints: ChainEndpoint[] = [
   {
     url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
   },
@@ -21,7 +21,7 @@ export const sampleTransferTrx = {
   try {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     await ropsten.connect()
-    console.log(ropsten)
+    console.log(await ropsten.chainInfo)
   } catch (error) {
     console.log(error)
   }
