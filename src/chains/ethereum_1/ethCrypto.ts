@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ethUtil from 'ethereumjs-util'
-import { isAString } from '../../helpers'
+import { isAString, toBuffer } from '../../helpers'
 import { PublicKey, Signature } from '../../models'
 import { throwNewError } from '../../errors'
-import { EthSignature } from './models/cryptoModels'
+import { EthPublicKey, EthSignature } from './models/cryptoModels'
+import { toEthBuffer } from './helpers/generalHelpers'
 
 // TODO
 export function sign(data: string | Buffer, privateKey: string): EthSignature {
-  const dataBuffer = ethUtil.toBuffer(data)
-  const keyBuffer = Buffer.from(privateKey, 'hex')
+  const dataBuffer = toEthBuffer(data)
+  const keyBuffer = toBuffer(privateKey, 'hex')
   return ethUtil.ecsign(dataBuffer, keyBuffer)
 }
 
@@ -23,12 +24,12 @@ export function isValidPublicKey(value: string): boolean {
 }
 
 export function getPublicKeyFromSignature(
-  signature: string | Buffer,
+  signature: EthSignature,
   data: string | Buffer,
   encoding: string,
-): PublicKey {
-  throwNewError('Not implemented')
-  return null
+): EthPublicKey {
+  const { v, r, s } = signature
+  return ethUtil.ecrecover(toEthBuffer(data), v, r, s)
 }
 
 export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string, overrideKeys: any): any {
