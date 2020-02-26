@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ethUtil from 'ethereumjs-util'
+import Web3 from 'web3'
+// standard library for elliptic curve used by most blockchains (ethereum, bitcoin..)
+import secp256k1 from 'secp256k1'
 import { isAString, toBuffer } from '../../helpers'
 import { PublicKey, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { EthPublicKey, EthSignature } from './models/cryptoModels'
 import { toEthBuffer } from './helpers/generalHelpers'
 
-// TODO
 export function sign(data: string | Buffer, privateKey: string): EthSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
@@ -14,13 +16,11 @@ export function sign(data: string | Buffer, privateKey: string): EthSignature {
 }
 
 export function isValidPrivateKey(value: string): boolean {
-  throwNewError('Not implemented')
-  return false
+  return secp256k1.privateKeyVerify(value)
 }
 
-export function isValidPublicKey(value: string): boolean {
-  throwNewError('Not implemented')
-  return false
+export function isValidPublicKey(value: EthPublicKey): boolean {
+  return Web3.utils.isAddress(value)
 }
 
 export function getPublicKeyFromSignature(
