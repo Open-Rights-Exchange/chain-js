@@ -1,4 +1,9 @@
-// import { EncryptedDataString, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
+// TODO: update types for EthPublicKey and EthPrivateKey
+/** a public key string - formatted correctly for ETH */
+export type EthPublicKey = Buffer
+
+/** a private key string - formatted correctly for ETH */
+export type EthPrivateKey = string
 
 export interface ECDSASignature {
   v: number
