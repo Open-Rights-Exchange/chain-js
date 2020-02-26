@@ -1,4 +1,5 @@
 import { parse, stringify } from 'flatted'
+import { TRANSACTION_ENCODING } from './constants'
 
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
@@ -31,7 +32,7 @@ export function parseSafe(string: string): any {
 }
 
 // it converts the input data with the optionalspecified encoding  into a buffer object
-export function toBuffer(data: any, encoding: any) {
+export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCODING) {
   return Buffer.from(data, encoding)
 }
 
