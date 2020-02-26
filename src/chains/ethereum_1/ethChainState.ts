@@ -1,3 +1,4 @@
+import Web3 from 'web3'
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
 import { trimTrailingChars } from '../../helpers'
@@ -20,9 +21,7 @@ export class EthereumChainState {
 
   private _isConnected: boolean = false
 
-  private _rpc: any // EOS chain RPC endpoint
-
-  private _api: any // EOS chain API endpoint
+  private _web3: any // Ethereum chain api endpoint
 
   constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
     this._endpoints = endpoints
@@ -66,25 +65,15 @@ export class EthereumChainState {
   /**  * Return instance of Web3 API */
   public get api(): any {
     this.assertIsConnected()
-    return this._api
-  }
-
-  /**  * Return instance of Web3 JsonRpc */
-  public get rpc(): any {
-    this.assertIsConnected()
-    return this._rpc
+    return this._web3
   }
 
   /**  * Connect to chain endpoint to verify that it is operational and to get latest block info */
   public async connect(): Promise<void> {
     try {
-      // we don't store keys in chain state so JsSignatureProvider keys are empty
-      if (!this._rpc) {
-        // const url = this.determineUrl()
-        // this._rpc = new JsonRpc(url, { fetch:fetch as any })
-      }
-      if (!this._api) {
-        // this._api = new Api({ rpc:this._rpc, signatureProvider:this._signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() })
+      if (!this._web3) {
+        const url = this.determineUrl()
+        this._web3 = new Web3.providers.HttpProvider(url)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -95,19 +84,17 @@ export class EthereumChainState {
 
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<any> {
-    const info = {
-      headBlockNumber: 0,
-      headBlockTime: 0,
-      version: '0',
-    } // TODO await this._rpc.get_info();
-    const { headBlockNumber, headBlockTime, version } = info
+    const info = await this._web3.eth.getBlock('latest')
+    const { gasLimit, gasUsed, number, timestamp } = info
+    const nodeInfo = await this._web3.eth.getNodeInfo()
 
     // this.ethChainInfo = info;
     this._chainInfo = {
-      headBlockNumber,
-      headBlockTime: new Date(headBlockTime),
-      version,
-      nativeInfo: info,
+      headBlockNumber: number,
+      headBlockTime: new Date(timestamp),
+      // Node information contains version example: 'Geth/v1.9.9-omnibus-e320ae4c-20191206/linux-amd64/go1.13.4'
+      version: nodeInfo,
+      nativeInfo: { gasLimit, gasUsed },
     }
     return info
   }
@@ -122,7 +109,7 @@ export class EthereumChainState {
   /* Retrieve a specific block from the chain */
   public async getBlock(blockNumber: number): Promise<any> {
     this.assertIsConnected()
-    const block = await this._rpc.get_block(blockNumber)
+    const block = await this._web3.get_block(blockNumber)
     return block
   }
 
@@ -167,7 +154,7 @@ export class EthereumChainState {
     let transaction
 
     try {
-      transaction = await this.rpc.push_transaction(signedTransaction)
+      transaction = await this._web3.push_transaction(signedTransaction)
     } catch (error) {
       const errString = mapChainError(error)
       throw new Error(`Send Transaction Failure: ${errString}`)
@@ -268,7 +255,7 @@ export class EthereumChainState {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     waitForConfirm: ConfirmType,
   ): Promise<boolean> {
-    const possibleTransactionBlock = await this.rpc.get_block(nextBlockNumToCheck)
+    const possibleTransactionBlock = await this._web3.get_block(nextBlockNumToCheck)
     const blockHasTransaction = this.blockHasTransaction(possibleTransactionBlock, transactionId)
     return !!blockHasTransaction
   }

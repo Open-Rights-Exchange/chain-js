@@ -13,6 +13,7 @@ export class ChainFactory {
       case ChainType.EosV18:
         return new ChainEosV18(endpoints, settings)
       case ChainType.EthereumV1:
+        console.log('ETHEREUMTYPE')
         return new ChainEthereumV1(endpoints, settings)
       default:
         throwNewError(`Chain type ${chainType} is not supported`)

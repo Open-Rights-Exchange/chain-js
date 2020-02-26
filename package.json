@@ -51,6 +51,7 @@
     "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
     "sjcl": "^1.0.8",
-    "text-encoding": "^0.7.0"
+    "text-encoding": "^0.7.0",
+    "web3": "^1.2.6"
   }
 }
