@@ -138,24 +138,15 @@ export class EthereumChainState {
 
   // TODO
   /** Broadcast a signed transaction to the chain */
-  async sendTransaction(
-    serializedTransaction: any,
-    signatures: string[],
-    waitForConfirm?: ConfirmType,
-    communicationSettings?: any,
-  ) {
+  async sendTransaction(signedTransaction: any, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-
+    let transaction
     if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
-
-    const signedTransaction = { signatures, serializedTransaction }
-    let transaction
-
     try {
-      transaction = await this._web3.push_transaction(signedTransaction)
+      transaction = await this._web3.sendSignedTransaction(signedTransaction)
     } catch (error) {
       const errString = mapChainError(error)
       throw new Error(`Send Transaction Failure: ${errString}`)
