@@ -1,10 +1,10 @@
 /** a public key string - formatted correctly for ETH */
-export type EthPublicKey = Buffer
+export type EthereumPublicKey = Buffer
 
 /** a private key string - formatted correctly for ETH */
-export type EthPrivateKey = Buffer
+export type EthereumPrivateKey = Buffer
 
-export type EthAddress = string
+export type EthereumAddress = string
 
 export interface ECDSASignature {
   v: number
@@ -13,4 +13,4 @@ export interface ECDSASignature {
 }
 
 /** a signature string - formatted correcly for ETH */
-export type EthSignature = ECDSASignature
+export type EthereumSignature = ECDSASignature
