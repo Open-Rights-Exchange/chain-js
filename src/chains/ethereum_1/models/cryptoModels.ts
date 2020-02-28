@@ -1,9 +1,10 @@
-// TODO: update types for EthPublicKey and EthPrivateKey
 /** a public key string - formatted correctly for ETH */
-export type EthPublicKey = any
+export type EthPublicKey = Buffer
 
 /** a private key string - formatted correctly for ETH */
-export type EthPrivateKey = string
+export type EthPrivateKey = Buffer
+
+export type EthAddress = string
 
 export interface ECDSASignature {
   v: number
