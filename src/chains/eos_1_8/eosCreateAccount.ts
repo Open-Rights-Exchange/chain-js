@@ -37,6 +37,8 @@ import { ChainActionType } from '../../models'
  *  Generates new account keys if not provide
  *  Supports reusing a recycled account and a wide range of other options */
 export class EosCreateAccount implements CreateAccount {
+  requiresTransaction: boolean = true
+
   private _accountName: EosEntityName
 
   private _chainState: EosChainState
@@ -319,6 +321,11 @@ export class EosCreateAccount implements CreateAccount {
   */
   generateAccountNameString = (prefix: string = ''): EosEntityName => {
     return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
+  }
+
+  async generateAccount() {
+    this.assertValidOptionPublicKeys()
+    throwNewError('Not supported')
   }
 
   private assertValidOptionPublicKeys() {
