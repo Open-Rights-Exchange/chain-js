@@ -17,11 +17,25 @@ export const sampleTransferTrx = {
   chain: 'ropsten',
   hardfork: 'petersburg',
 }
+
+export const sampleTransactionAction = {
+  to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+  value: '1000000000',
+  data: '0x0f',
+}
+export const sampleTransactionOptions = {
+  nonce: '0x00',
+  gasPrice: '0x09184e72a000',
+  gasLimit: '0x2710',
+}
 ;(async () => {
   try {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     await ropsten.connect()
     console.log(await ropsten.chainInfo)
+
+    const transaction = ropsten.new.Transaction(sampleTransactionOptions)
+    transaction.addAction(sampleTransferTrx)
   } catch (error) {
     console.log(error)
   }
