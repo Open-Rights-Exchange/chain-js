@@ -65,15 +65,15 @@ export interface Chain {
    * The returned, encrypted value is a stringified JSON object */
   encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString
   /** Returns a public key given a signature and the original data was signed */
-  getPublicKeyFromSignature(signature: string | Buffer, data: string | Buffer, encoding: string): PublicKey
+  getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */
   isValidEncryptedData(value: string): boolean
   /** Generate a signature given some data and a private key */
-  isValidPrivateKey(value: string): boolean
+  isValidPrivateKey(value: string | Buffer): boolean
   /** Verifies that the value is a valid public key for the chain */
-  isValidPublicKey(value: string): boolean
+  isValidPublicKey(value: string | Buffer): boolean
   /** Generate a signature given some data and a private key */
-  sign(data: string | Buffer, privateKey: string, encoding: string): Signature
+  sign(data: string | Buffer, privateKey: string, encoding: string): any
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
 
