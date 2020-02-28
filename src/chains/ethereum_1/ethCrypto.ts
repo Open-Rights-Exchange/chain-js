@@ -3,11 +3,11 @@ import ethUtil from 'ethereumjs-util'
 import Wallet from 'ethereumjs-wallet'
 import { toBuffer } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { EthAddress, EthPublicKey, EthSignature, EthPrivateKey } from './models/cryptoModels'
+import { EthAddress, EthPublicKey, EthSignature, EthPrivateKey, ECDSASignature } from './models/cryptoModels'
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 
-export function sign(data: string | Buffer, privateKey: string): EthSignature {
+export function sign(data: string | Buffer, privateKey: string): ECDSASignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
   return ethUtil.ecsign(dataBuffer, keyBuffer)
