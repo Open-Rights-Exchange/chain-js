@@ -1,3 +1,5 @@
+import { SignatureBrand } from '../../../models'
+
 /** a public key string - formatted correctly for ETH */
 export type EthPublicKey = Buffer
 
@@ -13,4 +15,4 @@ export interface ECDSASignature {
 }
 
 /** a signature string - formatted correcly for ETH */
-export type EthSignature = ECDSASignature
+export type EthSignature = ECDSASignature & SignatureBrand
