@@ -20,8 +20,6 @@ export interface CreateAccount {
   generatedKeys: any
   /** Account creation options */
   options: CreateAccountOptions
-  /** Specified whether account creation requires a transaction to be sent to the chain */
-  requiresTransaction: boolean
   /** The transaction with all actions needed to create the account
    *  This should be signed and sent to the chain to create the account */
   transaction: Transaction
@@ -30,11 +28,12 @@ export interface CreateAccount {
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
    *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
-  // TODO: FIX IT
-  determineNewAccountName(accountName: any): Promise<any> // Promise<{ alreadyExists: boolean; newAccountName: string; canRecycle: boolean }>
+  determineNewAccountName(
+    accountName: ChainEntityName,
+  ): Promise<{ alreadyExists: boolean; newAccountName: string; canRecycle: boolean }>
   /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
    *  If already in use, this function is called recursively until a unique name is generated */
-  generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean): Promise<any>
+  generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean): Promise<ChainEntityName>
   /** Verifies that all accounts and permisison for actions exist on chain.
    *  Throws if any problems */
   /** Generates a random EOS account name
