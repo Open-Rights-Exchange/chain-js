@@ -28,6 +28,8 @@ export const CreateAccountOptions = {
     console.log(await ropsten.chainInfo)
     const createAccount = ropsten.new.CreateAccount()
     const { requiresTransaction } = createAccount
+    if (createAccount.requiresTransaction) {
+    }
     if (!requiresTransaction) {
       const account = await createAccount.generateAccount(EthereumNewAccountType.Native, CreateAccountOptions)
       console.log(account)

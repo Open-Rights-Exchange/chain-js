@@ -252,10 +252,13 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
 
   // -----> CreateAccount - create native kylin account
-  // const createAccount = kylin.new.CreateAccount()
-  // await createAccount.composeTransaction(EosNewAccountType.Native, createAccountOptions_EosNative)
-  // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // console.log('createAccount response: ', await createAccount.transaction.send())
+  const createAccount = kylin.new.CreateAccount()
+  if (createAccount.requiresTransaction) {
+    await createAccount.composeTransaction(EosNewAccountType.Native, createAccountOptions_EosNative)
+    await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
+    console.log('createAccount response: ', await createAccount.transaction.send())
+  }
+  console.log(createAccount.generatedKeys)
 
   // -----> CreateAccount - create native ore-staging account
   // const createAccount = oreStaging.new.CreateAccount()

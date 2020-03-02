@@ -57,6 +57,9 @@ export class EosCreateAccount implements CreateAccount {
     this._chainState = chainState
   }
 
+  // TODO: separate function into 2 different functions:
+  // - Create account name and keys
+  // - Compose transaction
   /** Compose a transaction to send to the chain to create a new account */
   async composeTransaction(accountType: EosNewAccountType, options?: EosCreateAccountOptions): Promise<void> {
     this._accountType = accountType

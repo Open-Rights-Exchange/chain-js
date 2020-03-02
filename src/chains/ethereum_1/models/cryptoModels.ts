@@ -4,6 +4,7 @@ export type EthereumPublicKey = Buffer
 /** a private key string - formatted correctly for ETH */
 export type EthereumPrivateKey = Buffer
 
+// use it as account name
 export type EthereumAddress = string
 
 export interface ECDSASignature {

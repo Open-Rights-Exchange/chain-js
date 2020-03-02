@@ -1,6 +1,7 @@
-import { EthereumPrivateKey, EthereumAddress } from './cryptoModels'
+import { EthereumPrivateKey, EthereumAddress, EthereumPublicKey } from './cryptoModels'
 
 export type EthereumAccountStruct = {
-  publicKey: EthereumAddress
+  address: EthereumAddress
+  publicKey: EthereumPublicKey
   privateKey: EthereumPrivateKey
 }

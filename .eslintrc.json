@@ -47,7 +47,8 @@
     // "array-callback-return": 0,
     "quotes": ["error", "single"],
     "semi": "off",
-    "@typescript-eslint/semi": [2, "never"]
+    "@typescript-eslint/semi": [2, "never"],
+    "class-methods-use-this": "off"
   },
   "globals": {
     "Web3": false

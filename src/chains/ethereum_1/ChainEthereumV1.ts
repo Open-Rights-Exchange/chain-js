@@ -8,6 +8,7 @@ import * as ethcrypto from './ethCrypto'
 import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
+import { EthereumCreateAccount } from './ethCreateAccount'
 
 const notImplemented = () => {
   throw new Error('Not Implemented')
@@ -84,8 +85,8 @@ class ChainEthereumV1 implements Chain {
   }
 
   private newCreateAccount = (options?: any): any => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new EthereumCreateAccount(this._chainState)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
@@ -144,6 +145,13 @@ class ChainEthereumV1 implements Chain {
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
     return new ChainError(null, null, null)
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
+  public assertIsConnected(): void {
+    if (!this._chainState?.isConnected) {
+      throwNewError('Not connected to chain')
+    }
   }
 }
 
