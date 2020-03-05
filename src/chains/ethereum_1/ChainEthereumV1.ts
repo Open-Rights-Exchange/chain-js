@@ -89,8 +89,8 @@ class ChainEthereumV1 implements Chain {
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new EthereumTransaction(this._chainState, options)
   }
 
   public new = {
@@ -144,6 +144,13 @@ class ChainEthereumV1 implements Chain {
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
     return new ChainError(null, null, null)
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
+  public assertIsConnected(): void {
+    if (!this._chainState?.isConnected) {
+      throwNewError('Not connected to chain')
+    }
   }
 }
 
