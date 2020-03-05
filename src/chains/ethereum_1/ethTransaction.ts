@@ -68,7 +68,7 @@ export class EthereumTransaction implements Transaction {
     }
     const { gasPrice, gasLimit, chain, hardfork } = this._options
     const trxRaw = { ...this._actions, gasPrice, gasLimit }
-    let trxOptions = null
+    let trxOptions = {}
     if (!isNullOrEmpty(chain) && !isNullOrEmpty(hardfork)) {
       trxOptions = { chain, hardfork }
     } else if (!(isNullOrEmpty(chain) && isNullOrEmpty(hardfork))) {
@@ -130,11 +130,11 @@ export class EthereumTransaction implements Transaction {
 
   public addAction(action: any, options: any): void {
     this.assertNoSignatures()
-    const { replace = false } = options
+    const { replace = false } = options || {}
     if (!action) {
       throwNewError('Action parameter is missing')
     }
-    if (this._actions.length > 0 && !replace) {
+    if (this._actions?.length > 0 && !replace) {
       throwNewError('Ethereum transaction can only have 1 action')
     }
     this._actions = [action]
