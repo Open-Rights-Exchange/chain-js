@@ -1,7 +1,7 @@
-import { SignatureBrand, PrivateKeyBrand } from '../../../models'
+import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand } from '../../../models'
 
 /** a public key string - formatted correctly for ETH */
-export type EthPublicKey = string
+export type EthPublicKey = string & PublicKeyBrand
 
 /** a private key string - formatted correctly for ETH */
 export type EthPrivateKey = string & PrivateKeyBrand

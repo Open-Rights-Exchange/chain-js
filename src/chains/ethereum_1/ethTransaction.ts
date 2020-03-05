@@ -4,7 +4,7 @@ import { isNull } from 'util'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
-import { EthSerializedTransaction, EthTransactionOptions, EthSignature } from './models'
+import { EthSerializedTransaction, EthTransactionOptions, EthSignature, EthPrivateKey } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { isValidEthSignature } from './helpers'
@@ -250,7 +250,7 @@ export class EthereumTransaction implements Transaction {
     return this._signBuffer
   }
 
-  public sign(privateKeys: any[]): void {
+  public sign(privateKeys: EthPrivateKey[]): void {
     this.assertIsValidated()
     if (privateKeys.length !== 1) {
       throwNewError('Ethereum sign needs to be providen exactly 1 privateKey')
