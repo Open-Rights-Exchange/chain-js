@@ -36,7 +36,7 @@ import {
   toEosAsset,
   toEosDate,
 } from './helpers'
-import { EosEntityName, EosDate } from './models'
+import { EosEntityName, EosDate, EosCreateAccountOptions } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -116,9 +116,9 @@ class ChainEosV18 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): EosCreateAccount {
+  private newCreateAccount(options?: EosCreateAccountOptions): EosCreateAccount {
     this.assertIsConnected()
-    return new EosCreateAccount(this._chainState)
+    return new EosCreateAccount(this._chainState, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
