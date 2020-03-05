@@ -111,7 +111,7 @@ export interface EosTransactionStruct {
   max_net_usage_words: number | string // a whole number - int32 or string
   max_cpu_usage_ms: number | string // a whole number - int32 or string
   delay_sec: number // int32
-  context_free_actions: EosTransactionStruct[]
-  actions: EosTransactionStruct[]
+  context_free_actions: EosActionStruct[]
+  actions: EosActionStruct[]
   available_keys: EosPublicKey[]
 }
