@@ -273,7 +273,7 @@ export class EosCreateAccount implements CreateAccount {
 
   /** extract keys from options
    *  Returns publicKeys */
-  private getPublicKeysfromOptions(): EosPublicKeys {
+  private getPublicKeysFromOptions(): EosPublicKeys {
     const { publicKeys } = this._options || {}
     const { owner, active } = publicKeys || {}
     if (!owner || !active) {
@@ -287,7 +287,7 @@ export class EosCreateAccount implements CreateAccount {
   async generatePublicKeysIfNeeded() {
     let publicKeys: EosPublicKeys
     // get keys from paramters or freshly generated
-    publicKeys = this.getPublicKeysfromOptions()
+    publicKeys = this.getPublicKeysFromOptions()
     if (!publicKeys) {
       publicKeys = await this.generatePublicKeys()
     }
