@@ -6,6 +6,8 @@ import { throwNewError } from '../../errors'
 import { EthereumAddress, EthereumPublicKey, EthereumSignature, EthereumPrivateKey } from './models/cryptoModels'
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
+// eslint-disable-next-line import/no-cycle
+import { toEthereumPublicKey } from './helpers/cryptoModelHelpers'
 
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
@@ -26,17 +28,13 @@ export function isValidEthereumAddress(value: EthereumAddress): boolean {
   return isValidAddress(value)
 }
 
-export function toEthereumPublicKey(value: any): EthereumPublicKey {
-  return value
-}
-
 export function getEthereumPublicKeyFromSignature(
   signature: EthereumSignature,
   data: string | Buffer,
   encoding: string,
 ): EthereumPublicKey {
   const { v, r, s } = signature
-  return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s))
+  return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s).toString())
 }
 
 export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
