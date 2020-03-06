@@ -4,7 +4,7 @@ import { CreateAccount } from '../../interfaces'
 import {
   getEthereumAddressFromPublicKey,
   generateNewAccountKeysAndEncryptPrivateKeys,
-  isValidEthereumPublicKey,
+  isValidPublicKey,
 } from './ethCrypto'
 import { isNullOrEmpty, notSupported } from '../../helpers'
 import { EthereumAddress, EthereumPublicKey } from './models/cryptoModels'
@@ -107,7 +107,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private assertValidOptionPublicKeys() {
     const { publicKey } = this._options
-    if (publicKey && !isValidEthereumPublicKey(publicKey)) {
+    if (publicKey && !isValidPublicKey(publicKey)) {
       throwNewError('Invalid Option - Provided publicKey isnt valid')
     }
   }
