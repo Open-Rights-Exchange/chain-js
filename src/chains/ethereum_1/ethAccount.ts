@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { notSupported } from '../../helpers'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { EthereumChainState } from './ethChainState'
@@ -26,7 +27,7 @@ export class EthAccount implements Account {
   /** Account name */
   get name(): any {
     this.assertHasAccount()
-    return this._account.publicKey
+    return this._account?.account_name
   }
 
   /** Public Key(s) associated with the account */
@@ -48,8 +49,7 @@ export class EthAccount implements Account {
 
   /** Retrieves account from chain */
   fetchFromChain = async (accountName: string): Promise<void> => {
-    this.assertHasAccount()
-    throw new Error('Not Supported')
+    notSupported()
   }
 
   /** JSON representation of transaction data */
