@@ -1,8 +1,9 @@
+import { PrivateKeyBrand, PublicKeyBrand } from '../../../models'
 /** a public key string - formatted correctly for ETH */
-export type EthereumPublicKey = Buffer
+export type EthereumPublicKey = string & PublicKeyBrand
 
 /** a private key string - formatted correctly for ETH */
-export type EthereumPrivateKey = Buffer
+export type EthereumPrivateKey = string & PrivateKeyBrand
 
 // use it as account name
 export type EthereumAddress = string
