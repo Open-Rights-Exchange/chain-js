@@ -110,9 +110,9 @@ class ChainEthereumV1 implements Chain {
 
   toEncryptedDataString = crypto.toEncryptedDataString
 
-  isValidPrivateKey = ethcrypto.isValidEthereumPrivateKey
+  isValidPrivateKey = ethcrypto.isValidPrivateKey
 
-  isValidPublicKey = ethcrypto.isValidEthereumPublicKey
+  isValidPublicKey = ethcrypto.isValidPublicKey
 
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
