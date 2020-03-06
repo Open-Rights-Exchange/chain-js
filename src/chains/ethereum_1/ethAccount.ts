@@ -27,7 +27,7 @@ export class EthAccount implements Account {
   /** Account name */
   get name(): any {
     this.assertHasAccount()
-    return this._account?.account_name
+    return this._account?.address
   }
 
   /** Public Key(s) associated with the account */
