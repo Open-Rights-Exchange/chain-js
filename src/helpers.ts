@@ -94,3 +94,11 @@ export const removeEmptyValuesInJsonObject = (obj: { [x: string]: any }) => {
     else if (isNullOrEmpty(obj[key])) delete obj[key] // delete the property
   })
 }
+
+export const notImplemented = () => {
+  throw new Error('Not Implemented')
+}
+
+export const notSupported = () => {
+  throw new Error('Not Supported')
+}
