@@ -1,12 +1,17 @@
 import { EthereumChainState } from './ethChainState'
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
-import { generateNewAccountKeysAndEncryptPrivateKeys } from './ethCrypto'
-import { isNullOrEmpty } from '../../helpers'
-import { EthereumAddress } from './models/cryptoModels'
+import {
+  getEthereumAddressFromPublicKey,
+  generateNewAccountKeysAndEncryptPrivateKeys,
+  isValidEthereumPublicKey,
+} from './ethCrypto'
+import { isNullOrEmpty, notSupported } from '../../helpers'
+import { EthereumAddress, EthereumPublicKey } from './models/cryptoModels'
 import { EthereumAccountStruct } from './models/ethStructures'
 import { EthereumNewAccountType, EthereumCreateAccountOptions } from './models/accountModels'
-import { EthereumTransaction } from './ethTransaction'
+import { EthereumEntityName } from './models/generalModels'
+
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
  *  Generates new account keys if not provide */
@@ -25,72 +30,86 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _generatedKeys: EthereumAccountStruct
 
-  constructor(chainState: EthereumChainState) {
+  constructor(chainState: EthereumChainState, options?: EthereumCreateAccountOptions) {
     this._chainState = chainState
+    this._options = options
   }
 
-  /** Compose a transaction to send to the chain to create a new account */
-  // TODO
-  async composeTransaction(accountType: EthereumNewAccountType, options?: EthereumCreateAccountOptions): Promise<void> {
-    this.assertValidOptionNewKeys()
-    throwNewError('Not supported')
+  /** Compose a transaction to send to the chain to create a new account
+   * Ethereum does not require a create account transaction to be sent to the chain
+   */
+  async composeTransaction(): Promise<void> {
+    notSupported()
   }
 
   /** Determine if desired account name is usable for a new account.
-   *  Generates a new account name if one isnt provided.
-   *  Checks if provided account is unused and can be recycled */
-  // TODO: fix the return as this is not supported
-  async determineNewAccountName(accountName: any): Promise<any> {
-    this.assertValidOptionNewKeys()
-    throwNewError('Not supported')
+   */
+  async determineNewAccountName(): Promise<any> {
+    notSupported()
   }
 
-  /** extract keys from options or generate new keys
-   *  Returns publicKeys and generatedKeys if created */
-  private async getPublicKeysFromOptionsOrGenerateNewKeys() {
-    this._generatedKeys = await this.generateNewKeys()
-    return this._generatedKeys.publicKey
+  /** extract keys from options
+   *  Returns publicKeys */
+  private getPublicKeysFromOptions(): EthereumPublicKey {
+    const { publicKey } = this._options || {}
+    if (!publicKey) {
+      return null
+    }
+    return publicKey
+  }
+
+  /** Checks create options - if publicKeys are missing,
+   *  autogenerate them and add them to options */
+  async generatePublicKeysIfNeeded() {
+    let publicKey: EthereumPublicKey
+    this.assertValidOptionPublicKeys()
+    this.assertValidOptionNewKeys()
+    // get keys from options or generate
+    publicKey = this.getPublicKeysFromOptions()
+    if (!publicKey) {
+      publicKey = await this.generateNewKeys()
+    }
+    this._accountName = await getEthereumAddressFromPublicKey(publicKey)
+    this._accountType = EthereumNewAccountType.Native
   }
 
   private async generateNewKeys() {
-    const { newKeysOptions } = this._options
+    const { newKeysOptions } = this._options || {}
     const { password, salt } = newKeysOptions || {}
 
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {})
-    return this._generatedKeys
+    const newPublicKey = this._generatedKeys?.publicKey
+    return newPublicKey
   }
 
-  /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
-   *  If already in use, this function is called recursively until a unique name is generated */
-  // TODO
-  async generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean = true): Promise<void> {
-    this.assertValidOptionNewKeys()
-    throwNewError('Not supported')
+  /* Not supported for Ethereum */
+  async generateAccountName(): Promise<EthereumEntityName> {
+    notSupported()
+    return null
   }
 
-  async generateAccount(accountType: EthereumNewAccountType, options?: EthereumCreateAccountOptions) {
-    this._options = options
-    if (accountType !== EthereumNewAccountType.Native) {
-      throwNewError(`Only ${EthereumNewAccountType.Native} account type supported for ethereum`)
+  /* Ethereum accounts do not have the concept of existing on chain */
+  async doesAccountExist(): Promise<any> {
+    notSupported()
+    return null
+  }
+
+  /** Not supported */
+  generateAccountNameString = (): any => {
+    notSupported()
+  }
+
+  /** ETH does not require the chain to execute a createAccount transaction
+   *  to create the account structure on-chain */
+  requiresTransactionToCreateAccount = (): boolean => {
+    return false
+  }
+
+  private assertValidOptionPublicKeys() {
+    const { publicKey } = this._options
+    if (publicKey && !isValidEthereumPublicKey(publicKey)) {
+      throwNewError('Invalid Option - Provided publicKey isnt valid')
     }
-    const account = await this.generateNewKeys()
-    return account
-  }
-
-  // TODO
-  // async doesAccountExist(accountName: EosEntityName): Promise<{ exists: boolean; account: EosAccount }> {
-  //   const account = new EosAccount(this._chainState)
-  //   return account.doesAccountExist(accountName)
-  // }
-
-  /** Generates a random EOS account name
-    account names MUST be base32 encoded in compliance with the EOS standard (usually 12 characters)
-    account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
-    account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars
-  */
-  // TODO
-  generateAccountNameString = (prefix: string = ''): any => {
-    throwNewError('Not supported')
   }
 
   private assertValidOptionNewKeys() {
@@ -125,7 +144,7 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   /** The keys that were generated as part of the account creation process
-   *  IMPORTANT: Bes ure to always read and store these keys after creating an account
+   *  IMPORTANT: Be sure to always read and store these keys after creating an account
    *  This is the only way to retrieve the auto-generated private keys after an account is created */
   get generatedKeys() {
     if (this._generatedKeys) {
@@ -134,11 +153,11 @@ export class EthereumCreateAccount implements CreateAccount {
     return null
   }
 
-  /** The transaction with all actions needed to create the account
-   *  This should be signed and sent to the chain to create the account */
-  // TODO
+  /** Ethereum account creation doesn't require any on chain transactions.
+   * Hence there is no transaction object attached to EthereumCreateAccount class
+   */
   get transaction(): any {
-    throwNewError('')
+    throwNewError('Ethereum account creation does not require any on chain transactions')
     return null
   }
 }
