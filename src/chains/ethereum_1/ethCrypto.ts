@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ecsign, ecrecover, isValidPrivate, isValidPublic, isValidAddress, publicToAddress } from 'ethereumjs-util'
+import {
+  bufferToHex,
+  ecsign,
+  ecrecover,
+  isValidPrivate,
+  isValidPublic,
+  isValidAddress,
+  publicToAddress,
+} from 'ethereumjs-util'
 import Wallet from 'ethereumjs-wallet'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
@@ -38,7 +46,7 @@ export function getEthereumPublicKeyFromSignature(
 }
 
 export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
-  return publicToAddress(toEthBuffer(publicKey)).toString()
+  return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
 }
 
 /** Replaces unencrypted privateKey in keys object
