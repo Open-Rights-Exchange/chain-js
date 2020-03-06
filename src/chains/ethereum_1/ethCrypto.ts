@@ -13,17 +13,21 @@ export function sign(data: string | Buffer, privateKey: string): EthereumSignatu
   return ecsign(dataBuffer, keyBuffer)
 }
 
-export function isValidEthereumPrivateKey(value: EthereumPrivateKey): boolean {
-  return isValidPrivate(value)
+export function isValidPrivateKey(value: EthereumPrivateKey): boolean {
+  return isValidPrivate(toEthBuffer(value))
 }
 
-export function isValidEthereumPublicKey(value: EthereumPublicKey): boolean {
-  return isValidPublic(value)
+export function isValidPublicKey(value: EthereumPublicKey): boolean {
+  return isValidPublic(toEthBuffer(value))
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
 export function isValidEthereumAddress(value: EthereumAddress): boolean {
   return isValidAddress(value)
+}
+
+export function toEthereumPublicKey(value: any): EthereumPublicKey {
+  return value
 }
 
 export function getEthereumPublicKeyFromSignature(
@@ -32,11 +36,11 @@ export function getEthereumPublicKeyFromSignature(
   encoding: string,
 ): EthereumPublicKey {
   const { v, r, s } = signature
-  return ecrecover(toEthBuffer(data), v, r, s)
+  return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s))
 }
 
 export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
-  return publicToAddress(publicKey).toString()
+  return publicToAddress(toEthBuffer(publicKey)).toString()
 }
 
 /** Replaces unencrypted privateKey in keys object
@@ -53,8 +57,7 @@ export function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, s
 export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string, overrideKeys: any): any {
   const wallet = Wallet.generate()
   const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
-  // TODO: eth address is commonely referred to as public key. However there is a difference b/w those two. So should we just call eth address as public key to reduce confusion??
-  const publicKey: EthereumPublicKey = wallet.getPublicKey()
+  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
   const keys = { privateKey, publicKey }
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt)
   return encryptedKeys
