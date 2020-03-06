@@ -9,10 +9,8 @@ import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
-
-const notImplemented = () => {
-  throw new Error('Not Implemented')
-}
+import { notImplemented } from '../../helpers'
+import { EthereumCreateAccountOptions } from './models'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -84,9 +82,9 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  private newCreateAccount = (options?: any): any => {
+  private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
     this.assertIsConnected()
-    return new EthereumCreateAccount(this._chainState)
+    return new EthereumCreateAccount(this._chainState, options)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
@@ -106,15 +104,15 @@ class ChainEthereumV1 implements Chain {
 
   encrypt = crypto.encrypt
 
-  getPublicKeyFromSignature = ethcrypto.getPublicKeyFromSignature
+  getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
   isValidEncryptedData = crypto.isEncryptedDataString
 
   toEncryptedDataString = crypto.toEncryptedDataString
 
-  isValidPrivateKey = ethcrypto.isValidPrivateKey
+  isValidPrivateKey = ethcrypto.isValidEthereumPrivateKey
 
-  isValidPublicKey = ethcrypto.isValidPublicKey
+  isValidPublicKey = ethcrypto.isValidEthereumPublicKey
 
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
