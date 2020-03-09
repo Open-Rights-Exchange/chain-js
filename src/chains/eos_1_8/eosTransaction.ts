@@ -1,12 +1,20 @@
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosChainState } from './eosChainState'
-import { EosAuthorization, EosActionStruct, EosPublicKey, EosEntityName, EosSignature, EosPrivateKey } from './models'
+import {
+  EosAuthorization,
+  EosActionStruct,
+  EosPublicKey,
+  EosEntityName,
+  EosSignature,
+  EosPrivateKey,
+  EosTransactionOptions,
+} from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK, DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS } from './eosConstants'
 import { EosAccount } from './eosAccount'
 import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
-import { ConfirmType, TransactionOptions } from '../../models'
+import { ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
 import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './helpers'
 
@@ -27,7 +35,7 @@ export class EosTransaction implements Transaction {
 
   private _header: any
 
-  private _options: TransactionOptions
+  private _options: EosTransactionOptions
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
@@ -39,7 +47,7 @@ export class EosTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  constructor(chainState: EosChainState, options?: TransactionOptions) {
+  constructor(chainState: EosChainState, options?: EosTransactionOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
     blocksBehind = blocksBehind ?? DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK
@@ -164,8 +172,9 @@ export class EosTransaction implements Transaction {
 
   /** Add one action to the transaction body
    *  Setting asFirstAction = true places the new transaction at the top */
-  public addAction(action: EosActionStruct, asFirstAction: boolean = false): void {
+  public addAction(action: EosActionStruct, options: any): void {
     this.assertNoSignatures()
+    const { asFirstAction = false } = options
     if (!action) {
       throwNewError('Action parameter is missing')
     }

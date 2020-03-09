@@ -88,8 +88,8 @@ class ChainEthereumV1 implements Chain {
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new EthereumTransaction(this._chainState, options)
   }
 
   public new = {
