@@ -1,12 +1,14 @@
 import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand } from '../../../models'
 
-/** a public key string - formatted correctly for ETH */
-export type EthPublicKey = string & PublicKeyBrand
+/** a public key string - formatted correctly for ethereum */
+export type EthereumPublicKey = string & PublicKeyBrand
 
-/** a private key string - formatted correctly for ETH */
-export type EthPrivateKey = string & PrivateKeyBrand
+/** a private key string - formatted correctly for ethereum */
+export type EthereumPrivateKey = string & PrivateKeyBrand
 
-export type EthAddress = string
+
+// use it as account name
+export type EthereumAddress = string
 
 export interface ECDSASignature {
   v: number
@@ -14,5 +16,5 @@ export interface ECDSASignature {
   s: Buffer
 }
 
-/** a signature string - formatted correcly for ETH */
-export type EthSignature = ECDSASignature & SignatureBrand
+/** a signature string - formatted correcly for ethereum */
+export type EthereumSignature = ECDSASignature & SignatureBrand

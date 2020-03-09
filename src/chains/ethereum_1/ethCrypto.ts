@@ -1,38 +1,52 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import ethUtil from 'ethereumjs-util'
+import {
+  bufferToHex,
+  ecsign,
+  ecrecover,
+  isValidPrivate,
+  isValidPublic,
+  isValidAddress,
+  publicToAddress,
+} from 'ethereumjs-util'
 import Wallet from 'ethereumjs-wallet'
-import { toBuffer } from '../../helpers'
+import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { EthAddress, EthPublicKey, EthSignature, EthPrivateKey, ECDSASignature } from './models/cryptoModels'
+import { EthereumAddress, EthereumPublicKey, EthereumSignature, EthereumPrivateKey } from './models/cryptoModels'
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
+// eslint-disable-next-line import/no-cycle
+import { toEthereumPublicKey } from './helpers/cryptoModelHelpers'
 
-export function sign(data: string | Buffer, privateKey: string): ECDSASignature {
+export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
-  return ethUtil.ecsign(dataBuffer, keyBuffer)
+  return ecsign(dataBuffer, keyBuffer)
 }
 
-export function isValidPrivateKey(value: EthPrivateKey): boolean {
-  return ethUtil.isValidPrivate(toEthBuffer(value))
+export function isValidPrivateKey(value: EthereumPrivateKey): boolean {
+  return isValidPrivate(toEthBuffer(value))
 }
 
-export function isValidPublicKey(value: EthPublicKey): boolean {
-  return ethUtil.isValidPublic(toEthBuffer(value))
+export function isValidPublicKey(value: EthereumPublicKey): boolean {
+  return isValidPublic(toEthBuffer(value))
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
-export function isValidAddress(value: EthAddress): boolean {
-  return ethUtil.isValidAddress(value)
+export function isValidEthereumAddress(value: EthereumAddress): boolean {
+  return isValidAddress(value)
 }
 
-export function getPublicKeyFromSignature(
-  signature: EthSignature,
+export function getEthereumPublicKeyFromSignature(
+  signature: EthereumSignature,
   data: string | Buffer,
   encoding: string,
-): EthPublicKey {
+): EthereumPublicKey {
   const { v, r, s } = signature
-  return ethUtil.ecrecover(toEthBuffer(data), v, r, s)
+  return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s).toString())
+}
+
+export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
+  return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
 }
 
 /** Replaces unencrypted privateKey in keys object
@@ -48,9 +62,8 @@ export function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, s
 
 export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string, overrideKeys: any): any {
   const wallet = Wallet.generate()
-  const privateKey: EthPrivateKey = wallet.getPrivateKeyString()
-  // TODO: eth address is commonely referred to as public key. However there is a difference b/w those two. So should we just call eth address as public key to reduce confusion??
-  const publicKey: EthAddress = wallet.getAddressString()
+  const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
+  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
   const keys = { privateKey, publicKey }
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt)
   return encryptedKeys
@@ -62,6 +75,6 @@ export function verifySignedWithPublicKey(
   data: string | Buffer,
   encoding: string,
 ): boolean {
-  throwNewError('Not implemented')
-  return false
+  notImplemented()
+  return null
 }

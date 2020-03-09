@@ -15,7 +15,7 @@ export interface CreateAccount {
    * ... if the account name provided has the 'unused' key as its active public key */
   didRecycleAccount: boolean
   /** The keys that were generated as part of the account creation process
-   *  IMPORTANT: Bes ure to always read and store these keys after creating an account
+   *  IMPORTANT: Be sure to always read and store these keys after creating an account
    *  This is the only way to retrieve the auto-generated private keys after an account is created */
   generatedKeys: any
   /** Account creation options */
@@ -24,7 +24,7 @@ export interface CreateAccount {
    *  This should be signed and sent to the chain to create the account */
   transaction: Transaction
   /** Compose a transaction to send to the chain to create a new account */
-  composeTransaction(accountType: NewAccountType | any, options?: CreateAccountOptions): Promise<void>
+  composeTransaction(accountType: NewAccountType | any): Promise<void>
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
    *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
@@ -41,4 +41,11 @@ export interface CreateAccount {
   account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
   account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars */
   generateAccountNameString(prefix: string): string
+  /** Checks if publicKeys are provide in Options.
+   *  If not, generates new public keys and stores them in class's generatedKeys property
+   *  Also adds the new keys to the class's options.publicKeys property */
+  generatePublicKeysIfNeeded(): Promise<void>
+  /** Whether chain requires a transaction to create an account
+   *  ex: ETH does not, EOS does */
+  requiresTransactionToCreateAccount(): boolean
 }

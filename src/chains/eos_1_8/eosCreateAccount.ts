@@ -6,6 +6,7 @@ import {
   EosPermissionStruct,
   EosGeneratedKeys,
   EosNewAccountType,
+  EosPublicKeys,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -51,14 +52,14 @@ export class EosCreateAccount implements CreateAccount {
 
   private _generatedKeys: Partial<EosGeneratedKeys>
 
-  constructor(chainState: EosChainState) {
+  constructor(chainState: EosChainState, options?: EosCreateAccountOptions) {
     this._chainState = chainState
+    this._options = this.applyDefaultOptions(options)
   }
 
   /** Compose a transaction to send to the chain to create a new account */
-  async composeTransaction(accountType: EosNewAccountType, options?: EosCreateAccountOptions): Promise<void> {
+  async composeTransaction(accountType: EosNewAccountType): Promise<void> {
     this._accountType = accountType
-    this._options = this.applyDefaultOptions(options)
     const {
       accountName,
       creatorAccountName,
@@ -84,8 +85,8 @@ export class EosCreateAccount implements CreateAccount {
 
     this._accountName = newAccountName
 
-    // get keys from paramters or freshly generated
-    const publicKeys = await this.getPublicKeysFromOptionsOrGenerateNewKeys()
+    await this.generatePublicKeysIfNeeded()
+    const { publicKeys } = this.options
 
     // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
     if (recycleAccount) {
@@ -270,27 +271,42 @@ export class EosCreateAccount implements CreateAccount {
     return newVirtualAccountPermission
   }
 
-  /** extract keys from options or generate new keys
-   *  Returns publicKeys and generatedKeys if created */
-  private async getPublicKeysFromOptionsOrGenerateNewKeys() {
-    let generatedKeys: any
-    // generate new account owner/active keys if they weren't provided
-    let { publicKeys } = this._options || {}
+  /** extract keys from options
+   *  Returns publicKeys */
+  private getPublicKeysFromOptions(): EosPublicKeys {
+    const { publicKeys } = this._options || {}
     const { owner, active } = publicKeys || {}
-    const { newKeysOptions } = this._options
-    const { password, salt } = newKeysOptions || {}
-
-    // generate new public keys and add to options.publicKeyss
     if (!owner || !active) {
-      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, { publicKeys })
-      this._generatedKeys = {
-        ...this._generatedKeys,
-        accountKeys: generatedKeys,
-      }
-      publicKeys = this._generatedKeys.accountKeys.publicKeys
-      this._options.publicKeys = publicKeys // replace working keys with new ones
+      return null
     }
     return publicKeys
+  }
+
+  /** Checks create options - if publicKeys are missing,
+   *  autogenerate them and add them to options */
+  async generatePublicKeysIfNeeded() {
+    let publicKeys: EosPublicKeys
+    // get keys from paramters or freshly generated
+    publicKeys = this.getPublicKeysFromOptions()
+    if (!publicKeys) {
+      publicKeys = await this.generatePublicKeys()
+    }
+  }
+
+  /** Generate new public keys and stores them in class's generatedKeys
+   *  Also adds the new keys to the class's options.publicKeys */
+  private async generatePublicKeys(): Promise<EosPublicKeys> {
+    // generate new account owner/active keys if they weren't provided
+    const { newKeysOptions } = this._options
+    const { password, salt } = newKeysOptions || {}
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
+    this._generatedKeys = {
+      ...this._generatedKeys,
+      accountKeys: generatedKeys,
+    }
+    const newPublicKeys = this._generatedKeys?.accountKeys?.publicKeys
+    this._options.publicKeys = newPublicKeys // replace working keys with new ones
+    return newPublicKeys
   }
 
   /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
@@ -319,6 +335,12 @@ export class EosCreateAccount implements CreateAccount {
   */
   generateAccountNameString = (prefix: string = ''): EosEntityName => {
     return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
+  }
+
+  /** EOS requires the chain to execute a createAccount transaction
+   *  to create the account structure on-chain */
+  requiresTransactionToCreateAccount = (): boolean => {
+    return true
   }
 
   private assertValidOptionPublicKeys() {
