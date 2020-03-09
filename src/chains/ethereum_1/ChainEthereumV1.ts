@@ -11,7 +11,13 @@ import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
 import { notImplemented } from '../../helpers'
 import { EthereumCreateAccountOptions } from './models'
-
+import {
+  isValidEthereumPublicKey,
+  isValidEthereumPrivateKey,
+  toEthereumPublicKey,
+  toEthereumPrivateKey,
+  toEthereumSignature,
+} from './helpers'
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -110,9 +116,9 @@ class ChainEthereumV1 implements Chain {
 
   toEncryptedDataString = crypto.toEncryptedDataString
 
-  isValidPrivateKey = ethcrypto.isValidPrivateKey
+  isValidPrivateKey = isValidEthereumPrivateKey
 
-  isValidPublicKey = ethcrypto.isValidPublicKey
+  isValidPublicKey = isValidEthereumPublicKey
 
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
@@ -134,11 +140,11 @@ class ChainEthereumV1 implements Chain {
 
   toDate = notImplemented
 
-  toPublicKey = notImplemented
+  toPublicKey = toEthereumPublicKey
 
-  toPrivateKey = notImplemented
+  toPrivateKey = toEthereumPrivateKey
 
-  toSignature = notImplemented
+  toSignature = toEthereumSignature
 
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
