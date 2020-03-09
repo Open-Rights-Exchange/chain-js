@@ -2,7 +2,7 @@ import { Chain, ChainFactory, ChainType } from '../../src/index'
 
 import { ChainSettings, ChainEndpoint } from '../../src/models/generalModels'
 
-import { toEthPrivateKey } from '../../src/chains/ethereum_1/helpers'
+import { toEthereumPrivateKey } from '../../src/chains/ethereum_1/helpers'
 
 export const ropstenEndpoints: ChainEndpoint[] = [
   {
@@ -42,7 +42,7 @@ export const sampleTransactionOptions = {
     await transaction.generateSerialized()
     console.log('generateSerialized: ', transaction)
     await transaction.validate()
-    await transaction.sign([toEthPrivateKey(ropstenPrivate)])
+    await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     const signatures = {
       v: transaction?.serialized?.v,
       r: transaction?.serialized?.r,

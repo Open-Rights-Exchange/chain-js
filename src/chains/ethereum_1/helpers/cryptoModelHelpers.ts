@@ -2,15 +2,11 @@ import { ECDSASignature } from 'ethereumjs-util'
 // eslint-disable-next-line import/no-cycle
 import { isValidPrivateKey, isValidPublicKey, isValidSignature } from '../ethCrypto'
 import { EthereumSignature, EthereumPublicKey, EthereumPrivateKey } from '../models/cryptoModels'
-import { isNullOrEmpty } from '../../../helpers'
-import { toEthBuffer } from './generalHelpers'
 
-export function isValidEthereumSignature(value: ECDSASignature | EthereumSignature): value is EthereumSignature {
+export function isValidEthereumSignature(value: EthereumSignature): value is EthereumSignature {
   // this is an oversimplified check just to prevent assigning a wrong string
   // signatures are actually verified in transaction object
-  const { v, r, s } = value
-  if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) return false
-  return isValidSignature(v, r, s)
+  return isValidSignature(value)
 }
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
   // this is an oversimplified check just to prevent assigning a wrong string

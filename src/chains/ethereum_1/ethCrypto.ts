@@ -7,6 +7,7 @@ import {
   isValidPublic,
   isValidAddress,
   publicToAddress,
+  isValidSignature as utilIsValidSignature,
 } from 'ethereumjs-util'
 import Wallet from 'ethereumjs-wallet'
 import { toBuffer, notImplemented } from '../../helpers'
@@ -15,12 +16,12 @@ import { EthereumAddress, EthereumPublicKey, EthereumSignature, EthereumPrivateK
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 // eslint-disable-next-line import/no-cycle
-import { toEthereumPublicKey } from './helpers/cryptoModelHelpers'
+import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
 
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
-  return ecsign(dataBuffer, keyBuffer)
+  return toEthereumSignature(ecsign(dataBuffer, keyBuffer))
 }
 
 export function isValidPrivateKey(value: EthereumPrivateKey): boolean {
@@ -29,6 +30,11 @@ export function isValidPrivateKey(value: EthereumPrivateKey): boolean {
 
 export function isValidPublicKey(value: EthereumPublicKey): boolean {
   return isValidPublic(toEthBuffer(value))
+}
+
+export function isValidSignature(value: EthereumSignature): boolean {
+  const { v, r, s } = value
+  return utilIsValidSignature(v, r, s)
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
