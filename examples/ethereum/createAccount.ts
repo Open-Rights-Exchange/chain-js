@@ -25,7 +25,7 @@ export const CreateAccountOptions = {
     const createAccount = ropsten.new.CreateAccount(CreateAccountOptions)
     await createAccount.generatePublicKeysIfNeeded()
     console.log('generatedKeys:', createAccount.generatedKeys)
-    console.log('accountName:', createAccount.accountName)
+    console.log('address:', createAccount.accountName)
   } catch (error) {
     console.log(error)
   }
