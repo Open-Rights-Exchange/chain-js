@@ -4,10 +4,10 @@ import { isNull } from 'util'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
-import { EthSerializedTransaction, EthTransactionOptions, EthSignature, EthPrivateKey } from './models'
+import { EthSerializedTransaction, EthTransactionOptions, EthereumSignature, EthereumPrivateKey } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, getUniqueValues } from '../../helpers'
-import { isValidEthSignature } from './helpers'
+import { isValidEthereumSignature } from './helpers'
 
 export class EthereumTransaction implements Transaction {
   private _cachedAccounts: any[] = []
@@ -20,7 +20,7 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthTransactionOptions
 
-  private _signatures: Set<EthSignature> // A set keeps only unique values
+  private _signatures: Set<EthereumSignature> // A set keeps only unique values
 
   private _serialized: any
 
@@ -178,7 +178,7 @@ export class EthereumTransaction implements Transaction {
     this._signatures = new Set<any>(signatures)
   }
 
-  addSignatures = (signatures: EthSignature[]): void => {
+  addSignatures = (signatures: EthereumSignature[]): void => {
     if (signatures.length !== 1) {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     }
@@ -188,8 +188,8 @@ export class EthereumTransaction implements Transaction {
     this._serialized.s = s
   }
 
-  private assertValidSignature = (signature: EthSignature) => {
-    if (!isValidEthSignature(signature)) {
+  private assertValidSignature = (signature: EthereumSignature) => {
+    if (!isValidEthereumSignature(signature)) {
       throwNewError(`Not a valid signature : ${signature}`, 'signature_invalid')
     }
   }
@@ -250,7 +250,7 @@ export class EthereumTransaction implements Transaction {
     return this._signBuffer
   }
 
-  public sign(privateKeys: EthPrivateKey[]): void {
+  public sign(privateKeys: EthereumPrivateKey[]): void {
     this.assertIsValidated()
     if (privateKeys.length !== 1) {
       throwNewError('Ethereum sign needs to be providen exactly 1 privateKey')
