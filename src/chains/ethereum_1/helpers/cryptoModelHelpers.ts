@@ -1,23 +1,41 @@
-import { ECDSASignature } from 'ethereumjs-util'
-// eslint-disable-next-line import/no-cycle
-import { isValidPrivateKey, isValidPublicKey, isValidSignature } from '../ethCrypto'
-import { EthereumSignature, EthereumPublicKey, EthereumPrivateKey } from '../models/cryptoModels'
+import {
+  isValidPrivate,
+  isValidPublic,
+  isValidAddress,
+  isValidSignature as utilIsValidSignature,
+  ECDSASignature,
+} from 'ethereumjs-util'
+import { isString } from 'util'
+import { EthereumSignature, EthereumPublicKey, EthereumPrivateKey, EthereumAddress } from '../models/cryptoModels'
+import { toEthBuffer } from './generalHelpers'
 
-export function isValidEthereumSignature(value: EthereumSignature): value is EthereumSignature {
-  // this is an oversimplified check just to prevent assigning a wrong string
-  // signatures are actually verified in transaction object
-  return isValidSignature(value)
-}
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
-  // this is an oversimplified check just to prevent assigning a wrong string
-  // signatures are actually verified in transaction object
-  return isValidPublicKey(value)
+  return isValidPublic(toEthBuffer(value))
 }
 
-export function isValidEthereumPrivateKey(value: string | EthereumPrivateKey): value is EthereumPrivateKey {
+export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): value is EthereumPrivateKey {
+  return isValidPrivate(toEthBuffer(value))
+}
+
+export function isValidEthereumSignature(
+  value: EthereumSignature | string | ECDSASignature,
+): value is EthereumSignature {
+  let signature: ECDSASignature
   // this is an oversimplified check just to prevent assigning a wrong string
   // signatures are actually verified in transaction object
-  return isValidPrivateKey(value)
+  if (isString(value)) {
+    signature = JSON.parse(value)
+  } else {
+    signature = value
+  }
+
+  const { v, r, s } = signature
+  return utilIsValidSignature(v, r, s)
+}
+
+// For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
+export function isValidEthereumAddress(value: string | EthereumAddress): boolean {
+  return isValidAddress(value)
 }
 
 export function toEthereumPublicKey(value: string): EthereumPublicKey {
@@ -34,7 +52,7 @@ export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
   throw new Error(`Not a valid ethereum private key:${value}.`)
 }
 
-export function toEthereumSignature(value: ECDSASignature): EthereumSignature {
+export function toEthereumSignature(value: string | ECDSASignature): EthereumSignature {
   if (isValidEthereumSignature(value)) {
     return value
   }
