@@ -7,14 +7,14 @@ import {
 } from 'ethereumjs-util'
 import { isString } from 'util'
 import { EthereumSignature, EthereumPublicKey, EthereumPrivateKey, EthereumAddress } from '../models/cryptoModels'
-import { toEthBuffer } from './generalHelpers'
+import { toEthBuffer, addPrefixToKey } from './generalHelpers'
 
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
-  return isValidPublic(toEthBuffer(value))
+  return isValidPublic(toEthBuffer(addPrefixToKey(value)))
 }
 
 export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): value is EthereumPrivateKey {
-  return isValidPrivate(toEthBuffer(value))
+  return isValidPrivate(toEthBuffer(addPrefixToKey(value)))
 }
 
 export function isValidEthereumSignature(
