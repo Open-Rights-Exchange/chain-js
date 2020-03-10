@@ -23,7 +23,7 @@ export const CreateAccountOptions = {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     await ropsten.connect()
     const createAccount = ropsten.new.CreateAccount(CreateAccountOptions)
-    await createAccount.generatePublicKeysIfNeeded()
+    await createAccount.generateKeysIfNeeded()
     console.log('generatedKeys:', createAccount.generatedKeys)
     console.log('address:', createAccount.accountName)
   } catch (error) {

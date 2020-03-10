@@ -13,6 +13,7 @@ import { EthereumEntityName } from './models/generalModels'
  *  Handles native accounts
  *  Generates new account keys if not provide */
 export class EthereumCreateAccount implements CreateAccount {
+  // TODO: add comments
   private _accountName: EthereumAddress
 
   private _chainState: EthereumChainState
@@ -56,8 +57,8 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   /** Checks create options - if publicKeys are missing,
-   *  autogenerate them and add them to options */
-  async generatePublicKeysIfNeeded() {
+   *  autogenerate the public and private key pair and add them to options */
+  async generateKeysIfNeeded() {
     let publicKey: EthereumPublicKey
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()

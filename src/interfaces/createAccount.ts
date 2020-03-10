@@ -44,7 +44,7 @@ export interface CreateAccount {
   /** Checks if publicKeys are provide in Options.
    *  If not, generates new public keys and stores them in class's generatedKeys property
    *  Also adds the new keys to the class's options.publicKeys property */
-  generatePublicKeysIfNeeded(): Promise<void>
+  generateKeysIfNeeded(): Promise<void>
   /** Whether chain requires a transaction to create an account
    *  ex: ETH does not, EOS does */
   requiresTransactionToCreateAccount(): boolean

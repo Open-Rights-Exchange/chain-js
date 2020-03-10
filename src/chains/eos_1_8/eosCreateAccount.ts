@@ -85,7 +85,7 @@ export class EosCreateAccount implements CreateAccount {
 
     this._accountName = newAccountName
 
-    await this.generatePublicKeysIfNeeded()
+    await this.generateKeysIfNeeded()
     const { publicKeys } = this.options
 
     // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
@@ -284,7 +284,7 @@ export class EosCreateAccount implements CreateAccount {
 
   /** Checks create options - if publicKeys are missing,
    *  autogenerate them and add them to options */
-  async generatePublicKeysIfNeeded() {
+  async generateKeysIfNeeded() {
     let publicKeys: EosPublicKeys
     // get keys from paramters or freshly generated
     publicKeys = this.getPublicKeysFromOptions()
