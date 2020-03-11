@@ -9,8 +9,9 @@ import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
+import { EthereumAccount } from './ethAccount'
 import { notImplemented } from '../../helpers'
-import { EthereumCreateAccountOptions } from './models'
+import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress } from './models'
 import {
   isValidEthereumPublicKey,
   isValidEthereumPrivateKey,
@@ -83,9 +84,15 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  private newAccount = (options?: any): any => {
-    notImplemented()
-    return null
+  /** Returns a chain Account class
+   * Note: Does NOT create a new ethereum address - to create an address, use new.CreateAccount */
+  private newAccount = async (address?: EthereumAddress): Promise<EthereumAccount> => {
+    this.assertIsConnected()
+    const account = new EthereumAccount(this._chainState)
+    if (address) {
+      await account.load(address)
+    }
+    return account
   }
 
   private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
@@ -145,6 +152,10 @@ class ChainEthereumV1 implements Chain {
   toPrivateKey = toEthereumPrivateKey
 
   toSignature = toEthereumSignature
+
+  public setPublicKey = (publicKey: EthereumPublicKey) => {
+    return new EthereumAccount(this._chainState).setPublicKey(publicKey)
+  }
 
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
