@@ -6,7 +6,6 @@ export type EthereumPublicKey = string & PublicKeyBrand
 /** a private key string - formatted correctly for ethereum */
 export type EthereumPrivateKey = string & PrivateKeyBrand
 
-
 // use it as account name
 export type EthereumAddress = string
 
