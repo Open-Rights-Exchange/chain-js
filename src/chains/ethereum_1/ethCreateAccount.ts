@@ -101,11 +101,6 @@ export class EthereumCreateAccount implements CreateAccount {
     return false
   }
 
-  /** ETH accounts cannot be recycled as the private keys cannot be replaced */
-  supportsRecycling = (): boolean => {
-    return false
-  }
-
   private assertValidOptionPublicKeys() {
     const { publicKey } = this._options
     if (publicKey && !isValidEthereumPublicKey(publicKey)) {

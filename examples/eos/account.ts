@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainEndpoint, ChainSettings, NewAccountType } from '../src/models'
+import { Chain, ChainFactory, ChainType } from '../../src/index'
+import { ChainEndpoint, ChainSettings, NewAccountType } from '../../src/models'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -11,10 +11,10 @@ import {
   LinkPermissionsParams,
   DeletePermissionsParams,
   UnlinkPermissionsParams,
-} from '../src/chains/eos_1_8/models'
-import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
-import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
-import { toEosEntityName, toEosAsset, toEosPublicKey } from '../src/chains/eos_1_8/helpers'
+} from '../../src/chains/eos_1_8/models'
+import { EosAccount } from '../../src/chains/eos_1_8/eosAccount'
+import { ChainEosV18 } from '../../src/chains/eos_1_8/ChainEosV18'
+import { toEosEntityName, toEosAsset, toEosPublicKey } from '../../src/chains/eos_1_8/helpers'
 
 require('dotenv').config()
 
@@ -293,14 +293,14 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('response:', await transaction.send())
 
   // -----> CreateAccount - recycle native Kylin account
-  // const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
-  // console.log('account can be recycled:', account.canBeRecycled)
-  // if (account.canBeRecycled) {
-  //   const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
-  //   await recycleAccount.composeTransaction(EosNewAccountType.Native)
-  //   await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-  //   console.log('createAccount response: ', await recycleAccount.transaction.send())
-  // }
+  const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
+  console.log('account can be recycled:', account.canBeRecycled)
+  if (account.supportsRecycling() && account.canBeRecycled) {
+    const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
+    await recycleAccount.composeTransaction(EosNewAccountType.Native)
+    await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+    console.log('createAccount response: ', await recycleAccount.transaction.send())
+  }
 
   // -------------------- Permissions -----------------------
 

@@ -10,6 +10,8 @@ export interface Account {
   publicKeys: PublicKey[]
   /** Returns the underlying raw data from the chain's account structure */
   value: any
+  /** Some chains support reusing accounts existing on chain by replacing the account keys */
+  supportsRecycling(): boolean
   /** Whether the account is currently unused and can be reused
    *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
   canBeRecycled: boolean

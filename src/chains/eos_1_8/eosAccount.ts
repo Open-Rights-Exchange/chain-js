@@ -38,6 +38,11 @@ export class EosAccount implements Account {
     this._permHelper = new PermissionsHelper(this._chainState)
   }
 
+  /** EOS accounts can be recycled by replacing the account keys */
+  supportsRecycling = (): boolean => {
+    return true
+  }
+
   /** Whether the account is currently unused and can be reused
    *  Checks that existing account's active public key matches a designated unusedAccountPublicKey value */
   get canBeRecycled(): boolean {

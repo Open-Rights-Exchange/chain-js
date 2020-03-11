@@ -20,9 +20,14 @@ export class EthereumAccount implements Account {
     this._chainState = chainState
   }
 
+  /** ETH accounts cannot be recycled as the private keys cannot be replaced */
+  supportsRecycling = (): boolean => {
+    return false
+  }
+
   /** Whether the account is currently unused and can be reused - not supported in Ethereum */
   get canBeRecycled(): boolean {
-    return true
+    return notSupported()
   }
 
   /** Ethereum address */
