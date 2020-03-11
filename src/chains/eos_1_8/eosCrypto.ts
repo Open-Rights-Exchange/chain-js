@@ -1,7 +1,7 @@
 import * as ecc from 'eosjs-ecc'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
-import { EosAccountKeysStruct, EosSignature, EosPublicKey, EosPrivateKey } from './models'
+import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
 import { KeyPair, KeyPairEncrypted, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
@@ -72,7 +72,7 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
   removeEmptyValuesInJsonObject(overrideKeys)
 
   // Formally named generateEncryptedKeys
-  const keys: EosAccountKeysStruct = await Keygen.generateMasterKeys()
+  const keys: EosAccountKeys = await Keygen.generateMasterKeys()
   const replacedKeys = {
     publicKeys: {
       ...keys.publicKeys,
