@@ -5,7 +5,7 @@ import { getEthereumAddressFromPublicKey, generateNewAccountKeysAndEncryptPrivat
 import { isValidEthereumPublicKey } from './helpers'
 import { isNullOrEmpty, notSupported } from '../../helpers'
 import { EthereumAddress, EthereumPublicKey } from './models/cryptoModels'
-import { EthereumAccountStruct } from './models/ethStructures'
+import { EthereumGeneratedKeys } from './models'
 import { EthereumNewAccountType, EthereumCreateAccountOptions } from './models/accountModels'
 import { EthereumEntityName } from './models/generalModels'
 
@@ -26,7 +26,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   requiresTransaction: boolean = false
 
-  private _generatedKeys: EthereumAccountStruct
+  private _generatedKeys: EthereumGeneratedKeys
 
   constructor(chainState: EthereumChainState, options?: EthereumCreateAccountOptions) {
     this._chainState = chainState
@@ -65,19 +65,19 @@ export class EthereumCreateAccount implements CreateAccount {
     // get keys from options or generate
     publicKey = this.getPublicKeysFromOptions()
     if (!publicKey) {
-      publicKey = await this.generateNewKeys()
+      await this.generateAccountKeys()
+      publicKey = this._generatedKeys?.publicKey
     }
     this._accountName = await getEthereumAddressFromPublicKey(publicKey)
     this._accountType = EthereumNewAccountType.Native
   }
 
-  private async generateNewKeys() {
+  private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
     const { password, salt } = newKeysOptions || {}
 
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {})
-    const newPublicKey = this._generatedKeys?.publicKey
-    return newPublicKey
+    this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
   /* Not supported for Ethereum */
@@ -99,7 +99,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   /** ETH does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
-  requiresTransactionToCreateAccount = (): boolean => {
+  supportsTransactionToCreateAccount = (): boolean => {
     return false
   }
 
