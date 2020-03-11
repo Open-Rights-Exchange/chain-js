@@ -9,12 +9,14 @@ import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../cry
 // eslint-disable-next-line import/no-cycle
 import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
 
+/* signs data with ethereum private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
   return toEthereumSignature(ecsign(dataBuffer, keyBuffer))
 }
 
+/** Returns public key from ethereum signature */
 export function getEthereumPublicKeyFromSignature(
   signature: EthereumSignature,
   data: string | Buffer,
@@ -24,6 +26,7 @@ export function getEthereumPublicKeyFromSignature(
   return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s).toString())
 }
 
+/** Returns public key from ethereum address */
 export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
   return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
 }
@@ -39,6 +42,9 @@ export function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, s
   return encryptedKeys
 }
 
+/** Generates new public and private key pair
+ * Encrypts the private key using password and salt
+ */
 export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string, overrideKeys: any): any {
   const wallet = Wallet.generate()
   const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
@@ -48,7 +54,7 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, sa
   return encryptedKeys
 }
 
-// TODO: unless the data is signature, not sure what is the purpose of the function.  And how is it possibel to verify that the signature has what public key if the original data is not known
+// TODO: unless the data is signature, not sure what is the purpose of the function.  And how is it possible to verify that the signature has what public key if the original data is not known
 export function verifySignedWithPublicKey(
   publicKey: string | Buffer,
   data: string | Buffer,
