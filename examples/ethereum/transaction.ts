@@ -1,4 +1,4 @@
-import { Chain, ChainFactory, ChainType } from '../../src/index'
+import { ChainFactory, ChainType } from '../../src/index'
 
 import { ChainSettings, ChainEndpoint } from '../../src/models/generalModels'
 
