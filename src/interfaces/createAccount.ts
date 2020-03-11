@@ -10,6 +10,8 @@ export interface CreateAccount {
   accountName: ChainEntityName
   /** Account type to be created */
   accountType: NewAccountType | any
+  /** Some chains support reusing accounts existing on chain by replacing the account keys */
+  supportsRecycling(): boolean
   /** Account will be recycled (accountName must be specified via composeTransaction()
    * This is set by composeTransaction()
    * ... if the account name provided has the 'unused' key as its active public key */

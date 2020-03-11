@@ -350,6 +350,11 @@ export class EosCreateAccount implements CreateAccount {
     return true
   }
 
+  /** EOS accounts can be recycled by replacing the account keys */
+  supportsRecycling = (): boolean => {
+    return true
+  }
+
   private assertValidOptionPublicKeys() {
     const { publicKeys } = this._options
     const { active, owner } = publicKeys || {}

@@ -18,8 +18,6 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _chainState: EthereumChainState
 
-  private _didRecycleAccount: boolean
-
   private _accountType: EthereumNewAccountType
 
   private _options: EthereumCreateAccountOptions
@@ -103,6 +101,11 @@ export class EthereumCreateAccount implements CreateAccount {
     return false
   }
 
+  /** ETH accounts cannot be recycled as the private keys cannot be replaced */
+  supportsRecycling = (): boolean => {
+    return false
+  }
+
   private assertValidOptionPublicKeys() {
     const { publicKey } = this._options
     if (publicKey && !isValidEthereumPublicKey(publicKey)) {
@@ -138,7 +141,7 @@ export class EthereumCreateAccount implements CreateAccount {
    * This is set by composeTransaction()
    * ... if the account name provided has the 'unused' key as its active public key */
   get didRecycleAccount() {
-    return this._didRecycleAccount
+    return notSupported()
   }
 
   /** The keys that were generated as part of the account creation process
