@@ -394,7 +394,7 @@ export class EosTransaction implements Transaction {
     let account = this._cachedAccounts.find(ca => accountName === ca.name)
     if (!account) {
       account = new EosAccount(this._chainState)
-      await account.fetchFromChain(accountName)
+      await account.load(accountName)
       this._cachedAccounts.push(account)
     }
     return account
