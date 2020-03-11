@@ -26,6 +26,8 @@ export const CreateAccountOptions = {
     await createAccount.generateKeysIfNeeded()
     console.log('generatedKeys:', createAccount.generatedKeys)
     console.log('address:', createAccount.accountName)
+    const account = await ropsten.new.Account('0x3f0def554abb0107c08237361bba7e2b99906a48')
+    console.log('account', account)
   } catch (error) {
     console.log(error)
   }
