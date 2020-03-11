@@ -110,7 +110,7 @@ class ChainEosV18 implements Chain {
     this.assertIsConnected()
     const account = new EosAccount(this._chainState)
     if (accountName) {
-      await account.fetchFromChain(accountName)
+      await account.load(accountName)
     }
     return account
   }

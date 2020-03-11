@@ -254,7 +254,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // -----> CreateAccount - create native kylin account
   // const createAccount = kylin.new.CreateAccount(createAccountOptions_EosNative)
   // createAccount.generateKeysIfNeeded()
-  // if (createAccount.requiresTransaction) {
+  // if (createAccount.supportsTransactionToCreateAccount) {
   //   await createAccount.composeTransaction(EosNewAccountType.Native)
   //   await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
   //   console.log('createAccount response: ', await createAccount.transaction.send())
@@ -264,7 +264,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // -----> CreateAccount - create native ore-staging account
   // const createAccount = oreStaging.new.CreateAccount(createAccountOptions_OreNative)
   // await createAccount.generateKeysIfNeeded()
-  // if (createAccount.requiresTransactionToCreateAccount) {
+  // if (createAccount.supportsTransactionToCreateAccount) {
   //   await createAccount.composeTransaction(EosNewAccountType.NativeOre)
   //   await prepTransaction(oreStaging, createAccount.transaction, env.ORE_TESTNET_APPOREID_PRIVATE_KEY)
   //   console.log(JSON.stringify(createAccount.transaction.toJson()))
