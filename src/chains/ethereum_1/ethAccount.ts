@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { notSupported } from '../../helpers'
+import { isValidEthereumAddress, isValidEthereumPublicKey } from './helpers'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { EthereumChainState } from './ethChainState'
-import { EthereumAccountStruct } from './models/ethStructures'
-
+import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey } from './models'
+import { getEthereumAddressFromPublicKey } from './ethCrypto'
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission
 
-export class EthAccount implements Account {
-  private _account: EthereumAccountStruct
+export class EthereumAccount implements Account {
+  private _address: EthereumAddress
+
+  private _publicKey: EthereumPublicKey
 
   private _chainState: EthereumChainState
 
@@ -17,55 +20,69 @@ export class EthAccount implements Account {
     this._chainState = chainState
   }
 
-  // TODO: all getters are requied to use this. How to restructure the ones which are 'Not Supported'
   /** Whether the account is currently unused and can be reused - not supported in Ethereum */
   get canBeRecycled(): boolean {
-    this.assertHasAccount()
-    throw new Error('Not supported')
+    return true
   }
 
-  /** Account name */
+  /** Ethereum address */
   get name(): any {
-    this.assertHasAccount()
-    return this._account?.address
+    this.assertHasAddress()
+    return this._address
   }
 
   /** Public Key(s) associated with the account */
   get publicKeys(): any {
-    this.assertHasAccount()
-    return this._account.publicKey
+    this.assertHasAddress()
+    return this._publicKey
   }
 
-  /** Tries to retrieve the account from the chain
-   *  Returns { exists:true|false, account } */
-  doesAccountExist = async (accountName: string): Promise<{ exists: boolean; account: EthAccount }> => {
-    try {
-      this.assertHasAccount()
-      return { exists: true, account: this }
-    } catch {
-      return { exists: false, account: null }
+  /** Whether the account name can be used for new account */
+  isValidNewAccountName = async (accountName: string | EthereumAddress): Promise<boolean> => {
+    return isValidEthereumAddress(accountName)
+  }
+
+  /** Sets the ethereum address
+  /* Public key can only be obtained from a transaction signed by an ethereum address
+  /* Only Ethereum address is not enough to get public key */
+  load = async (address?: EthereumAddress): Promise<void> => {
+    this.assertValidEthereumAddress(address)
+    this._address = address
+  }
+
+  /** Sets the ethereum publie key and address */
+  setPublicKey = async (publicKey: EthereumPublicKey) => {
+    this.assertValidEthereumPublickey(publicKey)
+    this._publicKey = publicKey
+    this._address = getEthereumAddressFromPublicKey(publicKey)
+  }
+
+  /** JSON representation of address */
+  toJson() {
+    this.assertHasAddress()
+    return { address: this._address }
+  }
+
+  /** Returns the address */
+  get value(): EthereumAddress {
+    return this._address
+  }
+
+  private assertHasAddress(): void {
+    if (!this._address) {
+      throwNewError('Ethereum address or Public key not provided')
     }
   }
 
-  /** Retrieves account from chain */
-  fetchFromChain = async (accountName: string): Promise<void> => {
-    notSupported()
+  private assertValidEthereumAddress(address: EthereumAddress): void {
+    if (!isValidEthereumAddress(address)) {
+      throwNewError('Not a valid ethereum address')
+    }
   }
 
-  /** JSON representation of transaction data */
-  toJson() {
-    this.assertHasAccount()
-    return this._account
-  }
-
-  /** Returns the raw value from the chain */
-  get value(): any {
-    return this._account
-  }
-
-  private assertHasAccount(): void {
-    if (!this._account) {
-      throwNewError('Account not retrieved from chain')
+  private assertValidEthereumPublickey(publicKey: EthereumPublicKey): void {
+    if (!isValidEthereumPublicKey(publicKey)) {
+      throwNewError('Not a valid ethereum public key')
     }
   }
 }
