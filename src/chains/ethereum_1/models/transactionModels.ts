@@ -1,3 +1,5 @@
+import { EthereumValue } from './generalModels'
+
 /** Transaction options used when contructing a trnasaction header */
 export type EthTransactionOptions = {
   /** Uses the time from the block which is `blocksBehind` behind head block
@@ -16,4 +18,16 @@ export type EthSerializedTransaction = {
   to?: string
   value?: string | number
   data?: string
+}
+
+export type EthereumAddress = EthereumValue
+export type EthereumMethodName = EthereumValue
+export type EthereumAbi = EthereumValue
+
+export type EthereumAction = {
+  abi: EthereumAbi
+  address: EthereumAddress
+  method: EthereumMethodName
+  value: EthereumValue
+  data: [EthereumValue]
 }
