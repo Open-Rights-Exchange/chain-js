@@ -1,6 +1,6 @@
 import { toBuffer } from 'ethereumjs-util'
 
-export function toEthBuffer(data: string | Buffer): Buffer {
+export function toEthBuffer(data: string | Buffer | number): Buffer {
   return toBuffer(data)
 }
 
