@@ -91,7 +91,7 @@ export class EosTransaction implements Transaction {
    *  Also adds a header to the transaction that is included when transaction is signed
    */
 
-  public async generateSerialized(): Promise<void> {
+  public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     // if already serialized, then dont do it again
     if (this._serialized) {
@@ -119,7 +119,7 @@ export class EosTransaction implements Transaction {
 
   /** Set the body of the transaction using Hex serialized transaction data
    *  This is one of the ways to set the actions for the transaction */
-  async setSerialized(serialized: any): Promise<void> {
+  async setFromRaw(serialized: any): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (serialized) {
@@ -172,9 +172,8 @@ export class EosTransaction implements Transaction {
 
   /** Add one action to the transaction body
    *  Setting asFirstAction = true places the new transaction at the top */
-  public addAction(action: EosActionStruct, options: any): void {
+  public addAction(action: EosActionStruct, asFirstAction: boolean = false): void {
     this.assertNoSignatures()
-    const { asFirstAction = false } = options
     if (!action) {
       throwNewError('Action parameter is missing')
     }

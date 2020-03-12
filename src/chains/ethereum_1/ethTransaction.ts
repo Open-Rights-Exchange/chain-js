@@ -60,7 +60,7 @@ export class EthereumTransaction implements Transaction {
     return !!this._serialized
   }
 
-  public async generateSerialized(): Promise<void> {
+  public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (!this._actions) {
@@ -87,7 +87,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   // TODO
-  async setSerialized(serialized: EthSerializedTransaction): Promise<void> {
+  async setFromRaw(serialized: EthSerializedTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (serialized) {
@@ -128,16 +128,16 @@ export class EthereumTransaction implements Transaction {
     this._isValidated = false
   }
 
-  public addAction(action: any, options: any): void {
+  public addAction(action: any, asFirstAction?: boolean): void {
     this.assertNoSignatures()
-    const { replace = false } = options || {}
     if (!action) {
       throwNewError('Action parameter is missing')
     }
-    if (this._actions?.length > 0 && !replace) {
-      throwNewError('Ethereum transaction can only have 1 action')
+    if (!isNullOrEmpty(this._actions)) {
+      throwNewError('addAction failed. Transaction already has an action. Ethereum only supports 1 action.')
     }
     this._actions = [action]
+    this._isValidated = false
   }
 
   // validation
