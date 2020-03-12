@@ -30,6 +30,14 @@ export const sampleTransactionOptions = {
   gasPrice: '0x09184e72a000',
   gasLimit: '0x2710',
 }
+
+export const sampleTransactionAction2 = {
+  abi: '0x1112222',
+  address: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+  method: 'vote',
+  value: 1000000000,
+  data: [1, 'abc'],
+}
 ;(async () => {
   try {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
