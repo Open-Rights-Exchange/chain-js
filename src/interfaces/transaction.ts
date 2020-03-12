@@ -36,7 +36,7 @@ export interface Transaction {
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */
-  addAction(action: any, options?: any): void
+  addAction(action: any, asFirstAction?: boolean): void
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: Signature[]): void
   /** Whether there is an attached signature for the publicKey for the authorization (e.g. account/permission)
