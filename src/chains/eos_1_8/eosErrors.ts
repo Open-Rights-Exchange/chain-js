@@ -22,6 +22,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   TxConfirmFailure: 'TxConfirmFailure',
   TxExceededResources: '_exceeded', // includes all EOS resources
   MiscChainError: 'chain_type_exception',
+  CheckUnlinkAuthAuthorization: 'check_unlinkauth_authorization',
   MiscBlockValidationError: 'block_validate_exception',
   MiscTransactionError: 'transaction_exception',
   MiscActionValidationError: 'action_validate_exception',
@@ -54,6 +55,8 @@ export function mapChainError(error: RpcError | Error): ChainError {
     errorMessage = errorSearchString
   }
 
+  console.info('ChainErrorRegExs', ChainErrorRegExs)
+
   // loop through all possible ChainErrors and compare error string to regex for each ChainError
   // exit on first match - if no match for known errors, will match on the last one - UnkownError
   for (const errorKey of Object.keys(ChainErrorRegExs)) {
@@ -61,6 +64,7 @@ export function mapChainError(error: RpcError | Error): ChainError {
     const match = regexp.exec(errorSearchString)
     if (match) {
       // map the key name of the regEx to the ChainErrorType enum
+      console.info('errorKey', errorKey)
       errorType = (ChainErrorType as any)[errorKey] // map the key name to an enum with the same name (e.g. MiscChainError)
       break
     }
