@@ -52,6 +52,11 @@ export function toEosEntityName(name: string): EosEntityName {
   if (isValidEosEntityName(name)) {
     return name
   }
+
+  if (name === '') {
+    return null
+  }
+
   const rules = 'Up to 13 characters, last character can\'t be ".", 13th character can only be [1-5] or [a-j].'
   throw new Error(`Not a valid EOS Account name:${name}. ${rules}`)
 }

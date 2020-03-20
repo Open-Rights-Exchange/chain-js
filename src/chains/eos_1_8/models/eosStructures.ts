@@ -52,7 +52,7 @@ export type EosAuthorizationStruct = {
 /** EOS Raw Data Structure for Permission - i.e. permission name, and authorization */
 export type EosPermissionStruct = {
   perm_name: EosEntityName
-  parent: EosEntityName
+  parent: EosEntityName | ''
   required_auth: EosAuthorizationStruct
 }
 
