@@ -4,10 +4,14 @@ import { CreateAccount } from '../../interfaces'
 import { getEthereumAddressFromPublicKey, generateNewAccountKeysAndEncryptPrivateKeys } from './ethCrypto'
 import { isValidEthereumPublicKey } from './helpers'
 import { isNullOrEmpty, notSupported } from '../../helpers'
-import { EthereumAddress, EthereumPublicKey } from './models/cryptoModels'
-import { EthereumGeneratedKeys } from './models'
-import { EthereumNewAccountType, EthereumCreateAccountOptions } from './models/accountModels'
-import { EthereumEntityName } from './models/generalModels'
+import {
+  EthereumAddress,
+  EthereumCreateAccountOptions,
+  EthereumEntityName,
+  EthereumGeneratedKeys,
+  EthereumNewAccountType,
+  EthereumPublicKey,
+} from './models'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
