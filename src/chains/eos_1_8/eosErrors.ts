@@ -22,6 +22,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   TxConfirmFailure: 'TxConfirmFailure',
   TxExceededResources: '_exceeded', // includes all EOS resources
   MiscChainError: 'chain_type_exception',
+  CheckUnlinkAuthAuthorization: 'check_unlinkauth_authorization',
   MiscBlockValidationError: 'block_validate_exception',
   MiscTransactionError: 'transaction_exception',
   MiscActionValidationError: 'action_validate_exception',
