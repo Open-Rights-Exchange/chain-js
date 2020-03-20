@@ -25,7 +25,7 @@ export const prepTransactionFromActions = async (chain: Chain, transactionAction
   console.log('actions:', transactionActions)
   const transaction = (chain as ChainEosV18).new.Transaction()
   transaction.actions = transactionActions
-  await transaction.generateSerialized()
+  await transaction.prepareToBeSigned()
   await transaction.validate()
   transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
@@ -35,7 +35,7 @@ export const prepTransactionFromActions = async (chain: Chain, transactionAction
 
 export const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
   console.log('actions:', transaction.actions)
-  await transaction.generateSerialized()
+  await transaction.prepareToBeSigned()
   await transaction.validate()
   transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)

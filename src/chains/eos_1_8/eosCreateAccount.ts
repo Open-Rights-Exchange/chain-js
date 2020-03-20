@@ -166,7 +166,7 @@ export class EosCreateAccount implements CreateAccount {
     if (!isNullOrEmpty(newActions)) newTransaction.actions = newActions
 
     // generate and validate the serialized tranasaction - ready to send to the chain
-    await newTransaction.generateSerialized()
+    await newTransaction.prepareToBeSigned()
     await newTransaction.validate()
     this._transaction = newTransaction
   }
