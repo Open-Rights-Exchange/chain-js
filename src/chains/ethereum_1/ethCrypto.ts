@@ -3,7 +3,7 @@ import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util
 import Wallet from 'ethereumjs-wallet'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { EthereumAddress, EthereumPublicKey, EthereumSignature, EthereumPrivateKey } from './models/cryptoModels'
+import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 // eslint-disable-next-line import/no-cycle

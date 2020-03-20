@@ -76,10 +76,8 @@ export class EthereumTransaction implements Transaction {
     let { gasPrice, gasLimit } = this._options
     const { to, value, data } = this._action
     gasPrice = isNullOrEmpty(gasPrice) ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
-    console.log('GASPRICE: ', gasPrice)
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
     const trxRaw = { nonce: 11, to, value, data, gasPrice, gasLimit }
-    console.log('RAWTRX', trxRaw)
     let trxOptions = {}
     if (!isNullOrEmpty(chain) && !isNullOrEmpty(hardfork)) {
       trxOptions = { chain, hardfork }
@@ -87,7 +85,6 @@ export class EthereumTransaction implements Transaction {
       throwNewError('For transaction options, chain and hardfork have to be specified together')
     }
     this._raw = new EthereumJsTx(trxRaw, trxOptions)
-    console.log('Acti', this._raw)
     this.setHeaderFromRaw()
     this.setSignBuffer()
   }
@@ -152,7 +149,6 @@ export class EthereumTransaction implements Transaction {
     if (!isNullOrEmpty(this._action)) {
       throwNewError('addAction failed. Transaction already has an action. Ethereum only supports 1 action.')
     }
-    console.log('actionadded')
     this._action = action
     this._isValidated = false
   }

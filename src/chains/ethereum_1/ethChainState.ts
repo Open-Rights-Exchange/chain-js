@@ -141,7 +141,6 @@ export class EthereumChainState {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
     try {
-      console.log('SENT')
       transaction = await this._web3.eth.sendSignedTransaction(signedTransaction).on('receipt', console.log)
     } catch (error) {
       const errString = mapChainError(error)
