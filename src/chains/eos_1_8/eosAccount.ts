@@ -102,6 +102,11 @@ export class EosAccount implements Account {
     this._account = account
   }
 
+  /** eos accounts exist on the chain  */
+  supportsOnChainAccountRegistry = (): boolean => {
+    return true
+  }
+
   /** JSON representation of transaction data */
   toJson() {
     this.assertHasAccount()
