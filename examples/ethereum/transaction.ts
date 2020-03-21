@@ -64,30 +64,13 @@ export const sampleTransactionAction = {
   value: '1000000000',
   data: '0x0f',
 }
-export const sampleTransactionOptions: EthereumTransactionOptions = {
+export const ropstenTransactionOptions: EthereumTransactionOptions = {
   chain: 'ropsten',
   hardfork: 'istanbul',
 }
-
-export const sampleTransactionAction2 = {
-  abi: '0x1112222',
-  address: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-  method: 'vote',
-  value: 1000000000,
-  data: [1, 'abc'],
-}
-
-// export type EthereumAction = {
-//   abi: EthereumAbi
-//   address: EthereumAddress
-//   method: EthereumMethodName
-//   value: EthereumValue
-//   data: [EthereumValue]
-// }
-
 const transferEthOptions = {
   to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-  value: toWei(1, 'milliether'),
+  value: toWei(10, 'milliether'),
 }
 
 const transferErc20Options = {
@@ -104,12 +87,11 @@ const transferErc20Options = {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     await ropsten.connect()
     // console.log(await ropsten.chainInfo)
-    const transaction = await ropsten.new.Transaction(sampleTransactionOptions)
+    const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
     // console.log('trx:', transaction)
     // await transaction.addAction(sampleTransferTrx)
     transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, transferEthOptions)]
     await transaction.prepareToBeSigned()
-    console.log('prepareToBeSigned: ', transaction.actions)
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     console.log('SIG: ', transaction.signatures)
