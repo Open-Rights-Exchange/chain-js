@@ -70,8 +70,6 @@ export class EosTransaction implements Transaction {
     return this._options
   }
 
-  // raw transaction body
-
   /** The tranasctions raw body */
   get raw() {
     if (!this._raw) {
@@ -90,7 +88,6 @@ export class EosTransaction implements Transaction {
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
-
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     // if raw transaction already exists, then dont do it again
@@ -319,7 +316,7 @@ export class EosTransaction implements Transaction {
   }
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  public sign(privateKeys: EosPrivateKey[]): void {
+  public sign(privateKeys: EosPrivateKey[]): Promise<void> {
     this.assertIsValidated()
     if (isNullOrEmpty(privateKeys)) return
     privateKeys.forEach(pk => {

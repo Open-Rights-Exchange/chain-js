@@ -131,7 +131,6 @@ export class EthereumChainState {
     }
   }
 
-  // TODO
   /** Broadcast a signed transaction to the chain */
   async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
@@ -141,7 +140,7 @@ export class EthereumChainState {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
     try {
-      transaction = await this._web3.eth.sendSignedTransaction(signedTransaction).on('receipt', console.log)
+      transaction = await this._web3.eth.sendSignedTransaction(signedTransaction)
     } catch (error) {
       const errString = mapChainError(error)
       throw new Error(`Send Transaction Failure: ${errString}`)

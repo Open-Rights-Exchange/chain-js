@@ -9,7 +9,7 @@ import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../cry
 // eslint-disable-next-line import/no-cycle
 import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
 
-/* signs data with ethereum private key */
+/** Signs data with ethereum private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
