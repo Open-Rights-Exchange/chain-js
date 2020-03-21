@@ -53,7 +53,7 @@ export interface Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
   send(waitForConfirm?: ConfirmType): Promise<any>
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  sign(privateKeys: PrivateKey[]): void
+  sign(privateKeys: PrivateKey[]): Promise<void>
   /** JSON representation of transaction data */
   toJson(): ConfirmType.None
   /** Verifies that all accounts and permisison for actions exist on chain.
