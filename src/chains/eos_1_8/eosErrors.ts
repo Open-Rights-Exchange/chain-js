@@ -22,6 +22,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   DataReadFailedKeyDoesNotExist: 'unknown key \\(boost',
   MiscChainError: 'chain_type_exception',
   MiscBlockValidationError: 'block_validate_exception',
+  CheckUnlinkAuthAuthorization: 'check_unlinkauth_authorization',
   MiscTransactionError: 'transaction_exception',
   MiscActionValidationError: 'action_validate_exception',
   MiscContractError: 'contract_exception',

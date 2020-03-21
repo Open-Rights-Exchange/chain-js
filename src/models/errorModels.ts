@@ -9,6 +9,7 @@ export enum ChainErrorType {
   /** missing permission or key */
   AuthMissing = 'AuthMissing',
   /** all permission or keys needed for transaction weren't provided */
+  CheckUnlinkAuthAuthorization = 'CheckUnlinkAuthAuthorization',
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
   /** includes all EOS resources */
