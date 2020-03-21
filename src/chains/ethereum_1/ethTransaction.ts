@@ -100,9 +100,7 @@ export class EthereumTransaction implements Transaction {
     } else if (!(isNullOrEmpty(chain) && isNullOrEmpty(hardfork))) {
       throwNewError('For transaction options, chain and hardfork have to be specified together')
     }
-    console.log('TRX BODY: ', trxBody)
     this._raw = new EthereumJsTx(trxBody, trxOptions)
-    console.log('NONCE: ', this._raw.nonce)
     this.setHeaderFromRaw()
     this.setSignBuffer()
   }
