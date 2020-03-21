@@ -1,4 +1,5 @@
 import { TransformableToBuffer } from 'ethereumjs-tx'
+import { HEX_PREFIX } from '../../../constants'
 import { isAString, hasPrefix } from '../../../helpers'
 import { toEthBuffer } from './generalHelpers'
 import { EthereumValue } from '../models'
@@ -12,7 +13,7 @@ export class EthereumData implements TransformableToBuffer {
 
   toBuffer() {
     // if a string (but not a hex prefixed string), convert to buffer and return
-    if (isAString(this._value) && !hasPrefix(this._value, '0x')) {
+    if (isAString(this._value) && !hasPrefix(this._value, HEX_PREFIX)) {
       // TODO convert string value to hex encoded string - this is just a placeholder
       const hexString = this._value
       return toEthBuffer(hexString)
