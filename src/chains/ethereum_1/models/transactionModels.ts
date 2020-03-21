@@ -2,10 +2,8 @@ import { EthereumValue } from './generalModels'
 
 /** Transaction options used when contructing a trnasaction header */
 export type EthereumTransactionOptions = {
-  /** Uses the time from the block which is `blocksBehind` behind head block
-   *   to calclate the expiratation time (blockBehind_time + expireSeconds) */
+  nonce?: EthereumValue
   gasPrice?: EthereumValue
-  /** Number of seconds after which transaction expires - must be submitted to the chain before then */
   gasLimit?: EthereumValue
   chain: EthereumValue
   hardfork: EthereumValue
@@ -35,13 +33,6 @@ export type EthereumTransactionAction = {
 export type EthereumAddress = EthereumValue & string
 export type EthereumMethodName = EthereumValue & string
 export type EthereumAbi = any[]
-
-export type EthereumComposeActionContractInput = {
-  abi: EthereumAbi
-  address: EthereumAddress
-  method: EthereumMethodName
-  params?: EthereumValue
-}
 
 export type EthereumContractAction = {
   abi: any
