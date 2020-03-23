@@ -4,13 +4,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
-import { Chain, ChainFactory, ChainType } from '../../src/index'
-import { ChainActionType, ChainEndpoint, ChainSettings, NewAccountType } from '../../src/models'
-import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../../src/chains/eos_1_8/helpers'
-import { EosAccount } from '../../src/chains/eos_1_8/eosAccount'
-import { EosTransaction } from '../../src/chains/eos_1_8/eosTransaction'
-import { ChainEosV18 } from '../../src/chains/eos_1_8/ChainEosV18'
-import { toEncryptedDataString } from '../../src/crypto'
+import { Chain, ChainFactory, ChainType } from '../../../index'
+import { ChainActionType, ChainEndpoint, ChainSettings, NewAccountType } from '../../../models'
+import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../helpers'
+import { EosAccount } from '../eosAccount'
+import { EosTransaction } from '../eosTransaction'
+import { ChainEosV18 } from '../ChainEosV18'
+import { toEncryptedDataString } from '../../../crypto'
 
 require('dotenv').config()
 

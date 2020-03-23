@@ -1,8 +1,8 @@
-import { ChainFactory, ChainType } from '../../src/index'
-import { ChainActionType, ChainSettings, ChainEndpoint } from '../../src/models'
+import { ChainFactory, ChainType } from '../../../index'
+import { ChainActionType, ChainSettings, ChainEndpoint } from '../../../models'
 
-import { toEthereumPrivateKey, toWei } from '../../src/chains/ethereum_1/helpers'
-import { EthereumTransactionOptions } from '../../src/chains/ethereum_1/models'
+import { toEthereumPrivateKey, toWei } from '../helpers'
+import { EthereumTransactionOptions } from '../models'
 
 export const ropstenEndpoints: ChainEndpoint[] = [
   {
@@ -83,6 +83,7 @@ const transferErc20Options = {
 }
 ;(async () => {
   try {
+
     // ---> Sign and send ethereum transfer transaction
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     await ropsten.connect()
@@ -96,6 +97,7 @@ const transferErc20Options = {
     await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     console.log('SIG: ', transaction.signatures)
     console.log(await transaction.send())
+
     // // ---> Sign and send erc20 transfer Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     // await ropsten.connect()
@@ -108,6 +110,7 @@ const transferErc20Options = {
     // console.log('prepareToBeSigned: ', transaction.actions)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+
   } catch (error) {
     console.log(error)
   }

@@ -5,11 +5,10 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
-import { ChainEthereumV1 } from '../src/chains/ethereum_1/ChainEthereumV1'
+import { Chain, ChainFactory, ChainType } from '../../../index'
+import { ChainEosV18 } from '../ChainEosV18'
 import { RpcError } from 'eosjs'
-import { ChainActionType } from '../src/models'
+import { ChainActionType } from '../../../models'
 
 require('dotenv').config()
 
@@ -85,10 +84,4 @@ const { env } = process
   // const chainError = kylin.mapChainError(err)
   // console.log('chainError type is:', chainError.errorType)
 
-  /**
-   * Create an Ethereum chain and call a few functions
-   */
-  // console.log('App: Create an Etehereum Chain.')
-  // const ethChain = new ChainFactory().create(ChainType.EthereumV1, [ethEndpoint], {}) as ChainEthereumV1
-  // console.log(ethChain.chainId)
 })()
