@@ -1,5 +1,5 @@
 export const TRANSACTION_ENCODING = 'utf8'
 export const ZERO_HEX = '0x00'
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
-export const EMTPY_HEX = '0x'
+export const EMPTY_HEX = '0x'
 export const HEX_PREFIX = '0x'

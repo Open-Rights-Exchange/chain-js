@@ -2,7 +2,7 @@
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import { isNull } from 'util'
 import { bufferToInt, privateToAddress, bufferToHex } from 'ethereumjs-util'
-import { EMTPY_HEX } from '../../constants'
+import { EMPTY_HEX } from '../../constants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
@@ -144,7 +144,7 @@ export class EthereumTransaction implements Transaction {
   /** Deserializes the transaction header and actions - fetches from the chain to deserialize action data */
   private async deserializeWithActions(rawTransaction: EthereumRawTransaction): Promise<any> {
     this.assertIsConnected()
-    const { nonce, gasLimit, gasPrice, to, value, data } = rawTransaction // TODO
+    const { nonce, gasLimit, gasPrice, to, value, data } = rawTransaction
     return { txAction: { to, value, data }, txHeader: { nonce, gasLimit, gasPrice } }
   }
 
@@ -309,7 +309,7 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Ethereum sign needs to be providen exactly 1 privateKey')
     }
     const privateKeyBuffer = toEthBuffer(toEthereumPrivateKey(privateKeys[0]))
-    if (bufferToHex(this._prepared.nonce) === EMTPY_HEX) {
+    if (bufferToHex(this._prepared.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
       this._prepared.nonce = toEthBuffer(

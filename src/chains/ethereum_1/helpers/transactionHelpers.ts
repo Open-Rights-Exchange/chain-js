@@ -1,8 +1,8 @@
 import Web3 from 'web3'
 import { BN, bufferToHex } from 'ethereumjs-util'
 import { isNullOrEmpty } from '../../../helpers'
-import { Unit, EthereumContractAction } from '../models'
-import { ZERO_HEX, EMTPY_HEX } from '../../../constants'
+import { EthUnit, EthereumContractAction } from '../models'
+import { ZERO_HEX, EMPTY_HEX } from '../../../constants'
 
 /** Converts functionSignature to hexadecimal string */
 export function functionSignatureToHex(functionSignature: string): string {
@@ -23,7 +23,8 @@ export function abiToFunctionSignature(methodName: string, abi: any[]): string {
   return `${methodName}(${inputSignature})`
 }
 
-export function toWei(amount: number, type: Unit) {
+/** Uses web3-utils toWei conversion */
+export function toWei(amount: number, type: EthUnit) {
   const web3 = new Web3()
   return web3.utils.toWei(new BN(amount), type)
 }
@@ -32,8 +33,8 @@ export function toWei(amount: number, type: Unit) {
 export function ethereumTrxArgIsNullOrEmpty(obj: any) {
   if (
     isNullOrEmpty(obj) ||
-    obj === (0 || ZERO_HEX || EMTPY_HEX || Buffer.from(ZERO_HEX, 'hex')) ||
-    bufferToHex(obj) === EMTPY_HEX
+    obj === (0 || ZERO_HEX || EMPTY_HEX || Buffer.from(ZERO_HEX, 'hex')) ||
+    bufferToHex(obj) === EMPTY_HEX
   )
     return true
 

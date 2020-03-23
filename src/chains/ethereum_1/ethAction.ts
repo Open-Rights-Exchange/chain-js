@@ -1,11 +1,11 @@
 import { isNullOrEmpty } from '../../helpers'
-import { EthereumActionInput, EthereumAddress, EthereumValue, EthereumContractAction } from './models'
-import { ethereumTrxArgIsNullOrEmpty, generateDataFromContractAction } from './helpers'
+import { EthereumActionInput, EthereumAddress, EthereumValue, EthereumContractAction, EthereumTxData } from './models'
+import { ethereumTrxArgIsNullOrEmpty, generateDataFromContractAction, toEthereumTxData } from './helpers'
 import { ZERO_HEX, ZERO_ADDRESS } from '../../constants'
 import { throwNewError } from '../../errors'
 
 export class EthereumAction {
-  private _data: any
+  private _data: EthereumTxData
 
   private _to: EthereumAddress
 
@@ -22,19 +22,20 @@ export class EthereumAction {
 
     this._to = isNullOrEmpty(to) ? ZERO_ADDRESS : to
     this._value = isNullOrEmpty(value) ? ZERO_HEX : value
-    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = data
-    else if (isNullOrEmpty(contract) && ethereumTrxArgIsNullOrEmpty(data)) this._data = ZERO_HEX
+    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(generateDataFromContractAction(contract))
+    else if (isNullOrEmpty(contract) && ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(ZERO_HEX)
     else if (!isNullOrEmpty(contract)) {
       this._contract = contract
-      this._data = generateDataFromContractAction(contract)
+      this._data = toEthereumTxData(generateDataFromContractAction(contract))
     }
   }
 
-  // 'hex or binary' data
+  /** Returns 'hex or binary' data */
   get data() {
     return this._data
   }
 
+  /** Checks is data value is empty or implying 0 */
   get hasData(): boolean {
     return !ethereumTrxArgIsNullOrEmpty(this._data)
   }
@@ -62,8 +63,6 @@ export class EthereumAction {
     if (!data) {
       return false
     }
-    // TODO: validate data - also allow '0x00' as valid
-    // throw error if problem
     return true
   }
 }

@@ -15,7 +15,7 @@ export interface ECDSASignature {
 /** a signature string - formatted correcly for ethereum */
 export type EthereumSignature = ECDSASignature & SignatureBrand
 
-export type Unit =
+export type EthUnit =
   | 'noether'
   | 'wei'
   | 'kwei'

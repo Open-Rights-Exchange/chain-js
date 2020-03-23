@@ -17,7 +17,6 @@ import {
  *  Handles native accounts
  *  Generates new account keys if not provide */
 export class EthereumCreateAccount implements CreateAccount {
-  // TODO: add comments
   private _accountName: EthereumAddress
 
   private _chainState: EthereumChainState
