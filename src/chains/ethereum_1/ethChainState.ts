@@ -142,8 +142,8 @@ export class EthereumChainState {
     try {
       transaction = await this._web3.eth.sendSignedTransaction(signedTransaction)
     } catch (error) {
-      const errString = mapChainError(error)
-      throw new Error(`Send Transaction Failure: ${errString}`)
+      const chainError = mapChainError(error)
+      throw chainError
     }
 
     if (useWaitForConfirm !== ConfirmType.None) {

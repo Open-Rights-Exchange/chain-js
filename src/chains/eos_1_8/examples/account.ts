@@ -48,7 +48,20 @@ export const kylinEndpoints = [
   {
     url: new URL('https:api-kylin.eosasia.one:443'),
   },
+  {
+    url: new URL('https:api-kylin.eoslaomao.com:443'),
+  },
+  {
+    url: new URL('https:kylin.eosusa.news'),
+  },
 ]
+
+export const eosMainEndpoints = [
+  {
+    url: new URL('https:mainnet.eos.dfuse.io:443'),
+  },
+]
+
 export const oreStagingEndpoints = [
   {
     url: new URL('https://ore-staging.openrights.exchange/'),
@@ -65,8 +78,8 @@ export const chainSettings = {
   unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
 }
 
-// Kylin createbridge - moonlighting
-export const createAccountOptions_createBridge = {
+// Kylin createescrow - moonlighting
+export const createAccountOptions_createescrow = {
   accountNamePrefix: 'ore',
   creatorAccountName: toEosEntityName('oreidfunding'),
   creatorPermission: toEosEntityName('active'),
@@ -75,7 +88,7 @@ export const createAccountOptions_createBridge = {
     salt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
   createEscrowOptions: {
-    contractName: toEosEntityName('createbridge'),
+    contractName: toEosEntityName('createescrow'),
     appName: 'free',
   },
 }
@@ -104,7 +117,7 @@ export const createAccountOptions_virtualNested = {
     salt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
   createEscrowOptions: {
-    contractName: 'createbridge',
+    contractName: 'createescrow',
     appName: 'free',
   },
   createVirtualNestedOptions: {
@@ -212,12 +225,12 @@ export const accountUnlinkDemoPermissions: UnlinkPermissionsParams[] = [
 export const accountLinkPermissions: LinkPermissionsParams[] = [
   {
     permissionName: toEosEntityName('nwpermission'),
-    contract: toEosEntityName('createbridge'),
+    contract: toEosEntityName('createescrow'),
     action: toEosEntityName('create'),
   },
   {
     permissionName: toEosEntityName('n2permission'),
-    contract: toEosEntityName('createbridge'),
+    contract: toEosEntityName('createescrow'),
     action: toEosEntityName('define'),
   },
 ]
@@ -231,6 +244,9 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // Create an EOS chain and call a few functions
   const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
   await kylin.connect()
+
+  const eosMain = new ChainFactory().create(ChainType.EosV18, eosMainEndpoints, chainSettings)
+  await eosMain.connect()
 
   const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
@@ -246,7 +262,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const createAccount = kylin.new.CreateAccount(createAccountOptions_createBridge)
   // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-  // console.log('createAccount response: ', await createAccount.transaction.send())
+  // console.log('createAccount response: ', await createAccount.transaction.send(ConfirmType.After001))
   // console.log('missing signatures: ', createAccount.transaction.missingSignatures)
   // console.log('deserialized transaction: ', createAccount.transaction.toJson())
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)

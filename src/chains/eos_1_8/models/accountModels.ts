@@ -22,7 +22,7 @@ export type EosCreateAccountOptions = {
   accountName?: EosEntityName // Optional - aka oreAccountName
   accountNamePrefix?: string // Default 'ore'
   creatorAccountName: EosEntityName
-  creatorPermission: EosEntityName // Default = 'active' aka permission
+  creatorPermission: EosEntityName // Default = 'active'
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
   publicKeys?: EosPublicKeys
   newKeysOptions?: EosNewKeysOptions

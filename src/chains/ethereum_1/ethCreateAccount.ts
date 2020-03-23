@@ -88,12 +88,6 @@ export class EthereumCreateAccount implements CreateAccount {
     return null
   }
 
-  /* Ethereum accounts do not have the concept of existing on chain */
-  async doesAccountExist(): Promise<any> {
-    notSupported()
-    return null
-  }
-
   /** Not supported */
   generateAccountNameString = (): any => {
     notSupported()

@@ -74,11 +74,10 @@ export class EosAccount implements Account {
   }
 
   /** Tries to retrieve the account from the chain
-   *  Returns { exists:true|false, account } */
+   *  Returns whether the account exists on the chain  */
   async doesAccountExist(accountName: string): Promise<boolean> {
     try {
       await this.load(toEosEntityName(accountName))
-      // let account = await this.rpc.get_account(accountName);
       return true
     } catch (e) {
       return false
@@ -101,6 +100,11 @@ export class EosAccount implements Account {
     }
 
     this._account = account
+  }
+
+  /** eos accounts exist on the chain  */
+  supportsOnChainAccountRegistry = (): boolean => {
+    return true
   }
 
   /** JSON representation of transaction data */

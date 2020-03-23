@@ -36,7 +36,7 @@ export class PermissionsHelper {
   composePermission(
     publicKeys: EosPublicKey[],
     permissionName: EosEntityName,
-    parentPermissionName: EosEntityName,
+    parentPermissionName: EosEntityName | '',
     threshold: number = 1,
     weight: number = 1,
   ): EosPermissionStruct {
@@ -78,10 +78,11 @@ export class PermissionsHelper {
     // TODO: if appendKeyToExistingPermission = true, add the new key to the existing permission's require_auth array
     // collect an array of new permission objects
     usePermissionsToAdd.forEach(p => {
+      const parent = p.name === toEosEntityName('owner') && isNullOrEmpty(p.parent) ? '' : toEosEntityName(p.parent)
       const permissionToAdd = this.composePermission(
         [p.publicKey],
         toEosEntityName(p.name),
-        toEosEntityName(p.parent),
+        parent,
         p.threshold,
         p.publicKeyWeight,
       )

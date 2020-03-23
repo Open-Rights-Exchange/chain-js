@@ -42,6 +42,8 @@ export class EosTransaction implements Transaction {
   /** Transaction prepared for signing (raw transaction) */
   private _prepared: Uint8Array
 
+  private _sendReceipt: any
+
   private _signBuffer: Buffer
 
   private _requiredAuthorizations: EosAuthorization[]
@@ -89,6 +91,10 @@ export class EosTransaction implements Transaction {
   /** Whether the raw transaction has been prepared */
   get hasPrepared(): boolean {
     return !!this._prepared
+  }
+
+  get sendReceipt() {
+    return this._sendReceipt
   }
 
   /** Generate the raw transaction body using the actions attached
@@ -435,10 +441,11 @@ export class EosTransaction implements Transaction {
   // send
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
-  public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
+  public async send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    return this._chainState.sendTransaction(this._prepared, this.signatures, waitForConfirm)
+    this._sendReceipt = this._chainState.sendTransaction(this._prepared, this.signatures, waitForConfirm)
+    return this._sendReceipt
   }
 
   // helpers
