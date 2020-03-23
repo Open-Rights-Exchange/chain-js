@@ -62,6 +62,11 @@ export class EthereumAccount implements Account {
     this._address = getEthereumAddressFromPublicKey(publicKey)
   }
 
+  /** ETH has no account structure/registry on the chain */
+  supportsOnChainAccountRegistry = (): boolean => {
+    return false
+  }
+
   /** JSON representation of address */
   toJson() {
     this.assertHasAddress()
