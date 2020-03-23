@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { Chain, ChainFactory, ChainType } from '../../src/index'
-import { ChainEndpoint, ChainSettings, NewAccountType } from '../../src/models'
+import { Chain, ChainFactory, ChainType } from '../../../index'
+import { ChainEndpoint, ChainSettings, NewAccountType } from '../../../models'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -11,10 +11,10 @@ import {
   LinkPermissionsParams,
   DeletePermissionsParams,
   UnlinkPermissionsParams,
-} from '../../src/chains/eos_1_8/models'
-import { EosAccount } from '../../src/chains/eos_1_8/eosAccount'
-import { ChainEosV18 } from '../../src/chains/eos_1_8/ChainEosV18'
-import { toEosEntityName, toEosAsset, toEosPublicKey } from '../../src/chains/eos_1_8/helpers'
+} from '../models'
+import { EosAccount } from '../eosAccount'
+import { ChainEosV18 } from '../ChainEosV18'
+import { toEosEntityName, toEosAsset, toEosPublicKey } from '../helpers'
 
 require('dotenv').config()
 
@@ -25,7 +25,7 @@ export const prepTransactionFromActions = async (chain: Chain, transactionAction
   console.log('actions:', transactionActions)
   const transaction = (chain as ChainEosV18).new.Transaction()
   transaction.actions = transactionActions
-  await transaction.generateSerialized()
+  await transaction.prepareToBeSigned()
   await transaction.validate()
   transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
@@ -35,7 +35,7 @@ export const prepTransactionFromActions = async (chain: Chain, transactionAction
 
 export const prepTransaction = async (chain: Chain, transaction: any, key: string) => {
   console.log('actions:', transaction.actions)
-  await transaction.generateSerialized()
+  await transaction.prepareToBeSigned()
   await transaction.validate()
   transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
@@ -254,9 +254,9 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // -------------------- Create Account -----------------------
 
   // -----> List public keys in account
-  // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
-  // console.log('account permissions :', account.permissions)
-  // console.log('account public keys:', account.publicKeys)
+  const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
+  console.log('account permissions :', account.permissions)
+  console.log('account public keys:', account.publicKeys)
 
   // -----> CreateAccount - createbridge
   // const createAccount = kylin.new.CreateAccount(createAccountOptions_createBridge)
@@ -309,14 +309,14 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('response:', await transaction.send())
 
   // -----> CreateAccount - recycle native Kylin account
-  const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
-  console.log('account can be recycled:', account.canBeRecycled)
-  if (account.supportsRecycling() && account.canBeRecycled) {
-    const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
-    await recycleAccount.composeTransaction(EosNewAccountType.Native)
-    await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-    console.log('createAccount response: ', await recycleAccount.transaction.send())
-  }
+  // const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
+  // console.log('account can be recycled:', account.canBeRecycled)
+  // if (account.supportsRecycling() && account.canBeRecycled) {
+  //   const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
+  //   await recycleAccount.composeTransaction(EosNewAccountType.Native)
+  //   await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
+  //   console.log('createAccount response: ', await recycleAccount.transaction.send())
+  // }
 
   // -------------------- Permissions -----------------------
 

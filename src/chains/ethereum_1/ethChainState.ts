@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
 import { trimTrailingChars } from '../../helpers'
@@ -9,7 +10,7 @@ import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTE
 //   getContractTableRows() {}; // getAllTableRows
 
 export class EthereumChainState {
-  private ethChainInfo: any
+  private ethChainInfo: BlockTransactionString
 
   private _activeEndpoint: ChainEndpoint
 
@@ -21,7 +22,7 @@ export class EthereumChainState {
 
   private _isConnected: boolean = false
 
-  private _web3: any // Ethereum chain api endpoint
+  private _web3: Web3 // Ethereum chain api endpoint
 
   constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
     this._endpoints = endpoints
@@ -62,12 +63,6 @@ export class EthereumChainState {
     return this._isConnected
   }
 
-  /**  * Return instance of Web3 API */
-  public get api(): any {
-    this.assertIsConnected()
-    return this._web3
-  }
-
   /**  * Connect to chain endpoint to verify that it is operational and to get latest block info */
   public async connect(): Promise<void> {
     try {
@@ -83,7 +78,7 @@ export class EthereumChainState {
   }
 
   /** Retrieve lastest chain info including head block number and time */
-  public async getChainInfo(): Promise<any> {
+  public async getChainInfo(): Promise<ChainInfo> {
     const info = await this._web3.eth.getBlock('latest')
     const { gasLimit, gasUsed, number, timestamp } = info
     const nodeInfo = await this._web3.eth.getNodeInfo()
@@ -96,7 +91,7 @@ export class EthereumChainState {
       version: nodeInfo,
       nativeInfo: { gasLimit, gasUsed },
     }
-    return info
+    return this._chainInfo
   }
 
   // TODO: sort based on health info
@@ -107,7 +102,7 @@ export class EthereumChainState {
   }
 
   /* Retrieve a specific block from the chain */
-  public async getBlock(blockNumber: number | string): Promise<any> {
+  public async getBlock(blockNumber: number | string): Promise<BlockTransactionString> {
     this.assertIsConnected()
     const block = await this._web3.eth.getBlock(blockNumber)
     return block
@@ -121,7 +116,7 @@ export class EthereumChainState {
   }
 
   /*  Retrieve a specific block from the chain */
-  public blockHasTransaction = (block: any, transactionId: number): boolean => {
+  public blockHasTransaction = (block: BlockTransactionString, transactionId: string): boolean => {
     const { transactions } = block
     const result = transactions?.includes(transactionId)
     return !!result
@@ -136,9 +131,8 @@ export class EthereumChainState {
     }
   }
 
-  // TODO
   /** Broadcast a signed transaction to the chain */
-  async sendTransaction(signedTransaction: any, waitForConfirm?: ConfirmType, communicationSettings?: any) {
+  async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
     let transaction
@@ -146,7 +140,7 @@ export class EthereumChainState {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
     try {
-      transaction = await this._web3.sendSignedTransaction(signedTransaction)
+      transaction = await this._web3.eth.sendSignedTransaction(signedTransaction)
     } catch (error) {
       const chainError = mapChainError(error)
       throw chainError
@@ -179,7 +173,7 @@ export class EthereumChainState {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
 
-    const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
+    const { headBlockNumber: preCommitHeadBlockNum } = await this.getChainInfo()
 
     return new Promise((resolve, reject) => {
       let getBlockAttempt = 1
@@ -243,11 +237,11 @@ export class EthereumChainState {
 
   async hasReachedConfirmLevel(
     nextBlockNumToCheck: number,
-    transactionId: number,
+    transactionId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     waitForConfirm: ConfirmType,
   ): Promise<boolean> {
-    const possibleTransactionBlock = await this._web3.get_block(nextBlockNumToCheck)
+    const possibleTransactionBlock = await this._web3.eth.getBlock(nextBlockNumToCheck)
     const blockHasTransaction = this.blockHasTransaction(possibleTransactionBlock, transactionId)
     return !!blockHasTransaction
   }
@@ -262,5 +256,11 @@ export class EthereumChainState {
     const error = new Error(errorMessage)
     error.name = errorName
     reject(error)
+  }
+
+  /** Return instance of Web3js API */
+  public get web3(): Web3 {
+    this.assertIsConnected()
+    return this._web3
   }
 }

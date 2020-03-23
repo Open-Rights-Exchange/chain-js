@@ -3,13 +3,13 @@ import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util
 import Wallet from 'ethereumjs-wallet'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { EthereumAddress, EthereumPublicKey, EthereumSignature, EthereumPrivateKey } from './models/cryptoModels'
+import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer } from './helpers/generalHelpers'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 // eslint-disable-next-line import/no-cycle
 import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
 
-/* signs data with ethereum private key */
+/** Signs data with ethereum private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')

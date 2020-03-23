@@ -8,7 +8,6 @@ export enum ChainErrorType {
   AuthInvalid = 'AuthInvalid',
   /** missing permission or key */
   AuthMissing = 'AuthMissing',
-  /** all permission or keys needed for transaction weren't provided */
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
   DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',

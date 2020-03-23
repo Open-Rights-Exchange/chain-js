@@ -1,6 +1,7 @@
 import { toBuffer } from 'ethereumjs-util'
+import { HEX_PREFIX } from '../../../constants'
 
-export function toEthBuffer(data: string | Buffer): Buffer {
+export function toEthBuffer(data: string | Buffer | number): Buffer {
   return toBuffer(data)
 }
 
@@ -8,6 +9,6 @@ export function isLengthOne(array: any[]) {
   return array.length === 1
 }
 
-export function addPrefixToKey(key: string) {
-  return key.startsWith('0x') ? key : `0x${key}`
+export function addPrefixToHex(key: string) {
+  return key.startsWith(HEX_PREFIX) ? key : `${HEX_PREFIX}${key}`
 }

@@ -1,6 +1,6 @@
-import { ChainFactory, ChainType } from '../../src/index'
+import { ChainFactory, ChainType } from '../../../index'
 
-import { ChainSettings, ChainEndpoint } from '../../src/models/generalModels'
+import { ChainSettings, ChainEndpoint } from '../../../models/generalModels'
 
 require('dotenv').config()
 
