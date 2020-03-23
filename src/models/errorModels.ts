@@ -11,12 +11,14 @@ export enum ChainErrorType {
   /** all permission or keys needed for transaction weren't provided */
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
-  /** includes all EOS resources */
-  TxExceededResources = 'TxExceededResources',
+  DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
   PermissionAlreadyLinked = 'PermissionAlreadyLinked',
   PermissionNotLinked = 'PermissionNotLinked',
   PermissionDeleteFailedInUse = 'PermissionDeleteFailedInUse',
-  DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
+  TokenBalanceTooLow = 'TokenBalanceTooLow',
+  TxConfirmFailure = 'TxConfirmFailure',
+  TxExceededResources = 'TxExceededResources',
+
   MiscChainError = 'MiscChainError',
   MiscBlockValidationError = 'MiscBlockValidationError',
   MiscTransactionError = 'MiscTransactionError',

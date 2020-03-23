@@ -44,7 +44,7 @@ export type EosNewKeysOptions = {
 
 export type EosPermission = {
   name: EosEntityName
-  parent: EosEntityName
+  parent: EosEntityName | ''
   firstPublicKey: EosPublicKey
   firstPublicKeyMeetsThreshold: boolean
   requiredAuth: EosRequiredAuthorization
