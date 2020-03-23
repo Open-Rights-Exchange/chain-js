@@ -17,7 +17,9 @@ export interface Transaction {
   hasAllRequiredSignatures: boolean
   /** Whether there are any signatures attached */
   hasAnySignatures: boolean
-  /** Whether transaction is missing raw body */
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasPrepared: boolean
+  /** Whether transaction has raw body (same as hasPrepared) */
   hasRaw: boolean
   // ** Whether transaction has been validated - via vaidate() */
   isValidated: boolean
