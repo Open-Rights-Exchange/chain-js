@@ -40,7 +40,8 @@ export class EthereumTransaction implements Transaction {
 
   private _signature: EthereumSignature // A set keeps only unique values
 
-  private _raw: EthereumJsTx
+  /** Transaction prepared for signing (raw transaction) */
+  private _prepared: EthereumJsTx
 
   private _signBuffer: Buffer
 
@@ -64,19 +65,24 @@ export class EthereumTransaction implements Transaction {
     return this._options
   }
 
-  /** The tranasctions raw body */
+  /** The raw tranasction body (prepared for signing) */
   get raw() {
-    if (!this._raw) {
+    if (!this._prepared) {
       throwNewError(
-        'Raw transaction has not been generated yet. Call prepareToBeSigned(). Use transaction.hasRaw to check before calling transaction.raw',
+        'Transaction has not been prepared to be signed yet (creates the raw transaction). Call prepareToBeSigned(). Use transaction.hasRaw to check before calling transaction.raw',
       )
     }
-    return this._raw
+    return this._prepared
   }
 
-  /** Whether the raw transaction has been generated */
+  /** Whether the raw transaction has been prepared */
   get hasRaw(): boolean {
-    return !!this._raw
+    return this.hasPrepared
+  }
+
+  /** Whether the raw transaction has been prepared */
+  get hasPrepared(): boolean {
+    return !!this._prepared
   }
 
   /** Generate the raw transaction body using the actions attached
@@ -100,14 +106,14 @@ export class EthereumTransaction implements Transaction {
     } else if (!(isNullOrEmpty(chain) && isNullOrEmpty(hardfork))) {
       throwNewError('For transaction options, chain and hardfork have to be specified together')
     }
-    this._raw = new EthereumJsTx(trxBody, trxOptions)
-    this.setHeaderFromRaw()
+    this._prepared = new EthereumJsTx(trxBody, trxOptions)
+    this.setHeaderFromPreparedTx()
     this.setSignBuffer()
   }
 
   /** Extract header from raw transaction body */
-  private setHeaderFromRaw(): void {
-    const { nonce, gasPrice, gasLimit } = this._raw
+  private setHeaderFromPreparedTx(): void {
+    const { nonce, gasPrice, gasLimit } = this._prepared
     this._header = { nonce, gasPrice, gasLimit }
   }
 
@@ -123,7 +129,7 @@ export class EthereumTransaction implements Transaction {
       const { txAction, txHeader } = await this.deserializeWithActions(raw)
       this._header = txHeader
       this._action = txAction
-      this._raw = trx
+      this._prepared = trx
       this._isValidated = false
       this.setSignBuffer()
     }
@@ -132,7 +138,7 @@ export class EthereumTransaction implements Transaction {
   /** Creates a sign buffer using raw transaction body */
   private setSignBuffer() {
     this.assertIsConnected()
-    this._signBuffer = this._raw.hash(false)
+    this._signBuffer = this._prepared.hash(false)
   }
 
   /** Deserializes the transaction header and actions - fetches from the chain to deserialize action data */
@@ -180,7 +186,7 @@ export class EthereumTransaction implements Transaction {
   /** Verifies that raw trx exist.
    *  Throws if any problems */
   public async validate(): Promise<void> {
-    if (!this.hasRaw) {
+    if (!this.hasPrepared) {
       throwNewError(
         'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
       )
@@ -229,9 +235,9 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     }
     const { v, r, s } = signatures[0]
-    this._raw.v = toEthBuffer(v)
-    this._raw.r = r
-    this._raw.s = s
+    this._prepared.v = toEthBuffer(v)
+    this._prepared.r = r
+    this._prepared.s = s
     // eslint-disable-next-line prefer-destructuring
     this._signature = signatures[0]
   }
@@ -303,18 +309,18 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Ethereum sign needs to be providen exactly 1 privateKey')
     }
     const privateKeyBuffer = toEthBuffer(toEthereumPrivateKey(privateKeys[0]))
-    if (bufferToHex(this._raw.nonce) === EMTPY_HEX) {
+    if (bufferToHex(this._prepared.nonce) === EMTPY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
-      this._raw.nonce = toEthBuffer(
+      this._prepared.nonce = toEthBuffer(
         await this._chainState.web3.eth.getTransactionCount(addPrefixToHex(address), 'pending'),
       )
     }
-    this._raw?.sign(privateKeyBuffer)
+    this._prepared?.sign(privateKeyBuffer)
     this._signature = toEthereumSignature({
-      v: bufferToInt(this._raw?.v),
-      r: this._raw?.r,
-      s: this._raw?.s,
+      v: bufferToInt(this._prepared?.v),
+      r: this._prepared?.r,
+      s: this._prepared?.s,
     })
   }
 
@@ -326,8 +332,8 @@ export class EthereumTransaction implements Transaction {
   public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
     this.assertIsValidated()
     this.assertHasSignature()
-    // Serializing this._raw object that has signatures in it { v, r , s }
-    const signedTransaction = this._raw.serialize()
+    // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
+    const signedTransaction = this._prepared.serialize()
 
     return this._chainState.sendTransaction(`0x${signedTransaction.toString('hex')}`)
   }
@@ -345,8 +351,6 @@ export class EthereumTransaction implements Transaction {
   public toJson(): any {
     return { ...this._header, action: this._action.getActionBody(), signatures: this.signatures }
   }
-
-  // TODO: implement complete interface
 
   // ------------------------ Ethereum Specific functionality -------------------------------
   // Put any Ethereum chain specific feature that aren't included in the standard Transaction interface below here  */
