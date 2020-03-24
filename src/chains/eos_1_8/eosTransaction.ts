@@ -40,7 +40,7 @@ export class EosTransaction implements Transaction {
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
   /** Transaction prepared for signing (raw transaction) */
-  private _prepared: Uint8Array
+  private _raw: Uint8Array
 
   private _sendReceipt: any
 
@@ -75,22 +75,17 @@ export class EosTransaction implements Transaction {
 
   /** The transaction body in raw format (by prepareForSigning) */
   get raw() {
-    if (!this._prepared) {
+    if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet (creates the raw transaction). Call prepareToBeSigned(). Use transaction.hasRaw to check before calling transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
-    return this._prepared
+    return this._raw
   }
 
   /** Whether the raw transaction has been prepared */
   get hasRaw(): boolean {
-    return this.hasPrepared
-  }
-
-  /** Whether the raw transaction has been prepared */
-  get hasPrepared(): boolean {
-    return !!this._prepared
+    return !!this._raw
   }
 
   get sendReceipt() {
@@ -103,7 +98,7 @@ export class EosTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     // if prepared (raw) transaction already exists, then dont do it again
-    if (this._prepared) {
+    if (this._raw) {
       return
     }
     this.assertNoSignatures()
@@ -113,13 +108,13 @@ export class EosTransaction implements Transaction {
     const { blocksBehind, expireSeconds } = this._options
     const transactOptions = { broadcast: false, sign: false, blocksBehind, expireSeconds }
     const { rawTransaction } = await this._chainState.api.transact({ actions: this._actions }, transactOptions)
-    this._prepared = this.rawToUint8Array(rawTransaction)
-    this.setHeaderFromPreparedTx(rawTransaction)
+    this._raw = this.rawToUint8Array(rawTransaction)
+    this.setHeaderFromRaw(rawTransaction)
     this.setSignBuffer()
   }
 
   /** Extract header from raw transaction body (eosjs refers to raw as serialized) */
-  private setHeaderFromPreparedTx(rawTransaction: Uint8Array): void {
+  private setHeaderFromRaw(rawTransaction: Uint8Array): void {
     // deserializeTransaction does not call the chain - just deserializes transation header and action names (not action data)
     const deRawified = this._chainState.api.deserializeTransaction(rawTransaction)
     delete deRawified.actions // remove parially deRawified actions
@@ -139,7 +134,7 @@ export class EosTransaction implements Transaction {
       const { actions: txActions, deRawifiedTransaction: txHeader } = await this.deRawifyWithActions(useRaw)
       this._header = txHeader
       this._actions = txActions
-      this._prepared = useRaw
+      this._raw = useRaw
       this._isValidated = false
       this.setSignBuffer()
     }
@@ -150,7 +145,7 @@ export class EosTransaction implements Transaction {
     this.assertIsConnected()
     this._signBuffer = Buffer.concat([
       Buffer.from(this._chainState?.chainId, 'hex'),
-      Buffer.from(this._prepared),
+      Buffer.from(this._raw),
       Buffer.from(new Uint8Array(32)),
     ])
   }
@@ -202,7 +197,7 @@ export class EosTransaction implements Transaction {
   /** Verifies that all accounts and permisison for actions exist on chain.
    *  Throws if any problems */
   public async validate(): Promise<void> {
-    if (!this.hasPrepared) {
+    if (!this.hasRaw) {
       throwNewError(
         'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
       )
@@ -444,7 +439,7 @@ export class EosTransaction implements Transaction {
   public async send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    this._sendReceipt = this._chainState.sendTransaction(this._prepared, this.signatures, waitForConfirm)
+    this._sendReceipt = this._chainState.sendTransaction(this._raw, this.signatures, waitForConfirm)
     return this._sendReceipt
   }
 
