@@ -106,7 +106,7 @@ const { env } = process
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', transaction.missingSignatures)
   // console.log('send response:', await transaction.send())
 
@@ -116,7 +116,7 @@ const { env } = process
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
   // console.log('send response:', await transaction.send())
   // ----<
@@ -127,7 +127,7 @@ const { env } = process
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
   // console.log('send response:', await transaction.send())
   // ----<
@@ -137,7 +137,7 @@ const { env } = process
   //   kylin.decrypt(ore1qctfkfhw_privateKeyEncrypted, '2233', ore1qctfkfhw_salt),
   // )
   // console.log('ore1qctfkfhw_sig:', ore1qctfkfhw_sig)
-  // transaction.sign([ore1qctfkfhw_sig])
+  // await transaction.sign([ore1qctfkfhw_sig])
   // console.log('sign buffer', transaction.signBuffer)
 
   // ----<
