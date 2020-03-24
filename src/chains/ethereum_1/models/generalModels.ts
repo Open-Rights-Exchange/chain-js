@@ -1,7 +1,5 @@
-import { BufferLike, TransformableToBuffer } from 'ethereumjs-tx'
 import { EncryptedDataString, ChainEntityNameBrand } from '../../../models'
 import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
-import { hasPrefix, isAString } from '../../../helpers'
 
 export type EthereumEntityName = string & ChainEntityNameBrand
 

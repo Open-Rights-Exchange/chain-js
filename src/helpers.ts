@@ -95,15 +95,6 @@ export const removeEmptyValuesInJsonObject = (obj: { [x: string]: any }) => {
   })
 }
 
-// Todo NOT TESTED
-/** whether value is a string that starts with the specified prefix string */
-export function hasPrefix(value: any, prefixString: string) {
-  if (isAString(value) && !isNullOrEmpty(prefixString) && prefixString.length >= value.length) {
-    return value.startsWith(prefixString)
-  }
-  return false
-}
-
 export const notImplemented = () => {
   throw new Error('Not Implemented')
 }

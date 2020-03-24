@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { isNull } from 'util'
 import { bufferToInt, privateToAddress, bufferToHex } from 'ethereumjs-util'
 import { EMPTY_HEX } from '../../constants'
 import { EthereumChainState } from './ethChainState'
@@ -15,7 +14,7 @@ import {
   EthereumTransactionAction,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isNullOrEmpty, getUniqueValues, notSupported, toBuffer } from '../../helpers'
+import { isNullOrEmpty, notSupported } from '../../helpers'
 import {
   isValidEthereumSignature,
   isLengthOne,
@@ -25,11 +24,6 @@ import {
   toEthereumPrivateKey,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-
-type DeserializeWithActionsResult = {
-  txAction: EthereumTransactionAction
-  txHeader: EthereumTransactionHeader
-}
 
 export class EthereumTransaction implements Transaction {
   private _cachedAccounts: any[] = []
@@ -112,21 +106,18 @@ export class EthereumTransaction implements Transaction {
 
   /** Extract header from raw transaction body */
   private setHeaderFromRaw(): void {
+    this.assertHasRaw()
     const { nonce, gasPrice, gasLimit } = this._raw
     this._header = { nonce, gasPrice, gasLimit }
   }
 
-  // TODO update this comment so it is accurate for ETH
-  /** Set the body of the transaction using Hex raw transaction data
-   *  This is one of the ways to set the actions for the transaction
-   *  Sets transaction data from raw transaction - supports both raw/serialized formats (JSON bytes array and hex)
-   *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
+  /** Set the body of the transaction using Hex raw transaction data */
   async setFromRaw(raw: EthereumRawTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
       const trx = new EthereumJsTx(raw)
-      const { txAction, txHeader } = await this.deserializeWithActions(raw)
+      const { txAction, txHeader } = this.groupActionData(raw)
       this._header = txHeader
       this._actionHelper = new EthereumActionHelper(txAction)
       this._raw = trx
@@ -142,9 +133,10 @@ export class EthereumTransaction implements Transaction {
     this._signBuffer = this._raw.hash(false)
   }
 
-  /** Deserializes the transaction header and actions - fetches from the chain to deserialize action data */
-  private async deserializeWithActions(rawTransaction: EthereumRawTransaction): Promise<DeserializeWithActionsResult> {
-    this.assertIsConnected()
+  /** organize the transaction header and actions data */
+  private groupActionData(
+    rawTransaction: EthereumRawTransaction,
+  ): { txAction: EthereumTransactionAction; txHeader: EthereumTransactionHeader } {
     const { nonce, gasLimit, gasPrice, to, value, data } = rawTransaction
     return { txAction: { to, value, data }, txHeader: { nonce, gasLimit, gasPrice } }
   }
@@ -201,16 +193,9 @@ export class EthereumTransaction implements Transaction {
   /** Throws if not validated */
   private assertIsValidated(): void {
     this.assertIsConnected()
+    this.assertHasRaw()
     if (!this._isValidated) {
       throwNewError('Transaction not validated. Call transaction.validate() first.')
-    }
-  }
-
-  /** Throws if no raw transaction body */
-  private assertHasRaw(): void {
-    this.assertIsConnected()
-    if (!this.hasRaw) {
-      throwNewError('Transaction doenst have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
     }
   }
 
@@ -333,7 +318,7 @@ export class EthereumTransaction implements Transaction {
 
   // send
 
-  // TODO confirmation enum will be added
+  // TODO add confirmation enum usage
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
   public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
@@ -351,6 +336,13 @@ export class EthereumTransaction implements Transaction {
   private assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
+    }
+  }
+
+  /** Throws if no raw transaction body */
+  private assertHasRaw(): void {
+    if (!this.hasRaw) {
+      throwNewError('Transaction doenst have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
     }
   }
 

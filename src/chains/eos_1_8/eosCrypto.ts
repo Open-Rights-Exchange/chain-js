@@ -28,6 +28,7 @@ export function getPublicKeyFromSignature(
   return ecc.recover(signature, data, encoding)
 }
 
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
   publicKey: EosSignature | Buffer,
   data: string | Buffer,
