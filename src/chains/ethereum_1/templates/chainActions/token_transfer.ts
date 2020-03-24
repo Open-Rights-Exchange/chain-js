@@ -1,7 +1,7 @@
 // import { toHex } from 'web3-utils'
-import { EthereumActionInput } from '../../models'
+import { EthereumTransactionAction } from '../../models'
 
-export const action = (tokenTransferAction: EthereumActionInput) => {
+export const action = (tokenTransferAction: EthereumTransactionAction) => {
   const { to, value, contract } = tokenTransferAction
   return {
     to,
