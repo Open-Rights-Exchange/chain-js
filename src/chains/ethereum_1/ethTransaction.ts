@@ -13,7 +13,6 @@ import {
   EthereumTransactionOptions,
   EthereumTransactionHeader,
   EthereumTransactionAction,
-  EthereumActionInput,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, getUniqueValues, notSupported, toBuffer } from '../../helpers'
@@ -25,12 +24,17 @@ import {
   addPrefixToHex,
   toEthereumPrivateKey,
 } from './helpers'
-import { EthereumAction } from './ethAction'
+import { EthereumActionHelper } from './ethAction'
+
+type DeserializeWithActionsResult = {
+  txAction: EthereumTransactionAction
+  txHeader: EthereumTransactionHeader
+}
 
 export class EthereumTransaction implements Transaction {
   private _cachedAccounts: any[] = []
 
-  private _action: EthereumAction
+  private _actionHelper: EthereumActionHelper
 
   private _chainState: EthereumChainState
 
@@ -52,7 +56,7 @@ export class EthereumTransaction implements Transaction {
     this._options = options
   }
 
-  /** The header that is included when the transaction is sent to the chain
+  /** Header that is included when the transaction is sent to the chain
    *  It is part of the transaction body (in the signBuffer) which is signed
    *  The header changes every time prepareToBeSigned() is called since it includes gasPrice, gasLimit, etc.
    */
@@ -60,12 +64,12 @@ export class EthereumTransaction implements Transaction {
     return this._header
   }
 
-  /** The options provided when the transaction class was created */
+  /** Options provided when the transaction class was created */
   get options() {
     return this._options
   }
 
-  /** The raw tranasction body (prepared for signing) */
+  /** Raw tranasction body (prepared for signing) */
   get raw() {
     if (!this.hasRaw) {
       throwNewError(
@@ -86,12 +90,12 @@ export class EthereumTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    if (!this._action) {
+    if (!this._actionHelper) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
     }
     const { chain, hardfork, nonce } = this._options
     let { gasPrice, gasLimit } = this._options
-    const { to, value, data } = this._action.getActionBody()
+    const { to, value, data } = this._actionHelper.raw
     gasPrice = isNullOrEmpty(gasPrice) ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
@@ -124,7 +128,7 @@ export class EthereumTransaction implements Transaction {
       const trx = new EthereumJsTx(raw)
       const { txAction, txHeader } = await this.deserializeWithActions(raw)
       this._header = txHeader
-      this._action = txAction
+      this._actionHelper = new EthereumActionHelper(txAction)
       this._raw = trx
       this._isValidated = false
       this.setSignBuffer()
@@ -134,46 +138,45 @@ export class EthereumTransaction implements Transaction {
   /** Creates a sign buffer using raw transaction body */
   private setSignBuffer() {
     this.assertIsConnected()
+    this.assertHasRaw()
     this._signBuffer = this._raw.hash(false)
   }
 
   /** Deserializes the transaction header and actions - fetches from the chain to deserialize action data */
-  private async deserializeWithActions(rawTransaction: EthereumRawTransaction): Promise<any> {
+  private async deserializeWithActions(rawTransaction: EthereumRawTransaction): Promise<DeserializeWithActionsResult> {
     this.assertIsConnected()
     const { nonce, gasLimit, gasPrice, to, value, data } = rawTransaction
     return { txAction: { to, value, data }, txHeader: { nonce, gasLimit, gasPrice } }
   }
 
   /** Ethereum transfer & contract actions executed by the transaction */
-  public get actions() {
-    return [this._action.getActionBody()]
+  public get actions(): EthereumTransactionAction[] {
+    if (!this._actionHelper.raw) return null
+    return [this._actionHelper.raw]
   }
 
   /** Sets the Array of actions.
    * Array length has to be exactly 1 because ethereum doesn't support multiple actions
    */
-  public set actions(actions: EthereumActionInput[]) {
+  public set actions(actions: EthereumTransactionAction[]) {
     if (!isLengthOne(actions)) {
       throwNewError('Ethereum set actions function only allows actions array length of 1')
     }
     this.assertNoSignatures()
     // eslint-disable-next-line prefer-destructuring
-    this._action = new EthereumAction(actions[0])
+    this._actionHelper = new EthereumActionHelper(actions[0])
     this._isValidated = false
   }
 
   /** Add one action to the transaction body
    *  Transaction's action has to be empty to be able to add an action
    *  Therefore asFirstAction option does not affect behavior */
-  public addAction(action: EthereumActionInput, asFirstAction?: boolean): void {
+  public addAction(action: EthereumTransactionAction, asFirstAction?: boolean): void {
     this.assertNoSignatures()
-    if (!action) {
-      throwNewError('Action parameter is missing')
-    }
-    if (!isNullOrEmpty(this._action)) {
+    if (!isNullOrEmpty(this._actionHelper)) {
       throwNewError('addAction failed. Transaction already has an action. Ethereum only supports 1 action.')
     }
-    this._action = new EthereumAction(action)
+    this._actionHelper = new EthereumActionHelper(action)
     this._isValidated = false
   }
 
@@ -200,6 +203,14 @@ export class EthereumTransaction implements Transaction {
     this.assertIsConnected()
     if (!this._isValidated) {
       throwNewError('Transaction not validated. Call transaction.validate() first.')
+    }
+  }
+
+  /** Throws if no raw transaction body */
+  private assertHasRaw(): void {
+    this.assertIsConnected()
+    if (!this.hasRaw) {
+      throwNewError('Transaction doenst have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
     }
   }
 
@@ -345,7 +356,7 @@ export class EthereumTransaction implements Transaction {
 
   /** JSON representation of transaction data */
   public toJson(): any {
-    return { ...this._header, action: this._action.getActionBody(), signatures: this.signatures }
+    return { ...this._header, action: this._actionHelper.raw, signatures: this.signatures }
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------
