@@ -1,6 +1,6 @@
 import { EthereumValue } from './generalModels'
 
-/** Transaction options used when contructing a trnasaction header */
+/** Transaction 'header' options set to chain along with transaction */
 export type EthereumTransactionOptions = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
@@ -9,14 +9,14 @@ export type EthereumTransactionOptions = {
   hardfork: EthereumValue
 }
 
-/** Transaction type that we use to call prepareToBeSigned() */
+/** Transaction with hex data - ready to be signed and sent to chain */
 export type EthereumRawTransaction = {
-  nonce?: string
-  gasPrice?: string | number
-  gasLimit?: string | number
-  to?: string
-  value?: string | number
-  data?: string
+  nonce?: EthereumValue
+  gasPrice?: EthereumValue
+  gasLimit?: EthereumValue
+  to?: EthereumAddress
+  value?: EthereumValue
+  data?: EthereumTxData
 }
 
 /** Transaction properties that contain the fee & priority info */
@@ -26,11 +26,16 @@ export type EthereumTransactionHeader = {
   gasLimit?: EthereumValue
 }
 
-/** Transaction properties that contain Eth transfer and contract action info */
+/** Properties of an ETH transaction action
+ *  Can be used to create or compose a new ETH action
+ *  to and value - must both be present as a pair
+ *  data or contract - to create an action, optionally provide one but not both
+ *  contract property used only to generate data prop when creating an new action */
 export type EthereumTransactionAction = {
   to?: EthereumAddress
   value?: EthereumValue
-  data?: EthereumValue
+  data?: EthereumTxData
+  contract?: EthereumActionContract
 }
 
 export type EthereumAddress = EthereumValue & string
@@ -38,19 +43,11 @@ export type EthereumMethodName = EthereumValue & string
 export type EthereumAbi = any[]
 
 /** Information needed to generate Trx Data to invoke desired smart contract action */
-export type EthereumContractAction = {
+export type EthereumActionContract = {
   abi: any
   address: string
   method: string
   parameters: (string | number)[]
-}
-
-/** Ethereum action interface for both Eth transfer and smart contract actions */
-export type EthereumActionInput = {
-  to?: EthereumAddress
-  value?: EthereumValue
-  contract?: EthereumContractAction
-  data?: EthereumTxData
 }
 
 /** Hexadecimal format of contrat action data */

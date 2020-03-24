@@ -1,33 +1,45 @@
 import { isNullOrEmpty } from '../../helpers'
-import { EthereumActionInput, EthereumAddress, EthereumValue, EthereumContractAction, EthereumTxData } from './models'
+import { EthereumAddress, EthereumValue, EthereumTxData, EthereumTransactionAction } from './models'
 import { ethereumTrxArgIsNullOrEmpty, generateDataFromContractAction, toEthereumTxData } from './helpers'
 import { ZERO_HEX, ZERO_ADDRESS } from '../../constants'
 import { throwNewError } from '../../errors'
 
-export class EthereumAction {
+/** Helper class to ensure transaction actions properties are set correctly */
+export class EthereumActionHelper {
   private _data: EthereumTxData
 
   private _to: EthereumAddress
 
   private _value: EthereumValue
 
-  private _contract: EthereumContractAction
-
   /** Creates a new Action from 'human-readable' transfer or contact info
    *  OR from 'raw' data property
    *  Allows access to human-readable properties (method, parameters) or raw data (hex) */
-  constructor(action?: EthereumActionInput) {
-    // if raw data is provided, use that to set the action properties
-    const { to, value, contract, data } = action
+  constructor(actionInput: EthereumTransactionAction) {
+    this.assertAndValidateEthereumActionInput(actionInput)
+  }
+
+  /** apply rules for imput params, set class private properties, throw if violation */
+  private assertAndValidateEthereumActionInput(actionInput: EthereumTransactionAction) {
+    const { to, value, contract, data } = actionInput
 
     this._to = isNullOrEmpty(to) ? ZERO_ADDRESS : to
     this._value = isNullOrEmpty(value) ? ZERO_HEX : value
-    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(generateDataFromContractAction(contract))
-    else if (isNullOrEmpty(contract) && ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(ZERO_HEX)
-    else if (!isNullOrEmpty(contract)) {
-      this._contract = contract
-      this._data = toEthereumTxData(generateDataFromContractAction(contract))
+
+    // if either to or value is provided, both must be
+    if (ethereumTrxArgIsNullOrEmpty(this._to) !== ethereumTrxArgIsNullOrEmpty(this._value)) {
+      throwNewError('Must provide both to and value (if either is provided)')
     }
+
+    // cant provide both contract and data properties
+    if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
+      throwNewError('You can provide either data or contract but not both')
+    }
+
+    // set data from provided data or contract properties
+    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = data
+    else if (!ethereumTrxArgIsNullOrEmpty(contract)) this._data = generateDataFromContractAction(contract)
+    else this._data = toEthereumTxData(ZERO_HEX)
   }
 
   /** Returns 'hex or binary' data */
@@ -40,29 +52,12 @@ export class EthereumAction {
     return !ethereumTrxArgIsNullOrEmpty(this._data)
   }
 
-  // check if both data and to & value fields are empty, if so throw error
-  private validateActionBody(): void {
-    if (
-      ethereumTrxArgIsNullOrEmpty(this._data) &&
-      (ethereumTrxArgIsNullOrEmpty(this._to) || ethereumTrxArgIsNullOrEmpty(this._value))
-    )
-      throwNewError('Action is not valid.')
-  }
-
-  public getActionBody(): EthereumActionInput {
-    this.validateActionBody()
+  /** Action properties including raw data */
+  public get raw(): EthereumTransactionAction {
     return {
       to: this._to,
       value: this._value,
       data: this._data,
-      contract: this._contract,
     }
-  }
-
-  public assertValidateData(data: any): boolean {
-    if (!data) {
-      return false
-    }
-    return true
   }
 }

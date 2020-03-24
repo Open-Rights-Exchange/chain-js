@@ -54,7 +54,8 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, sa
   return encryptedKeys
 }
 
-// TODO: unless the data is signature, not sure what is the purpose of the function.  And how is it possible to verify that the signature has what public key if the original data is not known
+// TODO: implement using web3 method?
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
   publicKey: string | Buffer,
   data: string | Buffer,

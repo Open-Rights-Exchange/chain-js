@@ -27,7 +27,7 @@ export const prepTransactionFromActions = async (chain: Chain, transactionAction
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  transaction.sign([key])
+  await transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
   console.log(JSON.stringify(transaction.toJson()))
   return transaction
@@ -37,7 +37,7 @@ export const prepTransaction = async (chain: Chain, transaction: any, key: strin
   console.log('actions:', transaction.actions)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  transaction.sign([key])
+  await transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
   console.log(JSON.stringify(transaction.toJson()))
   return transaction
