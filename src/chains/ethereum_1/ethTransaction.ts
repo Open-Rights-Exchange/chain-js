@@ -22,6 +22,8 @@ import {
   toEthBuffer,
   addPrefixToHex,
   toEthereumPrivateKey,
+  toEthereumTxData,
+  ethereumTrxArgIsNullOrEmpty,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -116,11 +118,16 @@ export class EthereumTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
-      const trx = new EthereumJsTx(raw)
-      const { txAction, txHeader } = this.groupActionData(raw)
+      const { chain, hardfork } = this._options
+      let { gasPrice, gasLimit } = raw
+      gasPrice = ethereumTrxArgIsNullOrEmpty(gasPrice)
+        ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10)
+        : gasPrice
+      gasLimit = ethereumTrxArgIsNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
+      this._raw = new EthereumJsTx({ ...raw, gasLimit, gasPrice }, { chain, hardfork })
+      const { txAction, txHeader } = this.groupActionData(this._raw)
       this._header = txHeader
       this._actionHelper = new EthereumActionHelper(txAction)
-      this._raw = trx
       this._isValidated = false
       this.setSignBuffer()
     }
@@ -135,10 +142,10 @@ export class EthereumTransaction implements Transaction {
 
   /** organize the transaction header and actions data */
   private groupActionData(
-    rawTransaction: EthereumRawTransaction,
+    rawTransaction: EthereumJsTx,
   ): { txAction: EthereumTransactionAction; txHeader: EthereumTransactionHeader } {
     const { nonce, gasLimit, gasPrice, to, value, data } = rawTransaction
-    return { txAction: { to, value, data }, txHeader: { nonce, gasLimit, gasPrice } }
+    return { txAction: { to, value, data: toEthereumTxData(data) }, txHeader: { nonce, gasLimit, gasPrice } }
   }
 
   /** Ethereum transfer & contract actions executed by the transaction */
