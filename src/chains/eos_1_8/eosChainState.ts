@@ -368,7 +368,7 @@ export class EosChainState {
         if (getBlockAttempt >= maxBlockReadAttempts) {
           this.rejectAwaitTransaction(
             reject,
-            'maxBlockReadAttemptsTimeout',
+            ChainErrorType.MaxBlockReadAttemptsTimeout,
             `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
           )
           return
@@ -383,7 +383,7 @@ export class EosChainState {
     if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
       this.rejectAwaitTransaction(
         reject,
-        'maxBlocksTimeout',
+        ChainErrorType.ConfirmTransactionTimeout,
         `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
           blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
       )
@@ -438,8 +438,8 @@ export class EosChainState {
     resolve(transaction)
   }
 
-  rejectAwaitTransaction = (reject: any, errorCode: string, errorMessage: string) => {
-    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorCode })
+  rejectAwaitTransaction = (reject: any, errorCode: ChainErrorType, errorMessage: string) => {
+    const error = new ChainError(errorCode, errorMessage, { errorCode })
     reject(error)
   }
 
