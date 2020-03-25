@@ -5,8 +5,8 @@ export type EthereumTransactionOptions = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
   gasLimit?: EthereumValue
-  chain: EthereumValue
-  hardfork: EthereumValue
+  chain: EthereumValue & (number | string)
+  hardfork: EthereumValue & string
 }
 
 /** Transaction with hex data - ready to be signed and sent to chain */
@@ -38,7 +38,7 @@ export type EthereumTransactionAction = {
   contract?: EthereumActionContract
 }
 
-export type EthereumAddress = EthereumValue & string
+export type EthereumAddress = EthereumValue & (string | Buffer)
 export type EthereumMethodName = EthereumValue & string
 export type EthereumAbi = any[]
 
@@ -51,7 +51,7 @@ export type EthereumActionContract = {
 }
 
 /** Hexadecimal format of contrat action data */
-export type EthereumTxData = string & EthereumTxDataBrand
+export type EthereumTxData = (string | Buffer) & EthereumTxDataBrand
 
 /** Brand signifiying a valid value - assigned by using toEthereumTxData */
 export enum EthereumTxDataBrand {

@@ -51,29 +51,27 @@ const ABI = [
 
 export const ropstenPrivate = 'a5490e49ea693fe6dd5997a75a2c8d4231b1a9545b82326322343ca2a1facfb4'
 
-export const sampleTransferTrx = {
+// EthereumRawTransaction type input for setFromRaw()
+// Defaults all optional properties, so you can set from raw just with to & value OR data
+export const sampleSetFromRawTrx = {
   to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-  value: '1000000000',
-  gas: 2000000,
-  chain: 'ropsten',
-  hardfork: 'petersburg',
+  value: toWei(10, 'milliether'),
+  //  data: '0x00',
+  //  gasPrice: '0x00',
+  //  gasLimit: '0x00',
 }
 
-export const sampleTransactionAction = {
-  to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-  value: '1000000000',
-  data: '0x0f',
-}
 export const ropstenTransactionOptions: EthereumTransactionOptions = {
   chain: 'ropsten',
   hardfork: 'istanbul',
 }
-const transferEthOptions = {
+
+const composeEthTransferParams = {
   to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
   value: toWei(10, 'milliether'),
 }
 
-const transferErc20Options = {
+const composeERC20TransferParams = {
   contract: {
     abi: ABI,
     parameters: ['0xF0109fC8DF283027b6285cc889F5aA624EaC1F55', 100],
@@ -83,21 +81,20 @@ const transferErc20Options = {
 }
 ;(async () => {
   try {
-
-    // ---> Sign and send ethereum transfer transaction
-    const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
-    await ropsten.connect()
-    // console.log(await ropsten.chainInfo)
-    const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
-    // console.log('trx:', transaction)
-    // await transaction.addAction(sampleTransferTrx)
-    transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, transferEthOptions)]
-    await transaction.prepareToBeSigned()
-    await transaction.validate()
-    await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
-    console.log('SIG: ', transaction.signatures)
-    console.log(await transaction.send())
-
+    // // ---> Sign and send ethereum transfer with compose Action
+    // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
+    // await ropsten.connect()
+    // // console.log(await ropsten.chainInfo)
+    // const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
+    // // console.log('trx:', transaction)
+    // // await transaction.addAction(sampleTransferTrx)
+    // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
+    // await transaction.prepareToBeSigned()
+    // await transaction.validate()
+    // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // console.log('SIG: ', transaction.signatures)
+    // console.log(await transaction.send())
+    //
     // // ---> Sign and send erc20 transfer Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     // await ropsten.connect()
@@ -105,14 +102,26 @@ const transferErc20Options = {
     // const transaction = await ropsten.new.Transaction(sampleTransactionOptions)
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
-    // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, transferErc20Options)]
+    // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20TransferParams)]
     // await transaction.prepareToBeSigned()
     // console.log('prepareToBeSigned: ', transaction.actions)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
-
-  } catch (error) {
-    console.log(error)
+    // // ---> Sign and send ethereum transfer with setFromRaw()
+    //
+  //   const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
+  //   await ropsten.connect()
+  //   // console.log(await ropsten.chainInfo)
+  //   const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
+  //   // console.log('trx:', transaction)
+  //   // await transaction.addAction(sampleTransferTrx)
+  //   await transaction.setFromRaw(sampleSetFromRawTrx)
+  //   await transaction.validate()
+  //   await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+  //   console.log('SIG: ', transaction.signatures)
+  //   console.log(await transaction.send())
+  // } catch (error) {
+  //   console.log(error)
   }
 })()
 

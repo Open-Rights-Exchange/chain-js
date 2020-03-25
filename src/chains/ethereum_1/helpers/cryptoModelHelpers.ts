@@ -26,8 +26,9 @@ export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
   return true
 }
 
-export function isValidEthereumTxData(value: string | EthereumTxData): value is EthereumTxData {
-  return addPrefixToHex(value).length > 2
+export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): value is EthereumTxData {
+  if (typeof value === 'string') return addPrefixToHex(value).length > 2
+  return true
 }
 
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
@@ -54,16 +55,17 @@ export function isValidEthereumSignature(
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
-export function isValidEthereumAddress(value: string | EthereumAddress): boolean {
-  return isValidAddress(value)
+export function isValidEthereumAddress(value: string | Buffer | EthereumAddress): boolean {
+  if (typeof value === 'string') return isValidAddress(value)
+  return true
 }
 
 /** Accepts hex string checks if a valid ethereum data hex
  *  Returns EthereumPublicKey with prefix
  */
-export function toEthereumTxData(value: string): EthereumTxData {
+export function toEthereumTxData(value: string | Buffer): EthereumTxData {
   if (isValidEthereumTxData(value)) {
-    return addPrefixToHex(value) as EthereumTxData
+    return typeof value === 'string' ? (addPrefixToHex(value) as EthereumTxData) : (value as EthereumTxData)
   }
   throw new Error(`Not a valid ethereum public key:${value}.`)
 }
