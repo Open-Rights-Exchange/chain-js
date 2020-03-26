@@ -10,9 +10,7 @@ export enum ChainErrorType {
   /** all permission or keys needed for transaction weren't provided */
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
-  ConfirmTransactionTimeout = 'ConfirmTransactionTimeout',
   DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
-  MaxBlockReadAttemptsTimeout = 'MaxBlockReadAttemptsTimeout',
   PermissionAlreadyLinked = 'PermissionAlreadyLinked',
   PermissionNotLinked = 'PermissionNotLinked',
   PermissionDeleteFailedInUse = 'PermissionDeleteFailedInUse',
