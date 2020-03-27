@@ -133,7 +133,7 @@ export class EthereumCreateAccount implements CreateAccount {
    * This is set by composeTransaction()
    * ... if the account name provided has the 'unused' key as its active public key */
   get didRecycleAccount() {
-    return notSupported()
+    return false
   }
 
   /** The keys that were generated as part of the account creation process
