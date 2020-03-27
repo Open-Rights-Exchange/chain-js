@@ -107,7 +107,10 @@ export class EosTransaction implements Transaction {
     }
     const { blocksBehind, expireSeconds } = this._options
     const transactOptions = { broadcast: false, sign: false, blocksBehind, expireSeconds }
-    const { rawTransaction } = await this._chainState.api.transact({ actions: this._actions }, transactOptions)
+    const { serializedTransaction: rawTransaction } = await this._chainState.api.transact(
+      { actions: this._actions },
+      transactOptions,
+    )
     this._raw = this.rawToUint8Array(rawTransaction)
     this.setHeaderFromRaw(rawTransaction)
     this.setSignBuffer()
