@@ -8,6 +8,6 @@ export enum EthereumNewAccountType {
 }
 
 export type EthereumCreateAccountOptions = {
-  publicKey: EthereumPublicKey
+  publicKey?: EthereumPublicKey
   newKeysOptions?: EthereumNewKeysOptions
 }
