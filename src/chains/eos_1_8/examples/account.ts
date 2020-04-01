@@ -311,7 +311,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // -----> CreateAccount - recycle native Kylin account
   // const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
   // console.log('account can be recycled:', account.canBeRecycled)
-  // if (account.supportsRecycling() && account.canBeRecycled) {
+  // if (account.supportsRecycling && account.canBeRecycled) {
   //   const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
   //   await recycleAccount.composeTransaction(EosNewAccountType.Native)
   //   await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)

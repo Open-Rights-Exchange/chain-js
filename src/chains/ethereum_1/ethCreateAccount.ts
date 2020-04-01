@@ -34,84 +34,7 @@ export class EthereumCreateAccount implements CreateAccount {
     this._options = options
   }
 
-  /** Compose a transaction to send to the chain to create a new account
-   * Ethereum does not require a create account transaction to be sent to the chain
-   */
-  async composeTransaction(): Promise<void> {
-    notSupported()
-  }
-
-  /** Determine if desired account name is usable for a new account.
-   */
-  async determineNewAccountName(): Promise<any> {
-    notSupported()
-  }
-
-  /** extract keys from options
-   *  Returns publicKeys */
-  private getPublicKeysFromOptions(): EthereumPublicKey {
-    const { publicKey } = this._options || {}
-    if (!publicKey) {
-      return null
-    }
-    return publicKey
-  }
-
-  /** Checks create options - if publicKeys are missing,
-   *  autogenerate the public and private key pair and add them to options */
-  async generateKeysIfNeeded() {
-    let publicKey: EthereumPublicKey
-    this.assertValidOptionPublicKeys()
-    this.assertValidOptionNewKeys()
-    // get keys from options or generate
-    publicKey = this.getPublicKeysFromOptions()
-    if (!publicKey) {
-      await this.generateAccountKeys()
-      publicKey = this._generatedKeys?.publicKey
-    }
-    this._accountName = await getEthereumAddressFromPublicKey(publicKey)
-    this._accountType = EthereumNewAccountType.Native
-  }
-
-  private async generateAccountKeys(): Promise<void> {
-    const { newKeysOptions } = this._options || {}
-    const { password, salt } = newKeysOptions || {}
-
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {})
-    this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
-  }
-
-  /* Not supported for Ethereum */
-  async generateAccountName(): Promise<EthereumEntityName> {
-    notSupported()
-    return null
-  }
-
-  /** Not supported */
-  generateAccountNameString = (): any => {
-    notSupported()
-  }
-
-  /** ETH does not require the chain to execute a createAccount transaction
-   *  to create the account structure on-chain */
-  supportsTransactionToCreateAccount = (): boolean => {
-    return false
-  }
-
-  private assertValidOptionPublicKeys() {
-    const { publicKey } = this._options
-    if (publicKey && !isValidEthereumPublicKey(publicKey)) {
-      throwNewError('Invalid Option - Provided publicKey isnt valid')
-    }
-  }
-
-  private assertValidOptionNewKeys() {
-    const { newKeysOptions } = this._options
-    const { password, salt } = newKeysOptions || {}
-    if (isNullOrEmpty(password) || isNullOrEmpty(salt)) {
-      throwNewError('Invalid Option - You must provide a password AND salt to generate new keys')
-    }
-  }
+  // ---- Interface implementation
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
@@ -122,11 +45,6 @@ export class EthereumCreateAccount implements CreateAccount {
   /** Account type to be created */
   get accountType(): EthereumNewAccountType {
     return this._accountType
-  }
-
-  /** Account creation options */
-  get options() {
-    return this._options
   }
 
   /** Account will be recycled (accountName must be specified via composeTransaction()
@@ -146,11 +64,99 @@ export class EthereumCreateAccount implements CreateAccount {
     return null
   }
 
+  /** Account creation options */
+  get options() {
+    return this._options
+  }
+
+  /** ETH does not require the chain to execute a createAccount transaction
+   *  to create the account structure on-chain */
+  get supportsTransactionToCreateAccount(): boolean {
+    return false
+  }
+
   /** Ethereum account creation doesn't require any on chain transactions.
    * Hence there is no transaction object attached to EthereumCreateAccount class
    */
   get transaction(): any {
-    throwNewError('Ethereum account creation does not require any on chain transactions')
+    throwNewError(
+      'Ethereum account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
+    )
     return null
+  }
+
+  /** Compose a transaction to send to the chain to create a new account
+   * Ethereum does not require a create account transaction to be sent to the chain
+   */
+  async composeTransaction(): Promise<void> {
+    notSupported()
+  }
+
+  /** Determine if desired account name is usable for a new account.
+   */
+  async determineNewAccountName(): Promise<any> {
+    notSupported()
+  }
+
+  /* Not supported for Ethereum */
+  async generateAccountName(): Promise<EthereumEntityName> {
+    notSupported()
+    return null
+  }
+
+  /** Not supported */
+  generateAccountNameString = (): any => {
+    notSupported()
+  }
+
+  /** Checks create options - if publicKeys are missing,
+   *  autogenerate the public and private key pair and add them to options */
+  async generateKeysIfNeeded() {
+    let publicKey: EthereumPublicKey
+    this.assertValidOptionPublicKeys()
+    this.assertValidOptionNewKeys()
+    // get keys from options or generate
+    publicKey = this.getPublicKeysFromOptions()
+    if (!publicKey) {
+      await this.generateAccountKeys()
+      publicKey = this._generatedKeys?.publicKey
+    }
+    this._accountName = await getEthereumAddressFromPublicKey(publicKey)
+    this._accountType = EthereumNewAccountType.Native
+  }
+
+  // ---- Private functions
+
+  private async generateAccountKeys(): Promise<void> {
+    const { newKeysOptions } = this._options || {}
+    const { password, salt } = newKeysOptions || {}
+
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {})
+    this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
+  }
+
+  /** extract keys from options
+   *  Returns publicKeys */
+  private getPublicKeysFromOptions(): EthereumPublicKey {
+    const { publicKey } = this._options || {}
+    if (!publicKey) {
+      return null
+    }
+    return publicKey
+  }
+
+  private assertValidOptionPublicKeys() {
+    const { publicKey } = this._options
+    if (publicKey && !isValidEthereumPublicKey(publicKey)) {
+      throwNewError('Invalid Option - Provided publicKey isnt valid')
+    }
+  }
+
+  private assertValidOptionNewKeys() {
+    const { newKeysOptions } = this._options
+    const { password, salt } = newKeysOptions || {}
+    if (isNullOrEmpty(password) || isNullOrEmpty(salt)) {
+      throwNewError('Invalid Option - You must provide a password AND salt to generate new keys')
+    }
   }
 }
