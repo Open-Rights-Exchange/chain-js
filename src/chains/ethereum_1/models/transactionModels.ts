@@ -5,7 +5,7 @@ export type EthereumTransactionOptions = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
   gasLimit?: EthereumValue
-  chain: EthereumValue & (number | string)
+  chain: number | string
   hardfork: EthereumValue & string
 }
 
@@ -17,6 +17,9 @@ export type EthereumRawTransaction = {
   to?: EthereumAddress
   value?: EthereumValue
   data?: EthereumTxData
+  v?: EthereumValue
+  r?: EthereumValue
+  s?: EthereumValue
 }
 
 /** Transaction properties that contain the fee & priority info */

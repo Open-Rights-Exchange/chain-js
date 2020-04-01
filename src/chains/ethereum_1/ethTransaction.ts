@@ -66,13 +66,14 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Raw tranasction body (prepared for signing) */
-  get raw() {
+  get raw(): EthereumRawTransaction {
     if (!this.hasRaw) {
       throwNewError(
         'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
-    return this._raw
+    const { nonce, gasLimit, gasPrice, to, value, data, v, r, s } = this._raw
+    return { nonce, gasLimit, gasPrice, to, value, data: toEthereumTxData(data), v, r, s }
   }
 
   /** Whether the raw transaction body has been set or prepared */
