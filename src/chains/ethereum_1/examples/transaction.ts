@@ -334,6 +334,7 @@ const composeERC20MintParams = {
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     // console.log('SIG: ', transaction.signatures)
     // console.log(await transaction.send())
+    //
     // // ---> Sign and send erc20 mint Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     // await ropsten.connect()

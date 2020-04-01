@@ -47,5 +47,5 @@ export interface CreateAccount {
   generateKeysIfNeeded(): Promise<void>
   /** Whether chain requires a transaction to create an account
    *  ex: ETH does not, EOS does */
-  supportsTransactionToCreateAccount(): boolean
+  supportsTransactionToCreateAccount: boolean
 }

@@ -6,7 +6,7 @@
   "configurations": [
 
     {
-      "name": "Debug Examples - misc.ts",
+      "name": "Debug EOS Examples - misc.ts",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}/src/chains/eos_1_8/examples/transaction.ts"],
@@ -19,7 +19,7 @@
       }
     },
     {
-      "name": "Debug Examples - account.ts",
+      "name": "Debug EOS Examples - account.ts",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}/src/chains/eos_1_8/examples/account.ts"],
@@ -32,10 +32,36 @@
       }
     },
     {
-      "name": "Debug Examples - transaction.ts",
+      "name": "Debug EOS Examples - transaction.ts",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}/src/chains/eos_1_8/examples/transaction.ts"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart",
+      "env": {
+        "TS_NODE_IGNORE": "false"
+      }
+    },
+    {
+      "name": "Debug ETH Examples - account.ts",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/src/chains/ethereum_1/examples/account.ts"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart",
+      "env": {
+        "TS_NODE_IGNORE": "false"
+      }
+    },
+    {
+      "name": "Debug ETH Examples - transaction.ts",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/src/chains/ethereum_1/examples/transaction.ts"],
       "runtimeArgs": ["-r", "ts-node/register"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
