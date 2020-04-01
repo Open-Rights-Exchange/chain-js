@@ -45,7 +45,6 @@ export type EthereumAbi = any[]
 /** Information needed to generate Trx Data to invoke desired smart contract action */
 export type EthereumActionContract = {
   abi: any
-  address: string
   method: string
   parameters: (string | number)[]
 }

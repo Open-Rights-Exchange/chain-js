@@ -26,11 +26,6 @@ export class EthereumActionHelper {
     this._to = isNullOrEmpty(to) ? ZERO_ADDRESS : to
     this._value = isNullOrEmpty(value) ? ZERO_HEX : value
 
-    // if either to or value is provided, both must be
-    if (ethereumTrxArgIsNullOrEmpty(this._to) !== ethereumTrxArgIsNullOrEmpty(this._value)) {
-      throwNewError('Must provide both to and value (if either is provided)')
-    }
-
     // cant provide both contract and data properties
     if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
       throwNewError('You can provide either data or contract but not both')
