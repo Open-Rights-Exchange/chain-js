@@ -17,6 +17,9 @@ export type EthereumRawTransaction = {
   to?: EthereumAddress
   value?: EthereumValue
   data?: EthereumTxData
+  v?: EthereumValue
+  r?: EthereumValue
+  s?: EthereumValue
 }
 
 /** Transaction properties that contain the fee & priority info */
