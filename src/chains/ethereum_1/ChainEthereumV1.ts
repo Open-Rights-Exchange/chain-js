@@ -8,11 +8,17 @@ import * as ethcrypto from './ethCrypto'
 import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
-
-const notImplemented = () => {
-  throw new Error('Not Implemented')
-}
-
+import { EthereumCreateAccount } from './ethCreateAccount'
+import { EthereumAccount } from './ethAccount'
+import { notImplemented } from '../../helpers'
+import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress } from './models'
+import {
+  isValidEthereumPublicKey,
+  isValidEthereumPrivateKey,
+  toEthereumPublicKey,
+  toEthereumPrivateKey,
+  toEthereumSignature,
+} from './helpers'
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -29,7 +35,9 @@ class ChainEthereumV1 implements Chain {
     this._chainState = new EthereumChainState(endpoints, settings)
   }
 
-  public isConnected = this._chainState.isConnected
+  public get isConnected(): boolean {
+    return this._chainState?.isConnected
+  }
 
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
 
@@ -76,19 +84,25 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  private newAccount = (options?: any): any => {
-    notImplemented()
-    return null
+  /** Returns a chain Account class
+   * Note: Does NOT create a new ethereum address - to create an address, use new.CreateAccount */
+  private newAccount = async (address?: EthereumAddress): Promise<EthereumAccount> => {
+    this.assertIsConnected()
+    const account = new EthereumAccount(this._chainState)
+    if (address) {
+      await account.load(address)
+    }
+    return account
   }
 
-  private newCreateAccount = (options?: any): any => {
-    notImplemented()
-    return null
+  private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
+    this.assertIsConnected()
+    return new EthereumCreateAccount(this._chainState, options)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new EthereumTransaction(this._chainState, options)
   }
 
   public new = {
@@ -103,15 +117,15 @@ class ChainEthereumV1 implements Chain {
 
   encrypt = crypto.encrypt
 
-  getPublicKeyFromSignature = ethcrypto.getPublicKeyFromSignature
+  getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
   isValidEncryptedData = crypto.isEncryptedDataString
 
   toEncryptedDataString = crypto.toEncryptedDataString
 
-  isValidPrivateKey = ethcrypto.isValidPrivateKey
+  isValidPrivateKey = isValidEthereumPrivateKey
 
-  isValidPublicKey = ethcrypto.isValidPublicKey
+  isValidPublicKey = isValidEthereumPublicKey
 
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
@@ -133,15 +147,26 @@ class ChainEthereumV1 implements Chain {
 
   toDate = notImplemented
 
-  toPublicKey = notImplemented
+  toPublicKey = toEthereumPublicKey
 
-  toPrivateKey = notImplemented
+  toPrivateKey = toEthereumPrivateKey
 
-  toSignature = notImplemented
+  toSignature = toEthereumSignature
+
+  public setPublicKey = (publicKey: EthereumPublicKey) => {
+    return new EthereumAccount(this._chainState).setPublicKey(publicKey)
+  }
 
   public mapChainError = (error: Error): ChainError => {
     notImplemented()
     return new ChainError(null, null, null)
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
+  public assertIsConnected(): void {
+    if (!this._chainState?.isConnected) {
+      throwNewError('Not connected to chain')
+    }
   }
 }
 

@@ -8,7 +8,7 @@ export type EosPrivateKey = string & PrivateKeyBrand
 export type EosSignature = string & SignatureBrand
 
 /** An object containing public and private keys for owner and active permissions */
-export type EosAccountKeysStruct = {
+export type EosAccountKeys = {
   publicKeys: {
     owner: EosPublicKey
     active: EosPublicKey

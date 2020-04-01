@@ -18,7 +18,8 @@ export enum EncryptedDataStringBrand {
 /** Stringified JSON ciphertext (used for private keys) */
 export type EncryptedDataString = string & EncryptedDataStringBrand
 /** a public key string - formatted correctly for the chain */
-export type PublicKey = string & PublicKeyBrand
+// TODO: eth public key is of type buffer
+export type PublicKey = (string & PublicKeyBrand) | any
 /** a private key string - formatted correctly for the chain */
 export type PrivateKey = string & PrivateKeyBrand
 /** a signature string - formatted correcly for the chain */

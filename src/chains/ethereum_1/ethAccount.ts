@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { notSupported } from '../../helpers'
+import { isValidEthereumAddress, isValidEthereumPublicKey } from './helpers'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { EthereumChainState } from './ethChainState'
-
+import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey } from './models'
+import { getEthereumAddressFromPublicKey } from './ethCrypto'
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission
 
-export class EthAccount implements Account {
-  private _account: any
+export class EthereumAccount implements Account {
+  private _address: EthereumAddress
+
+  private _publicKey: EthereumPublicKey
 
   private _chainState: EthereumChainState
 
@@ -16,49 +21,78 @@ export class EthAccount implements Account {
   }
 
   /** Whether the account is currently unused and can be reused - not supported in Ethereum */
-  canBeRecycled = false
+  get canBeRecycled(): boolean {
+    return notSupported()
+  }
 
-  /** Account name */
-  get name() {
-    return this._account?.account_name
+  /** Ethereum address */
+  get name(): any {
+    this.assertHasAddress()
+    return this._address
   }
 
   /** Public Key(s) associated with the account */
-  get publicKeys(): any[] {
-    this.assertHasAccount()
-    throw new Error('Not Implemented')
+  get publicKeys(): any {
+    this.assertHasAddress()
+    return this._publicKey
   }
 
-  /** Tries to retrieve the account from the chain
-   *  Returns { exists:true|false, account } */
-  doesAccountExist = async (accountName: string): Promise<{ exists: boolean; account: EthAccount }> => {
-    throw new Error('Not Implemented')
+  /** Whether the account name can be used for new account */
+  isValidNewAccountName = async (accountName: string | EthereumAddress): Promise<boolean> => {
+    return isValidEthereumAddress(accountName)
   }
 
-  /** Retrieves account from chain */
-  fetchFromChain = async (accountName: string): Promise<void> => {
-    throw new Error('Not Implemented')
+  /** Sets the ethereum address
+  /* Public key can only be obtained from a transaction signed by an ethereum address
+  /* Only Ethereum address is not enough to get public key */
+  load = async (address?: EthereumAddress): Promise<void> => {
+    this.assertValidEthereumAddress(address)
+    this._address = address
   }
 
-  /** JSON representation of transaction data */
+  /** Sets the ethereum publie key and address */
+  setPublicKey = async (publicKey: EthereumPublicKey) => {
+    this.assertValidEthereumPublickey(publicKey)
+    this._publicKey = publicKey
+    this._address = getEthereumAddressFromPublicKey(publicKey)
+  }
+
+  /** ETH has no account structure/registry on the chain */
+  get supportsOnChainAccountRegistry(): boolean {
+    return false
+  }
+
+  /** ETH accounts cannot be recycled as the private keys cannot be replaced */
+  get supportsRecycling(): boolean {
+    return false
+  }
+
+  /** JSON representation of address */
   toJson() {
-    this.assertHasAccount()
-    return this._account
+    this.assertHasAddress()
+    return { address: this._address }
   }
 
-  /** Returns the raw value from the chain */
-  get value(): any {
-    return this._account
+  /** Returns the address */
+  get value(): EthereumAddress {
+    return this._address
   }
 
-  private assertHasAccount(): void {
-    if (!this._account) {
-      throwNewError('Account not retrieved from chain')
+  private assertHasAddress(): void {
+    if (!this._address) {
+      throwNewError('Ethereum address or Public key not provided')
     }
   }
 
-  // ---------------- Etheruem SPECIFIC FUNCTIONS ------------------
-  // These features are not on the main Account interface
-  // They are only accessaible via an EosAccount object
-  // ...
+  private assertValidEthereumAddress(address: EthereumAddress): void {
+    if (!isValidEthereumAddress(address)) {
+      throwNewError('Not a valid ethereum address')
+    }
+  }
+
+  private assertValidEthereumPublickey(publicKey: EthereumPublicKey): void {
+    if (!isValidEthereumPublicKey(publicKey)) {
+      throwNewError('Not a valid ethereum public key')
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import * as ecc from 'eosjs-ecc'
 import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
-import { EosAccountKeysStruct, EosSignature, EosPublicKey, EosPrivateKey } from './models'
+import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
 import { KeyPair, KeyPairEncrypted, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
@@ -28,6 +28,7 @@ export function getPublicKeyFromSignature(
   return ecc.recover(signature, data, encoding)
 }
 
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
   publicKey: EosSignature | Buffer,
   data: string | Buffer,
@@ -72,7 +73,7 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
   removeEmptyValuesInJsonObject(overrideKeys)
 
   // Formally named generateEncryptedKeys
-  const keys: EosAccountKeysStruct = await Keygen.generateMasterKeys()
+  const keys: EosAccountKeys = await Keygen.generateMasterKeys()
   const replacedKeys = {
     publicKeys: {
       ...keys.publicKeys,

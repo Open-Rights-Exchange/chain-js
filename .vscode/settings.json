@@ -7,7 +7,6 @@
     "titleBar.activeBackground": "#188262"
   },
   "git.autofetch": true,
-  "window.zoomLevel": 0,
   "editor.tabSize": 2,
   "code-runner.executorMap": {
       "javascript": "node",

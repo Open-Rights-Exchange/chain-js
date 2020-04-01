@@ -6,6 +6,7 @@ import {
   EosPermissionStruct,
   EosGeneratedKeys,
   EosNewAccountType,
+  EosPublicKeys,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -30,7 +31,7 @@ import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty, isANumber } from '../../helpers'
 import { composeAction } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
-import { ChainActionType } from '../../models'
+import { ChainActionType, ChainErrorType } from '../../models'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native, virtual, and createEscrow accounts
@@ -51,14 +52,64 @@ export class EosCreateAccount implements CreateAccount {
 
   private _generatedKeys: Partial<EosGeneratedKeys>
 
-  constructor(chainState: EosChainState) {
+  constructor(chainState: EosChainState, options?: EosCreateAccountOptions) {
     this._chainState = chainState
+    this._options = this.applyDefaultOptions(options)
+  }
+
+  // ---- Interface implementation
+
+  /** Account name for the account to be created
+   *  May be automatically generated (or otherwise changed) by composeTransaction() */
+  get accountName(): EosEntityName {
+    return this._accountName
+  }
+
+  /** Account type to be created */
+  get accountType(): EosNewAccountType {
+    return this._accountType
+  }
+
+  /** Account will be recycled (accountName must be specified via composeTransaction()
+   * This is set by composeTransaction()
+   * ... if the account name provided has the 'unused' key as its active public key */
+  get didRecycleAccount() {
+    return this._didRecycleAccount
+  }
+
+  /** The keys that were generated as part of the account creation process
+   *  IMPORTANT: Bes ure to always read and store these keys after creating an account
+   *  This is the only way to retrieve the auto-generated private keys after an account is created */
+  get generatedKeys() {
+    if (this._generatedKeys) {
+      return this._generatedKeys
+    }
+    return null
+  }
+
+  /** Account creation options */
+  get options() {
+    return this._options
+  }
+
+  /** EOS requires the chain to execute a createAccount transaction
+   *  to create the account structure on-chain */
+  get supportsTransactionToCreateAccount(): boolean {
+    return true
+  }
+
+  /** The transaction with all actions needed to create the account
+   *  This should be signed and sent to the chain to create the account */
+  get transaction() {
+    if (!this._transaction) {
+      this._transaction = new EosTransaction(this._chainState)
+    }
+    return this._transaction
   }
 
   /** Compose a transaction to send to the chain to create a new account */
-  async composeTransaction(accountType: EosNewAccountType, options?: EosCreateAccountOptions): Promise<void> {
+  async composeTransaction(accountType: EosNewAccountType): Promise<void> {
     this._accountType = accountType
-    this._options = this.applyDefaultOptions(options)
     const {
       accountName,
       creatorAccountName,
@@ -84,8 +135,8 @@ export class EosCreateAccount implements CreateAccount {
 
     this._accountName = newAccountName
 
-    // get keys from paramters or freshly generated
-    const publicKeys = await this.getPublicKeysFromOptionsOrGenerateNewKeys()
+    await this.generateKeysIfNeeded()
+    const { publicKeys } = this.options
 
     // if recyclying an account, we don't want a generated owner key, we will expect it to be = unusedAccountPublicKey
     if (recycleAccount) {
@@ -121,7 +172,7 @@ export class EosCreateAccount implements CreateAccount {
       // we've already confirmed (in generateAccountName) that account can be recycled
       const parentAccount = new EosAccount(this._chainState)
       // replacing the keys of an existing account, so fetch it first
-      await parentAccount.fetchFromChain(this._accountName)
+      await parentAccount.load(this._accountName)
 
       const replaceActivePermissionAction = await permissionHelper.composeReplacePermissionKeysAction(
         creatorAccountName,
@@ -165,10 +216,84 @@ export class EosCreateAccount implements CreateAccount {
     if (!isNullOrEmpty(newActions)) newTransaction.actions = newActions
 
     // generate and validate the serialized tranasaction - ready to send to the chain
-    await newTransaction.generateSerialized()
+    await newTransaction.prepareToBeSigned()
     await newTransaction.validate()
     this._transaction = newTransaction
   }
+
+  /** Determine if desired account name is usable for a new account.
+   *  Generates a new account name if one isnt provided.
+   *  Checks if provided account is unused and can be recycled */
+  async determineNewAccountName(accountName: EosEntityName) {
+    let eosAccount: EosAccount
+    let alreadyExists = false
+    let canRecycle = false
+    let newAccountName = accountName
+    const { accountNamePrefix } = this._options
+
+    if (!accountName) {
+      newAccountName = await this.generateAccountName(accountNamePrefix, true)
+    } else {
+      eosAccount = new EosAccount(this._chainState)
+      try {
+        await eosAccount.load(accountName)
+        // check if this account is an unused, recyclable account
+        canRecycle = await eosAccount.canBeRecycled
+        if (!canRecycle) alreadyExists = true
+      } catch (error) {
+        alreadyExists = false
+        // if account doesn't exist - don't do anything. Otherwise, rethrow error
+        if (error.errorType !== ChainErrorType.AccountDoesntExist) {
+          throw error
+        }
+      }
+    }
+    return { alreadyExists, newAccountName, canRecycle }
+  }
+
+  /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
+   *  If already in use, this function is called recursively until a unique name is generated */
+  async generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean = true): Promise<EosEntityName> {
+    const accountName = this.generateAccountNameString(prefix)
+    let exists = false
+    if (checkIfNameUsedOnChain) {
+      exists = await this.doesAccountExist(accountName)
+    }
+    if (exists) {
+      return this.generateAccountName(prefix, checkIfNameUsedOnChain)
+    }
+    return toEosEntityName(accountName)
+  }
+
+  /** Generates a random EOS account name
+    account names MUST be base32 encoded in compliance with the EOS standard (usually 12 characters)
+    account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
+    account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars
+  */
+  generateAccountNameString = (prefix: string = ''): EosEntityName => {
+    return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
+  }
+
+  /** Checks create options - if publicKeys are missing,
+   *  autogenerate the public and private key pair and add them to options */
+  async generateKeysIfNeeded() {
+    let publicKeys: EosPublicKeys
+    // get keys from paramters or freshly generated
+    publicKeys = this.getPublicKeysFromOptions()
+    if (!publicKeys) {
+      await this.generateAccountKeys()
+      publicKeys = this._generatedKeys?.accountKeys?.publicKeys
+    }
+  }
+
+  // ---- Chain-specific functions
+
+  async doesAccountExist(accountName: EosEntityName): Promise<boolean> {
+    const account = new EosAccount(this._chainState)
+    return account.doesAccountExist(accountName)
+  }
+
+  // ---- Private functions
 
   /** merge default options and incoming options */
   private applyDefaultOptions = (options: EosCreateAccountOptions): EosCreateAccountOptions => {
@@ -187,26 +312,18 @@ export class EosCreateAccount implements CreateAccount {
     }
   }
 
-  /** Determine if desired account name is usable for a new account.
-   *  Generates a new account name if one isnt provided.
-   *  Checks if provided account is unused and can be recycled */
-  async determineNewAccountName(accountName: EosEntityName) {
-    let canRecycle = false
-    let alreadyExists = false
-    let newAccountName = accountName
-    const { accountNamePrefix } = this._options
-
-    if (!accountName) {
-      newAccountName = await this.generateAccountName(accountNamePrefix, true)
-    } else {
-      const { exists, account } = await this.doesAccountExist(accountName)
-      if (exists) {
-        // check if this account is an unused, recyclable account
-        canRecycle = await account.canBeRecycled
-        if (!canRecycle) alreadyExists = exists
-      }
+  /** Generate new public and private key pair and stores them in class's generatedKeys
+   *  Also adds the new keys to the class's options.publicKeys */
+  private async generateAccountKeys(): Promise<void> {
+    // generate new account owner/active keys if they weren't provided
+    const { newKeysOptions } = this._options
+    const { password, salt } = newKeysOptions || {}
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
+    this._generatedKeys = {
+      ...this._generatedKeys,
+      accountKeys: generatedKeys,
     }
-    return { alreadyExists, newAccountName, canRecycle }
+    this._options.publicKeys = this._generatedKeys?.accountKeys?.publicKeys // replace working keys with new ones
   }
 
   /** Compose an updateAuth command to add a permission to the virtual 'master' account */
@@ -254,7 +371,7 @@ export class EosCreateAccount implements CreateAccount {
     const { parentAccountName, rootPermission } = createVirtualNestedOptions || {}
     const { active: publicKeyActive } = publicKeys || {}
     const parentAccount = new EosAccount(this._chainState)
-    await parentAccount.fetchFromChain(parentAccountName)
+    await parentAccount.load(parentAccountName)
     const permissionHelper = new PermissionsHelper(this._chainState)
     const { perm_name: deepestPermissionName } = permissionHelper.findDeepestPermission(
       parentAccount.value.permissions,
@@ -270,55 +387,15 @@ export class EosCreateAccount implements CreateAccount {
     return newVirtualAccountPermission
   }
 
-  /** extract keys from options or generate new keys
-   *  Returns publicKeys and generatedKeys if created */
-  private async getPublicKeysFromOptionsOrGenerateNewKeys() {
-    let generatedKeys: any
-    // generate new account owner/active keys if they weren't provided
-    let { publicKeys } = this._options || {}
+  /** extract keys from options
+   *  Returns publicKeys */
+  private getPublicKeysFromOptions(): EosPublicKeys {
+    const { publicKeys } = this._options || {}
     const { owner, active } = publicKeys || {}
-    const { newKeysOptions } = this._options
-    const { password, salt } = newKeysOptions || {}
-
-    // generate new public keys and add to options.publicKeyss
     if (!owner || !active) {
-      generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, { publicKeys })
-      this._generatedKeys = {
-        ...this._generatedKeys,
-        accountKeys: generatedKeys,
-      }
-      publicKeys = this._generatedKeys.accountKeys.publicKeys
-      this._options.publicKeys = publicKeys // replace working keys with new ones
+      return null
     }
     return publicKeys
-  }
-
-  /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
-   *  If already in use, this function is called recursively until a unique name is generated */
-  async generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean = true): Promise<EosEntityName> {
-    const accountName = this.generateAccountNameString(prefix)
-    let exists = false
-    if (checkIfNameUsedOnChain) {
-      ;({ exists } = await this.doesAccountExist(accountName))
-    }
-    if (exists) {
-      return this.generateAccountName(prefix, checkIfNameUsedOnChain)
-    }
-    return toEosEntityName(accountName)
-  }
-
-  async doesAccountExist(accountName: EosEntityName): Promise<{ exists: boolean; account: EosAccount }> {
-    const account = new EosAccount(this._chainState)
-    return account.doesAccountExist(accountName)
-  }
-
-  /** Generates a random EOS account name
-    account names MUST be base32 encoded in compliance with the EOS standard (usually 12 characters)
-    account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
-    account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars
-  */
-  generateAccountNameString = (prefix: string = ''): EosEntityName => {
-    return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
   }
 
   private assertValidOptionPublicKeys() {
@@ -348,47 +425,5 @@ export class EosCreateAccount implements CreateAccount {
         'Invalid Option - For this type of account, You must provide valid values for ramBytes(number), stakeNetQuantity(EOSAsset), stakeCpuQuantity(EOSAsset)',
       )
     }
-  }
-
-  /** Account name for the account to be created
-   *  May be automatically generated (or otherwise changed) by composeTransaction() */
-  get accountName(): EosEntityName {
-    return this._accountName
-  }
-
-  /** Account type to be created */
-  get accountType(): EosNewAccountType {
-    return this._accountType
-  }
-
-  /** Account creation options */
-  get options() {
-    return this._options
-  }
-
-  /** Account will be recycled (accountName must be specified via composeTransaction()
-   * This is set by composeTransaction()
-   * ... if the account name provided has the 'unused' key as its active public key */
-  get didRecycleAccount() {
-    return this._didRecycleAccount
-  }
-
-  /** The keys that were generated as part of the account creation process
-   *  IMPORTANT: Bes ure to always read and store these keys after creating an account
-   *  This is the only way to retrieve the auto-generated private keys after an account is created */
-  get generatedKeys() {
-    if (this._generatedKeys) {
-      return this._generatedKeys
-    }
-    return null
-  }
-
-  /** The transaction with all actions needed to create the account
-   *  This should be signed and sent to the chain to create the account */
-  get transaction() {
-    if (!this._transaction) {
-      this._transaction = new EosTransaction(this._chainState)
-    }
-    return this._transaction
   }
 }

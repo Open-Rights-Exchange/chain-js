@@ -1,20 +1,13 @@
-/** Type of account to craate */
-export enum EthereumAccountType {
-  /** Native account for chain tyep (EOS, Ethereum, etc.) */
+import { EthereumNewKeysOptions } from './generalModels'
+import { EthereumPublicKey } from './cryptoModels'
+
+/** Type of account to create */
+export enum EthereumNewAccountType {
+  /** Native account for chain type (Ethereum, etc.) */
   Native = 'Native',
 }
 
 export type EthereumCreateAccountOptions = {
-  // accountName: EthereumEntityName,
-  // creatorAccountName: EthereumEntityName
-  // creatorPermission: EthereumEntityName
-  /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
-  publicKeys?: {
-    // owner?: EthereumPublicKey
-    // active?: EthereumPublicKey
-  }
-  newKeysOptions?: {
-    password?: string
-    salt?: string
-  }
+  publicKey?: EthereumPublicKey
+  newKeysOptions?: EthereumNewKeysOptions
 }

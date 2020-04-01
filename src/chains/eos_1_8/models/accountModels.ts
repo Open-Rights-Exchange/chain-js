@@ -13,16 +13,18 @@ export enum EosNewAccountType {
   VirtualNested = 'VirtualNested',
 }
 
+export type EosPublicKeys = {
+  owner?: EosPublicKey
+  active?: EosPublicKey
+}
+
 export type EosCreateAccountOptions = {
-  accountName: EosEntityName // Optional
-  accountNamePrefix?: string
+  accountName?: EosEntityName // Optional - aka oreAccountName
+  accountNamePrefix?: string // Default 'ore'
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName // Default = 'active'
   /** to generate new keys (using newKeysOptions), leave both publicKeys as null */
-  publicKeys?: {
-    owner?: EosPublicKey
-    active?: EosPublicKey
-  }
+  publicKeys?: EosPublicKeys
   newKeysOptions?: EosNewKeysOptions
   oreOptions?: {
     pricekey?: number // default = 1

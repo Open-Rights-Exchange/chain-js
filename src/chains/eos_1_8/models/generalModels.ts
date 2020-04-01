@@ -1,4 +1,4 @@
-import { EosPublicKey, EosAccountKeysStruct } from './cryptoModels'
+import { EosPublicKey, EosAccountKeys } from './cryptoModels'
 import { ChainAssetBrand, ChainDateBrand, ChainEntityNameBrand, KeyPairEncrypted } from '../../../models'
 
 // using Enum 'brands' to force a string type to have a particular format
@@ -28,7 +28,7 @@ export type EosPermissionSimplified = {
 }
 
 export type EosGeneratedKeys = {
-  accountKeys: EosAccountKeysStruct
+  accountKeys: EosAccountKeys
   permissionKeys: EosGeneratedPermissionKeys[]
 }
 

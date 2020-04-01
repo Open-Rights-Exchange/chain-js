@@ -25,7 +25,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   // generate the transaction to create an on-chain account
   await accntCreator.composeTransaction(AccountType.Native, accountOptions)
   // sign and send the transaction to the chain
-  accntCreator.transaction.sign([{myPrivateKeys}])
+  await accntCreator.transaction.sign([{myPrivateKeys}])
   accntCreator.transaction.send()
 
 ```

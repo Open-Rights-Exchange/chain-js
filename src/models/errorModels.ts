@@ -3,11 +3,11 @@
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export enum ChainErrorType {
   AccountCreationFailedAlreadyExists = 'AccountCreationFailedAlreadyExists',
+  AccountDoesntExist = 'AccountDoesntExist',
   /** authority is not valid */
   AuthInvalid = 'AuthInvalid',
   /** missing permission or key */
   AuthMissing = 'AuthMissing',
-  /** all permission or keys needed for transaction weren't provided */
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
   DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
