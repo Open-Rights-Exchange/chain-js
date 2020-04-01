@@ -3,7 +3,14 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { ChainError, throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, ChainErrorType } from '../../models'
+import {
+  ChainInfo,
+  ChainEndpoint,
+  ChainSettings,
+  ConfirmType,
+  ChainErrorType,
+  ChainErrorDetailCode,
+} from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
 import { mapChainError } from './eosErrors'
@@ -368,7 +375,7 @@ export class EosChainState {
         if (getBlockAttempt >= maxBlockReadAttempts) {
           this.rejectAwaitTransaction(
             reject,
-            'maxBlockReadAttemptsTimeout',
+            ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
             `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
           )
           return
@@ -383,7 +390,7 @@ export class EosChainState {
     if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
       this.rejectAwaitTransaction(
         reject,
-        'maxBlocksTimeout',
+        ChainErrorDetailCode.ConfirmTransactionTimeout,
         `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
           blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
       )
@@ -438,8 +445,11 @@ export class EosChainState {
     resolve(transaction)
   }
 
-  rejectAwaitTransaction = (reject: any, errorCode: string, errorMessage: string) => {
-    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorCode })
+  /** All errors are of ErrorType TxConfirmFailure
+   *  A more specfic cause of the error is passed via errorDetailCode param
+   */
+  rejectAwaitTransaction = (reject: any, errorDetailCode: ChainErrorDetailCode, errorMessage: string) => {
+    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorDetailCode })
     reject(error)
   }
 
