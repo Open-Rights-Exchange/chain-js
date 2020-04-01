@@ -5,7 +5,7 @@ export type EthereumTransactionOptions = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
   gasLimit?: EthereumValue
-  chain: EthereumValue & (number | string)
+  chain: number | string
   hardfork: EthereumValue & string
 }
 
