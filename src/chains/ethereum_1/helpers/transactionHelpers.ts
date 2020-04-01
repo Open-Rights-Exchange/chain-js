@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import { BN, bufferToHex } from 'ethereumjs-util'
 import { isNullOrEmpty } from '../../../helpers'
 import { EthUnit, EthereumActionContract } from '../models'
-import { ZERO_HEX, EMPTY_HEX } from '../../../constants'
+import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../../../constants'
 import { toEthereumTxData } from './cryptoModelHelpers'
 
 /** Converts functionSignature to hexadecimal string */
@@ -34,19 +34,23 @@ export function toWei(amount: number, type: EthUnit) {
 export function ethereumTrxArgIsNullOrEmpty(obj: any) {
   if (
     isNullOrEmpty(obj) ||
-    obj === (0 || ZERO_HEX || EMPTY_HEX || Buffer.from(ZERO_HEX, 'hex')) ||
-    bufferToHex(obj) === EMPTY_HEX
+    obj === 0 ||
+    obj === ZERO_HEX ||
+    obj === EMPTY_HEX ||
+    obj === ZERO_ADDRESS ||
+    obj === Buffer.from(ZERO_HEX, 'hex')
   )
     return true
+  if (Buffer.isBuffer(obj) && bufferToHex(obj) === EMPTY_HEX) return true
 
   return false
 }
 
 /** Generates hexadecimal string for transaction data from EthereumActionContract */
 export function generateDataFromContractAction(contractAction: EthereumActionContract) {
-  const { abi, address, method, parameters } = contractAction
+  const { abi, method, parameters } = contractAction
   const web3 = new Web3()
-  const contract = new web3.eth.Contract(abi, address)
+  const contract = new web3.eth.Contract(abi)
   const methodHex = functionSignatureToHex(abiToFunctionSignature(method, abi))
   return toEthereumTxData(contract.methods[methodHex](...parameters).encodeABI())
 }

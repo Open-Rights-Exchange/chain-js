@@ -92,7 +92,7 @@ export class EthereumTransaction implements Transaction {
     const { chain, hardfork, nonce } = this._options
     let { gasPrice, gasLimit } = this._options
     const { to, value, data } = this._actionHelper.raw
-    gasPrice = isNullOrEmpty(gasPrice) ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
+    gasPrice = isNullOrEmpty(gasPrice) ? 1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
     let trxOptions = {}
