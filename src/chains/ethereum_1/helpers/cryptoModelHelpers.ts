@@ -54,7 +54,7 @@ export function isValidEthereumSignature(
   return isValidSignature(v, r, s)
 }
 
-// For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) to which it corresponds is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
+// For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
 export function isValidEthereumAddress(value: string | Buffer | EthereumAddress): boolean {
   if (typeof value === 'string') return isValidAddress(value)
   return true
