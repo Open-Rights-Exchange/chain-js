@@ -11,7 +11,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
 }
 
 // Maps an Error object (thrown by a call to the chain) into a known set of errors
-// RpcError is an eosjs structure that includes the 'json' property that has error details
+// RpcError is an web3js structure that includes the 'json' property that has error details
 export function mapChainError(error: Error): ChainError {
   let errorSearchString
   let errorMessage

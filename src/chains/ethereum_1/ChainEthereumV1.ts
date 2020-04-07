@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { BN } from 'ethereumjs-util'
 import { Chain } from '../../interfaces'
 import {
   ChainActionType,
@@ -155,34 +156,34 @@ class ChainEthereumV1 implements Chain {
 
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   public isValidEntityName = (value: string): boolean => {
-    return !!isValidEthereumEntityName(value)
+    return isValidEthereumEntityName(value)
   }
 
-  /** Verifies that the value is a valid EOS entity name (e.g. an account name) */
+  /** Verifies that the value is a valid Ethereum entity name (e.g. an account name) */
   isValidEthereumEntityName = isValidEthereumEntityName
 
   /** Verifies that the value is a valid chain asset string */
-  public isValidAsset = (value: string): boolean => {
-    return !!isValidEthereumAsset(value)
+  public isValidAsset = (value: number | BN): boolean => {
+    return isValidEthereumAsset(value)
   }
 
-  /** Verifies that the value is a valid EOS asset string */
+  /** Verifies that the value is a valid Ethereum value */
   isValidEthereumAsset = isValidEthereumAsset
 
   /** Verifies that the value is a valid chain date */
   public isValidDate = (value: string): boolean => {
-    return !!isValidEthereumDateString(value)
+    return isValidEthereumDateString(value)
   }
 
-  /** Verifies that the value is a valid EOS date */
+  /** Verifies that the value is a valid Ethereum date */
   isValidEthereumDate = isValidEthereumDateString
 
-  /** Ensures that the value comforms to a well-formed chain asset string */
+  /** Ensures that the value comforms to a well-formed ethereum value */
   public toAsset = (amount: number, symbol: string): ChainAsset => {
     return toEthereumAsset(amount, symbol) as ChainAsset
   }
 
-  /** Ensures that the value comforms to a well-formed EOS asset string */
+  /** Ensures that the value comforms to a well-formed Ethereum value */
   toEthereumAsset = toEthereumAsset
 
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
@@ -190,7 +191,7 @@ class ChainEthereumV1 implements Chain {
     return toEthereumEntityName(value) as ChainEntityName
   }
 
-  /** Ensures that the value comforms to a well-formed EOS entity name
+  /** Ensures that the value comforms to a well-formed Ethereum entity name
    *  e.g. account, permission, or contract name */
   toEthereumEntityName = toEthereumEntityName
 
