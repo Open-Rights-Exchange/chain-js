@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
+import {
+  ChainActionType,
+  ChainEndpoint,
+  ChainInfo,
+  ChainSettings,
+  ChainType,
+  ChainAsset,
+  ChainEntityName,
+  ChainDate,
+} from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -11,14 +20,21 @@ import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
 import { notImplemented } from '../../helpers'
-import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress } from './models'
+import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress, EthereumDate } from './models'
 import {
+  isValidEthereumAsset,
+  isValidEthereumDateString,
+  isValidEthereumEntityName,
   isValidEthereumPublicKey,
   isValidEthereumPrivateKey,
+  toEthereumAsset,
+  toEthereumDate,
+  toEthereumEntityName,
   toEthereumPublicKey,
   toEthereumPrivateKey,
   toEthereumSignature,
 } from './helpers'
+
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -135,17 +151,53 @@ class ChainEthereumV1 implements Chain {
 
   // Chain Helper Functions
 
-  isValidEntityName = notImplemented
+  // --------- Chain helper functions
 
-  isValidAsset = notImplemented
+  /** Verifies that the value is a valid chain entity name (e.g. an account name) */
+  public isValidEntityName = (value: string): boolean => {
+    return !!isValidEthereumEntityName(value)
+  }
 
-  isValidDate = notImplemented
+  /** Verifies that the value is a valid EOS entity name (e.g. an account name) */
+  isValidEthereumEntityName = isValidEthereumEntityName
 
-  toEntityName = notImplemented
+  /** Verifies that the value is a valid chain asset string */
+  public isValidAsset = (value: string): boolean => {
+    return !!isValidEthereumAsset(value)
+  }
 
-  toAsset = notImplemented
+  /** Verifies that the value is a valid EOS asset string */
+  isValidEthereumAsset = isValidEthereumAsset
 
-  toDate = notImplemented
+  /** Verifies that the value is a valid chain date */
+  public isValidDate = (value: string): boolean => {
+    return !!isValidEthereumDateString(value)
+  }
+
+  /** Verifies that the value is a valid EOS date */
+  isValidEthereumDate = isValidEthereumDateString
+
+  /** Ensures that the value comforms to a well-formed chain asset string */
+  public toAsset = (amount: number, symbol: string): ChainAsset => {
+    return toEthereumAsset(amount, symbol) as ChainAsset
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS asset string */
+  toEthereumAsset = toEthereumAsset
+
+  /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
+  public toEntityName = (value: string): ChainEntityName => {
+    return toEthereumEntityName(value) as ChainEntityName
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS entity name
+   *  e.g. account, permission, or contract name */
+  toEthereumEntityName = toEthereumEntityName
+
+  /** Ensures that the value comforms to a well-formed chain date string */
+  public toDate = (value: string | Date | EthereumDate): ChainDate => {
+    return toEthereumDate(value) as ChainDate
+  }
 
   toPublicKey = toEthereumPublicKey
 
