@@ -1,6 +1,7 @@
 import moment from 'moment'
+import { BN } from 'ethereumjs-util'
 import { EthereumDate, EthereumEntityName, EthereumAsset } from '../models/generalModels'
-import { isNullOrEmpty } from '../../../helpers'
+import { isNullOrEmpty, isInEnum } from '../../../helpers'
 import { toWei } from './transactionHelpers'
 import {
   toEthUnit,
@@ -9,43 +10,19 @@ import {
   isValidEthereumTxData,
   isValidEthereumPrivateKey,
 } from './cryptoModelHelpers'
+import { EthUnit } from '../models'
 
 export function isValidEthereumDateString(str: string): str is EthereumDate {
   if (isNullOrEmpty(str)) return false
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
 
-export function isValidEthereumAsset(symbol: string): boolean {
-  if (
-    symbol === 'noether' ||
-    symbol === 'wei' ||
-    symbol === 'kwei' ||
-    symbol === 'Kwei' ||
-    symbol === 'babbage' ||
-    symbol === 'femtoether' ||
-    symbol === 'mwei' ||
-    symbol === 'Mwei' ||
-    symbol === 'lovelace' ||
-    symbol === 'picoether' ||
-    symbol === 'gwei' ||
-    symbol === 'Gwei' ||
-    symbol === 'shannon' ||
-    symbol === 'nanoether' ||
-    symbol === 'nano' ||
-    symbol === 'szabo' ||
-    symbol === 'microether' ||
-    symbol === 'micro' ||
-    symbol === 'finney' ||
-    symbol === 'milliether' ||
-    symbol === 'milli' ||
-    symbol === 'ether' ||
-    symbol === 'kether' ||
-    symbol === 'grand' ||
-    symbol === 'mether' ||
-    symbol === 'gether' ||
-    symbol === 'tether'
-  )
-    return true
+export function isValidEthereumUnit(unit: string): boolean {
+  return isInEnum(EthUnit, unit)
+}
+
+export function isValidEthereumAsset(value: number | BN, unit: string = 'wei'): boolean {
+  if (value > 0 && isValidEthereumUnit(unit)) return true
   return false
 }
 
@@ -73,9 +50,9 @@ export function toEthereumDate(date: string | Date | moment.Moment | EthereumDat
   throw new Error(`Should not get here. (invalid toDateStr provided): ${date}`)
 }
 
-export function toEthereumAsset(amount: number, symbol: string): EthereumAsset {
-  if (isValidEthereumAsset(symbol)) throw new Error('Symbol must be ethereum unit type')
-  return toWei(amount, toEthUnit(symbol)) as EthereumAsset
+export function toEthereumAsset(amount: number, unit: string): EthereumAsset {
+  if (isValidEthereumAsset(amount, unit)) throw new Error('Symbol must be ethereum unit type')
+  return toWei(amount, toEthUnit(unit)) as EthereumAsset
 }
 
 export function toEthereumEntityName(name: string): EthereumEntityName {
@@ -83,7 +60,7 @@ export function toEthereumEntityName(name: string): EthereumEntityName {
     return name
   }
 
-  if (name === '') {
+  if (isNullOrEmpty(name)) {
     return null
   }
 

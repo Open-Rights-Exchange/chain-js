@@ -3,8 +3,8 @@ import Web3 from 'web3'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainSettings, ChainEndpoint } from '../../../models'
 
-import { toEthereumPrivateKey, toWei } from '../helpers'
-import { EthereumTransactionOptions } from '../models'
+import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
+import { EthereumTransactionOptions, EthUnit } from '../models'
 
 const web3 = new Web3('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a')
 
@@ -272,7 +272,7 @@ export const ropstenPrivate = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8
 // Defaults all optional properties, so you can set from raw just with to & value OR data
 export const sampleSetFromRawTrx = {
   to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-  value: toWei(10, 'milliether'),
+  value: toWei(10, EthUnit.Milliether),
   //  data: '0x00',
   //  gasPrice: '0x00',
   //  gasLimit: '0x00',
@@ -285,7 +285,7 @@ export const ropstenTransactionOptions: EthereumTransactionOptions = {
 
 const composeEthTransferParams = {
   to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-  value: toWei(10, 'milliether'),
+  value: toWei(10, toEthUnit('milliether')),
 }
 
 const composeERC20TransferParams = {
@@ -363,6 +363,7 @@ const composeERC20MintParams = {
     //   await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     //   console.log('SIG: ', transaction.signatures)
     //   console.log(await transaction.send())
+    console.log(composeEthTransferParams)
   } catch (error) {
     console.log(error)
   }

@@ -15,31 +15,30 @@ export interface ECDSASignature {
 /** a signature string - formatted correcly for ethereum */
 export type EthereumSignature = ECDSASignature & SignatureBrand
 
-export type EthUnit =
-  | 'noether'
-  | 'wei'
-  | 'kwei'
-  | 'Kwei'
-  | 'babbage'
-  | 'femtoether'
-  | 'mwei'
-  | 'Mwei'
-  | 'lovelace'
-  | 'picoether'
-  | 'gwei'
-  | 'Gwei'
-  | 'shannon'
-  | 'nanoether'
-  | 'nano'
-  | 'szabo'
-  | 'microether'
-  | 'micro'
-  | 'finney'
-  | 'milliether'
-  | 'milli'
-  | 'ether'
-  | 'kether'
-  | 'grand'
-  | 'mether'
-  | 'gether'
-  | 'tether'
+export enum EthUnit {
+  Noether = 'noether',
+  Wei = 'wei',
+  Kwei = 'kwei',
+  Babbage = 'babbage',
+  femtoether = 'femtoether',
+  Mwei = 'mwei',
+  Lovelace = 'lovelace',
+  Picoether = 'picoether',
+  Qwei = 'gwei',
+  Gwei = 'Gwei',
+  Shannon = 'shannon',
+  Nanoether = 'nanoether',
+  Nano = 'nano',
+  Szabo = 'szabo',
+  Microether = 'microether',
+  Micro = 'micro',
+  Finney = 'finney',
+  Milliether = 'milliether',
+  Milli = 'milli',
+  Ether = 'ether',
+  Kether = 'kether',
+  Grand = 'grand',
+  Mether = 'mether',
+  Gether = 'gether',
+  Thether = 'tether',
+}

@@ -76,6 +76,11 @@ export function isAnObject(obj: any) {
   return obj !== null && typeof obj === 'object'
 }
 
+/** Typescript Typeguard to verify that the value is in the enumType specified  */
+export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
+  return Object.values(enumType).includes(value as T[keyof T])
+}
+
 export function getUniqueValues<T>(array: T[]) {
   return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
 }
