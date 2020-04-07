@@ -363,7 +363,6 @@ const composeERC20MintParams = {
     //   await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     //   console.log('SIG: ', transaction.signatures)
     //   console.log(await transaction.send())
-    console.log(composeEthTransferParams)
   } catch (error) {
     console.log(error)
   }
