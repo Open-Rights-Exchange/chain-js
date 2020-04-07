@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Web3 from 'web3'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainSettings, ChainEndpoint } from '../../../models'
