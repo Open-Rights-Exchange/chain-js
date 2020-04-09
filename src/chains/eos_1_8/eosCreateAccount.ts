@@ -394,15 +394,9 @@ export class EosCreateAccount implements CreateAccount {
     const publicKeys: EosPublicKeys = {}
     const { publicKeys: publicKeysFromOptions } = this._options || {}
     const { owner, active } = publicKeysFromOptions || {}
-
-    if (owner) {
-      publicKeys.owner = owner
+    if (!owner && !active) {
+      return null
     }
-
-    if (active) {
-      publicKeys.active = active
-    }
-
     return publicKeys
   }
 
