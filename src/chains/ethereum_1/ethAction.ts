@@ -1,6 +1,11 @@
 import { isNullOrEmpty } from '../../helpers'
 import { EthereumAddress, EthereumValue, EthereumTxData, EthereumTransactionAction } from './models'
-import { ethereumTrxArgIsNullOrEmpty, generateDataFromContractAction, toEthereumTxData } from './helpers'
+import {
+  ethereumTrxArgIsNullOrEmpty,
+  generateDataFromContractAction,
+  toEthereumTxData,
+  isValidEthereumAddress,
+} from './helpers'
 import { ZERO_HEX, ZERO_ADDRESS } from '../../constants'
 import { throwNewError } from '../../errors'
 
@@ -28,6 +33,14 @@ export class EthereumActionHelper {
     this._to = isNullOrEmpty(to) ? ZERO_ADDRESS : to
     this._from = isNullOrEmpty(from) ? ZERO_ADDRESS : from
     this._value = isNullOrEmpty(value) ? ZERO_HEX : value
+
+    if (isNullOrEmpty(from)) {
+      this._from = ZERO_ADDRESS
+    } else if (isValidEthereumAddress(from)) {
+      this._from = from
+    } else {
+      throwNewError('From is not a valid ethereum address')
+    }
 
     // cant provide both contract and data properties
     if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
