@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { bufferToInt, privateToAddress, bufferToHex } from 'ethereumjs-util'
+import { bufferToInt, privateToAddress, bufferToHex, publicToAddress } from 'ethereumjs-util'
 import { EMPTY_HEX } from '../../constants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
@@ -12,6 +12,8 @@ import {
   EthereumTransactionOptions,
   EthereumTransactionHeader,
   EthereumTransactionAction,
+  EthereumAddress,
+  EthereumPublicKey,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, notSupported } from '../../helpers'
@@ -24,8 +26,13 @@ import {
   toEthereumPrivateKey,
   toEthereumTxData,
   ethereumTrxArgIsNullOrEmpty,
+  isValidEthereumPublicKey,
+  isValidEthereumAddress,
+  toEthereumPublicKey,
+  toEthereumAddress,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
+import { getEthereumPublicKeyFromSignature } from './ethCrypto'
 
 export class EthereumTransaction implements Transaction {
   private _cachedAccounts: any[] = []
@@ -42,6 +49,10 @@ export class EthereumTransaction implements Transaction {
 
   /** Transaction prepared for signing (raw transaction) */
   private _raw: EthereumJsTx
+
+  private _fromAddress: EthereumAddress
+
+  private _fromPublicKey: EthereumPublicKey
 
   private _signBuffer: Buffer
 
@@ -270,18 +281,12 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
-  public hasSignatureForPublicKey = (publicKey: any): boolean => {
-    const hasSignature = false
-    // for (const signature of this.signatures || []) {
-    //   let pk = getPublicKeyFromSignature(signature, this._signBuffer)
-    //   if (pk === publicKey) hasSignature = true;
-    //   break
-    // }
-    return hasSignature
+  public hasSignatureForPublicKey = (publicKey: EthereumPublicKey): boolean => {
+    return this.fromPublicKey === publicKey
   }
 
-  public async hasSignatureForAuthorization(authorization: any): Promise<any> {
-    notSupported()
+  public async hasSignatureForAuthorization(authorization: EthereumAddress): Promise<boolean> {
+    return this.fromAddress === authorization
   }
 
   public get hasAllRequiredSignatures(): boolean {
@@ -322,6 +327,17 @@ export class EthereumTransaction implements Transaction {
       r: this._raw?.r,
       s: this._raw?.s,
     })
+    this._raw.verifySignature()
+    this._fromAddress = toEthereumAddress(bufferToHex(this._raw.getSenderAddress()))
+    this._fromPublicKey = toEthereumPublicKey(bufferToHex(this._raw.getSenderPublicKey()))
+  }
+
+  public get fromAddress(): EthereumAddress {
+    return this._fromAddress
+  }
+
+  public get fromPublicKey(): EthereumPublicKey {
+    return this._fromPublicKey
   }
 
   // send

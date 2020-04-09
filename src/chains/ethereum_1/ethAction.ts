@@ -12,6 +12,8 @@ export class EthereumActionHelper {
 
   private _value: EthereumValue
 
+  // private _from: EthereumAddress
+
   /** Creates a new Action from 'human-readable' transfer or contact info
    *  OR from 'raw' data property
    *  Allows access to human-readable properties (method, parameters) or raw data (hex) */
@@ -21,9 +23,10 @@ export class EthereumActionHelper {
 
   /** apply rules for imput params, set class private properties, throw if violation */
   private assertAndValidateEthereumActionInput(actionInput: EthereumTransactionAction) {
-    const { to, value, contract, data } = actionInput
+    const { to, from, value, contract, data } = actionInput
 
     this._to = isNullOrEmpty(to) ? ZERO_ADDRESS : to
+    // this._from = isNullOrEmpty(from) ? ZERO_ADDRESS : from
     this._value = isNullOrEmpty(value) ? ZERO_HEX : value
 
     // cant provide both contract and data properties
@@ -51,6 +54,7 @@ export class EthereumActionHelper {
   public get raw(): EthereumTransactionAction {
     return {
       to: this._to,
+      // from: this._from,
       value: this._value,
       data: this._data,
     }
