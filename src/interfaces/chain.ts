@@ -82,7 +82,7 @@ export interface Chain {
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   isValidEntityName(value: string): boolean
   /** Verifies that the value is a valid chain asset string */
-  isValidAsset(value: string): boolean
+  isValidAsset(value: any): boolean
   /** Verifies that the value is a valid chain date */
   isValidDate(value: string): boolean
   /** Ensures that the value comforms to a well-formed chain asset string */

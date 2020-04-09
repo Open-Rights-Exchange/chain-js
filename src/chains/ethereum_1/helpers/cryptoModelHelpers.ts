@@ -1,6 +1,13 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN } from 'ethereumjs-util'
 import { isString } from 'util'
-import { EthereumSignature, EthereumPublicKey, EthereumPrivateKey, EthereumAddress, EthereumTxData } from '../models'
+import {
+  EthereumSignature,
+  EthereumPublicKey,
+  EthereumPrivateKey,
+  EthereumAddress,
+  EthereumTxData,
+  EthUnit,
+} from '../models'
 import { toEthBuffer, addPrefixToHex } from './generalHelpers'
 
 // Reimplemented from ethereumjs-util module to workaround a current bug
@@ -108,4 +115,12 @@ export function toEthereumAddress(value: string): EthereumAddress {
     return addPrefixToHex(value) as EthereumAddress
   }
   throw new Error(`Not a valid ethereum address:${value}.`)
+}
+
+export function toEthUnit(unit: string): EthUnit {
+  try {
+    return unit as EthUnit
+  } catch (err) {
+    throw new Error('Not a valid ethereum unit type.')
+  }
 }
