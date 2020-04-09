@@ -1,11 +1,17 @@
 import { isNullOrEmpty } from '../../helpers'
-import { EthereumAddress, EthereumValue, EthereumTxData, EthereumTransactionAction } from './models'
 import {
   ethereumTrxArgIsNullOrEmpty,
   generateDataFromContractAction,
   toEthereumTxData,
   isValidEthereumAddress,
 } from './helpers'
+import {
+  EthereumAddress,
+  EthereumValue,
+  EthereumTxData,
+  EthereumTransactionAction,
+  EthereumActionContract,
+} from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from '../../constants'
 import { throwNewError } from '../../errors'
 
@@ -18,6 +24,8 @@ export class EthereumActionHelper {
   private _value: EthereumValue
 
   private _from: EthereumAddress
+
+  private _contract: EthereumActionContract
 
   /** Creates a new Action from 'human-readable' transfer or contact info
    *  OR from 'raw' data property
@@ -49,8 +57,10 @@ export class EthereumActionHelper {
 
     // set data from provided data or contract properties
     if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = data
-    else if (!ethereumTrxArgIsNullOrEmpty(contract)) this._data = generateDataFromContractAction(contract)
-    else this._data = toEthereumTxData(ZERO_HEX)
+    else if (!ethereumTrxArgIsNullOrEmpty(contract)) {
+      this._data = generateDataFromContractAction(contract)
+      this._contract = contract
+    } else this._data = toEthereumTxData(ZERO_HEX)
   }
 
   /** Returns 'hex or binary' data */
@@ -71,5 +81,10 @@ export class EthereumActionHelper {
       value: this._value,
       data: this._data,
     }
+  }
+
+  /** Action properties including raw data */
+  public get contract(): EthereumActionContract {
+    return this._contract
   }
 }

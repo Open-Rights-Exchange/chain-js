@@ -160,7 +160,8 @@ export class EthereumTransaction implements Transaction {
   /** Ethereum transfer & contract actions executed by the transaction */
   public get actions(): EthereumTransactionAction[] {
     if (!this._actionHelper.raw) return null
-    return [this._actionHelper.raw]
+    const action = { ...this._actionHelper.raw, contract: this._actionHelper.contract }
+    return [action]
   }
 
   /** Sets the Array of actions.
@@ -397,7 +398,7 @@ export class EthereumTransaction implements Transaction {
 
   /** JSON representation of transaction data */
   public toJson(): any {
-    return { ...this._header, action: this._actionHelper.raw, signatures: this.signatures }
+    return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------
