@@ -16,7 +16,7 @@ import {
   EthereumPublicKey,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isNullOrEmpty, notSupported } from '../../helpers'
+import { isNullOrEmpty } from '../../helpers'
 import {
   isValidEthereumSignature,
   isLengthOne,
@@ -26,13 +26,10 @@ import {
   toEthereumPrivateKey,
   toEthereumTxData,
   ethereumTrxArgIsNullOrEmpty,
-  isValidEthereumPublicKey,
-  isValidEthereumAddress,
   toEthereumPublicKey,
   toEthereumAddress,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { getEthereumPublicKeyFromSignature } from './ethCrypto'
 
 export class EthereumTransaction implements Transaction {
   private _cachedAccounts: any[] = []
@@ -47,12 +44,12 @@ export class EthereumTransaction implements Transaction {
 
   private _signature: EthereumSignature // A set keeps only unique values
 
+  private _fromAddress: EthereumAddress // Address that retrieved from signature
+
+  private _fromPublicKey: EthereumPublicKey // Public Key that retrieved from signature
+
   /** Transaction prepared for signing (raw transaction) */
   private _raw: EthereumJsTx
-
-  private _fromAddress: EthereumAddress
-
-  private _fromPublicKey: EthereumPublicKey
 
   private _signBuffer: Buffer
 
@@ -204,7 +201,7 @@ export class EthereumTransaction implements Transaction {
     this._isValidated = true
   }
 
-  /** Whether transaction has been validated - via vaidate() */
+  /** Whether transaction has been validated - via validate() */
   get isValidated() {
     return this._isValidated
   }
@@ -281,24 +278,45 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
+  /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey = (publicKey: EthereumPublicKey): boolean => {
-    return this.fromPublicKey === publicKey
+    return this._fromPublicKey === publicKey
   }
 
+  /** Whether there is an attached signature for the publicKey of the address */
   public async hasSignatureForAuthorization(authorization: EthereumAddress): Promise<boolean> {
-    return this.fromAddress === authorization
+    return this._fromAddress === authorization
   }
 
+  /** Checks if signature belongs to the "from" property of action.
+   *  Only callable if "from" is a valid address */
   public get hasAllRequiredSignatures(): boolean {
-    return notSupported()
+    this.assertFromNotEmpty()
+    this.assertIsValidated()
+    return this.requiredAuthorizations[0] === this._fromAddress
   }
 
+  /** Throws if transaction is missing any signatures */
+  private assertHasAllRequiredSignature(): void {
+    if (!this.hasAllRequiredSignatures) {
+      throwNewError('Missing at least one required Signature', 'transaction_missing_signature')
+    }
+  }
+
+  /** Checks if transaction has the signature belongs to "from" property of action.
+   *  Only callable if "from" is a valid address */
   public get missingSignatures(): any {
-    return notSupported()
+    this.assertIsValidated()
+    const missing = this.hasAllRequiredSignatures ? null : this.requiredAuthorizations[0]
+    return ethereumTrxArgIsNullOrEmpty(missing) ? null : missing // if no values, return null instead of empty array
   }
 
-  public get requiredAuthorizations(): any {
-    return notSupported()
+  /** Returns address of the transaction sender defined in action's "from" property
+   *  Only callable if "from" is a valid address. */
+  public get requiredAuthorizations(): EthereumAddress[] {
+    this.assertIsValidated()
+    this.assertFromNotEmpty()
+    return [this.actions[0].from]
   }
 
   public get signBuffer(): Buffer {
@@ -332,14 +350,6 @@ export class EthereumTransaction implements Transaction {
     this._fromPublicKey = toEthereumPublicKey(bufferToHex(this._raw.getSenderPublicKey()))
   }
 
-  public get fromAddress(): EthereumAddress {
-    return this._fromAddress
-  }
-
-  public get fromPublicKey(): EthereumPublicKey {
-    return this._fromPublicKey
-  }
-
   // send
 
   // TODO add confirmation enum usage
@@ -347,7 +357,11 @@ export class EthereumTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
   public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
     this.assertIsValidated()
-    this.assertHasSignature()
+    if (this.isFromDefined()) {
+      this.assertHasAllRequiredSignature()
+    } else {
+      this.assertHasSignature()
+    }
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
     const signedTransaction = this._raw.serialize()
 
@@ -367,6 +381,17 @@ export class EthereumTransaction implements Transaction {
   private assertHasRaw(): void {
     if (!this.hasRaw) {
       throwNewError('Transaction doenst have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
+    }
+  }
+
+  private isFromDefined(): boolean {
+    return !ethereumTrxArgIsNullOrEmpty(this.actions[0]?.from)
+  }
+
+  /** Throws is from is not null or empty ethereum argument */
+  private assertFromNotEmpty(): void {
+    if (!this.isFromDefined()) {
+      throwNewError('Transaction doesnt have "from" property defined in action.')
     }
   }
 
