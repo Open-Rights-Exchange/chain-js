@@ -280,8 +280,9 @@ export class EosCreateAccount implements CreateAccount {
     let publicKeys: EosPublicKeys
     // get keys from paramters or freshly generated
     publicKeys = this.getPublicKeysFromOptions()
-    if (!publicKeys) {
-      await this.generateAccountKeys()
+    const { owner, active } = publicKeys
+    if (!owner || !active) {
+      await this.generateAccountKeys(publicKeys)
       publicKeys = this._generatedKeys?.accountKeys?.publicKeys
     }
   }
@@ -312,13 +313,13 @@ export class EosCreateAccount implements CreateAccount {
     }
   }
 
-  /** Generate new public and private key pair and stores them in class's generatedKeys
+  /** Generate new public and private key pair if not passed in the function and stores them in class's generatedKeys
    *  Also adds the new keys to the class's options.publicKeys */
-  private async generateAccountKeys(): Promise<void> {
+  private async generateAccountKeys(publicKeys: EosPublicKeys): Promise<void> {
     // generate new account owner/active keys if they weren't provided
     const { newKeysOptions } = this._options
     const { password, salt } = newKeysOptions || {}
-    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, { publicKeys })
     this._generatedKeys = {
       ...this._generatedKeys,
       accountKeys: generatedKeys,
@@ -390,11 +391,18 @@ export class EosCreateAccount implements CreateAccount {
   /** extract keys from options
    *  Returns publicKeys */
   private getPublicKeysFromOptions(): EosPublicKeys {
-    const { publicKeys } = this._options || {}
-    const { owner, active } = publicKeys || {}
-    if (!owner || !active) {
-      return null
+    const publicKeys: EosPublicKeys = {}
+    const { publicKeys: publicKeysFromOptions } = this._options || {}
+    const { owner, active } = publicKeysFromOptions || {}
+
+    if (owner) {
+      publicKeys.owner = owner
     }
+
+    if (active) {
+      publicKeys.active = active
+    }
+
     return publicKeys
   }
 
