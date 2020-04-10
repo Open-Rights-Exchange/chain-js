@@ -279,9 +279,10 @@ export class EosCreateAccount implements CreateAccount {
   async generateKeysIfNeeded() {
     let publicKeys: EosPublicKeys
     // get keys from paramters or freshly generated
-    publicKeys = this.getPublicKeysFromOptions()
-    if (!publicKeys) {
-      await this.generateAccountKeys()
+    publicKeys = this.getPublicKeysFromOptions() || {}
+    const { owner, active } = publicKeys
+    if (!owner || !active) {
+      await this.generateAccountKeys(publicKeys)
       publicKeys = this._generatedKeys?.accountKeys?.publicKeys
     }
   }
@@ -313,12 +314,15 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Generate new public and private key pair and stores them in class's generatedKeys
+   *  Allows existing publicKeys to be retained via overridePublicKeys
    *  Also adds the new keys to the class's options.publicKeys */
-  private async generateAccountKeys(): Promise<void> {
+  private async generateAccountKeys(overridePublicKeys: EosPublicKeys): Promise<void> {
     // generate new account owner/active keys if they weren't provided
     const { newKeysOptions } = this._options
     const { password, salt } = newKeysOptions || {}
-    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {
+      publicKeys: overridePublicKeys,
+    })
     this._generatedKeys = {
       ...this._generatedKeys,
       accountKeys: generatedKeys,
@@ -390,9 +394,10 @@ export class EosCreateAccount implements CreateAccount {
   /** extract keys from options
    *  Returns publicKeys */
   private getPublicKeysFromOptions(): EosPublicKeys {
-    const { publicKeys } = this._options || {}
-    const { owner, active } = publicKeys || {}
-    if (!owner || !active) {
+    const publicKeys: EosPublicKeys = {}
+    const { publicKeys: publicKeysFromOptions } = this._options || {}
+    const { owner, active } = publicKeysFromOptions || {}
+    if (!owner && !active) {
       return null
     }
     return publicKeys
