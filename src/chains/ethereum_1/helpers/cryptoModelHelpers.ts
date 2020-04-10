@@ -13,6 +13,7 @@ import { toEthBuffer, addPrefixToHex } from './generalHelpers'
 // Reimplemented from ethereumjs-util module to workaround a current bug
 /** Checks if a valid signature with ECDSASignature */
 export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
+  if (!v || !r || !s) return false
   const SECP256K1_N_DIV_2 = new BN('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0', 16)
   const SECP256K1_N = new BN('fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141', 16)
 
@@ -34,15 +35,18 @@ export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
 }
 
 export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): value is EthereumTxData {
+  if (!value) return false
   if (typeof value === 'string') return addPrefixToHex(value).length > 2
   return true
 }
 
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
+  if (!value) return false
   return isValidPublic(toEthBuffer(addPrefixToHex(value)))
 }
 
 export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): value is EthereumPrivateKey {
+  if (!value) return false
   return isValidPrivate(toEthBuffer(addPrefixToHex(value)))
 }
 
@@ -52,6 +56,7 @@ export function isValidEthereumSignature(
   let signature: ECDSASignature
   // this is an oversimplified check just to prevent assigning a wrong string
   // signatures are actually verified in transaction object
+  if (!value) return false
   if (isString(value)) {
     signature = JSON.parse(value)
   } else {
@@ -63,6 +68,7 @@ export function isValidEthereumSignature(
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
 export function isValidEthereumAddress(value: string | Buffer | EthereumAddress): boolean {
+  if (!value) return false
   if (typeof value === 'string') return isValidAddress(value)
   return true
 }
