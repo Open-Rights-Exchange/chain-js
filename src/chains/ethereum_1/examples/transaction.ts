@@ -298,6 +298,7 @@ const composeERC20TransferParams = {
 }
 
 const composeERC20MintParams = {
+  from: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
   to: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
   contract: {
     abi: ABI,
@@ -336,7 +337,7 @@ const composeERC20MintParams = {
     // console.log('SIG: ', transaction.signatures)
     // console.log(await transaction.send())
     //
-    // // ---> Sign and send erc20 mint Transaction
+    // ---> Sign and send erc20 mint Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
@@ -348,7 +349,9 @@ const composeERC20MintParams = {
     // console.log('prepareToBeSigned: ', transaction.actions)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // console.log(transaction.requiredAuthorizations)
     // console.log('SIG: ', transaction.signatures)
+    // console.log(transaction.missingSignatures)
     // console.log(await transaction.send())
     // // ---> Sign and send ethereum transfer with setFromRaw()
     //

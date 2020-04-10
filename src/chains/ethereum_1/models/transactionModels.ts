@@ -36,6 +36,7 @@ export type EthereumTransactionHeader = {
  *  contract property used only to generate data prop when creating an new action */
 export type EthereumTransactionAction = {
   to?: EthereumAddress
+  from?: EthereumAddress
   value?: EthereumValue
   data?: EthereumTxData
   contract?: EthereumActionContract

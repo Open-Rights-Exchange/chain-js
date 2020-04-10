@@ -2,9 +2,10 @@
 import { EthereumTransactionAction } from '../../models'
 
 export const action = (tokenTransferAction: EthereumTransactionAction) => {
-  const { to, value, contract } = tokenTransferAction
+  const { to, from, value, contract } = tokenTransferAction
   return {
     to,
+    from,
     value,
     contract,
   }

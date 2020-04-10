@@ -5,7 +5,8 @@ export function toEthBuffer(data: string | Buffer | number): Buffer {
   return toBuffer(data)
 }
 
-export function isLengthOne(array: any[]) {
+export function isArrayLengthOne(array: any[]) {
+  if (!array) return false
   return array.length === 1
 }
 
