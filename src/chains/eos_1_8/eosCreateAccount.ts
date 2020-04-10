@@ -279,7 +279,7 @@ export class EosCreateAccount implements CreateAccount {
   async generateKeysIfNeeded() {
     let publicKeys: EosPublicKeys
     // get keys from paramters or freshly generated
-    publicKeys = this.getPublicKeysFromOptions()
+    publicKeys = this.getPublicKeysFromOptions() || {}
     const { owner, active } = publicKeys
     if (!owner || !active) {
       await this.generateAccountKeys(publicKeys)
@@ -313,13 +313,16 @@ export class EosCreateAccount implements CreateAccount {
     }
   }
 
-  /** Generate new public and private key pair if not passed in the function and stores them in class's generatedKeys
+  /** Generate new public and private key pair and stores them in class's generatedKeys
+   *  Allows existing publicKeys to be retained via overridePublicKeys
    *  Also adds the new keys to the class's options.publicKeys */
-  private async generateAccountKeys(publicKeys: EosPublicKeys): Promise<void> {
+  private async generateAccountKeys(overridePublicKeys: EosPublicKeys): Promise<void> {
     // generate new account owner/active keys if they weren't provided
     const { newKeysOptions } = this._options
     const { password, salt } = newKeysOptions || {}
-    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, { publicKeys })
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {
+      publicKeys: overridePublicKeys,
+    })
     this._generatedKeys = {
       ...this._generatedKeys,
       accountKeys: generatedKeys,
