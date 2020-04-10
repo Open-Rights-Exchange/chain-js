@@ -2,10 +2,14 @@ import moment from 'moment'
 import { EosDate, EosAsset, EosEntityName } from '../models/generalModels'
 import { isNullOrEmpty } from '../../../helpers'
 
+/**  Expects a format of time_point/time_point_sec
+ * Example here: https://eosio.stackexchange.com/questions/4830/can-we-store-date-on-eosio-table/4831
+ * */
 export function isValidEosDate(str: string): str is EosDate {
   if (isNullOrEmpty(str)) return false
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
+
 // A string representation of an EOSIO symbol, composed of a float with a precision of 4
 // ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
