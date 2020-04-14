@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Web3 from 'web3'
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainSettings, ChainEndpoint } from '../../../models'
+import { ChainActionType, ChainSettings, ChainEndpoint, ChainForkType } from '../../../models'
 
 import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
 import { EthereumTransactionOptions, EthUnit } from '../models'
@@ -278,9 +278,9 @@ export const sampleSetFromRawTrx = {
   //  gasLimit: '0x00',
 }
 
-export const ropstenTransactionOptions: EthereumTransactionOptions = {
-  chain: 'ropsten',
-  hardfork: 'istanbul',
+export const ropstenTransactionOptions: ChainForkType = {
+  chainName: 'ropsten',
+  hardFork: 'istanbul',
 }
 
 const composeEthTransferParams = {
@@ -312,7 +312,7 @@ const composeERC20MintParams = {
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
+    // //const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
@@ -338,10 +338,12 @@ const composeERC20MintParams = {
     // console.log(await transaction.send())
     //
     // ---> Sign and send erc20 mint Transaction
-    // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {} as ChainSettings)
+    // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
+    //   chainForkType: ropstenTransactionOptions,
+    // } as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction(ropstenTransactionOptions)
+    // const transaction = await ropsten.new.Transaction({})
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20MintParams)]
