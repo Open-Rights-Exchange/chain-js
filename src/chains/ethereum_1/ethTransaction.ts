@@ -99,7 +99,11 @@ export class EthereumTransaction implements Transaction {
     if (!this._actionHelper) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
     }
-    const { chainName, hardFork } = this._chainState?.chainSettings?.chainForkType
+    const { chainForkType } = this._chainState?.chainSettings
+    if (isNullOrEmpty(chainForkType)) {
+      throwNewError('For ethereum chain settings, chainForkType has to be defined')
+    }
+    const { chainName, hardFork } = chainForkType
     const trxOptions = { chain: chainName, hardfork: hardFork }
     const { nonce = null } = this._options || {}
     let { gasPrice = null, gasLimit = null } = this._options || {}
