@@ -314,7 +314,7 @@ const composeERC20MintParams = {
     // } as ChainSettings)
     // await ropsten.connect()
     // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction({})
+    // const transaction = await ropsten.new.Transaction()
     // console.log('trx:', transaction)
     // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
@@ -329,7 +329,7 @@ const composeERC20MintParams = {
     // } as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction({})
+    // const transaction = await ropsten.new.Transaction()
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20TransferParams)]
@@ -345,7 +345,7 @@ const composeERC20MintParams = {
     // } as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction({})
+    // const transaction = await ropsten.new.Transaction()
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20MintParams)]
@@ -363,7 +363,7 @@ const composeERC20MintParams = {
     // } as ChainSettings)
     // await ropsten.connect()
     // // console.log(await ropsten.chainInfo)
-    // const transaction = await ropsten.new.Transaction({})
+    // const transaction = await ropsten.new.Transaction()
     // // console.log('trx:', transaction)
     // // await transaction.addAction(sampleTransferTrx)
     // await transaction.setFromRaw(sampleSetFromRawTrx)

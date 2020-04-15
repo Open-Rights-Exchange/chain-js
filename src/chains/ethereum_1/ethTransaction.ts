@@ -99,12 +99,10 @@ export class EthereumTransaction implements Transaction {
     if (!this._actionHelper) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
     }
-    const { chainSettings } = this._chainState
-    const { chainForkType } = chainSettings
-    const { chainName, hardFork } = chainForkType
+    const { chainName, hardFork } = this._chainState?.chainSettings?.chainForkType
     const trxOptions = { chain: chainName, hardfork: hardFork }
-    const { nonce } = this._options
-    let { gasPrice, gasLimit } = this._options
+    const { nonce = null } = this._options || {}
+    let { gasPrice = null, gasLimit = null } = this._options || {}
     const { to, value, data } = this._actionHelper.raw
     // 1 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
     gasPrice = isNullOrEmpty(gasPrice) ? 1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
