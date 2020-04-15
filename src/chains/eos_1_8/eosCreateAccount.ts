@@ -394,9 +394,8 @@ export class EosCreateAccount implements CreateAccount {
   /** extract keys from options
    *  Returns publicKeys */
   private getPublicKeysFromOptions(): EosPublicKeys {
-    const publicKeys: EosPublicKeys = {}
-    const { publicKeys: publicKeysFromOptions } = this._options || {}
-    const { owner, active } = publicKeysFromOptions || {}
+    const { publicKeys } = this._options || {}
+    const { owner, active } = publicKeys || {}
     if (!owner && !active) {
       return null
     }
