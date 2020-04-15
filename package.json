@@ -1,6 +1,10 @@
 {
   "name": "@open-rights-exchange/chainjs",
+<<<<<<< HEAD
   "version": "0.10.5",
+=======
+  "version": "0.10.4",
+>>>>>>> fe813fbab046df772db45763dd3754e9689414ad
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "main": "./dist/index.js",
   "scripts": {
