@@ -99,18 +99,19 @@ export class EthereumTransaction implements Transaction {
     if (!this._actionHelper) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
     }
-    const { chain, hardfork, nonce } = this._options
-    let { gasPrice, gasLimit } = this._options
+    const { chainForkType } = this._chainState?.chainSettings
+    if (isNullOrEmpty(chainForkType)) {
+      throwNewError('For ethereum chain settings, chainForkType has to be defined')
+    }
+    const { chainName, hardFork } = chainForkType
+    const trxOptions = { chain: chainName, hardfork: hardFork }
+    const { nonce = null } = this._options || {}
+    let { gasPrice = null, gasLimit = null } = this._options || {}
     const { to, value, data } = this._actionHelper.raw
+    // 1 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
     gasPrice = isNullOrEmpty(gasPrice) ? 1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
-    let trxOptions = {}
-    if (!isNullOrEmpty(chain) && !isNullOrEmpty(hardfork)) {
-      trxOptions = { chain, hardfork }
-    } else if (!(isNullOrEmpty(chain) && isNullOrEmpty(hardfork))) {
-      throwNewError('For transaction options, chain and hardfork have to be specified together')
-    }
     this._raw = new EthereumJsTx(trxBody, trxOptions)
     this.setHeaderFromRaw()
     this.setSignBuffer()

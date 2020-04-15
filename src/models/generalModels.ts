@@ -52,6 +52,12 @@ export type ChainSettings = {
   monitorType?: ChainMonitorType
   monitorUrl?: URL
   unusedAccountPublicKey?: string
+  chainForkType?: ChainForkType
+}
+
+export type ChainForkType = {
+  chainName: string
+  hardFork: string
 }
 
 /** Chain urls and related details used to connect to chain */
