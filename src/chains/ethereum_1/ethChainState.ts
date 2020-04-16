@@ -133,29 +133,29 @@ export class EthereumChainState {
 
   /** Broadcast a signed transaction to the chain */
   async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
-   // Default confirm to not wait for any block confirmations
-   const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-   let sendReceipt: TransactionReceipt
-   if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
-     throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
-   }
+    // Default confirm to not wait for any block confirmations
+    const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
+    let sendReceipt: TransactionReceipt
+    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
+      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
+    }
 
-   try {
-     if (useWaitForConfirm === ConfirmType.None) {
-       this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', function(hash) {
-         sendReceipt = hash
-       })
-     }
+    try {
+      if (useWaitForConfirm === ConfirmType.None) {
+        this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', function(hash) {
+          sendReceipt.transactionHash = hash
+        })
+      }
 
-     if (useWaitForConfirm === ConfirmType.After001) {
-       sendReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
-     }
-   } catch (error) {
-     const chainError = mapChainError(error)
-     throw chainError
-   }
+      if (useWaitForConfirm === ConfirmType.After001) {
+        sendReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
+      }
+    } catch (error) {
+      const chainError = mapChainError(error)
+      throw chainError
+    }
 
-   return sendReceipt
+    return sendReceipt
   }
 
   /** Polls the chain until it finds a block that includes the specific transaction
