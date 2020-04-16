@@ -131,24 +131,30 @@ export class EthereumChainState {
     }
   }
 
+  getTransactionHash(signedTransaction: string) {
+    return new Promise((resolve, reject) => {
+      this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', hash => {
+        resolve(hash)
+      })
+    })
+  }
+
   /** Broadcast a signed transaction to the chain */
   async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-    let sendReceipt: TransactionReceipt
+    const sendReceipt: TransactionReceipt = {}
     if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
 
     try {
       if (useWaitForConfirm === ConfirmType.None) {
-        this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', function(hash) {
-          sendReceipt.transactionHash = hash
-        })
+        sendReceipt.transactionHash = await this.getTransactionHash(signedTransaction)
       }
 
       if (useWaitForConfirm === ConfirmType.After001) {
-        sendReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
+        sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
       }
     } catch (error) {
       const chainError = mapChainError(error)
