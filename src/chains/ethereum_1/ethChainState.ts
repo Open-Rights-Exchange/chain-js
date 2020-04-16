@@ -131,7 +131,10 @@ export class EthereumChainState {
     }
   }
 
-  getTransactionHash(signedTransaction: string) {
+  /**  Submits the transaction to the chain and waits only till it gets a transaction hash.
+   * Does not wait for the transaction to be finalized on the chain.
+   */
+  sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
     return new Promise((resolve, reject) => {
       this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', hash => {
         resolve(hash)
@@ -140,6 +143,9 @@ export class EthereumChainState {
   }
 
   /** Broadcast a signed transaction to the chain */
+  /* Confirm type None returns the transaction hash
+  /* Confirm type 001 waits for the transaction to finalise on chain and then returns the transaction receipt
+  */
   async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
@@ -150,7 +156,7 @@ export class EthereumChainState {
 
     try {
       if (useWaitForConfirm === ConfirmType.None) {
-        sendReceipt.transactionHash = await this.getTransactionHash(signedTransaction)
+        sendReceipt.transactionHash = await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)
       }
 
       if (useWaitForConfirm === ConfirmType.After001) {
