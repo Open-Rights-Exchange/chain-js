@@ -1,6 +1,10 @@
 /** Transaction options used when contructing a trnasaction header */
 export type TransactionOptions = any
 
+/** Transaction receipt returned from chain after submitting the transaction */
+/** It can contain fields like transaction id, transaction hash etc */
+export type TransactionReceipt = any
+
 /** Specifies how many block confirmations should be received before considering transaction is complete */
 export enum ConfirmType {
   /** Don't wait for any block confirmations */
