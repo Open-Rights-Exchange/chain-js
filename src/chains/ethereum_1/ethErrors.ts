@@ -3,10 +3,16 @@ import { ChainError } from '../../errors'
 import { stringifySafe } from '../../helpers'
 import { ChainErrorType } from '../../models'
 
+// TODO: move this to another model file - it's generic after all - not just for errors
+/** Category of chain functions - useful in error mapping */
+export enum ChainFunctionCategory {
+  Contract = 'Contract',
+}
+
 // subset of errors from Eteherum chain - {url to ETh errors}
 // IMPORTANT: These are in order of importance
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
-export const ChainErrorRegExs: { [key: string]: string } = {
+export const DefaultChainErrorRegExs: { [key: string]: string } = {
   //        ErrSignFailed
   AuthInvalid: '(invalid transaction v, r, s values|public key|private key|invalid signature|signing failed)', // the permission isnt valid (or permission already exists in an account)
   BlockDoesNotExist: '(header for hash not found|neither block nor hash specified)',
@@ -19,41 +25,29 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   UnknownError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
-// Maps an Error object (thrown by a call to the chain) into a known set of errors
-export function mapChainError(error: Error): ChainError {
-  let errorSearchString
-  let errorMessage
-  let errorJson
-  let errorType = ChainErrorType.UnknownError
-
-  if (error instanceof Error) {
-    errorSearchString = `${error.name} ${error.message}`
-    errorMessage = errorSearchString
-  } else {
-    errorSearchString = stringifySafe(error)
-    errorMessage = errorSearchString
-  }
-
-  // loop through all possible ChainErrors and compare error string to regex for each ChainError
-  // exit on first match - if no match for known errors, will match on the last one - UnkownError
-  for (const errorKey of Object.keys(ChainErrorRegExs)) {
-    const regexp = new RegExp(ChainErrorRegExs[errorKey], 'im')
-    const match = regexp.exec(errorSearchString)
-    if (match) {
-      errorType = (ChainErrorType as any)[errorKey] // map the key name to an enum with the same name (e.g. MiscChainError)
-      break
-    }
-  }
-
-  return new ChainError(errorType, errorMessage, errorJson)
+/** For Contract category of chain actions and related error */
+export const ContractErrorRegExs: { [key: string]: string } = {
+  ContractDoesNotExist: 'not found',
+  MiscContractError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
-// Maps an Error object (thrown by a call to the chain) into a known set of errors
-export function mapChainErrorByFunction(error: Error, chainFunction: ChainFunction): ChainError {
+/** Maps a category of errors to a regex collection */
+export const ChainFunctionCategoryMap: { [key: string]: any } = {
+  // ChainRead: ,
+  // ChainStateRead: ,
+  Contract: ContractErrorRegExs,
+  // BlockRead: ,
+  // Transaction:,
+}
+
+/** Maps an Error object (thrown by a call to the chain) into a known set of errors */
+export function mapChainError(error: Error, chainFunctionCategory?: ChainFunctionCategory): ChainError {
   let errorSearchString
   let errorMessage
   let errorJson
   let errorType = ChainErrorType.UnknownError
+  // default to using catch-all errors - (if we dont have a specific chainFunctionCategory)
+  let regExErrorMap = DefaultChainErrorRegExs
 
   if (error instanceof Error) {
     errorSearchString = `${error.name} ${error.message}`
@@ -63,10 +57,15 @@ export function mapChainErrorByFunction(error: Error, chainFunction: ChainFuncti
     errorMessage = errorSearchString
   }
 
+  // change regExErrorMap to match chainFunctionCategory - if provided
+  if (chainFunctionCategory) {
+    regExErrorMap = ChainFunctionCategoryMap[chainFunctionCategory]
+  }
+
   // loop through all possible ChainErrors and compare error string to regex for each ChainError
   // exit on first match - if no match for known errors, will match on the last one - UnkownError
-  for (const errorKey of Object.keys(ChainErrorRegExs)) {
-    const regexp = new RegExp(ChainErrorRegExs[errorKey], 'im')
+  for (const errorKey of Object.keys(regExErrorMap)) {
+    const regexp = new RegExp(regExErrorMap[errorKey], 'im')
     const match = regexp.exec(errorSearchString)
     if (match) {
       errorType = (ChainErrorType as any)[errorKey] // map the key name to an enum with the same name (e.g. MiscChainError)
