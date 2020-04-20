@@ -20,7 +20,7 @@ import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
-import { notImplemented } from '../../helpers'
+import { mapChainError } from './ethErrors'
 import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress, EthereumDate } from './models'
 import {
   isValidEthereumAsset,
@@ -35,6 +35,7 @@ import {
   toEthereumPrivateKey,
   toEthereumSignature,
 } from './helpers'
+import { notImplemented } from '../../helpers'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -210,9 +211,9 @@ class ChainEthereumV1 implements Chain {
     return new EthereumAccount(this._chainState).setPublicKey(publicKey)
   }
 
+  /** Map error from chain into a well-known ChainError type */
   public mapChainError = (error: Error): ChainError => {
-    notImplemented()
-    return new ChainError(null, null, null)
+    return mapChainError(error, null)
   }
 
   /** Confirm that we've connected to the chain - throw if not */
