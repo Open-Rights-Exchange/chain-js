@@ -83,5 +83,5 @@ export function mapChainError(error: Error, chainFunctionCategory?: ChainFunctio
     }
   }
 
-  return new ChainError(errorType, errorMessage, errorJson)
+  return new ChainError(errorType, errorMessage, errorJson, error)
 }
