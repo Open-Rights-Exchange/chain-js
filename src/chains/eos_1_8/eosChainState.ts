@@ -377,6 +377,7 @@ export class EosChainState {
             reject,
             ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
             `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
+            error,
           )
           return
         }
@@ -393,6 +394,7 @@ export class EosChainState {
         ChainErrorDetailCode.ConfirmTransactionTimeout,
         `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
           blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        null,
       )
       return
     }
@@ -448,8 +450,13 @@ export class EosChainState {
   /** All errors are of ErrorType TxConfirmFailure
    *  A more specfic cause of the error is passed via errorDetailCode param
    */
-  rejectAwaitTransaction = (reject: any, errorDetailCode: ChainErrorDetailCode, errorMessage: string) => {
-    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorDetailCode })
+  rejectAwaitTransaction = (
+    reject: any,
+    errorDetailCode: ChainErrorDetailCode,
+    errorMessage: string,
+    originalError: Error,
+  ) => {
+    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorDetailCode }, originalError)
     reject(error)
   }
 
