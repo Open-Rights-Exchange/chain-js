@@ -109,7 +109,7 @@ export class EthereumTransaction implements Transaction {
     let { gasPrice = null, gasLimit = null } = this._options || {}
     const { to, value, data } = this._actionHelper.raw
     // 1 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
-    gasPrice = isNullOrEmpty(gasPrice) ? 1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10) : gasPrice
+    gasPrice = isNullOrEmpty(gasPrice) ? 1 * (await this._chainState.getGasPrice()) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
     this._raw = new EthereumJsTx(trxBody, trxOptions)
@@ -361,9 +361,7 @@ export class EthereumTransaction implements Transaction {
     if (bufferToHex(this._raw.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
-      this._raw.nonce = toEthBuffer(
-        await this._chainState.web3.eth.getTransactionCount(addPrefixToHex(address), 'pending'),
-      )
+      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(addPrefixToHex(address), 'pending'))
     }
     this._raw?.sign(privateKeyBuffer)
     this._signature = toEthereumSignature({
