@@ -1,6 +1,17 @@
 import { BN } from 'ethereumjs-util'
+import BigNumber from 'bignumber.js'
 import { EncryptedDataString, ChainEntityNameBrand, ChainAssetBrand, ChainDateBrand } from '../../../models'
 import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
+
+/** Category of chain functions - useful in error mapping */
+export enum ChainFunctionCategory {
+  Block = 'Block',
+  ChainState = 'ChainState',
+  Contract = 'Contract',
+  Transaction = 'Transaction',
+}
+
+export type EthereumBlockNumber = string | number | BN | BigNumber | 'latest' | 'pending' | 'earliest' | 'genesis'
 
 export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EthereumAsset = BN & ChainAssetBrand

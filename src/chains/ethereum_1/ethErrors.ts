@@ -2,12 +2,7 @@
 import { ChainError } from '../../errors'
 import { stringifySafe } from '../../helpers'
 import { ChainErrorType } from '../../models'
-
-// TODO: move this to another model file - it's generic after all - not just for errors
-/** Category of chain functions - useful in error mapping */
-export enum ChainFunctionCategory {
-  Contract = 'Contract',
-}
+import { ChainFunctionCategory } from './models'
 
 // subset of errors from Eteherum chain - {url to ETh errors}
 // IMPORTANT: These are in order of importance
@@ -31,13 +26,28 @@ export const ContractErrorRegExs: { [key: string]: string } = {
   MiscContractError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
+export const BlockErrorRegExs: { [key: string]: string } = {
+  BlockDoesNotExist: 'not found',
+  MiscBlockError: '(.*)', // matches anything - this is the catch all if nothing else matches
+}
+
+export const TransactionErrorRegExs: { [key: string]: string } = {
+  TxExceededResources: '(insufficient funds|insufficient balance)', // insufficient funds for gas * price + value
+  TransactionDoesNotExist: 'not found',
+  MiscTransactionError: '(.*)', // matches anything - this is the catch all if nothing else matches
+}
+
+export const ChainStateErrorRegExs: { [key: string]: string } = {
+  ChainStateDoesNotExist: 'not found',
+  MiscChainStateError: '(.*)', // matches anything - this is the catch all if nothing else matches
+}
+
 /** Maps a category of errors to a regex collection */
 export const ChainFunctionCategoryMap: { [key: string]: any } = {
-  // ChainRead: ,
-  // ChainStateRead: ,
+  Block: BlockErrorRegExs,
+  ChainState: ChainStateErrorRegExs,
   Contract: ContractErrorRegExs,
-  // BlockRead: ,
-  // Transaction:,
+  Transaction: TransactionErrorRegExs,
 }
 
 /** Maps an Error object (thrown by a call to the chain) into a known set of errors */
@@ -75,61 +85,3 @@ export function mapChainError(error: Error, chainFunctionCategory?: ChainFunctio
 
   return new ChainError(errorType, errorMessage, errorJson)
 }
-
-// export enum ChainErrorType {
-//   AccountCreationFailedAlreadyExists = 'AccountCreationFailedAlreadyExists',
-//   AccountDoesntExist = 'AccountDoesntExist',
-//   /** authority is not valid */
-//   AuthInvalid = 'AuthInvalid',
-//   /** missing permission or key */
-//   AuthMissing = 'AuthMissing',
-//   AuthUnsatisfied = 'AuthUnsatisfied',                                         // No feature
-//   BlockDoesNotExist = 'BlockDoesNotExist',                                     // Returns null
-//   DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
-//   PermissionAlreadyLinked = 'PermissionAlreadyLinked',
-//   PermissionNotLinked = 'PermissionNotLinked',
-//   PermissionDeleteFailedInUse = 'PermissionDeleteFailedInUse',
-//   TokenBalanceTooLow = 'TokenBalanceTooLow',
-//   TxConfirmFailure = 'TxConfirmFailure',                                       // rejectAwaitTransaction function needs to be implemented
-//   TxExceededResources = 'TxExceededResources',
-
-//   MiscChainError = 'MiscChainError',
-//   MiscBlockValidationError = 'MiscBlockValidationError',
-//   MiscTransactionError = 'MiscTransactionError',
-//   MiscActionValidationError = 'MiscActionValidationError',
-//   MiscContractError = 'MiscContractError',
-//   MiscDatabaseError = 'MiscDatabaseError',
-//   MiscBlockProducerError = 'MiscBlockProducerError',
-//   MiscWhitelistBlackListError = 'MiscWhitelistBlackListError',
-//   MiscNodeError = 'MiscNodeError',
-//   /** matches anything - this is the catch all if nothing else matches */
-//   UnknownError = 'UnknownError',
-// }
-
-// export const ChainErrorRegExs: { [key: string]: string } = {
-//   AccountCreationFailedAlreadyExists: 'account_name_exists_exception',
-//   AccountDoesntExist: 'account_query_exception', // the account not on chain. Thrown by functions like link permission. Not thrown by get_account which throws 'unknown key \\(boost'
-//   AuthInvalid: 'authority_type_exception', // the permission isnt valid (or permission already exists in an account)
-//   AuthUnsatisfied: 'unsatisfied_authorization', // all permission or keys needed for transaction weren't provided
-//   AuthMissing: 'missing_auth_exception', // missing permission or key
-//   BlockDoesNotExist: 'unknown_block_exception',
-//   DataReadFailedKeyDoesNotExist: 'unknown key \\(boost',
-//   PermissionAlreadyLinked: 'Attempting to update required authority, but new requirement is same as old',
-//   PermissionNotLinked: 'Attempting to unlink authority, but no link found',
-//   PermissionDeleteFailedInUse:
-//     '(Cannot delete a linked authority. Unlink the authority first|Cannot delete active authority|Cannot delete owner authority)',
-//   TokenBalanceTooLow: 'this is set within chainState code',
-//   TxConfirmFailure: 'TxConfirmFailure',
-//   TxExceededResources: '_exceeded', // includes all EOS resources
-//   MiscChainError: 'chain_type_exception',
-//   MiscBlockValidationError: 'block_validate_exception',
-//   MiscTransactionError: 'transaction_exception',
-//   MiscActionValidationError: 'action_validate_exception',
-//   MiscContractError: 'contract_exception',
-//   MiscDatabaseError: 'database_exception',
-//   MiscBlockProducerError: 'producer_exception',
-//   MiscWhitelistBlackListError: 'whitelist_blacklist_exception',
-//   MiscNodeError:
-//     '(misc_exception|plugin_exception|wallet_exception|abi_exception|reversible_blocks_exception|block_log_exception|contract_api_exception|protocol_feature_exception|mongo_db_exception)',
-//   UnknownError: '(.*)', // matches anything - this is the catch all if nothing else matches
-// }
