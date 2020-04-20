@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
+import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, TransactionReceipt } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './ethConstants'
@@ -167,27 +167,44 @@ export class EthereumChainState {
     }
   }
 
+  /**  Submits the transaction to the chain and waits only till it gets a transaction hash.
+   * Does not wait for the transaction to be finalized on the chain.
+   */
+  sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
+    return new Promise((resolve, reject) => {
+      this._web3.eth.sendSignedTransaction(signedTransaction).once('transactionHash', hash => {
+        resolve(hash)
+      })
+    })
+  }
+
   /** Broadcast a signed transaction to the chain */
+  /* Confirm type None returns the transaction hash
+  /* Confirm type 001 waits for the transaction to finalise on chain and then returns the transaction receipt
+  */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType, communicationSettings?: any) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-    let transaction
+    const sendReceipt: TransactionReceipt = {}
     if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
+
     try {
-      transaction = await this._web3.eth.sendSignedTransaction(signedTransaction)
+      if (useWaitForConfirm === ConfirmType.None) {
+        sendReceipt.transactionHash = await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)
+      }
+
+      if (useWaitForConfirm === ConfirmType.After001) {
+        sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
+      }
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
     }
 
-    if (useWaitForConfirm !== ConfirmType.None) {
-      transaction = await this.awaitTransaction(transaction, useWaitForConfirm, communicationSettings)
-    }
-
-    return transaction
+    return sendReceipt
   }
 
   /** Polls the chain until it finds a block that includes the specific transaction

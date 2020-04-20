@@ -384,7 +384,7 @@ export class EthereumTransaction implements Transaction {
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
     const signedTransaction = this._raw.serialize()
 
-    return this._chainState.sendTransaction(`0x${signedTransaction.toString('hex')}`)
+    return this._chainState.sendTransaction(`0x${signedTransaction.toString('hex')}`, waitForConfirm)
   }
 
   // helpers

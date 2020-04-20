@@ -10,6 +10,7 @@ import {
   ConfirmType,
   ChainErrorType,
   ChainErrorDetailCode,
+  TransactionReceipt,
 } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
@@ -235,8 +236,8 @@ export class EosChainState {
     }
 
     const signedTransaction = { signatures, serializedTransaction }
-    let sendReceipt
-
+    let sendReceipt: TransactionReceipt
+    
     // get the head block just before sending the transaction
     const currentHeadBlock = await this.getChainInfo()
     try {
