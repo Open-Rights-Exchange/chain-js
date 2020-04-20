@@ -80,11 +80,11 @@ export class EthereumChainState {
 
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<ChainInfo> {
-    const info = await this.getBlock('latest')
+    // Not calling this.getBlock() because this.connect() calls this function before it sets this._isConnected = true
+    const info = await this._web3.eth.getBlock('latest')
     const { gasLimit, gasUsed, number, timestamp } = info
     try {
       const nodeInfo = await this._web3.eth.getNodeInfo()
-      // this.ethChainInfo = info;
       this._chainInfo = {
         headBlockNumber: number,
         headBlockTime: new Date(timestamp),
