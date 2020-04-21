@@ -14,6 +14,7 @@ import {
   EthereumTransactionAction,
   EthereumAddress,
   EthereumPublicKey,
+  EthereumBlockType,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty } from '../../helpers'
@@ -110,7 +111,7 @@ export class EthereumTransaction implements Transaction {
     const { to, value, data } = this._actionHelper.raw
     // 1 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
     gasPrice = isNullOrEmpty(gasPrice) ? 1 * (await this._chainState.getGasPrice()) : gasPrice
-    gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
+    gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit : gasLimit
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
     this._raw = new EthereumJsTx(trxBody, trxOptions)
     this.setHeaderFromRaw()
@@ -134,7 +135,9 @@ export class EthereumTransaction implements Transaction {
       gasPrice = ethereumTrxArgIsNullOrEmpty(gasPrice)
         ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10)
         : gasPrice
-      gasLimit = ethereumTrxArgIsNullOrEmpty(gasLimit) ? (await this._chainState.getBlock('latest')).gasLimit : gasLimit
+      gasLimit = ethereumTrxArgIsNullOrEmpty(gasLimit)
+        ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit
+        : gasLimit
       this._raw = new EthereumJsTx({ ...raw, gasLimit, gasPrice }, { chain, hardfork })
       const { txAction, txHeader } = this.groupActionData(this._raw)
       this._header = txHeader
@@ -362,7 +365,7 @@ export class EthereumTransaction implements Transaction {
     if (!this._raw?.nonce || bufferToHex(this._raw?.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
-      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(address, 'pending'))
+      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(address, EthereumBlockType.Pending))
     }
     this._raw?.sign(privateKeyBuffer)
     this._signature = toEthereumSignature({

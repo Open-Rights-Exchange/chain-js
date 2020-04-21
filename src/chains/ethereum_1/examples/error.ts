@@ -3,7 +3,7 @@
 import Web3 from 'web3'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import { toWei, ensureHexPrefix, toEthBuffer } from '../helpers'
-import { EthUnit } from '../models'
+import { EthUnit, EthereumBlockType } from '../models'
 
 const web3 = new Web3('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a')
 
@@ -34,7 +34,9 @@ export const sampleSetFromRawTrx = {
     // console.log(block)
 
     // --> Exceeded resource error
-    const nonce = toEthBuffer(await web3.eth.getTransactionCount(ensureHexPrefix(ropstenAddress), 'pending'))
+    const nonce = toEthBuffer(
+      await web3.eth.getTransactionCount(ensureHexPrefix(ropstenAddress), EthereumBlockType.Pending),
+    )
     const tx = new EthereumJsTx(
       {
         nonce,

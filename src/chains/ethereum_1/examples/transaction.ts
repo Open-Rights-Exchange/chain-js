@@ -5,7 +5,7 @@ import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainSettings, ChainEndpoint, ChainForkType } from '../../../models'
 
 import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
-import { EthereumTransactionOptions, EthUnit } from '../models'
+import { EthereumTransactionOptions, EthUnit, EthereumBlockType } from '../models'
 
 const web3 = new Web3('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a')
 
@@ -380,7 +380,7 @@ const composeERC20MintParams = {
   }
 })()
 
-// console.log(await web3.eth.getBlock('latest'))
+// console.log(await web3.eth.getBlock(EthereumBlockType.Latest))
 
 // const signedTrx = await web3.eth.accounts.signTransaction(
 //   sampleTransferTrx,

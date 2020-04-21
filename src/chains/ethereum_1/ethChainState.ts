@@ -4,7 +4,7 @@ import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, TransactionReceipt } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
-import { ChainFunctionCategory, EthereumAddress, EthereumBlockNumber } from './models'
+import { ChainFunctionCategory, EthereumAddress, EthereumBlockNumber, EthereumBlockType } from './models'
 import { ensureHexPrefix } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
@@ -80,7 +80,7 @@ export class EthereumChainState {
 
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<ChainInfo> {
-    const info = await this._web3.eth.getBlock('latest')
+    const info = await this._web3.eth.getBlock(EthereumBlockType.Latest)
     const { gasLimit, gasUsed, number, timestamp } = info
     try {
       const nodeInfo = await this._web3.eth.getNodeInfo()
