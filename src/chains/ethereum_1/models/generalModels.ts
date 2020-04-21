@@ -11,7 +11,7 @@ export enum ChainFunctionCategory {
   Transaction = 'Transaction',
 }
 
-export type EthereumBlockNumber = string | number | BN | BigNumber | 'latest' | 'pending' | 'earliest' | 'genesis'
+export type EthereumBlockNumber = number | BN | BigNumber | 'latest' | 'pending' | 'earliest' | 'genesis'
 
 export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EthereumAsset = BN & ChainAssetBrand
