@@ -9,6 +9,7 @@ import {
   EthUnit,
 } from '../models'
 import { toEthBuffer, ensureHexPrefix } from './generalHelpers'
+import { isNullOrEmpty } from 'src/helpers'
 
 // Reimplemented from ethereumjs-util module to workaround a current bug
 /** Checks if a valid signature with ECDSASignature */
@@ -35,7 +36,8 @@ export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
 }
 
 export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): value is EthereumTxData {
-  if (!value) return false
+  if (isNullOrEmpty(value)) return false
+  // return false for '0x' as well as empty string
   if (typeof value === 'string') return ensureHexPrefix(value).length > 2
   return true
 }

@@ -359,7 +359,7 @@ export class EthereumTransaction implements Transaction {
     }
     const privateKey = privateKeys[0]
     const privateKeyBuffer = toEthBuffer(privateKey)
-    // generate nonce if not already present
+    // generate nonce (using privateKey) if not already present
     if (!this._raw?.nonce || bufferToHex(this._raw?.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
