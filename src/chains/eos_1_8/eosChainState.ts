@@ -237,7 +237,7 @@ export class EosChainState {
 
     const signedTransaction = { signatures, serializedTransaction }
     let sendReceipt: TransactionReceipt
-    
+
     // get the head block just before sending the transaction
     const currentHeadBlock = await this.getChainInfo()
     try {
