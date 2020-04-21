@@ -132,9 +132,7 @@ export class EthereumTransaction implements Transaction {
     if (raw) {
       const { chain, hardfork } = this._options
       let { gasPrice, gasLimit } = raw
-      gasPrice = ethereumTrxArgIsNullOrEmpty(gasPrice)
-        ? 1.1 * parseInt(await this._chainState.web3.eth.getGasPrice(), 10)
-        : gasPrice
+      gasPrice = ethereumTrxArgIsNullOrEmpty(gasPrice) ? 1 * (await this._chainState.getGasPrice()) : gasPrice
       gasLimit = ethereumTrxArgIsNullOrEmpty(gasLimit)
         ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit
         : gasLimit
