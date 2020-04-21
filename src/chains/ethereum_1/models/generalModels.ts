@@ -11,20 +11,19 @@ export enum ChainFunctionCategory {
   Transaction = 'Transaction',
 }
 
-export type EthereumBlockNumber = number | BN | BigNumber | 'latest' | 'pending' | 'earliest' | 'genesis'
-
-export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EthereumAsset = BN & ChainAssetBrand
+export type EthereumBlockNumber = number | BN | BigNumber | 'latest' | 'pending' | 'earliest' | 'genesis'
+export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EthereumEntityName = string & ChainEntityNameBrand
-
-export type EthereumNewKeysOptions = {
-  password?: string
-  salt?: string
-}
 
 export type EthereumGeneratedKeys = {
   publicKey: EthereumPublicKey
   privateKey: EthereumPrivateKey | EncryptedDataString
+}
+
+export type EthereumNewKeysOptions = {
+  password?: string
+  salt?: string
 }
 
 export type EthereumString = {
