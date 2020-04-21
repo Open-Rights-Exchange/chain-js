@@ -29,7 +29,6 @@ describe('Error mapping', () => {
     } catch (e) {
       // eslint-disable-next-line jest/no-try-expect
       expect(e).toBeInstanceOf(Error)
-      console.log(e)
       const mappedError = mapChainError(e)
       actErrorType = mappedError.errorType
     }
