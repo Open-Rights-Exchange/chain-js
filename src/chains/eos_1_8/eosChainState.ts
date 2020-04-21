@@ -202,7 +202,7 @@ export class EosChainState {
     }
   }
 
-  /** Retrieve a specific block from the chain */
+  /** Check if a block includes a transaction */
   public blockHasTransaction = (block: any, transactionId: string): boolean => {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction?.trx?.id === transactionId)
