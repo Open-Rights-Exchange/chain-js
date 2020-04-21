@@ -1,7 +1,7 @@
 import { stringifySafe } from './helpers'
 import { ChainErrorType } from './models'
 
-/** Hold additional info related to the chain error
+/** Provides additional info related to a chain error
  *  errorType - A ChainErrorType which is a common set of errors that span all chains
  *  originalError - The original error object thrown by the chain
  *  json - Additional data about the error (if provided by the chain) */

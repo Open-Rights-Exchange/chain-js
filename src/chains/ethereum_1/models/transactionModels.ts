@@ -1,13 +1,16 @@
 import { EthereumValue } from './generalModels'
 
-/** Transaction 'header' options set to chain along with transaction */
-export type EthereumTransactionOptions = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
-  chain: number | string
-  hardfork: EthereumValue & string
+export type EthereumAbi = any[]
+/** Information needed to generate Trx Data to invoke desired smart contract action */
+export type EthereumActionContract = {
+  abi: any
+  method: string
+  parameters: (string | number)[]
 }
+
+export type EthereumAddress = EthereumValue & (string | Buffer)
+
+export type EthereumMethodName = EthereumValue & string
 
 /** Transaction with hex data - ready to be signed and sent to chain */
 export type EthereumRawTransaction = {
@@ -20,13 +23,6 @@ export type EthereumRawTransaction = {
   v?: EthereumValue
   r?: EthereumValue
   s?: EthereumValue
-}
-
-/** Transaction properties that contain the fee & priority info */
-export type EthereumTransactionHeader = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
 }
 
 /** Properties of an ETH transaction action
@@ -42,15 +38,20 @@ export type EthereumTransactionAction = {
   contract?: EthereumActionContract
 }
 
-export type EthereumAddress = EthereumValue & (string | Buffer)
-export type EthereumMethodName = EthereumValue & string
-export type EthereumAbi = any[]
+/** Transaction properties that contain the fee & priority info */
+export type EthereumTransactionHeader = {
+  nonce?: EthereumValue
+  gasPrice?: EthereumValue
+  gasLimit?: EthereumValue
+}
 
-/** Information needed to generate Trx Data to invoke desired smart contract action */
-export type EthereumActionContract = {
-  abi: any
-  method: string
-  parameters: (string | number)[]
+/** Transaction 'header' options set to chain along with transaction */
+export type EthereumTransactionOptions = {
+  nonce?: EthereumValue
+  gasPrice?: EthereumValue
+  gasLimit?: EthereumValue
+  chain: number | string
+  hardfork: EthereumValue & string
 }
 
 /** Hexadecimal format of contrat action data */

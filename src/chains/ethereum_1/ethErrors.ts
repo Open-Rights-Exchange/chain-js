@@ -8,38 +8,38 @@ import { ChainFunctionCategory } from './models'
 // IMPORTANT: These are in order of importance
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export const DefaultChainErrorRegExs: { [key: string]: string } = {
-  //        ErrSignFailed
   AuthInvalid: '(invalid transaction v, r, s values|public key|private key|invalid signature|signing failed)', // the permission isnt valid (or permission already exists in an account)
   BlockDoesNotExist: '(header for hash not found|neither block nor hash specified)',
   DataReadFailedKeyDoesNotExist: 'not found',
   TxExceededResources: '(insufficient funds|insufficient balance)', // insufficient funds for gas * price + value
-
+  // catch-all errors for a category
   MiscTransactionError:
     '(gas limit|nonce too high|nonce too low|already known|invalid sender|transaction underpriced|gas too low|negative value|oversized data|txdata|for signer|execution timeout)',
   MiscDatabaseError: 'index out of bounds',
   UnknownError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
-/** For Contract category of chain actions and related error */
-export const ContractErrorRegExs: { [key: string]: string } = {
-  ContractDoesNotExist: 'not found',
-  MiscContractError: '(.*)', // matches anything - this is the catch all if nothing else matches
-}
-
+// Match messages for each type of error category
+// Some errors have the same message thrown by the chain (e.g. 'not found') - diff meaning for each 'category' of errors
 export const BlockErrorRegExs: { [key: string]: string } = {
   BlockDoesNotExist: 'not found',
   MiscBlockError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
-export const TransactionErrorRegExs: { [key: string]: string } = {
-  TxExceededResources: '(insufficient funds|insufficient balance)', // insufficient funds for gas * price + value
-  TransactionDoesNotExist: 'not found',
-  MiscTransactionError: '(.*)', // matches anything - this is the catch all if nothing else matches
-}
-
 export const ChainStateErrorRegExs: { [key: string]: string } = {
   ChainStateDoesNotExist: 'not found',
   MiscChainStateError: '(.*)', // matches anything - this is the catch all if nothing else matches
+}
+
+export const ContractErrorRegExs: { [key: string]: string } = {
+  ContractDoesNotExist: 'not found',
+  MiscContractError: '(.*)', // matches anything - this is the catch all if nothing else matches
+}
+
+export const TransactionErrorRegExs: { [key: string]: string } = {
+  TxExceededResources: DefaultChainErrorRegExs.TxExceededResources, // insufficient funds for gas * price + value
+  TransactionDoesNotExist: 'not found',
+  MiscTransactionError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
 /** Maps a category of errors to a regex collection */
