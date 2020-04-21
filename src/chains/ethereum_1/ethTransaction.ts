@@ -357,11 +357,12 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Ethereum sign() requires privateKeys array of length one')
     }
     const privateKey = privateKeys[0]
-    const privateKeyBuffer = toEthBuffer(toEthereumPrivateKey(privateKey))
-    if (bufferToHex(this._raw.nonce) === EMPTY_HEX) {
+    const privateKeyBuffer = toEthBuffer(privateKey)
+    // generate nonce if not already present
+    if (!this._raw?.nonce || bufferToHex(this._raw?.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
-      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(ensureHexPrefix(address), 'pending'))
+      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(address, 'pending'))
     }
     this._raw?.sign(privateKeyBuffer)
     this._signature = toEthereumSignature({
