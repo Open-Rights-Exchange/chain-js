@@ -1,5 +1,6 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN } from 'ethereumjs-util'
 import { isString } from 'util'
+import { isNullOrEmpty } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -8,7 +9,7 @@ import {
   EthereumTxData,
   EthUnit,
 } from '../models'
-import { toEthBuffer, addPrefixToHex } from './generalHelpers'
+import { toEthBuffer, ensureHexPrefix } from './generalHelpers'
 
 // Reimplemented from ethereumjs-util module to workaround a current bug
 /** Checks if a valid signature with ECDSASignature */
@@ -35,19 +36,20 @@ export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
 }
 
 export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): value is EthereumTxData {
-  if (!value) return false
-  if (typeof value === 'string') return addPrefixToHex(value).length > 2
+  if (isNullOrEmpty(value)) return false
+  // return false for '0x' as well as empty string
+  if (typeof value === 'string') return ensureHexPrefix(value).length > 2
   return true
 }
 
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
   if (!value) return false
-  return isValidPublic(toEthBuffer(addPrefixToHex(value)))
+  return isValidPublic(toEthBuffer(ensureHexPrefix(value)))
 }
 
 export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): value is EthereumPrivateKey {
   if (!value) return false
-  return isValidPrivate(toEthBuffer(addPrefixToHex(value)))
+  return isValidPrivate(toEthBuffer(ensureHexPrefix(value)))
 }
 
 export function isValidEthereumSignature(
@@ -78,7 +80,7 @@ export function isValidEthereumAddress(value: string | Buffer | EthereumAddress)
  */
 export function toEthereumTxData(value: string | Buffer): EthereumTxData {
   if (isValidEthereumTxData(value)) {
-    return typeof value === 'string' ? (addPrefixToHex(value) as EthereumTxData) : (value as EthereumTxData)
+    return typeof value === 'string' ? (ensureHexPrefix(value) as EthereumTxData) : (value as EthereumTxData)
   }
   throw new Error(`Not a valid ethereum public key:${value}.`)
 }
@@ -88,7 +90,7 @@ export function toEthereumTxData(value: string | Buffer): EthereumTxData {
  */
 export function toEthereumPublicKey(value: string): EthereumPublicKey {
   if (isValidEthereumPublicKey(value)) {
-    return addPrefixToHex(value) as EthereumPublicKey
+    return ensureHexPrefix(value) as EthereumPublicKey
   }
   throw new Error(`Not a valid ethereum public key:${value}.`)
 }
@@ -98,7 +100,7 @@ export function toEthereumPublicKey(value: string): EthereumPublicKey {
  */
 export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
   if (isValidEthereumPrivateKey(value)) {
-    return addPrefixToHex(value) as EthereumPrivateKey
+    return ensureHexPrefix(value) as EthereumPrivateKey
   }
   throw new Error(`Not a valid ethereum private key:${value}.`)
 }
@@ -118,7 +120,7 @@ export function toEthereumSignature(value: string | ECDSASignature): EthereumSig
  */
 export function toEthereumAddress(value: string): EthereumAddress {
   if (isValidEthereumAddress(value)) {
-    return addPrefixToHex(value) as EthereumAddress
+    return ensureHexPrefix(value) as EthereumAddress
   }
   throw new Error(`Not a valid ethereum address:${value}.`)
 }

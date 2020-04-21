@@ -4,7 +4,8 @@ import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, TransactionReceipt } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
-import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './ethConstants'
+import { ChainFunctionCategory, EthereumAddress, EthereumBlockNumber, EthereumBlockType } from './models'
+import { ensureHexPrefix } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -79,19 +80,22 @@ export class EthereumChainState {
 
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<ChainInfo> {
-    const info = await this._web3.eth.getBlock('latest')
+    const info = await this._web3.eth.getBlock(EthereumBlockType.Latest)
     const { gasLimit, gasUsed, number, timestamp } = info
-    const nodeInfo = await this._web3.eth.getNodeInfo()
-
-    // this.ethChainInfo = info;
-    this._chainInfo = {
-      headBlockNumber: number,
-      headBlockTime: new Date(timestamp),
-      // Node information contains version example: 'Geth/v1.9.9-omnibus-e320ae4c-20191206/linux-amd64/go1.13.4'
-      version: nodeInfo,
-      nativeInfo: { gasLimit, gasUsed },
+    try {
+      const nodeInfo = await this._web3.eth.getNodeInfo()
+      this._chainInfo = {
+        headBlockNumber: number,
+        headBlockTime: new Date(timestamp),
+        // Node information contains version example: 'Geth/v1.9.9-omnibus-e320ae4c-20191206/linux-amd64/go1.13.4'
+        version: nodeInfo,
+        nativeInfo: { gasLimit, gasUsed },
+      }
+      return this._chainInfo
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
+      throw chainError
     }
-    return this._chainInfo
   }
 
   // TODO: sort based on health info
@@ -101,37 +105,59 @@ export class EthereumChainState {
     return trimTrailingChars(url, '/')
   }
 
-  /* Retrieve a specific block from the chain */
-  public async getBlock(blockNumber: number | string): Promise<BlockTransactionString> {
-    this.assertIsConnected()
-    const block = await this._web3.eth.getBlock(blockNumber)
-    return block
+  /** Retrieve a specific block from the chain */
+  public async getBlock(blockNumber: EthereumBlockNumber): Promise<BlockTransactionString> {
+    try {
+      this.assertIsConnected()
+      const block = await this._web3.eth.getBlock(blockNumber)
+      return block
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.Block)
+      throw chainError
+    }
   }
 
-  /* Confirm that we've connected to the chain - throw if not */
+  /** Retrieve a the current price of gas from the chain */
+  public async getGasPrice(): Promise<number> {
+    try {
+      this.assertIsConnected()
+      const gasPrice = parseInt(await this._web3.eth.getGasPrice(), 10)
+      return gasPrice
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
+      throw chainError
+    }
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
     if (!this._isConnected) {
       throwNewError('Not connected to chain')
     }
   }
 
-  /*  Retrieve a specific block from the chain */
+  /** Get transaction count for an address
+   *  Useful to calculate transaction nonce propery */
+  public async getTransactionCount(
+    address: EthereumAddress & string,
+    defaultBlock: EthereumBlockNumber,
+  ): Promise<number> {
+    try {
+      return this._web3.eth.getTransactionCount(ensureHexPrefix(address), defaultBlock)
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
+      throw chainError
+    }
+  }
+
+  /** Check if a block includes a transaction */
   public blockHasTransaction = (block: BlockTransactionString, transactionId: string): boolean => {
     const { transactions } = block
     const result = transactions?.includes(transactionId)
     return !!result
   }
 
-  /** Retrieve the default settings for chain communications */
-  static get defaultCommunicationSettings() {
-    return {
-      blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
-      checkInterval: DEFAULT_CHECK_INTERVAL,
-      getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
-    }
-  }
-
-  /** Submits the transaction to the chain and waits only till it gets a transaction hash
+  /** Submits the transaction to the chain and waits only until it gets a transaction hash
    * Does not wait for the transaction to be finalized on the chain
    */
   sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
@@ -169,7 +195,7 @@ export class EthereumChainState {
         sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
       }
     } catch (error) {
-      const chainError = mapChainError(error)
+      const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
     }
 

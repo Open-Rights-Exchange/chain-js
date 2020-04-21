@@ -67,5 +67,5 @@ export function mapChainError(error: RpcError | Error): ChainError {
     }
   }
 
-  return new ChainError(errorType, errorMessage, errorJson)
+  return new ChainError(errorType, errorMessage, errorJson, error)
 }
