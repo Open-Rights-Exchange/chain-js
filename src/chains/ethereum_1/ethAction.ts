@@ -1,3 +1,4 @@
+import { BN } from 'ethereumjs-util'
 import { isNullOrEmpty } from '../../helpers'
 import {
   ethereumTrxArgIsNullOrEmpty,
@@ -21,7 +22,7 @@ export class EthereumActionHelper {
 
   private _to: EthereumAddress
 
-  private _value: EthereumValue
+  private _value: EthereumValue | BN
 
   private _from: EthereumAddress
 
