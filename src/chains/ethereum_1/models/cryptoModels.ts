@@ -1,5 +1,6 @@
 import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand } from '../../../models'
 
+/** an ethereum transaction signature */
 export interface ECDSASignature {
   v: number
   r: Buffer
@@ -15,6 +16,7 @@ export type EthereumPublicKey = string & PublicKeyBrand
 /** a signature string - formatted correcly for ethereum */
 export type EthereumSignature = ECDSASignature & SignatureBrand
 
+/** Ethereum value units */
 export enum EthUnit {
   Noether = 'noether',
   Wei = 'wei',

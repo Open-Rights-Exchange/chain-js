@@ -1,5 +1,6 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN } from 'ethereumjs-util'
 import { isString } from 'util'
+import { isNullOrEmpty } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -9,7 +10,6 @@ import {
   EthUnit,
 } from '../models'
 import { toEthBuffer, ensureHexPrefix } from './generalHelpers'
-import { isNullOrEmpty } from 'src/helpers'
 
 // Reimplemented from ethereumjs-util module to workaround a current bug
 /** Checks if a valid signature with ECDSASignature */
