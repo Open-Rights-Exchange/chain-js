@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Web3 from 'web3'
 import { ChainFactory, ChainType } from '../../../index'
@@ -323,6 +324,7 @@ const composeERC20MintParams = {
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     // console.log('SIG: ', transaction.signatures)
     // console.log(await transaction.send())
+    //
     // // ---> Sign and send erc20 transfer Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
     //   chainForkType: ropstenChainOptions,
@@ -339,6 +341,7 @@ const composeERC20MintParams = {
     // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     // console.log('SIG: ', transaction.signatures)
     // console.log(await transaction.send())
+    //
     // ---> Sign and send erc20 mint Transaction
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
     //   chainForkType: ropstenChainOptions,
@@ -357,6 +360,7 @@ const composeERC20MintParams = {
     // console.log('SIG: ', transaction.signatures)
     // console.log(transaction.missingSignatures)
     // console.log(await transaction.send())
+    //
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
     //   chainForkType: ropstenChainOptions,
