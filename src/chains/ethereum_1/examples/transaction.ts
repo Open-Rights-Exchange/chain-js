@@ -379,11 +379,3 @@ const composeERC20MintParams = {
     console.log(error)
   }
 })()
-
-// console.log(await web3.eth.getBlock(EthereumBlockType.Latest))
-
-// const signedTrx = await web3.eth.accounts.signTransaction(
-//   sampleTransferTrx,
-//   '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
-// )
-// console.log(signedTrx)
