@@ -22,7 +22,7 @@ import {
   isArrayLengthOne,
   toEthereumSignature,
   toEthBuffer,
-  addPrefixToHex,
+  ensureHexPrefix,
   toEthereumPrivateKey,
   toEthereumTxData,
   ethereumTrxArgIsNullOrEmpty,
@@ -361,7 +361,7 @@ export class EthereumTransaction implements Transaction {
     if (bufferToHex(this._raw.nonce) === EMPTY_HEX) {
       const addressBuffer = privateToAddress(privateKeyBuffer)
       const address = bufferToHex(addressBuffer)
-      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(addPrefixToHex(address), 'pending'))
+      this._raw.nonce = toEthBuffer(await this._chainState.getTransactionCount(ensureHexPrefix(address), 'pending'))
     }
     this._raw?.sign(privateKeyBuffer)
     this._signature = toEthereumSignature({
