@@ -5,7 +5,6 @@ import {
   ChainActionType,
   ChainEndpoint,
   ChainInfo,
-  ChainSettings,
   ChainType,
   ChainAsset,
   ChainEntityName,
@@ -21,7 +20,13 @@ import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
 import { mapChainError } from './ethErrors'
-import { EthereumCreateAccountOptions, EthereumPublicKey, EthereumAddress, EthereumDate } from './models'
+import {
+  EthereumChainSettings,
+  EthereumCreateAccountOptions,
+  EthereumPublicKey,
+  EthereumAddress,
+  EthereumDate,
+} from './models'
 import {
   isValidEthereumAsset,
   isValidEthereumDateString,
@@ -43,11 +48,11 @@ import { notImplemented } from '../../helpers'
 class ChainEthereumV1 implements Chain {
   private _endpoints: ChainEndpoint[]
 
-  private _settings: ChainSettings
+  private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EthereumChainState(endpoints, settings)
