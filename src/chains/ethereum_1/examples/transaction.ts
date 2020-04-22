@@ -7,7 +7,7 @@ import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, ChainSettings, ChainEndpoint, ChainForkType, PrivateKey } from '../../../models'
 import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
 import { EthereumTransactionOptions, EthUnit, EthereumBlockType } from '../models'
-import { erc20ABI } from './exampleABI'
+import { erc20Abi } from './data/exampleErc20Abi'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: PrivateKey) => {
@@ -54,7 +54,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
     const composeERC20TransferParams = {
       to: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
       contract: {
-        abi: erc20ABI,
+        abi: erc20Abi,
         parameters: ['0x27105356F6C1ede0e92020e6225E46DC1F496b81', 20], // 0xD38ADf7D0204a6f5b7ddDe509378e43B1447CDb6
         method: 'transfer',
       },
@@ -64,7 +64,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
       from: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       to: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
       contract: {
-        abi: erc20ABI,
+        abi: erc20Abi,
         parameters: [20],
         method: 'mint',
       },

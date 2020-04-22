@@ -1,4 +1,4 @@
-export const erc20ABI: any[] = [
+export const erc20Abi: any[] = [
   {
     anonymous: false,
     inputs: [
