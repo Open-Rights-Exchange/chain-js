@@ -121,7 +121,7 @@ export function toEthereumSignature(value: string | ECDSASignature): EthereumSig
 export function toEthereumAddress(value: string): EthereumAddress {
   const prefixedValue = ensureHexPrefix(value)
   if (isValidEthereumAddress(prefixedValue)) {
-    return prefixedValue as EthereumAddress
+    return prefixedValue
   }
   throw new Error(`Not a valid ethereum address:${value}.`)
 }
