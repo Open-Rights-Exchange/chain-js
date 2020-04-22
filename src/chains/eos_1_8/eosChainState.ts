@@ -6,16 +6,27 @@ import { ChainError, throwNewError, throwAndLogError } from '../../errors'
 import {
   ChainInfo,
   ChainEndpoint,
-  ChainSettings,
   ConfirmType,
   ChainErrorType,
   ChainErrorDetailCode,
   TransactionReceipt,
 } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
-import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
+import {
+  EosSignature,
+  EosEntityName,
+  EOSGetTableRowsParams,
+  EosChainSettings,
+  EosChainSettingsCommunicationSettings,
+} from './models'
 import { mapChainError } from './eosErrors'
-import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './eosConstants'
+import {
+  DEFAULT_BLOCKS_TO_CHECK,
+  DEFAULT_GET_BLOCK_ATTEMPTS,
+  DEFAULT_CHECK_INTERVAL,
+  DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK,
+  DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS,
+} from './eosConstants'
 
 export class EosChainState {
   private eosChainInfo: RpcInterfaces.GetInfoResult
@@ -24,7 +35,7 @@ export class EosChainState {
 
   private _chainInfo: ChainInfo
 
-  private _chainSettings: ChainSettings
+  private _chainSettings: EosChainSettings
 
   private _endpoints: ChainEndpoint[]
 
@@ -36,11 +47,28 @@ export class EosChainState {
 
   private _api: Api // EOSJS chain API endpoint
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
-    // TODO chainjs check for valid settings and throw if bad
+  constructor(endpoints: ChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
     // TODO chainjs check for valid settings and throw if bad
-    this._chainSettings = settings
+    this._chainSettings = this.applyDefaultSettings(settings)
+  }
+
+  /** apply default value - override defaults with incoming settings */
+  private applyDefaultSettings = (settings?: EosChainSettings): EosChainSettings => {
+    return {
+      ...settings,
+      communicationSettings: {
+        blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
+        checkInterval: DEFAULT_CHECK_INTERVAL,
+        getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
+        ...settings?.communicationSettings,
+      },
+      defaultTransactionSettings: {
+        blocksBehind: DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK,
+        expireSeconds: DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS,
+        ...settings?.defaultTransactionSettings,
+      },
+    }
   }
 
   /** Return chain URL endpoints */
@@ -61,7 +89,7 @@ export class EosChainState {
   }
 
   /** Return chain settings */
-  public get chainSettings(): ChainSettings {
+  public get chainSettings(): EosChainSettings {
     return this._chainSettings
   }
 
@@ -223,7 +251,7 @@ export class EosChainState {
     serializedTransaction: any,
     signatures: EosSignature[],
     waitForConfirm?: ConfirmType,
-    communicationSettings?: any,
+    communicationSettings?: EosChainSettingsCommunicationSettings,
   ) {
     // Default confirm to not wait for any block confirmations
     const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
@@ -272,9 +300,9 @@ export class EosChainState {
     transactionResponse: any,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: any,
+    communicationSettings: EosChainSettingsCommunicationSettings,
   ) {
-    // use default communicationSettings or whatever was passed-in in ChainSettings (via constructor)
+    // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
       ...EosChainState.defaultCommunicationSettings,
       ...this.chainSettings?.communicationSettings,
