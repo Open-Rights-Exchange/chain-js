@@ -5,10 +5,12 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, ChainSettings, ChainEndpoint, ChainForkType, PrivateKey } from '../../../models'
+import { ChainEthereumV1 } from '../ChainEthereumV1'
 import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
 import { EthereumTransactionOptions, EthUnit, EthereumBlockType } from '../models'
 import { erc20ABI } from './exampleABI'
-import { ChainEthereumV1 } from '../ChainEthereumV1'
+
+require('dotenv').config()
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: PrivateKey) => {
   console.log('actions:', transactionActions)
@@ -21,6 +23,8 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
   console.log(JSON.stringify(transaction.toJson()))
   return transaction
 }
+
+const { env } = process
 ;(async () => {
   try {
     const ropstenEndpoints: ChainEndpoint[] = [
@@ -33,8 +37,6 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
       chainName: 'ropsten',
       hardFork: 'istanbul',
     }
-
-    const ropstenPrivate = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'
 
     // EthereumRawTransaction type input for setFromRaw()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
@@ -80,7 +82,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
-    // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', await transaction.send())
 
@@ -90,7 +92,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20TransferParams)]
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
-    // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', await transaction.send())
 
@@ -100,7 +102,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
     // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20MintParams)]
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
-    // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', await transaction.send())
 
@@ -109,7 +111,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
     // // await transaction.addAction(sampleTransferTrx)
     // await transaction.setFromRaw(sampleSetFromRawTrx)
     // await transaction.validate()
-    // await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
+    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', await transaction.send())
   } catch (error) {
