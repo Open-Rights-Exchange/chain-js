@@ -1,5 +1,5 @@
 import * as ecc from 'eosjs-ecc'
-import { EosPrivateKey, EosPublicKey, EosSignature } from '../models/cryptoModels'
+import { EosPrivateKey, EosPublicKey, EosSignature } from '../models'
 import { isNullOrEmpty } from '../../../helpers'
 
 export function isValidEosPublicKey(value: EosPublicKey | string): value is EosPublicKey {

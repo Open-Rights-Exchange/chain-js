@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { BN } from 'ethereumjs-util'
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainEndpoint, ChainInfo, ChainSettings, ChainType } from '../../models'
+import {
+  ChainActionType,
+  ChainEndpoint,
+  ChainInfo,
+  ChainType,
+  ChainAsset,
+  ChainEntityName,
+  ChainDate,
+} from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as crypto from '../../crypto'
@@ -8,10 +17,30 @@ import * as ethcrypto from './ethCrypto'
 import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
-
-const notImplemented = () => {
-  throw new Error('Not Implemented')
-}
+import { EthereumCreateAccount } from './ethCreateAccount'
+import { EthereumAccount } from './ethAccount'
+import { mapChainError } from './ethErrors'
+import {
+  EthereumChainSettings,
+  EthereumCreateAccountOptions,
+  EthereumPublicKey,
+  EthereumAddress,
+  EthereumDate,
+} from './models'
+import {
+  isValidEthereumAsset,
+  isValidEthereumDateString,
+  isValidEthereumEntityName,
+  isValidEthereumPublicKey,
+  isValidEthereumPrivateKey,
+  toEthereumAsset,
+  toEthereumDate,
+  toEthereumEntityName,
+  toEthereumPublicKey,
+  toEthereumPrivateKey,
+  toEthereumSignature,
+} from './helpers'
+import { notImplemented } from '../../helpers'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -19,17 +48,19 @@ const notImplemented = () => {
 class ChainEthereumV1 implements Chain {
   private _endpoints: ChainEndpoint[]
 
-  private _settings: ChainSettings
+  private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EthereumChainState(endpoints, settings)
   }
 
-  public isConnected = this._chainState.isConnected
+  public get isConnected(): boolean {
+    return this._chainState?.isConnected
+  }
 
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
 
@@ -76,19 +107,25 @@ class ChainEthereumV1 implements Chain {
     return null
   }
 
-  private newAccount = (options?: any): any => {
-    notImplemented()
-    return null
+  /** Returns a chain Account class
+   * Note: Does NOT create a new ethereum address - to create an address, use new.CreateAccount */
+  private newAccount = async (address?: EthereumAddress): Promise<EthereumAccount> => {
+    this.assertIsConnected()
+    const account = new EthereumAccount(this._chainState)
+    if (address) {
+      await account.load(address)
+    }
+    return account
   }
 
-  private newCreateAccount = (options?: any): any => {
-    notImplemented()
-    return null
+  private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
+    this.assertIsConnected()
+    return new EthereumCreateAccount(this._chainState, options)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new EthereumTransaction(this._chainState, options)
   }
 
   public new = {
@@ -103,15 +140,15 @@ class ChainEthereumV1 implements Chain {
 
   encrypt = crypto.encrypt
 
-  getPublicKeyFromSignature = ethcrypto.getPublicKeyFromSignature
+  getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
   isValidEncryptedData = crypto.isEncryptedDataString
 
   toEncryptedDataString = crypto.toEncryptedDataString
 
-  isValidPrivateKey = ethcrypto.isValidPrivateKey
+  isValidPrivateKey = isValidEthereumPrivateKey
 
-  isValidPublicKey = ethcrypto.isValidPublicKey
+  isValidPublicKey = isValidEthereumPublicKey
 
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
@@ -121,27 +158,74 @@ class ChainEthereumV1 implements Chain {
 
   // Chain Helper Functions
 
-  isValidEntityName = notImplemented
+  // --------- Chain helper functions
 
-  isValidAsset = notImplemented
+  /** Verifies that the value is a valid chain entity name (e.g. an account name) */
+  public isValidEntityName = (value: string): boolean => {
+    return isValidEthereumEntityName(value)
+  }
 
-  isValidDate = notImplemented
+  /** Verifies that the value is a valid Ethereum entity name (e.g. an account name) */
+  isValidEthereumEntityName = isValidEthereumEntityName
 
-  toEntityName = notImplemented
+  /** Verifies that the value is a valid chain asset string */
+  public isValidAsset = (value: number | BN): boolean => {
+    return isValidEthereumAsset(value)
+  }
 
-  toAsset = notImplemented
+  /** Verifies that the value is a valid Ethereum value */
+  isValidEthereumAsset = isValidEthereumAsset
 
-  toDate = notImplemented
+  /** Verifies that the value is a valid chain date */
+  public isValidDate = (value: string): boolean => {
+    return isValidEthereumDateString(value)
+  }
 
-  toPublicKey = notImplemented
+  /** Verifies that the value is a valid Ethereum date */
+  isValidEthereumDate = isValidEthereumDateString
 
-  toPrivateKey = notImplemented
+  /** Ensures that the value comforms to a well-formed ethereum value */
+  public toAsset = (amount: number, symbol: string): ChainAsset => {
+    return toEthereumAsset(amount, symbol) as ChainAsset
+  }
 
-  toSignature = notImplemented
+  /** Ensures that the value comforms to a well-formed Ethereum value */
+  toEthereumAsset = toEthereumAsset
 
+  /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
+  public toEntityName = (value: string): ChainEntityName => {
+    return toEthereumEntityName(value) as ChainEntityName
+  }
+
+  /** Ensures that the value comforms to a well-formed Ethereum entity name
+   *  e.g. account, permission, or contract name */
+  toEthereumEntityName = toEthereumEntityName
+
+  /** Ensures that the value comforms to a well-formed chain date string */
+  public toDate = (value: string | Date | EthereumDate): ChainDate => {
+    return toEthereumDate(value) as ChainDate
+  }
+
+  toPublicKey = toEthereumPublicKey
+
+  toPrivateKey = toEthereumPrivateKey
+
+  toSignature = toEthereumSignature
+
+  public setPublicKey = (publicKey: EthereumPublicKey) => {
+    return new EthereumAccount(this._chainState).setPublicKey(publicKey)
+  }
+
+  /** Map error from chain into a well-known ChainError type */
   public mapChainError = (error: Error): ChainError => {
-    notImplemented()
-    return new ChainError(null, null, null)
+    return mapChainError(error, null)
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
+  public assertIsConnected(): void {
+    if (!this._chainState?.isConnected) {
+      throwNewError('Not connected to chain')
+    }
   }
 }
 

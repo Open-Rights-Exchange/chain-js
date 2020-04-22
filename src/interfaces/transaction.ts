@@ -6,20 +6,19 @@ import { TransactionOptions, ConfirmType, Signature, PublicKey, PrivateKey } fro
 export interface Transaction {
   /** Transaction's actions */
   actions: any
-  /** Chain-specific and time-sensitive transaction header
-   *  Header is included in a serialized transaction body */
+  /** Chain-specific and time-sensitive transaction header */
   header: any
   /** Transction options set in constructor */
   options: TransactionOptions
-  /** Serialized transaction body
-   *  Note: Set via generateSerialized() or setSerialized() */
-  serialized: any
+  /** Raw transaction body
+   *  Note: Set via prepareToBeSigned() or setFromRaw() */
+  raw: any
   /** Whether there is an attached signature for every authorization (e.g. account/permission) in all actions */
   hasAllRequiredSignatures: boolean
   /** Whether there are any signatures attached */
   hasAnySignatures: boolean
-  /** Whether transaction is missing serialized body */
-  hasSerialized: boolean
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasRaw: boolean
   // ** Whether transaction has been validated - via vaidate() */
   isValidated: boolean
   /** An array of authorizations (e.g. account/permission) that do not have an attached signature
@@ -44,17 +43,17 @@ export interface Transaction {
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
-  /** Generates a serialized transaction (using actions already attached)
-   *  uses eosjs.transact which fetches action and account info from the chain */
-  generateSerialized(): Promise<void>
-  /** Sets transaction data from serialized transaction - supports both serialized formats (JSON bytes array and hex)
-   *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
-  setSerialized(serialized: any): Promise<void>
+  /** Internally creates Raw Transaction data.
+   *  Requires at least one action set. Must be called before sign() */
+  prepareToBeSigned(): Promise<void>
+  /** Set the body of the transaction using raw (hex) transaction data
+   *  This is one of the ways to set the actions for the transaction */
+  setFromRaw(raw: any): Promise<void>
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
-  send(waitForConfirm?: ConfirmType): Promise<any>
+  send(waitForConfirm?: ConfirmType, communicationSettings?: any): Promise<any>
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  sign(privateKeys: PrivateKey[]): void
+  sign(privateKeys: PrivateKey[]): Promise<void>
   /** JSON representation of transaction data */
   toJson(): ConfirmType.None
   /** Verifies that all accounts and permisison for actions exist on chain.

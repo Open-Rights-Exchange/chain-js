@@ -3,7 +3,6 @@ import {
   ChainActionType,
   ChainEndpoint,
   ChainInfo,
-  ChainSettings,
   TransactionOptions,
   ChainType,
   ChainEntityName,
@@ -36,7 +35,7 @@ import {
   toEosAsset,
   toEosDate,
 } from './helpers'
-import { EosEntityName, EosDate } from './models'
+import { EosChainSettings, EosEntityName, EosDate, EosCreateAccountOptions } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -44,11 +43,11 @@ import { EosEntityName, EosDate } from './models'
 class ChainEosV18 implements Chain {
   private _endpoints: ChainEndpoint[]
 
-  private _settings: ChainSettings
+  private _settings: EosChainSettings
 
   private _chainState: EosChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+  constructor(endpoints: ChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EosChainState(endpoints, settings)
@@ -110,15 +109,15 @@ class ChainEosV18 implements Chain {
     this.assertIsConnected()
     const account = new EosAccount(this._chainState)
     if (accountName) {
-      await account.fetchFromChain(accountName)
+      await account.load(accountName)
     }
     return account
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): EosCreateAccount {
+  private newCreateAccount(options?: EosCreateAccountOptions): EosCreateAccount {
     this.assertIsConnected()
-    return new EosCreateAccount(this._chainState)
+    return new EosCreateAccount(this._chainState, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */

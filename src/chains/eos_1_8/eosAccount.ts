@@ -19,6 +19,7 @@ import { mapChainError } from './eosErrors'
 import { isNullOrEmpty } from '../../helpers'
 import { toEosEntityName } from './helpers'
 import { PermissionsHelper } from './eosPermissionsHelper'
+import { ChainErrorType } from '../../models'
 
 // OREJS Ported functions
 //   hasPermission() {} // checkIfAccountHasPermission
@@ -61,30 +62,49 @@ export class EosAccount implements Account {
     return [...allPublicKeys]
   }
 
+  /** Whether the account is already in use on chain */
+  async isValidNewAccountName(accountName: string): Promise<boolean> {
+    const accountExists = await this.doesAccountExist(accountName)
+    return !accountExists
+  }
+
   /** Tries to retrieve the account from the chain
-   *  Returns { exists:true|false, account } */
-  async doesAccountExist(accountName: string): Promise<{ exists: boolean; account: EosAccount }> {
+   *  Returns whether the account exists on the chain  */
+  async doesAccountExist(accountName: string): Promise<boolean> {
     try {
-      await this.fetchFromChain(toEosEntityName(accountName))
-      // let account = await this.rpc.get_account(accountName);
-      return { exists: true, account: this }
+      await this.load(toEosEntityName(accountName))
+      return true
     } catch (e) {
-      return { exists: false, account: null }
+      return false
     }
   }
 
   /** Retrieves account from chain */
-  async fetchFromChain(accountName: EosEntityName): Promise<void> {
+  async load(accountName: EosEntityName): Promise<void> {
     let account
     try {
       account = await this._chainState.rpc.get_account(accountName)
     } catch (error) {
       const chainError = mapChainError(error)
+      // if account doesn't exist on the chain - remap the chain error (db key error)
+      if (chainError.errorType === ChainErrorType.DataReadFailedKeyDoesNotExist) {
+        chainError.errorType = ChainErrorType.AccountDoesntExist
+      }
       chainError.message = `problem fetching account:${accountName} from chain: ${chainError.message}`
       throw chainError
     }
 
     this._account = account
+  }
+
+  /** EOS accounts exist on the chain  */
+  get supportsOnChainAccountRegistry(): boolean {
+    return true
+  }
+
+  /** EOS accounts can be recycled by replacing the account keys */
+  get supportsRecycling(): boolean {
+    return true
   }
 
   /** JSON representation of transaction data */

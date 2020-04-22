@@ -3,19 +3,21 @@
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export enum ChainErrorType {
   AccountCreationFailedAlreadyExists = 'AccountCreationFailedAlreadyExists',
+  AccountDoesntExist = 'AccountDoesntExist',
   /** authority is not valid */
   AuthInvalid = 'AuthInvalid',
   /** missing permission or key */
   AuthMissing = 'AuthMissing',
-  /** all permission or keys needed for transaction weren't provided */
   AuthUnsatisfied = 'AuthUnsatisfied',
   BlockDoesNotExist = 'BlockDoesNotExist',
-  /** includes all EOS resources */
-  TxExceededResources = 'TxExceededResources',
+  DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
   PermissionAlreadyLinked = 'PermissionAlreadyLinked',
   PermissionNotLinked = 'PermissionNotLinked',
   PermissionDeleteFailedInUse = 'PermissionDeleteFailedInUse',
-  DataReadFailedKeyDoesNotExist = 'DataReadFailedKeyDoesNotExist',
+  TokenBalanceTooLow = 'TokenBalanceTooLow',
+  TxConfirmFailure = 'TxConfirmFailure',
+  TxExceededResources = 'TxExceededResources',
+
   MiscChainError = 'MiscChainError',
   MiscBlockValidationError = 'MiscBlockValidationError',
   MiscTransactionError = 'MiscTransactionError',
@@ -27,4 +29,13 @@ export enum ChainErrorType {
   MiscNodeError = 'MiscNodeError',
   /** matches anything - this is the catch all if nothing else matches */
   UnknownError = 'UnknownError',
+}
+
+/** Additional chain-specific error detail which adds more insight to the cause of an error
+ *  Often used as a subcategory of ErrorType e.g. what specific error caused the ErrorType TxConfirmFailure
+ *  Optionaly included in ChainError's json metadata (i.e. ChainError.json.errorDetailCode)
+ */
+export enum ChainErrorDetailCode {
+  ConfirmTransactionTimeout = 'ConfirmTransactionTimeout',
+  MaxBlockReadAttemptsTimeout = 'MaxBlockReadAttemptsTimeout',
 }

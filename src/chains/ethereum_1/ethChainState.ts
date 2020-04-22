@@ -1,30 +1,38 @@
+import Web3 from 'web3'
+import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType } from '../../models'
+import { ChainInfo, ChainEndpoint, ConfirmType, TransactionReceipt } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
-import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './ethConstants'
+import {
+  ChainFunctionCategory,
+  EthereumAddress,
+  EthereumBlockNumber,
+  EthereumBlockType,
+  EthereumChainSettings,
+  EthereumChainSettingsCommunicationSettings,
+} from './models'
+import { ensureHexPrefix } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
 
 export class EthereumChainState {
-  private ethChainInfo: any
+  private ethChainInfo: BlockTransactionString
 
   private _activeEndpoint: ChainEndpoint
 
   private _chainInfo: ChainInfo
 
-  private _chainSettings: ChainSettings
+  private _chainSettings: EthereumChainSettings
 
   private _endpoints: ChainEndpoint[]
 
   private _isConnected: boolean = false
 
-  private _rpc: any // EOS chain RPC endpoint
+  private _web3: Web3 // Ethereum chain api endpoint
 
-  private _api: any // EOS chain API endpoint
-
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._chainSettings = settings
   }
@@ -47,7 +55,7 @@ export class EthereumChainState {
   }
 
   /** Return chain settings */
-  public get chainSettings(): ChainSettings {
+  public get chainSettings(): EthereumChainSettings {
     return this._chainSettings
   }
 
@@ -63,28 +71,12 @@ export class EthereumChainState {
     return this._isConnected
   }
 
-  /**  * Return instance of Web3 API */
-  public get api(): any {
-    this.assertIsConnected()
-    return this._api
-  }
-
-  /**  * Return instance of Web3 JsonRpc */
-  public get rpc(): any {
-    this.assertIsConnected()
-    return this._rpc
-  }
-
   /**  * Connect to chain endpoint to verify that it is operational and to get latest block info */
   public async connect(): Promise<void> {
     try {
-      // we don't store keys in chain state so JsSignatureProvider keys are empty
-      if (!this._rpc) {
-        // const url = this.determineUrl()
-        // this._rpc = new JsonRpc(url, { fetch:fetch as any })
-      }
-      if (!this._api) {
-        // this._api = new Api({ rpc:this._rpc, signatureProvider:this._signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() })
+      if (!this._web3) {
+        const url = this.determineUrl()
+        this._web3 = new Web3(url)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -94,22 +86,23 @@ export class EthereumChainState {
   }
 
   /** Retrieve lastest chain info including head block number and time */
-  public async getChainInfo(): Promise<any> {
-    const info = {
-      headBlockNumber: 0,
-      headBlockTime: 0,
-      version: '0',
-    } // TODO await this._rpc.get_info();
-    const { headBlockNumber, headBlockTime, version } = info
-
-    // this.ethChainInfo = info;
-    this._chainInfo = {
-      headBlockNumber,
-      headBlockTime: new Date(headBlockTime),
-      version,
-      nativeInfo: info,
+  public async getChainInfo(): Promise<ChainInfo> {
+    const info = await this._web3.eth.getBlock(EthereumBlockType.Latest)
+    const { gasLimit, gasUsed, number, timestamp } = info
+    try {
+      const nodeInfo = await this._web3.eth.getNodeInfo()
+      this._chainInfo = {
+        headBlockNumber: number,
+        headBlockTime: new Date(timestamp),
+        // Node information contains version example: 'Geth/v1.9.9-omnibus-e320ae4c-20191206/linux-amd64/go1.13.4'
+        version: nodeInfo,
+        nativeInfo: { gasLimit, gasUsed },
+      }
+      return this._chainInfo
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
+      throw chainError
     }
-    return info
   }
 
   // TODO: sort based on health info
@@ -119,169 +112,110 @@ export class EthereumChainState {
     return trimTrailingChars(url, '/')
   }
 
-  /* Retrieve a specific block from the chain */
-  public async getBlock(blockNumber: number): Promise<any> {
-    this.assertIsConnected()
-    const block = await this._rpc.get_block(blockNumber)
-    return block
+  /** Retrieve a specific block from the chain */
+  public async getBlock(blockNumber: EthereumBlockNumber): Promise<BlockTransactionString> {
+    try {
+      this.assertIsConnected()
+      const block = await this._web3.eth.getBlock(blockNumber)
+      return block
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.Block)
+      throw chainError
+    }
   }
 
-  /* Confirm that we've connected to the chain - throw if not */
+  /** Retrieve a the current price of gas from the chain */
+  public async getGasPrice(): Promise<number> {
+    try {
+      this.assertIsConnected()
+      const gasPrice = parseInt(await this._web3.eth.getGasPrice(), 10)
+      return gasPrice
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
+      throw chainError
+    }
+  }
+
+  /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
     if (!this._isConnected) {
       throwNewError('Not connected to chain')
     }
   }
 
-  /*  Retrieve a specific block from the chain */
-  public blockHasTransaction = (block: any, transactionId: number): boolean => {
+  /** Get transaction count for an address
+   *  Useful to calculate transaction nonce propery */
+  public async getTransactionCount(
+    address: EthereumAddress & string,
+    defaultBlock: EthereumBlockNumber,
+  ): Promise<number> {
+    try {
+      return this._web3.eth.getTransactionCount(ensureHexPrefix(address), defaultBlock)
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
+      throw chainError
+    }
+  }
+
+  /** Check if a block includes a transaction */
+  public blockHasTransaction = (block: BlockTransactionString, transactionId: string): boolean => {
     const { transactions } = block
-    const result = transactions?.find((transaction: any) => transaction?.trx?.id === transactionId)
+    const result = transactions?.includes(transactionId)
     return !!result
   }
 
-  /** Retrieve the default settings for chain communications */
-  static get defaultCommunicationSettings() {
-    return {
-      blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
-      checkInterval: DEFAULT_CHECK_INTERVAL,
-      getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
-    }
-  }
-
-  /** Broadcast a signed transaction to the chain */
-  async sendTransaction(
-    serializedTransaction: any,
-    signatures: string[],
-    waitForConfirm?: ConfirmType,
-    communicationSettings?: any,
-  ) {
-    // Default confirm to not wait for any block confirmations
-    const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
-
-    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
-      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
-    }
-
-    const signedTransaction = { signatures, serializedTransaction }
-    let transaction
-
-    try {
-      transaction = await this.rpc.push_transaction(signedTransaction)
-    } catch (error) {
-      const errString = mapChainError(error)
-      throw new Error(`Send Transaction Failure: ${errString}`)
-    }
-
-    if (useWaitForConfirm !== ConfirmType.None) {
-      transaction = await this.awaitTransaction(transaction, useWaitForConfirm, communicationSettings)
-    }
-
-    return transaction
-  }
-
-  /** Polls the chain until it finds a block that includes the specific transaction
-        Useful when committing sequential transactions with inter-dependencies (must wait for the first one to commit before submitting the next one)
-        transactionResponse: The response body from submitting the transaction to the chain (includes transaction Id and most recent chain block number)
-        waitForConfirm an enum that specifies how long to wait before 'confirming transaction' and resolving the promise with the tranasction results
-        blocksToCheck = the number of blocks to check, after committing the transaction, before giving up
-        checkInterval = the time between block checks in MS
-        getBlockAttempts = the number of failed attempts at retrieving a particular block, before giving up
-  */
-  async awaitTransaction(transactionResponse: any, waitForConfirm: ConfirmType, communicationSettings: any) {
-    // use default communicationSettings or whatever was passed-in in ChainSettings (via constructor)
-    const useCommunicationSettings = communicationSettings ?? {
-      ...EthereumChainState.defaultCommunicationSettings,
-      ...this.chainSettings?.communicationSettings,
-    }
-    const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
-
-    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
-      throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
-    }
-
-    const { head_block_num: preCommitHeadBlockNum } = await this.getChainInfo()
-
+  /** Submits the transaction to the chain and waits only until it gets a transaction hash
+   * Does not wait for the transaction to be finalized on the chain
+   */
+  sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
     return new Promise((resolve, reject) => {
-      let getBlockAttempt = 1
-      // get the chain's current head block number...
-      const { processed, transaction_id: transactionId } = transactionResponse || {}
-      // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
-      const { block_num: blockNum = preCommitHeadBlockNum } = processed || {}
-      const startingBlockNumToCheck = blockNum - 1
-
-      let blockNumToCheck = startingBlockNumToCheck
-      let inProgress = false
-
-      // Keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
-      // ... or until we reach a max number of blocks or block read attempts
-      const timer = setInterval(async () => {
-        try {
-          if (inProgress) return
-          inProgress = true
-          const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
-            blockNumToCheck,
-            transactionId,
-            waitForConfirm,
-          )
-          if (hasReachedConfirmLevel) {
-            this.resolveAwaitTransaction(resolve, timer, transactionResponse)
-          }
-          blockNumToCheck += 1
-        } catch (error) {
-          const mappedError = mapChainError(error)
-          if (mappedError.name === 'BlockDoesNotExist') {
-            // Try to read the specific block - up to getBlockAttempts times
-            if (getBlockAttempt >= maxBlockReadAttempts) {
-              this.rejectAwaitTransaction(
-                reject,
-                timer,
-                'maxBlockReadAttemptsTimeout',
-                `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
-              )
-              return
-            }
-            getBlockAttempt += 1
-          } else {
-            // re-throw error - not one we can handle here
-            throw mappedError
-          }
-        } finally {
-          inProgress = false
-        }
-        if (blockNumToCheck > startingBlockNumToCheck + blocksToCheck) {
-          this.rejectAwaitTransaction(
-            reject,
-            timer,
-            'maxBlocksTimeout',
-            `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-              blocksToCheck} seconds) starting with block num: ${startingBlockNumToCheck}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
-          )
-        }
-      }, checkInterval)
+      this._web3.eth
+        .sendSignedTransaction(signedTransaction)
+        .once('transactionHash', hash => {
+          resolve(hash)
+        })
+        .on('error', err => {
+          reject(err)
+        })
     })
   }
 
-  async hasReachedConfirmLevel(
-    nextBlockNumToCheck: number,
-    transactionId: number,
+  /** Broadcast a signed transaction to the chain
+  /* if ConfirmType.None, returns the transaction hash without waiting for further tx receipt
+  /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
+  */
+  async sendTransaction(
+    signedTransaction: string,
+    waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    waitForConfirm: ConfirmType,
-  ): Promise<boolean> {
-    const possibleTransactionBlock = await this.rpc.get_block(nextBlockNumToCheck)
-    const blockHasTransaction = this.blockHasTransaction(possibleTransactionBlock, transactionId)
-    return !!blockHasTransaction
+    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+  ) {
+    const sendReceipt: TransactionReceipt = {}
+
+    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
+      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
+    }
+
+    try {
+      // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
+      if (waitForConfirm === ConfirmType.None) {
+        sendReceipt.transactionHash = await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)
+      }
+      // returns transactionReceipt after submitting transaction AND waiting for a confirmation
+      if (waitForConfirm === ConfirmType.After001) {
+        sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
+      }
+    } catch (error) {
+      const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
+      throw chainError
+    }
+
+    return sendReceipt
   }
 
-  resolveAwaitTransaction = (resolve: any, timer: NodeJS.Timeout, transaction: any) => {
-    clearInterval(timer)
-    resolve(transaction)
-  }
-
-  rejectAwaitTransaction = (reject: any, timer: NodeJS.Timeout, errorName: string, errorMessage: string) => {
-    clearInterval(timer)
-    const error = new Error(errorMessage)
-    error.name = errorName
-    reject(error)
+  /** Return instance of Web3js API */
+  public get web3(): Web3 {
+    this.assertIsConnected()
+    return this._web3
   }
 }

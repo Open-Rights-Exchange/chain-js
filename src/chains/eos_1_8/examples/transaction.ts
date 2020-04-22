@@ -4,13 +4,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
-import { Chain, ChainFactory, ChainType } from '../src/index'
-import { ChainActionType, ChainEndpoint, ChainSettings, NewAccountType } from '../src/models'
-import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../src/chains/eos_1_8/helpers'
-import { EosAccount } from '../src/chains/eos_1_8/eosAccount'
-import { EosTransaction } from '../src/chains/eos_1_8/eosTransaction'
-import { ChainEosV18 } from '../src/chains/eos_1_8/ChainEosV18'
-import { toEncryptedDataString } from '../src/crypto'
+import { Chain, ChainFactory, ChainType } from '../../../index'
+import { ChainActionType, ConfirmType } from '../../../models'
+import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../helpers'
+import { EosAccount } from '../eosAccount'
+import { EosTransaction } from '../eosTransaction'
+import { ChainEosV18 } from '../ChainEosV18'
+import { toEncryptedDataString } from '../../../crypto'
 
 require('dotenv').config()
 
@@ -20,7 +20,7 @@ const prepTransactionFromActions = async (chain: Chain, transactionActions: any,
   console.log('actions:', transactionActions)
   const transaction = (chain as ChainEosV18).new.Transaction()
   transaction.actions = transactionActions
-  await transaction.generateSerialized()
+  await transaction.prepareToBeSigned()
   await transaction.validate()
   transaction.sign([key])
   if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
@@ -87,7 +87,7 @@ const { env } = process
 
   //  ---> set transaction from serialized
   // const transaction = kylin.new.Transaction({ blocksBehind: 10 })
-  // await transaction.setSerialized(serializedTransaction)
+  // await transaction.setFromRaw(serializedTransaction)
   // await transaction.validate()
   // console.log('missing signatures:', transaction.missingSignatures)
   // transaction.signatures = signatures
@@ -104,30 +104,30 @@ const { env } = process
   // const transaction = kylin.new.Transaction()
   // transaction.actions = [sampleActionFirstAuth]
   // // transaction.addAction(sampleActionFirstAuth, true)
-  // await transaction.generateSerialized()
+  // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', transaction.missingSignatures)
-  // console.log('send response:', await transaction.send())
+  // console.log('send response:', await transaction.send(ConfirmType.None))
 
   // ---> send token
   // const transaction = kylin.new.Transaction()
   // transaction.actions = [kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
   // // transaction.addAction(sampleActionFirstAuth, true)
-  // await transaction.generateSerialized()
+  // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
-  // console.log('send response:', await transaction.send())
+  // console.log('send response:', await transaction.send(ConfirmType.After001))
   // ----<
 
   // ---> demo transaction
   // const transaction = kylin.new.Transaction()
   // transaction.actions = [sampleActionsDemoApp]
   // // transaction.addAction(sampleActionFirstAuth, true)
-  // await transaction.generateSerialized()
+  // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
   // console.log('send response:', await transaction.send())
   // ----<
@@ -137,7 +137,7 @@ const { env } = process
   //   kylin.decrypt(ore1qctfkfhw_privateKeyEncrypted, '2233', ore1qctfkfhw_salt),
   // )
   // console.log('ore1qctfkfhw_sig:', ore1qctfkfhw_sig)
-  // transaction.sign([ore1qctfkfhw_sig])
+  // await transaction.sign([ore1qctfkfhw_sig])
   // console.log('sign buffer', transaction.signBuffer)
 
   // ----<

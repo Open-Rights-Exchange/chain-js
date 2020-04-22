@@ -1,4 +1,4 @@
-import { EosPublicKey, EosAccountKeysStruct } from './cryptoModels'
+import { EosPublicKey, EosAccountKeys } from './cryptoModels'
 import { ChainAssetBrand, ChainDateBrand, ChainEntityNameBrand, KeyPairEncrypted } from '../../../models'
 
 // using Enum 'brands' to force a string type to have a particular format
@@ -19,6 +19,33 @@ export type EosAuthorization = {
   publicKey?: EosPublicKey
 }
 
+/** Chain configuation for creating a new connection */
+export type EosChainSettings = {
+  createEscrowContract?: string
+  communicationSettings?: EosChainSettingsCommunicationSettings
+  defaultTransactionSettings?: {
+    blocksBehind: number
+    expireSeconds: number
+  }
+  fetch?: any
+  monitorType?: EosChainMonitorType
+  monitorUrl?: URL
+  unusedAccountPublicKey?: string
+}
+
+/** Monitor services listenting to the chain */
+export enum EosChainMonitorType {
+  NONE,
+  DFUSE,
+  DEMUX,
+}
+
+export type EosChainSettingsCommunicationSettings = {
+  blocksToCheck: number
+  checkInterval: number
+  getBlockAttempts: number
+}
+
 export type EosPermissionSimplified = {
   name: EosEntityName
   parent: EosEntityName
@@ -28,7 +55,7 @@ export type EosPermissionSimplified = {
 }
 
 export type EosGeneratedKeys = {
-  accountKeys: EosAccountKeysStruct
+  accountKeys: EosAccountKeys
   permissionKeys: EosGeneratedPermissionKeys[]
 }
 
@@ -44,7 +71,7 @@ export type EosNewKeysOptions = {
 
 export type EosPermission = {
   name: EosEntityName
-  parent: EosEntityName
+  parent: EosEntityName | ''
   firstPublicKey: EosPublicKey
   firstPublicKeyMeetsThreshold: boolean
   requiredAuth: EosRequiredAuthorization

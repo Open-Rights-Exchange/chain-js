@@ -3,7 +3,7 @@ module.exports = {
   // collectCoverageFrom: [
   //   'src/**/*.{js,jsx,ts}'
   // ],
-  roots: ['<rootDir>/src/chains/eos_1_8/tests', '<rootDir>/src/tests'],
+  roots: ['<rootDir>/src/chains/eos_1_8/tests', '<rootDir>/src/tests', '<rootDir>/src/chains/ethereum_1/tests'],
   setupFiles: ['<rootDir>/src/tests/setupJest.js'],
   testMatch: ['<rootDir>/src/**/?(*.)(spec|test).(js|jsx|ts|tsx)'],
   transform: {

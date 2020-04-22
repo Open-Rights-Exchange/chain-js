@@ -1,4 +1,5 @@
 import { parse, stringify } from 'flatted'
+import { TRANSACTION_ENCODING } from './constants'
 
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
@@ -28,6 +29,11 @@ export function stringifySafe(obj: any): any {
 // if converts a specially stringifyied string (created by stringifySafe) back into an object
 export function parseSafe(string: string): any {
   return parse(string)
+}
+
+// it converts the input data with the optionalspecified encoding  into a buffer object
+export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCODING) {
+  return Buffer.from(data, encoding)
 }
 
 /** filter values in array down to an array of a single, uniques value
@@ -70,6 +76,11 @@ export function isAnObject(obj: any) {
   return obj !== null && typeof obj === 'object'
 }
 
+/** Typescript Typeguard to verify that the value is in the enumType specified  */
+export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
+  return Object.values(enumType).includes(value as T[keyof T])
+}
+
 export function getUniqueValues<T>(array: T[]) {
   return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
 }
@@ -87,4 +98,12 @@ export const removeEmptyValuesInJsonObject = (obj: { [x: string]: any }) => {
     // eslint-disable-next-line no-param-reassign
     else if (isNullOrEmpty(obj[key])) delete obj[key] // delete the property
   })
+}
+
+export const notImplemented = () => {
+  throw new Error('Not Implemented')
+}
+
+export const notSupported = () => {
+  throw new Error('Not Supported')
 }
