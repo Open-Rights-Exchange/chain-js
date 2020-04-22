@@ -33,38 +33,14 @@ export enum ChainType {
   EthereumV1 = 'ethereum',
 }
 
-/** Monitor services listenting to the chain */
-export enum ChainMonitorType {
-  NONE,
-  DFUSE,
-  DEMUX,
-}
-
-/** Chain configuation for creating a new connection */
-export type ChainSettings = {
-  createEscrowContract?: string
-  communicationSettings?: {
-    blocksToCheck: number
-    checkInterval: number
-    getBlockAttempts: number
-  }
-  fetch?: any
-  monitorType?: ChainMonitorType
-  monitorUrl?: URL
-  unusedAccountPublicKey?: string
-  chainForkType?: ChainForkType
-}
-
-export type ChainForkType = {
-  chainName: string
-  hardFork: string
-}
-
 /** Chain urls and related details used to connect to chain */
 export type ChainEndpoint = {
+  /** api endpoint url - including http(s):// prefix */
   url: URL
-  health?: number /** between 0 and 1 - 0 is not responding, 1 is very fast */
-  settings?: ChainSettings
+  /** between 0 and 1 - 0 is not responding, 1 is very fast */
+  health?: number
+  /** settings for chain endpoint (chain-specific) */
+  settings?: any
 }
 
 /** Chain information including head block number and time and software version */
