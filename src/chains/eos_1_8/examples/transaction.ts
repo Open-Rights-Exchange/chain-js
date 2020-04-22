@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { ChainActionType } from '../../../models'
+import { ChainActionType, ConfirmType } from '../../../models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../helpers'
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'
@@ -108,7 +108,7 @@ const { env } = process
   // await transaction.validate()
   // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', transaction.missingSignatures)
-  // console.log('send response:', await transaction.send())
+  // console.log('send response:', await transaction.send(ConfirmType.None))
 
   // ---> send token
   // const transaction = kylin.new.Transaction()
@@ -118,7 +118,7 @@ const { env } = process
   // await transaction.validate()
   // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
-  // console.log('send response:', await transaction.send())
+  // console.log('send response:', await transaction.send(ConfirmType.After001))
   // ----<
 
   // ---> demo transaction

@@ -90,7 +90,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // // ---> Sign and send erc20 transfer Transaction
     // const transaction = await ropsten.new.Transaction()
@@ -100,7 +100,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // ---> Sign and send erc20 mint Transaction
     // const transaction = await ropsten.new.Transaction()
@@ -110,7 +110,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const transaction = await ropsten.new.Transaction()
@@ -119,7 +119,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
   } catch (error) {
     console.log(error)
   }

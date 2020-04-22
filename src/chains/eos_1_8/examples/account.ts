@@ -272,7 +272,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // if (createAccount.supportsTransactionToCreateAccount) {
   //   await createAccount.composeTransaction(EosNewAccountType.Native)
   //   await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  //   console.log('createAccount response: ', await createAccount.transaction.send())
+  //   console.log('createAccount response: ', await createAccount.transaction.send(ConfirmType.None))
   // }
   // console.log(createAccount.generatedKeys)
 
@@ -283,7 +283,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   //   await createAccount.composeTransaction(EosNewAccountType.NativeOre)
   //   await prepTransaction(oreStaging, createAccount.transaction, env.ORE_TESTNET_APPOREID_PRIVATE_KEY)
   //   console.log(JSON.stringify(createAccount.transaction.toJson()))
-  //   console.log('createAccount response: ', await createAccount.transaction.send())
+  //   console.log('createAccount response: ', await createAccount.transaction.send(ConfirmType.None))
   // }
   // console.log('generatedKeys:', createAccount.generatedKeys)
 
@@ -291,7 +291,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const createAccount = kylin.new.CreateAccount(createAccountOptions_virtualNested)
   // await createAccount.composeTransaction(EosNewAccountType.VirtualNested)
   // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_moonlightore_PRIVATE_KEY)
-  // console.log('createAccount response: ', await createAccount.transaction.send())
+  // console.log('createAccount response: ', await createAccount.transaction.send(ConfirmType.None))
 
   // // -----> Reset account to be recyclable
   // const recycleAccount = (await kylin.new.Account('ore1qadesjxm')) as EosAccount
@@ -305,7 +305,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('generated Keys:', generatedKeys)
   // console.log('actions:', actions)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 
   // -----> CreateAccount - recycle native Kylin account
   // const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
@@ -314,7 +314,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   //   const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
   //   await recycleAccount.composeTransaction(EosNewAccountType.Native)
   //   await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
-  //   console.log('createAccount response: ', await recycleAccount.transaction.send())
+  //   console.log('createAccount response: ', await recycleAccount.transaction.send(ConfirmType.None))
   // }
 
   // -------------------- Permissions -----------------------
@@ -329,13 +329,13 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // )
   // console.log('createAccount.generatedKeys:', JSON.stringify(generatedKeys))
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 
   // -----> Delete Permissions
   // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
   // const actions = await account.composeDeletePermissionsActions(toEosEntityName('owner'), accountDeletePermissions)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 
   // -----> Unlink and Delete Permissions
   // const account = (await kylin.new.Account('ore1qctfkfhw')) as EosAccount
@@ -343,17 +343,17 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // const actionsDelete = await account.composeDeletePermissionsActions(toEosEntityName('owner'), accountDeleteDemoPermissions)
   // const transaction = await prepTransactionFromActions(kylin, [...actionsUnlink, ...actionsDelete], env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // console.log('actionsDelete:', JSON.stringify(actionsDelete))
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 
   // -----> link Permissions
   // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
   // const actions = await account.composeLinkPermissionsActions(toEosEntityName('owner'), accountLinkPermissions)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 
   // -----> unlink Permissions
   // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
   // const actions = await account.composeUnlinkPermissionsActions(toEosEntityName('owner'), accountLinkPermissions)
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
-  // console.log('response:', await transaction.send())
+  // console.log('response:', await transaction.send(ConfirmType.None))
 })()
