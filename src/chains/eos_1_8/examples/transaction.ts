@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, ChainSettings, NewAccountType } from '../../../models'
+import { ChainActionType } from '../../../models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../helpers'
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'

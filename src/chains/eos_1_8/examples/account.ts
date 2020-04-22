@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainSettings, NewAccountType } from '../../../models'
 import {
   EosPrivateKey,
   EosNewAccountType,
