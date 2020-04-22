@@ -51,7 +51,7 @@ export interface Transaction {
   setFromRaw(raw: any): Promise<void>
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
-  send(waitForConfirm: ConfirmType, communicationSettings?: any): Promise<any>
+  send(waitForConfirm?: ConfirmType, communicationSettings?: any): Promise<any>
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>
   /** JSON representation of transaction data */
