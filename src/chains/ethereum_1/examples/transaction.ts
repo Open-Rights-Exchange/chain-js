@@ -4,10 +4,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType, Chain } from '../../../index'
-import { ChainActionType, ChainSettings, ChainEndpoint, ChainForkType, PrivateKey } from '../../../models'
+import { ChainActionType, ChainEndpoint, PrivateKey } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
 import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
-import { EthereumTransactionOptions, EthUnit, EthereumBlockType } from '../models'
+import {
+  EthereumChainSettings,
+  EthereumChainForkType,
+  EthereumTransactionOptions,
+  EthUnit,
+  EthereumBlockType,
+} from '../models'
 import { erc20Abi } from './data/exampleErc20Abi'
 
 require('dotenv').config()
@@ -33,7 +39,7 @@ const { env } = process
       },
     ]
 
-    const ropstenChainOptions: ChainForkType = {
+    const ropstenChainOptions: EthereumChainForkType = {
       chainName: 'ropsten',
       hardFork: 'istanbul',
     }
@@ -74,7 +80,7 @@ const { env } = process
 
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
       chainForkType: ropstenChainOptions,
-    } as ChainSettings)
+    } as EthereumChainSettings)
     await ropsten.connect()
 
     // // ---> Sign and send ethereum transfer with compose Action
@@ -84,7 +90,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // // ---> Sign and send erc20 transfer Transaction
     // const transaction = await ropsten.new.Transaction()
@@ -94,7 +100,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // ---> Sign and send erc20 mint Transaction
     // const transaction = await ropsten.new.Transaction()
@@ -104,7 +110,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const transaction = await ropsten.new.Transaction()
@@ -113,7 +119,7 @@ const { env } = process
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', await transaction.send())
+    // console.log('send response:', await transaction.send(ConfirmType.None))
   } catch (error) {
     console.log(error)
   }

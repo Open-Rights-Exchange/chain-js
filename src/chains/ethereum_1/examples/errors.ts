@@ -5,9 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainSettings, ChainForkType, ChainEndpoint, ChainErrorType } from '../../../models'
+import { ChainActionType, ChainEndpoint, ChainErrorType, ConfirmType } from '../../../models'
 import { toEthereumPrivateKey, toWei } from '../helpers'
-import { EthUnit } from '../models'
+import { EthereumChainSettings, EthereumChainForkType, EthUnit } from '../models'
 ;(async () => {
   try {
     const ropstenEndpoints: ChainEndpoint[] = [
@@ -16,7 +16,7 @@ import { EthUnit } from '../models'
       },
     ]
     const ropstenPrivate = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'
-    const ropstenChainOptions: ChainForkType = {
+    const ropstenChainOptions: EthereumChainForkType = {
       chainName: 'ropsten',
       hardFork: 'istanbul',
     }
@@ -28,7 +28,7 @@ import { EthUnit } from '../models'
 
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
       chainForkType: ropstenChainOptions,
-    } as ChainSettings)
+    } as EthereumChainSettings)
     await ropsten.connect()
 
     const transaction = await ropsten.new.Transaction()
@@ -37,7 +37,7 @@ import { EthUnit } from '../models'
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])
     console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('send response:', await transaction.send())
+    console.log('send response:', await transaction.send(ConfirmType.None))
   } catch (error) {
     if (error.errorType === ChainErrorType.TxExceededResources) {
       console.log('Expected error:', error.message)

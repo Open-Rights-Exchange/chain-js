@@ -19,6 +19,33 @@ export type EosAuthorization = {
   publicKey?: EosPublicKey
 }
 
+/** Chain configuation for creating a new connection */
+export type EosChainSettings = {
+  createEscrowContract?: string
+  communicationSettings?: EosChainSettingsCommunicationSettings
+  defaultTransactionSettings?: {
+    blocksBehind: number
+    expireSeconds: number
+  }
+  fetch?: any
+  monitorType?: EosChainMonitorType
+  monitorUrl?: URL
+  unusedAccountPublicKey?: string
+}
+
+/** Monitor services listenting to the chain */
+export enum EosChainMonitorType {
+  NONE,
+  DFUSE,
+  DEMUX,
+}
+
+export type EosChainSettingsCommunicationSettings = {
+  blocksToCheck: number
+  checkInterval: number
+  getBlockAttempts: number
+}
+
 export type EosPermissionSimplified = {
   name: EosEntityName
   parent: EosEntityName

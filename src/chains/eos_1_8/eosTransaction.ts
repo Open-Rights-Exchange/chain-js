@@ -1,8 +1,12 @@
 import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
+import { EosAccount } from './eosAccount'
 import { EosChainState } from './eosChainState'
+import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
+import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './helpers'
 import {
   EosAuthorization,
   EosActionStruct,
+  EosChainSettingsCommunicationSettings,
   EosPublicKey,
   EosEntityName,
   EosSignature,
@@ -11,12 +15,8 @@ import {
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK, DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS } from './eosConstants'
-import { EosAccount } from './eosAccount'
-import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
 import { ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
-import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './helpers'
 
 export type PublicKeyMapCache = {
   accountName: EosEntityName
@@ -53,8 +53,8 @@ export class EosTransaction implements Transaction {
   constructor(chainState: EosChainState, options?: EosTransactionOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
-    blocksBehind = blocksBehind ?? DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK
-    expireSeconds = expireSeconds ?? DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS
+    blocksBehind = blocksBehind ?? this._chainState?.chainSettings?.defaultTransactionSettings?.blocksBehind
+    expireSeconds = expireSeconds ?? this._chainState?.chainSettings?.defaultTransactionSettings?.expireSeconds
     this._options = { blocksBehind, expireSeconds }
   }
 
@@ -439,10 +439,18 @@ export class EosTransaction implements Transaction {
   // send
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
-  public async send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
+  public async send(
+    waitForConfirm: ConfirmType = ConfirmType.None,
+    communicationSettings?: EosChainSettingsCommunicationSettings,
+  ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    this._sendReceipt = this._chainState.sendTransaction(this._raw, this.signatures, waitForConfirm)
+    this._sendReceipt = this._chainState.sendTransaction(
+      this._raw,
+      this.signatures,
+      waitForConfirm,
+      communicationSettings,
+    )
     return this._sendReceipt
   }
 

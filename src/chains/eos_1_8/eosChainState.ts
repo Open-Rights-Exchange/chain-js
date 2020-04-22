@@ -6,16 +6,28 @@ import { ChainError, throwNewError, throwAndLogError } from '../../errors'
 import {
   ChainInfo,
   ChainEndpoint,
-  ChainSettings,
   ConfirmType,
   ChainErrorType,
   ChainErrorDetailCode,
   TransactionReceipt,
 } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
-import { EosSignature, EosEntityName, EOSGetTableRowsParams } from './models'
+import {
+  EosSignature,
+  EosEntityName,
+  EOSGetTableRowsParams,
+  EosChainSettings,
+  EosChainSettingsCommunicationSettings,
+} from './models'
 import { mapChainError } from './eosErrors'
-import { DEFAULT_BLOCKS_TO_CHECK, DEFAULT_GET_BLOCK_ATTEMPTS, DEFAULT_CHECK_INTERVAL } from './eosConstants'
+import {
+  CHAIN_BLOCK_FREQUENCY,
+  DEFAULT_BLOCKS_TO_CHECK,
+  DEFAULT_GET_BLOCK_ATTEMPTS,
+  DEFAULT_CHECK_INTERVAL,
+  DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK,
+  DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS,
+} from './eosConstants'
 
 export class EosChainState {
   private eosChainInfo: RpcInterfaces.GetInfoResult
@@ -24,7 +36,7 @@ export class EosChainState {
 
   private _chainInfo: ChainInfo
 
-  private _chainSettings: ChainSettings
+  private _chainSettings: EosChainSettings
 
   private _endpoints: ChainEndpoint[]
 
@@ -36,11 +48,28 @@ export class EosChainState {
 
   private _api: Api // EOSJS chain API endpoint
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
-    // TODO chainjs check for valid settings and throw if bad
+  constructor(endpoints: ChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
     // TODO chainjs check for valid settings and throw if bad
-    this._chainSettings = settings
+    this._chainSettings = this.applyDefaultSettings(settings)
+  }
+
+  /** apply default value - override defaults with incoming settings */
+  private applyDefaultSettings = (settings?: EosChainSettings): EosChainSettings => {
+    return {
+      ...settings,
+      communicationSettings: {
+        blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
+        checkInterval: DEFAULT_CHECK_INTERVAL,
+        getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
+        ...settings?.communicationSettings,
+      },
+      defaultTransactionSettings: {
+        blocksBehind: DEFAULT_TRANSACTION_BLOCKS_BEHIND_REF_BLOCK,
+        expireSeconds: DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS,
+        ...settings?.defaultTransactionSettings,
+      },
+    }
   }
 
   /** Return chain URL endpoints */
@@ -61,7 +90,7 @@ export class EosChainState {
   }
 
   /** Return chain settings */
-  public get chainSettings(): ChainSettings {
+  public get chainSettings(): EosChainSettings {
     return this._chainSettings
   }
 
@@ -222,11 +251,9 @@ export class EosChainState {
   async sendTransaction(
     serializedTransaction: any,
     signatures: EosSignature[],
-    waitForConfirm?: ConfirmType,
-    communicationSettings?: any,
+    waitForConfirm: ConfirmType = ConfirmType.None,
+    communicationSettings?: EosChainSettingsCommunicationSettings,
   ) {
-    // Default confirm to not wait for any block confirmations
-    const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
     if (
       waitForConfirm !== ConfirmType.None &&
       waitForConfirm !== ConfirmType.After001 &&
@@ -247,14 +274,14 @@ export class EosChainState {
       throw chainError
     }
 
-    if (useWaitForConfirm !== ConfirmType.None) {
+    if (waitForConfirm !== ConfirmType.None) {
       // starting block number should be the block number in the transaction receipt
       // ...if it doesnt have one (which can happen), get the latest head block from the chain via get info
       let startFromBlockNumber = sendReceipt?.processed?.block_num
       if (!startFromBlockNumber) {
         startFromBlockNumber = currentHeadBlock
       }
-      await this.awaitTransaction(sendReceipt, useWaitForConfirm, startFromBlockNumber, communicationSettings)
+      await this.awaitTransaction(sendReceipt, waitForConfirm, startFromBlockNumber, communicationSettings)
     }
     return sendReceipt
   }
@@ -272,16 +299,20 @@ export class EosChainState {
     transactionResponse: any,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: any,
+    communicationSettings: EosChainSettingsCommunicationSettings,
   ) {
-    // use default communicationSettings or whatever was passed-in in ChainSettings (via constructor)
+    // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
       ...EosChainState.defaultCommunicationSettings,
       ...this.chainSettings?.communicationSettings,
     }
     const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
 
-    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
+    if (
+      waitForConfirm !== ConfirmType.None &&
+      waitForConfirm !== ConfirmType.After001 &&
+      waitForConfirm !== ConfirmType.Final
+    ) {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
 
@@ -363,7 +394,11 @@ export class EosChainState {
         }
       }
       // check if we've met our limit rules
-      const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(transactionBlockNumber, waitForConfirm)
+      const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
+        transactionBlockNumber,
+        waitForConfirm,
+        blocksToCheck,
+      )
       if (hasReachedConfirmLevel) {
         this.resolveAwaitTransaction(resolve, transactionResponse)
         return
@@ -422,9 +457,14 @@ export class EosChainState {
   }
 
   /** block has reached the confirmation level requested */
-  hasReachedConfirmLevel = async (transactionBlockNumber: number, waitForConfirm: ConfirmType): Promise<boolean> => {
+  hasReachedConfirmLevel = async (
+    transactionBlockNumber: number,
+    waitForConfirm: ConfirmType,
+    blocksToCheck: number,
+  ): Promise<boolean> => {
     // check that we've reached the required number of confirms
-    let chainInfo
+    let lastIrreversibleBlockNum: number
+    let blocksTillIrreversible: number
     switch (waitForConfirm) {
       case ConfirmType.None:
         return true
@@ -435,10 +475,20 @@ export class EosChainState {
         throw new Error('Not Implemented')
       case ConfirmType.After010:
         throw new Error('Not Implemented')
-      // ConfirmType.Final is impractical to use - would wait for 2mins on EOS chain
+      // ConfirmType.Final might be impractical to use - could wait for 2mins on EOS chain
       case ConfirmType.Final:
-        chainInfo = await this.getChainInfo()
-        return transactionBlockNumber <= chainInfo?.last_irreversible_block_num
+        // don't have a transactionBlockNumber yet
+        if (!transactionBlockNumber) return false
+        lastIrreversibleBlockNum = (await this.getChainInfo())?.last_irreversible_block_num
+        // check if blocksToCheck allows us to read enough blocks to get to final confirm
+        blocksTillIrreversible = transactionBlockNumber - lastIrreversibleBlockNum
+        if (blocksTillIrreversible > blocksToCheck) {
+          throw new Error(
+            `Process will 'time-out' before reaching final confirmation. It would take ${blocksTillIrreversible} blocks to get to the lastIrreversibleBlock (taking ${blocksTillIrreversible *
+              CHAIN_BLOCK_FREQUENCY} seconds) but blocksToCheck setting is only ${blocksToCheck}. To use ConfirmType.Final (which is not recommended), increase communicationsSettings.blocksToCheck to be at least ${blocksTillIrreversible}`,
+          )
+        }
+        return transactionBlockNumber <= lastIrreversibleBlockNum
       default:
         return false
     }

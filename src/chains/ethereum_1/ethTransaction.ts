@@ -15,6 +15,7 @@ import {
   EthereumAddress,
   EthereumPublicKey,
   EthereumBlockType,
+  EthereumChainSettingsCommunicationSettings,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty } from '../../helpers'
@@ -380,13 +381,20 @@ export class EthereumTransaction implements Transaction {
 
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
-  public send(waitForConfirm: ConfirmType = ConfirmType.None): Promise<any> {
+  public send(
+    waitForConfirm: ConfirmType = ConfirmType.None,
+    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+  ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
     const signedTransaction = this._raw.serialize()
 
-    return this._chainState.sendTransaction(`0x${signedTransaction.toString('hex')}`, waitForConfirm)
+    return this._chainState.sendTransaction(
+      `0x${signedTransaction.toString('hex')}`,
+      waitForConfirm,
+      communicationSettings,
+    )
   }
 
   // helpers

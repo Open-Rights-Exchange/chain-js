@@ -1,10 +1,17 @@
 import Web3 from 'web3'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ChainSettings, ConfirmType, TransactionReceipt } from '../../models'
+import { ChainInfo, ChainEndpoint, ConfirmType, TransactionReceipt } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
-import { ChainFunctionCategory, EthereumAddress, EthereumBlockNumber, EthereumBlockType } from './models'
+import {
+  ChainFunctionCategory,
+  EthereumAddress,
+  EthereumBlockNumber,
+  EthereumBlockType,
+  EthereumChainSettings,
+  EthereumChainSettingsCommunicationSettings,
+} from './models'
 import { ensureHexPrefix } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
@@ -17,7 +24,7 @@ export class EthereumChainState {
 
   private _chainInfo: ChainInfo
 
-  private _chainSettings: ChainSettings
+  private _chainSettings: EthereumChainSettings
 
   private _endpoints: ChainEndpoint[]
 
@@ -25,7 +32,7 @@ export class EthereumChainState {
 
   private _web3: Web3 // Ethereum chain api endpoint
 
-  constructor(endpoints: ChainEndpoint[], settings?: ChainSettings) {
+  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._chainSettings = settings
   }
@@ -48,7 +55,7 @@ export class EthereumChainState {
   }
 
   /** Return chain settings */
-  public get chainSettings(): ChainSettings {
+  public get chainSettings(): EthereumChainSettings {
     return this._chainSettings
   }
 
@@ -177,21 +184,25 @@ export class EthereumChainState {
   /* if ConfirmType.None, returns the transaction hash without waiting for further tx receipt
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
   */
-  async sendTransaction(signedTransaction: string, waitForConfirm?: ConfirmType) {
-    // Default confirm to not wait for any block confirmations
-    const useWaitForConfirm = waitForConfirm ?? ConfirmType.None
+  async sendTransaction(
+    signedTransaction: string,
+    waitForConfirm: ConfirmType = ConfirmType.None,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+  ) {
     const sendReceipt: TransactionReceipt = {}
-    if (useWaitForConfirm !== ConfirmType.None && useWaitForConfirm !== ConfirmType.After001) {
+
+    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
 
     try {
       // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
-      if (useWaitForConfirm === ConfirmType.None) {
+      if (waitForConfirm === ConfirmType.None) {
         sendReceipt.transactionHash = await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
-      if (useWaitForConfirm === ConfirmType.After001) {
+      if (waitForConfirm === ConfirmType.After001) {
         sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
       }
     } catch (error) {

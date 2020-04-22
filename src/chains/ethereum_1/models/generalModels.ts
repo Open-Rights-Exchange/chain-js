@@ -18,6 +18,19 @@ export enum EthereumBlockType {
   Pending = 'pending',
 }
 
+/** Chain configuation for creating a new chain connection and sending transaction */
+export type EthereumChainSettings = {
+  chainForkType?: EthereumChainForkType
+}
+
+export type EthereumChainForkType = {
+  chainName: string
+  hardFork: string
+}
+
+/** For future use - add any settings needed to customize communication with API endpoint */
+export type EthereumChainSettingsCommunicationSettings = {}
+
 export type EthereumAsset = BN & ChainAssetBrand
 export type EthereumBlockNumber = string | number | BN | BigNumber | EthereumBlockType
 export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
