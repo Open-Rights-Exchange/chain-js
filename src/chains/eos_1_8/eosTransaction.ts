@@ -330,7 +330,7 @@ export class EosTransaction implements Transaction {
     this.assertIsValidated()
     if (isNullOrEmpty(privateKeys)) return
     privateKeys.forEach(pk => {
-      if (!isValidEosPrivateKey) {
+      if (!isValidEosPrivateKey(pk)) {
         throwNewError(`Sign Transaction Failure - Private key :${pk} is not valid EOS private key`)
       }
     })
