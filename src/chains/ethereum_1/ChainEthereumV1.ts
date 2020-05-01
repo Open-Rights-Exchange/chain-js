@@ -25,6 +25,7 @@ import {
   EthereumPublicKey,
   EthereumAddress,
   EthereumDate,
+  EthereumTransactionAction,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -83,6 +84,12 @@ class ChainEthereumV1 implements Chain {
 
   public composeAction = (actionType: ChainActionType | EthereumChainActionType, args: any): any => {
     return composeAction(actionType, args)
+  }
+
+  public decomposeAction = (
+    action: EthereumTransactionAction,
+  ): { chainActionType: ChainActionType | EthereumChainActionType; args: any } => {
+    return this.decomposeAction(action)
   }
 
   // eslint-disable-next-line class-methods-use-this

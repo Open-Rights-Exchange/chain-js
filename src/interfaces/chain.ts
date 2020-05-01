@@ -31,6 +31,8 @@ export interface Chain {
   connect(): Promise<void>
   /** Compose an object for a chain contract action */
   composeAction(chainActionType: any, args: any): any
+  /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
+  decomposeAction(action: any): { chainActionType: any; args: any }
   /** Fetch data from an on-chain contract table */
   fetchContractData(
     contract: string,

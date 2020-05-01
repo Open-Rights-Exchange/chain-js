@@ -3,7 +3,10 @@ import { ChainActionType } from '../../models'
 import { action as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { action as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
 import { action as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
-import { action as AccountUnlinkAuthTemplate } from './templates/chainActions/account_unlinkAuth'
+import {
+  composeAction as AccountUnlinkAuthTemplate_Compose,
+  decomposeAction as AccountUnlinkAuthTemplate_Decompose,
+} from './templates/chainActions/account_unlinkAuth'
 import { action as AccountUpdateAuthTemplate } from './templates/chainActions/account_updateAuth'
 import { action as CreateEscrowCreateTemplate } from './templates/chainActions/createEscrow_create'
 import { action as CreateEscrowDefineTemplate } from './templates/chainActions/createEscrow_define'
@@ -23,30 +26,66 @@ import { action as TokenTransferFromTemplate } from './templates/chainActions/to
 export const enum EosChainActionType {}
 
 // map a key name to a function that returns an object
-export const ChainAction: { [key: string]: (args: any) => any } = {
-  AccountCreate: AccountCreateTemplate,
-  AccountDeleteAuth: AccountDeleteAuthTemplate,
-  AccountLinkAuth: AccountLinkAuthTemplate,
-  AccountUnlinkAuth: AccountUnlinkAuthTemplate,
-  AccountUpdateAuth: AccountUpdateAuthTemplate,
-  CreateEscrowCreate: CreateEscrowCreateTemplate,
-  CreateEscrowDefine: CreateEscrowDefineTemplate,
-  CreateEscrowInit: CreateEscrowInitTemplate,
-  CreateEscrowReclaim: CreateEscrowReclaimTemplate,
-  CreateEscrowTransfer: CreateEscrowTransferTemplate,
-  CreateEscrowWhitelist: CreateEscrowWhitelistTemplate,
-  OreCreateAccount: OreCreateAccountTemplate,
-  OreUpsertRight: OreUpsertRightTemplate,
-  TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
-  TokenTransfer: TokenTransferTemplate,
-  TokenTransferFrom: TokenTransferFromTemplate,
+export const ComposeAction: { [key: string]: (args: any) => any } = {
+  AccountCreate: AccountCreateTemplate_Compose,
+  AccountDeleteAuth: AccountDeleteAuthTemplate_Compose,
+  AccountLinkAuth: AccountLinkAuthTemplate_Compose,
+  AccountUnlinkAuth: AccountUnlinkAuthTemplate_Compose,
+  AccountUpdateAuth: AccountUpdateAuthTemplate_Compose,
+  CreateEscrowCreate: CreateEscrowCreateTemplate_Compose,
+  CreateEscrowDefine: CreateEscrowDefineTemplate_Compose,
+  CreateEscrowInit: CreateEscrowInitTemplate_Compose,
+  CreateEscrowReclaim: CreateEscrowReclaimTemplate_Compose,
+  CreateEscrowTransfer: CreateEscrowTransferTemplate_Compose,
+  CreateEscrowWhitelist: CreateEscrowWhitelistTemplate_Compose,
+  OreCreateAccount: OreCreateAccountTemplate_Compose,
+  OreUpsertRight: OreUpsertRightTemplate_Compose,
+  TokenApprove: TokenApproveTemplate_Compose,
+  TokenCreate: TokenCreateTemplate_Compose,
+  TokenIssue: TokenIssueTemplate_Compose,
+  TokenRetire: TokenRetireTemplate_Compose,
+  TokenTransfer: TokenTransferTemplate_Compose,
+  TokenTransferFrom: TokenTransferFromTemplate_Compose,
 }
 
-export function composeAction(actionType: ChainActionType | EosChainActionType, args: any): any {
+// map a key name to a function that returns an object
+export const DecomposeAction: { [key: string]: (args: any) => any } = {
+  AccountCreate: AccountCreateTemplate_Decompose,
+  AccountDeleteAuth: AccountDeleteAuthTemplate_Decompose,
+  AccountLinkAuth: AccountLinkAuthTemplate_Decompose,
+  AccountUnlinkAuth: AccountUnlinkAuthTemplate_Decompose,
+  AccountUpdateAuth: AccountUpdateAuthTemplate_Decompose,
+  CreateEscrowCreate: CreateEscrowCreateTemplate_Decompose,
+  CreateEscrowDefine: CreateEscrowDefineTemplate_Decompose,
+  CreateEscrowInit: CreateEscrowInitTemplate_Decompose,
+  CreateEscrowReclaim: CreateEscrowReclaimTemplate_Decompose,
+  CreateEscrowTransfer: CreateEscrowTransferTemplate_Decompose,
+  CreateEscrowWhitelist: CreateEscrowWhitelistTemplate_Decompose,
+  OreCreateAccount: OreCreateAccountTemplate_Decompose,
+  OreUpsertRight: OreUpsertRightTemplate_Decompose,
+  TokenApprove: TokenApproveTemplate_Decompose,
+  TokenCreate: TokenCreateTemplate_Decompose,
+  TokenIssue: TokenIssueTemplate_Decompose,
+  TokenRetire: TokenRetireTemplate_Decompose,
+  TokenTransfer: TokenTransferTemplate_Decompose,
+  TokenTransferFrom: TokenTransferFromTemplate_Decompose,
+}
+
+export function composeAction(chainActionType: ChainActionType | EosChainActionType, args: any): any {
   // const composerFunction = ChainActionType[actionType];
-  const composerFunction = ChainAction[actionType as string]
+  const composerFunction = ComposeAction[chainActionType as string]
   return composerFunction(args)
+}
+
+export function decomposeAction(action: any): { chainActionType: ChainActionType | EosChainActionType; args: any } {
+  // const composerFunction = ChainActionType[actionType];
+
+  // LOOP  through every DecomposeAction and call it and check if it returns a actionType, if it does, return actionType and args
+  // ... loop
+  //... const decomposerFunction = DecomposeAction[action as any]
+  // { actionType, args } = decomposerFunction(action)
+  // if (actionType) {
+  //  return { chainActionType: actionType, args }
+  // ... continue loop
+
 }
