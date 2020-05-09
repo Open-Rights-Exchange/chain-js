@@ -1,3 +1,4 @@
+import { TransactionReceipt } from 'web3-core'
 import { BN } from 'ethereumjs-util'
 import { EthereumValue } from './generalModels'
 
@@ -62,3 +63,12 @@ export type EthereumTxData = (string | Buffer) & EthereumTxDataBrand
 export enum EthereumTxDataBrand {
   _ = '',
 }
+
+/** Payload returned after sending transaction to chain */
+export type EthereumTxResult = {
+  transactionId: string
+  chainResponse: EthereumTxChainResponse
+}
+
+/** Response from chain after sending transaction */
+export type EthereumTxChainResponse = TransactionReceipt
