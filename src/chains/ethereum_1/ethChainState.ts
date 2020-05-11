@@ -12,6 +12,7 @@ import {
   EthereumChainSettings,
   EthereumChainSettingsCommunicationSettings,
   EthereumTxResult,
+  EthereumTxChainResponse,
 } from './models'
 import { ensureHexPrefix } from './helpers'
 
@@ -206,7 +207,9 @@ export class EthereumChainState {
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        sendResult.chainResponse = await this._web3.eth.sendSignedTransaction(signedTransaction)
+        sendResult.chainResponse = (await this._web3.eth.sendSignedTransaction(
+          signedTransaction,
+        )) as EthereumTxChainResponse
         sendResult.transactionId = sendResult?.chainResponse?.transactionHash
       }
     } catch (error) {
