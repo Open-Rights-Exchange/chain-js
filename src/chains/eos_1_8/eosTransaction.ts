@@ -11,7 +11,7 @@ import {
   EosEntityName,
   EosSignature,
   EosPrivateKey,
-  EosTransactionOptions,
+  EosTxOptions,
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
@@ -35,7 +35,7 @@ export class EosTransaction implements Transaction {
 
   private _header: any
 
-  private _options: EosTransactionOptions
+  private _options: EosTxOptions
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
@@ -50,7 +50,7 @@ export class EosTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  constructor(chainState: EosChainState, options?: EosTransactionOptions) {
+  constructor(chainState: EosChainState, options?: EosTxOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
     blocksBehind = blocksBehind ?? this._chainState?.chainSettings?.defaultTransactionSettings?.blocksBehind
@@ -330,7 +330,7 @@ export class EosTransaction implements Transaction {
     this.assertIsValidated()
     if (isNullOrEmpty(privateKeys)) return
     privateKeys.forEach(pk => {
-      if (!isValidEosPrivateKey) {
+      if (!isValidEosPrivateKey(pk)) {
         throwNewError(`Sign Transaction Failure - Private key :${pk} is not valid EOS private key`)
       }
     })

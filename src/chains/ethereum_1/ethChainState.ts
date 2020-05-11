@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ConfirmType, TransactionReceipt } from '../../models'
+import { ChainInfo, ChainEndpoint, ConfirmType } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
@@ -11,6 +11,7 @@ import {
   EthereumBlockType,
   EthereumChainSettings,
   EthereumChainSettingsCommunicationSettings,
+  EthereumTxResult,
 } from './models'
 import { ensureHexPrefix } from './helpers'
 
@@ -189,8 +190,8 @@ export class EthereumChainState {
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: EthereumChainSettingsCommunicationSettings,
-  ) {
-    const sendReceipt: TransactionReceipt = {}
+  ): Promise<EthereumTxResult> {
+    const sendResult: Partial<EthereumTxResult> = {}
 
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
@@ -199,18 +200,21 @@ export class EthereumChainState {
     try {
       // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
       if (waitForConfirm === ConfirmType.None) {
-        sendReceipt.transactionHash = await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)
+        const transactionHash = (await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)) as string
+        sendResult.chainResponse = null
+        sendResult.transactionId = transactionHash
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        sendReceipt.transactionReceipt = await this._web3.eth.sendSignedTransaction(signedTransaction)
+        sendResult.chainResponse = await this._web3.eth.sendSignedTransaction(signedTransaction)
+        sendResult.transactionId = sendResult?.chainResponse?.transactionHash
       }
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
     }
 
-    return sendReceipt
+    return sendResult as EthereumTxResult
   }
 
   /** Return instance of Web3js API */

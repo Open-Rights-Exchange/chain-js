@@ -100,7 +100,6 @@ const { env } = process
   // ----<
 
   // ---> set transaction from actions
-
   // const transaction = kylin.new.Transaction()
   // transaction.actions = [sampleActionFirstAuth]
   // // transaction.addAction(sampleActionFirstAuth, true)
@@ -108,7 +107,8 @@ const { env } = process
   // await transaction.validate()
   // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', transaction.missingSignatures)
-  // console.log('send response:', await transaction.send(ConfirmType.None))
+  // const txResponse = await transaction.send()
+  // console.log('send response:', JSON.stringify(txResponse))
 
   // ---> send token
   // const transaction = kylin.new.Transaction()
@@ -118,7 +118,8 @@ const { env } = process
   // await transaction.validate()
   // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
-  // console.log('send response:', await transaction.send(ConfirmType.After001))
+  // const txResponse = await transaction.send(ConfirmType.After001)
+  // console.log('send response:', JSON.stringify(txResponse))
   // ----<
 
   // ---> demo transaction
@@ -129,7 +130,8 @@ const { env } = process
   // await transaction.validate()
   // await transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
-  // console.log('send response:', await transaction.send())
+  // const txResponse = await transaction.send()
+  // console.log('send response:', JSON.stringify(txResponse))
   // ----<
 
   // add user's signature from encrypted key
