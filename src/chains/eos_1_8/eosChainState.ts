@@ -3,14 +3,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { ChainError, throwNewError, throwAndLogError } from '../../errors'
-import {
-  ChainInfo,
-  ChainEndpoint,
-  ConfirmType,
-  ChainErrorType,
-  ChainErrorDetailCode,
-  TransactionReceipt,
-} from '../../models'
+import { ChainInfo, ChainEndpoint, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import {
   EosSignature,
@@ -18,6 +11,7 @@ import {
   EOSGetTableRowsParams,
   EosChainSettings,
   EosChainSettingsCommunicationSettings,
+  EosTxResult,
 } from './models'
 import { mapChainError } from './eosErrors'
 import {
@@ -253,7 +247,7 @@ export class EosChainState {
     signatures: EosSignature[],
     waitForConfirm: ConfirmType = ConfirmType.None,
     communicationSettings?: EosChainSettingsCommunicationSettings,
-  ) {
+  ): Promise<EosTxResult> {
     if (
       waitForConfirm !== ConfirmType.None &&
       waitForConfirm !== ConfirmType.After001 &&
@@ -263,12 +257,14 @@ export class EosChainState {
     }
 
     const signedTransaction = { signatures, serializedTransaction }
-    let sendReceipt: TransactionReceipt
+    // payload to return from this function
+    const sendResult: Partial<EosTxResult> = {}
 
     // get the head block just before sending the transaction
     const currentHeadBlock = await this.getChainInfo()
     try {
-      sendReceipt = await this.rpc.push_transaction(signedTransaction)
+      sendResult.chainResponse = await this.rpc.push_transaction(signedTransaction)
+      sendResult.transactionId = sendResult.chainResponse?.transaction_id
     } catch (error) {
       const chainError = mapChainError(error)
       throw chainError
@@ -277,18 +273,23 @@ export class EosChainState {
     if (waitForConfirm !== ConfirmType.None) {
       // starting block number should be the block number in the transaction receipt
       // ...if it doesnt have one (which can happen), get the latest head block from the chain via get info
-      let startFromBlockNumber = sendReceipt?.processed?.block_num
+      let startFromBlockNumber = sendResult?.chainResponse?.processed?.block_num
       if (!startFromBlockNumber) {
         startFromBlockNumber = currentHeadBlock
       }
-      await this.awaitTransaction(sendReceipt, waitForConfirm, startFromBlockNumber, communicationSettings)
+      await this.awaitTransaction(
+        sendResult as EosTxResult,
+        waitForConfirm,
+        startFromBlockNumber,
+        communicationSettings,
+      )
     }
-    return sendReceipt
+    return sendResult as EosTxResult
   }
 
   /** Polls the chain until it finds a block that includes the specific transaction
         Useful when committing sequential transactions with inter-dependencies (must wait for the first one to commit before submitting the next one)
-        transactionResponse: The response body from submitting the transaction to the chain (includes transaction Id and most recent chain block number)
+        transactionResult: The value return to the function calling sendTransaction() - includes response body from submitting the transaction to the chain and transactionId
         waitForConfirm an enum that specifies how long to wait before 'confirming transaction' and resolving the promise with the tranasction results
         startFromBlockNumber = first block to start looking for the transaction to appear in
         blocksToCheck = the number of blocks to check, after committing the transaction, before giving up
@@ -296,7 +297,7 @@ export class EosChainState {
         getBlockAttempts = the number of failed attempts at retrieving a particular block, before giving up
   */
   private async awaitTransaction(
-    transactionResponse: any,
+    transactionResult: EosTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
     communicationSettings: EosChainSettingsCommunicationSettings,
@@ -322,8 +323,7 @@ export class EosChainState {
 
     return new Promise((resolve, reject) => {
       const getBlockAttempt = 1
-      // get the chain's current head block number...
-      const { transaction_id: transactionId } = transactionResponse || {}
+      const { transactionId } = transactionResult || {}
       // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
       const nextBlockNumToCheck = startFromBlockNumber - 1
 
@@ -343,7 +343,7 @@ export class EosChainState {
             startFromBlockNumber,
             null,
             transactionId,
-            transactionResponse,
+            transactionResult,
             waitForConfirm,
           ),
         checkInterval,
@@ -364,7 +364,7 @@ export class EosChainState {
     startFromBlockNumber: number,
     transactionBlockNumberParam: number,
     transactionId: string,
-    transactionResponse: any,
+    transactionResult: EosTxResult,
     waitForConfirm: ConfirmType,
   ) {
     let transactionBlockNumber = transactionBlockNumberParam
@@ -400,7 +400,7 @@ export class EosChainState {
         blocksToCheck,
       )
       if (hasReachedConfirmLevel) {
-        this.resolveAwaitTransaction(resolve, transactionResponse)
+        this.resolveAwaitTransaction(resolve, transactionResult)
         return
       }
       nextBlockNumToCheck = blockNumToCheck + 1
@@ -449,7 +449,7 @@ export class EosChainState {
           startFromBlockNumber,
           transactionBlockNumber,
           transactionId,
-          transactionResponse,
+          transactionResult,
           waitForConfirm,
         ),
       checkAgainInMs,
