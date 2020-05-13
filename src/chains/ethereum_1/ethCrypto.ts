@@ -1,13 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
 import Wallet from 'ethereumjs-wallet'
+import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
+import * as aesCrypto from '../../crypto/aesCrypto'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
 import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer } from './helpers/generalHelpers'
-import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
 // eslint-disable-next-line import/no-cycle
 import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
+import { EncryptedDataString } from '../../models'
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  return aesCrypto.isEncryptedDataString(value)
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toEncryptedDataString(value: any): EncryptedDataString {
+  return aesCrypto.toEncryptedDataString(value)
+}
+
+/** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+ * The encrypted value is either a stringified JSON object or a JSON object */
+export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
+  return aesCrypto.decrypt(encrypted, password, salt)
+}
+
+/** Encrypts a string using a password and salt */
+export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
+  return aesCrypto.encrypt(unencrypted, password, salt)
+}
 
 /** Signs data with ethereum private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
