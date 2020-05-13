@@ -1,4 +1,3 @@
-import * as crypto from './crypto'
 import { ChainFactory } from './chainFactory'
 import { ChainError } from './errors'
 import { Account, Chain, CreateAccount, Transaction } from './interfaces'
@@ -21,7 +20,6 @@ export {
   ChainFactory,
   ChainType,
   CreateAccount,
-  crypto,
   EosV18,
   Ethereum10,
   Models,
