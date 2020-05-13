@@ -10,7 +10,7 @@ import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '..
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'
 import { ChainEosV18 } from '../ChainEosV18'
-import { toEncryptedDataString } from '../../../crypto'
+import { toEncryptedDataString } from '../../../crypto/aesCrypto'
 
 require('dotenv').config()
 
