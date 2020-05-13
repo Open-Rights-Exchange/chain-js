@@ -1,16 +1,34 @@
 import * as ecc from 'eosjs-ecc'
-import { isEncryptedDataString, encrypt, toEncryptedDataString } from '../../crypto'
+import * as aesCrypto from '../../crypto/aesCrypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
-import { KeyPair, KeyPairEncrypted, Signature } from '../../models'
+import { KeyPair, KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
 
 const { Keygen } = require('eosjs-keygen')
 
-// OREJS Ported functions
-// generateAndEncryptOwnerActiveKeys() {} // generateEncryptedKeys
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  return aesCrypto.isEncryptedDataString(value)
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toEncryptedDataString(value: any): EncryptedDataString {
+  return aesCrypto.toEncryptedDataString(value)
+}
+
+/** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+ * The encrypted value is either a stringified JSON object or a JSON object */
+export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
+  return aesCrypto.decrypt(encrypted, password, salt)
+}
+
+/** Encrypts a string using a password and salt */
+export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
+  return aesCrypto.encrypt(unencrypted, password, salt)
+}
 
 export function sign(
   data: string | Buffer,
