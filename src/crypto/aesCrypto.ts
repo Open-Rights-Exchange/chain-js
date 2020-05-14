@@ -1,16 +1,6 @@
 import sjcl from 'sjcl'
-import { EncryptedDataString } from './models'
-import { isAString } from './helpers'
-
-/** Convert a string to a sjcl.BitArray */
-export function stringToBitArray(value: string): sjcl.BitArray {
-  return sjcl.codec.base64.toBits(value)
-}
-
-/** Convert sjcl.BitArray to a string */
-export function bitArrayToString(value: sjcl.BitArray): string {
-  return sjcl.codec.base64.fromBits(value)
-}
+import { EncryptedDataString } from '../models'
+import { isAString } from '../helpers'
 
 // casting and type conversion
 
@@ -29,16 +19,23 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
   throw new Error(`Not valid encrypted data string:${value}`)
 }
 
+/** Convert a string to a sjcl.BitArray */
+export function stringToBitArray(value: string): sjcl.BitArray {
+  return sjcl.codec.base64.toBits(value)
+}
+
+/** Convert sjcl.BitArray to a string */
+export function bitArrayToString(value: sjcl.BitArray): string {
+  return sjcl.codec.base64.fromBits(value)
+}
+
+// decrypt and encrypt
+
 // NOTE Passing in at least an empty string for the salt, will prevent cached keys, which can lead to false positives in the test suite
 /** Derive the key used for encryption/decryption */
 export function deriveKey(password: string, salt: string): sjcl.BitArray {
-  // Alternative way of handling salt - does not work with existing encypted values
-  // const saltArray = stringToBitArray(salt || '')
-  // const params = { iter: 1000, salt: saltArray }
   const params = { iter: 1000, salt }
   const { key } = sjcl.misc.cachedPbkdf2(password, params)
-  // Alternative way of handling salt - part 2 - convert the key:BitArray returned from cachedPbkdf2 into a string
-  // const keyString = bitArrayToString(key); return keyString;
   return key
 }
 

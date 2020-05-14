@@ -14,7 +14,6 @@ import {
 } from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
-import * as crypto from '../../crypto'
 import * as eoscrypto from './eosCrypto'
 import { EosChainState } from './eosChainState'
 import { mapChainError } from './eosErrors'
@@ -141,11 +140,11 @@ class ChainEosV18 implements Chain {
 
   /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt = crypto.decrypt
+  decrypt = eoscrypto.decrypt
 
   /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = crypto.encrypt
+  encrypt = eoscrypto.encrypt
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (
@@ -157,10 +156,10 @@ class ChainEosV18 implements Chain {
   }
 
   /** Verifies that the value is a valid, stringified JSON ciphertext */
-  isValidEncryptedData = crypto.isEncryptedDataString
+  isValidEncryptedData = eoscrypto.isEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
-  toEncryptedDataString = crypto.toEncryptedDataString
+  toEncryptedDataString = eoscrypto.toEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {
