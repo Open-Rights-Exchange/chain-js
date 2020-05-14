@@ -1,4 +1,7 @@
 import { EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'unlinkauth'
 
 interface unlinkAuthParams {
   action: string
@@ -9,7 +12,7 @@ interface unlinkAuthParams {
 
 export const composeAction = ({ action, authAccount, authPermission, contract }: unlinkAuthParams) => ({
   account: 'eosio',
-  name: 'unlinkauth',
+  name: actionName,
   authorization: [
     {
       actor: authAccount,
@@ -24,8 +27,14 @@ export const composeAction = ({ action, authAccount, authPermission, contract }:
 })
 
 export const decomposeAction = (action: any) => {
-  // const actionLength = action.length
-  // if (actionLength) {
+  const { name, data } = action
 
-  // }
+  if (name === actionName && data?.account && data?.code && data?.type) {
+    return {
+      actionType: ChainActionType.AccountUnlinkAuth,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

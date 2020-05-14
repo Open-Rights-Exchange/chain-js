@@ -1,4 +1,7 @@
 import { EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'upsertright'
 
 interface oreUpsertRightParams {
   contractName: EosEntityName
@@ -10,7 +13,7 @@ interface oreUpsertRightParams {
 
 export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams) => ({
   account: contractName,
-  name: 'upsertright',
+  name: actionName,
   authorization: [
     {
       actor: oreAccountName,
@@ -26,4 +29,14 @@ export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, r
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {
+    return {
+      actionType: ChainActionType.OreUpsertRight,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

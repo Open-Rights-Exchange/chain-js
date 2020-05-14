@@ -1,4 +1,7 @@
 import { EosEntityName, EosPublicKey } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'create'
 
 interface createEscrowCreateParams {
   accountName: EosEntityName
@@ -24,7 +27,7 @@ export const composeAction = ({
   referralAccountName,
 }: createEscrowCreateParams) => ({
   account: contractName,
-  name: 'create',
+  name: actionName,
   authorization: [
     {
       actor: creatorAccountName,
@@ -42,4 +45,14 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.memo && data?.account && data?.ownerkey && data?.activekey && data?.origin) {
+    return {
+      actionType: ChainActionType.CreateEscrowCreate,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

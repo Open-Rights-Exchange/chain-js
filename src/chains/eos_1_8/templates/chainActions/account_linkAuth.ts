@@ -1,5 +1,8 @@
 /* eslint-disable no-shadow */
 import { EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'linkauth'
 
 interface linkAuthParams {
   action: string
@@ -11,7 +14,7 @@ interface linkAuthParams {
 
 export const composeAction = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
   account: 'eosio',
-  name: 'linkauth',
+  name: actionName,
   authorization: [
     {
       actor: authAccount,
@@ -27,4 +30,14 @@ export const composeAction = ({ action, authAccount, authPermission, contract, p
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {
+    return {
+      actionType: ChainActionType.AccountLinkAuth,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

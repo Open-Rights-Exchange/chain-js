@@ -1,4 +1,7 @@
 import { EosEntityName, EosPublicKey, EosAsset } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'newaccount'
 
 interface createAccountNativeParams {
   accountName: EosEntityName
@@ -24,7 +27,7 @@ export const composeAction = ({
 }: createAccountNativeParams) => [
   {
     account: 'eosio',
-    name: 'newaccount',
+    name: actionName,
     authorization: [
       {
         actor: creatorAccountName,
@@ -93,8 +96,14 @@ export const composeAction = ({
 ]
 
 export const decomposeAction = (action: any) => {
-  // const actionLength = action.length
-  // if (actionLength) {
+  const { name, data } = action
 
-  // }
+  if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
+    return {
+      actionType: ChainActionType.AccountCreate,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

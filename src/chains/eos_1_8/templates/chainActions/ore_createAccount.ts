@@ -1,4 +1,7 @@
 import { EosEntityName, EosPublicKey } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'createoreacc'
 
 interface oreCreateAccountParams {
   accountName: EosEntityName
@@ -20,7 +23,7 @@ export const composeAction = ({
   referralAccountName,
 }: oreCreateAccountParams) => ({
   account: 'system.ore',
-  name: 'createoreacc',
+  name: actionName,
   authorization: [
     {
       actor: creatorAccountName,
@@ -38,4 +41,14 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
+    return {
+      actionType: ChainActionType.OreCreateAccount,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

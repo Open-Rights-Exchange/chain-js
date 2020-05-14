@@ -1,5 +1,4 @@
 import { ChainActionType } from '../../models'
-import { EosChainActionType } from './models'
 
 import { composeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { composeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
@@ -20,7 +19,6 @@ import { composeAction as TokenIssueTemplate } from './templates/chainActions/to
 import { composeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
-
 
 // map a key name to a function that returns an object
 export const ComposeAction: { [key: string]: (args: any) => any } = {
@@ -45,7 +43,7 @@ export const ComposeAction: { [key: string]: (args: any) => any } = {
   TokenTransferFrom: TokenTransferFromTemplate,
 }
 
-export function composeAction(chainActionType: ChainActionType | EosChainActionType, args: any): any {
+export function composeAction(chainActionType: ChainActionType, args: any): any {
   const composerFunction = ComposeAction[chainActionType as string]
   return composerFunction(args)
 }

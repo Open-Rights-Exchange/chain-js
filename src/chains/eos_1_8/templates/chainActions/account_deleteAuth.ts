@@ -1,4 +1,7 @@
 import { EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'deleteauth'
 
 interface deleteAuthParams {
   account: EosEntityName
@@ -9,7 +12,7 @@ interface deleteAuthParams {
 
 export const composeAction = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
   account: 'eosio',
-  name: 'deleteauth',
+  name: actionName,
   authorization: [
     {
       actor: authAccount,
@@ -23,8 +26,14 @@ export const composeAction = ({ account, authAccount, authPermission, permission
 })
 
 export const decomposeAction = (action: any) => {
-  // const actionLength = action.length
-  // if (actionLength) {
+  const { name, data } = action
 
-  // }
+  if (name === actionName && data?.account && data?.permission) {
+    return {
+      actionType: ChainActionType.AccountDeleteAuth,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

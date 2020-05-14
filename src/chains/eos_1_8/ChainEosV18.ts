@@ -17,7 +17,8 @@ import { ChainError, throwNewError } from '../../errors'
 import * as eoscrypto from './eosCrypto'
 import { EosChainState } from './eosChainState'
 import { mapChainError } from './eosErrors'
-import { EosChainActionType, composeAction, decomposeAction } from './eosCompose'
+import { composeAction } from './eosCompose'
+import { decomposeAction } from './eosDecompose'
 import { EosTransaction } from './eosTransaction'
 import { EosCreateAccount } from './eosCreateAccount'
 import { EosAccount } from './eosAccount'
@@ -98,14 +99,12 @@ class ChainEosV18 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType | EosChainActionType, args: any): any => {
+  public composeAction = (actionType: ChainActionType, args: any): any => {
     return composeAction(actionType, args)
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
-  public decomposeAction = (
-    action: EosActionStruct,
-  ): { chainActionType: ChainActionType | EosChainActionType; args: any } => {
+  public decomposeAction = (action: EosActionStruct): { chainActionType: ChainActionType; args: any } => {
     return decomposeAction(action)
   }
 

@@ -1,4 +1,7 @@
 import { EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'init'
 
 interface createEscrowInitParams {
   contractName: EosEntityName
@@ -18,7 +21,7 @@ export const composeAction = ({
   permission,
 }: createEscrowInitParams) => ({
   account: contractName,
-  name: 'init',
+  name: actionName,
   authorization: [
     {
       actor: contractName,
@@ -34,4 +37,14 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.symbol && data?.newaccountcontract && data?.newaccountaction && data?.minimumram) {
+    return {
+      actionType: ChainActionType.CreateEscrowInit,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

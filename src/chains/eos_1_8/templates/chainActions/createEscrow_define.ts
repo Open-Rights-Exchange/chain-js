@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { EosPublicKey, EosEntityName } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'define'
 
 interface createEscrowDefineParams {
   accountName: EosEntityName
@@ -48,7 +51,7 @@ export const composeAction = ({
   useRex,
 }: createEscrowDefineParams) => ({
   account: contractName,
-  name: 'define',
+  name: actionName,
   authorization: [
     {
       actor: accountName,
@@ -69,4 +72,14 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.owner && data?.dapp && data?.ram_bytes && data?.net && data?.cpu && data?.pricekey) {
+    return {
+      actionType: ChainActionType.CreateEscrowDefine,
+      args: { ...data },
+    }
+  }
+
+  return null
 }

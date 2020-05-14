@@ -1,5 +1,4 @@
 import { ChainActionType } from '../../models'
-import { EosChainActionType } from './models'
 
 import { decomposeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { decomposeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
@@ -44,13 +43,13 @@ export const DecomposeAction: { [key: string]: (args: any) => any } = {
   TokenTransferFrom: TokenTransferFromTemplate,
 }
 
-export function decomposeAction(action: any): { chainActionType: ChainActionType | EosChainActionType; args: any } {
+export function decomposeAction(action: any): { chainActionType: ChainActionType; args: any } {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   let actionData = null
 
   // Using find to stop iterating once a match is found
-  decomposeActionFuncs.find((decomposeFunc) => {
-    const { actionType, args } = decomposeFunc(action)
+  decomposeActionFuncs.find((decomposeFunc: any) => {
+    const { actionType, args } = decomposeFunc(action) || {}
     if (actionType) {
       actionData = { chainActionType: actionType, args }
       return true

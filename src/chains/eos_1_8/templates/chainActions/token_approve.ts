@@ -1,4 +1,7 @@
 import { EosEntityName, EosAsset } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'approve'
 
 interface tokenApproveParams {
   contractName: EosEntityName
@@ -18,7 +21,7 @@ export const composeAction = ({
   permission,
 }: tokenApproveParams) => ({
   account: contractName,
-  name: 'approve',
+  name: actionName,
   authorization: [
     {
       actor: fromAccountName,
@@ -34,4 +37,14 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.from && data?.to && data?.quantity) {
+    return {
+      actionType: ChainActionType.TokenApprove,
+      args: { ...data },
+    }
+  }
+
+  return null
 }
