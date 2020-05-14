@@ -10,7 +10,7 @@ interface oreCreateAccountParams {
   referralAccountName: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -36,3 +36,6 @@ export const action = ({
     referral: referralAccountName || '',
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

@@ -8,7 +8,7 @@ interface createEscrowWhitelistParams {
   whitelistAccount: string
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   appName,
   contractName,
@@ -29,3 +29,6 @@ export const action = ({
     dapp: appName,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

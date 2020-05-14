@@ -9,7 +9,7 @@ interface tokenIssueParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   ownerAccountName,
   toAccountName,
@@ -31,3 +31,6 @@ export const action = ({
     memo,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

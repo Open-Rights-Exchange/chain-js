@@ -1,5 +1,6 @@
 import { EosEntityName, EosAsset, EosDate } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
+import { ChainActionType } from '../../../models'
 
 // Raw data Types from the EOS Chain
 
@@ -114,4 +115,9 @@ export interface EosTransactionStruct {
   context_free_actions: EosActionStruct[]
   actions: EosActionStruct[]
   available_keys: EosPublicKey[]
+}
+
+export type DecomposeReturn = {
+  actionType: ChainActionType
+  args: any
 }

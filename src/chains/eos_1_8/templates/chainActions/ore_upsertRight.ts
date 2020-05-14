@@ -8,7 +8,7 @@ interface oreUpsertRightParams {
   urls: string
 }
 
-export const action = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams) => ({
+export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams) => ({
   account: contractName,
   name: 'upsertright',
   authorization: [
@@ -24,3 +24,6 @@ export const action = ({ contractName, issuerWhitelist, oreAccountName, rightNam
     issuer_whitelist: issuerWhitelist,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

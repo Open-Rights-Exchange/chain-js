@@ -9,7 +9,7 @@ interface createEscrowInitParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   chainSymbol,
   newAccountContract,
@@ -32,3 +32,6 @@ export const action = ({
     minimumram: minimumRAM,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

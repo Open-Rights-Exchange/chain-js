@@ -1,4 +1,5 @@
-import { EosEntityName, EosAsset } from '../../models'
+import { EosEntityName, EosAsset, EosActionStruct, DecomposeReturn } from '../../models'
+import { ChainActionType } from '../../../../models'
 
 interface tokenRetireParams {
   contractName: EosEntityName
@@ -8,7 +9,7 @@ interface tokenRetireParams {
   permission: EosEntityName
 }
 
-export const action = ({ contractName, ownerAccountName, tokenAmount, memo, permission }: tokenRetireParams) => ({
+export const composeAction = ({ contractName, ownerAccountName, tokenAmount, memo, permission }: tokenRetireParams) => ({
   account: contractName,
   name: 'retire',
   authorization: [
@@ -22,3 +23,17 @@ export const action = ({ contractName, ownerAccountName, tokenAmount, memo, perm
     memo,
   },
 })
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === 'retire' && data?.quantity) {
+    return {
+      actionType: ChainActionType.TokenRetire,
+      args: {
+        ...data,
+      },
+    }
+  }
+
+  return null
+}

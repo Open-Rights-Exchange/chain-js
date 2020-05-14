@@ -9,7 +9,7 @@ interface tokenApproveParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   memo,
   fromAccountName,
@@ -32,3 +32,6 @@ export const action = ({
     memo,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

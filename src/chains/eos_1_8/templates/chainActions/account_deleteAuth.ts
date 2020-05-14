@@ -7,7 +7,7 @@ interface deleteAuthParams {
   permission: EosEntityName
 }
 
-export const action = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
+export const composeAction = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
   account: 'eosio',
   name: 'deleteauth',
   authorization: [
@@ -21,3 +21,10 @@ export const action = ({ account, authAccount, authPermission, permission }: del
     permission,
   },
 })
+
+export const decomposeAction = (action: any) => {
+  // const actionLength = action.length
+  // if (actionLength) {
+
+  // }
+}

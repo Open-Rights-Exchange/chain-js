@@ -9,7 +9,7 @@ interface linkAuthParams {
   permission: EosEntityName
 }
 
-export const action = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
+export const composeAction = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
   account: 'eosio',
   name: 'linkauth',
   authorization: [
@@ -25,3 +25,6 @@ export const action = ({ action, authAccount, authPermission, contract, permissi
     requirement: permission,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

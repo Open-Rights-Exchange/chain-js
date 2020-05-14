@@ -29,7 +29,7 @@ interface createEscrowRexParams {
   cpuLoanFund: string
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   airdrop,
   appName,
@@ -67,3 +67,6 @@ export const action = ({
     use_rex: useRex,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

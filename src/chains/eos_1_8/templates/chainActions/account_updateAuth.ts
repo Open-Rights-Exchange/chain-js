@@ -8,7 +8,7 @@ interface updateAuthParams {
   permission: EosEntityName
 }
 
-export const action = ({ auth, authAccount, authPermission, parent, permission }: updateAuthParams) => ({
+export const composeAction = ({ auth, authAccount, authPermission, parent, permission }: updateAuthParams) => ({
   account: 'eosio',
   name: 'updateauth',
   authorization: [
@@ -24,3 +24,6 @@ export const action = ({ auth, authAccount, authPermission, parent, permission }
     auth,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

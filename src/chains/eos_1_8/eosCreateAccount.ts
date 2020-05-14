@@ -235,17 +235,13 @@ export class EosCreateAccount implements CreateAccount {
       newAccountName = await this.generateAccountName(accountNamePrefix, true)
     } else {
       eosAccount = new EosAccount(this._chainState)
-      try {
-        await eosAccount.load(accountName)
+      const exists = await this.doesAccountExist(accountName)
+      if (exists) {
         // check if this account is an unused, recyclable account
-        canRecycle = await eosAccount.canBeRecycled
+        canRecycle = eosAccount.canBeRecycled
         if (!canRecycle) alreadyExists = true
-      } catch (error) {
+      } else {
         alreadyExists = false
-        // if account doesn't exist - don't do anything. Otherwise, rethrow error
-        if (error.errorType !== ChainErrorType.AccountDoesntExist) {
-          throw error
-        }
       }
     }
     return { alreadyExists, newAccountName, canRecycle }

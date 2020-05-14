@@ -12,7 +12,7 @@ interface createEscrowCreateParams {
   referralAccountName: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   contractName,
   appName,
@@ -40,3 +40,6 @@ export const action = ({
     referral: referralAccountName || '',
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

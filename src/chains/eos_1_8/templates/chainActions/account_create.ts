@@ -11,7 +11,7 @@ interface createAccountNativeParams {
   stakeCpuQuantity: EosAsset
   transfer: boolean
 }
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -91,3 +91,10 @@ export const action = ({
     },
   },
 ]
+
+export const decomposeAction = (action: any) => {
+  // const actionLength = action.length
+  // if (actionLength) {
+
+  // }
+}

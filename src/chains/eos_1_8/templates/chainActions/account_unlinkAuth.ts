@@ -7,7 +7,7 @@ interface unlinkAuthParams {
   contract: EosEntityName
 }
 
-export const action = ({ action, authAccount, authPermission, contract }: unlinkAuthParams) => ({
+export const composeAction = ({ action, authAccount, authPermission, contract }: unlinkAuthParams) => ({
   account: 'eosio',
   name: 'unlinkauth',
   authorization: [
@@ -22,3 +22,10 @@ export const action = ({ action, authAccount, authPermission, contract }: unlink
     type: action,
   },
 })
+
+export const decomposeAction = (action: any) => {
+  // const actionLength = action.length
+  // if (actionLength) {
+
+  // }
+}

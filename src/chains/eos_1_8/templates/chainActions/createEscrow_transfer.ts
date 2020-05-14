@@ -9,7 +9,7 @@ interface createEscrowTransferParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   amount,
   contractName,
@@ -32,3 +32,6 @@ export const action = ({
     memo,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

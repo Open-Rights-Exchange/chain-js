@@ -8,7 +8,7 @@ interface createEscrowReclaimParams {
   symbol: string
 }
 
-export const action = ({ accountName, appName, contractName, permission, symbol }: createEscrowReclaimParams) => ({
+export const composeAction = ({ accountName, appName, contractName, permission, symbol }: createEscrowReclaimParams) => ({
   account: contractName,
   name: 'reclaim',
   authorization: [
@@ -23,3 +23,6 @@ export const action = ({ accountName, appName, contractName, permission, symbol 
     sym: symbol,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}

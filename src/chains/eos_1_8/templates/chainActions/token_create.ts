@@ -8,7 +8,7 @@ interface tokenCreateParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   ownerAccountName,
   toAccountName,
@@ -28,3 +28,6 @@ export const action = ({
     maximum_supply: tokenAmount,
   },
 })
+
+export const decomposeAction = (action: any) => {
+}
