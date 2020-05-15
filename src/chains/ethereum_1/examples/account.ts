@@ -26,12 +26,22 @@ export const CreateAccountOptions = {
   try {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints)
     await ropsten.connect()
-    const createAccount = ropsten.new.CreateAccount(CreateAccountOptions)
-    await createAccount.generateKeysIfNeeded()
-    console.log('generatedKeys:', createAccount.generatedKeys)
-    console.log('address:', createAccount.accountName)
-    const account = await ropsten.new.Account('0x3f0def554abb0107c08237361bba7e2b99906a48')
-    console.log('account', account)
+    const transferAction = {
+      to: 'bob',
+      from: 'sally',
+      value: '100 ETH',
+      contract: '10830193073',
+    }
+    const someAction = {
+      someParam: '10830193073',
+    }
+    console.info('Decompose', ropsten.decomposeAction(someAction))
+    // const createAccount = ropsten.new.CreateAccount(CreateAccountOptions)
+    // await createAccount.generateKeysIfNeeded()
+    // console.log('generatedKeys:', createAccount.generatedKeys)
+    // console.log('address:', createAccount.accountName)
+    // const account = await ropsten.new.Account('0x3f0def554abb0107c08237361bba7e2b99906a48')
+    // console.log('account', account)
   } catch (error) {
     console.log(error)
   }
