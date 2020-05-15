@@ -1,5 +1,5 @@
 /* eslint-disable quotes */
-import { encrypt, decrypt, deriveKey, decryptWithKey } from '../crypto'
+import { encrypt, decrypt, deriveKey, decryptWithKey } from '../aesCrypto'
 // import { rejects } from 'assert';
 
 describe('encryption/decryption of private keys with wallet passwords', () => {

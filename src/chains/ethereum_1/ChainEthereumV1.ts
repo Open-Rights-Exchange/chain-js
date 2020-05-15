@@ -12,7 +12,6 @@ import {
 } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
-import * as crypto from '../../crypto'
 import * as ethcrypto from './ethCrypto'
 import { composeAction, EthereumChainActionType } from './ethCompose'
 import { EthereumTransaction } from './ethTransaction'
@@ -136,15 +135,15 @@ class ChainEthereumV1 implements Chain {
 
   // Chain Crypto Functions
 
-  decrypt = crypto.decrypt
+  decrypt = ethcrypto.decrypt
 
-  encrypt = crypto.encrypt
+  encrypt = ethcrypto.encrypt
 
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
-  isValidEncryptedData = crypto.isEncryptedDataString
+  isValidEncryptedData = ethcrypto.isEncryptedDataString
 
-  toEncryptedDataString = crypto.toEncryptedDataString
+  toEncryptedDataString = ethcrypto.toEncryptedDataString
 
   isValidPrivateKey = isValidEthereumPrivateKey
 
