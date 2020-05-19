@@ -2,7 +2,7 @@ import { EosEntityName, EosActionStruct, DecomposeReturn, EosSymbol } from '../.
 import { ChainActionType } from '../../../../models'
 import { toEosAsset } from '../../helpers'
 
-const actionName = 'tokenTransfer'
+const actionName = 'transfer'
 interface tokenTransferParams {
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
