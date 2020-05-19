@@ -1,5 +1,6 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName } from '../../helpers'
 
 const actionName = 'deleteauth'
 
@@ -10,8 +11,13 @@ interface deleteAuthParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
-  account: 'eosio',
+export const composeAction = ({
+  account,
+  authAccount,
+  authPermission,
+  permission,
+}: deleteAuthParams): EosActionStruct => ({
+  account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
     {
