@@ -21,6 +21,7 @@ import { composeAction as TokenIssueTemplate } from './templates/chainActions/to
 import { composeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+import { composeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any) => any } = {
@@ -36,6 +37,7 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
   TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
+  ValueTransfer: ValueTransferTemplate,
   // EOS - specific action
   CreateEscrowCreate: CreateEscrowCreateTemplate,
   CreateEscrowDefine: CreateEscrowDefineTemplate,
