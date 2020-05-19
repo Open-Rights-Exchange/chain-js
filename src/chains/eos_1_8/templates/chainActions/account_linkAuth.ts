@@ -1,5 +1,5 @@
 /* eslint-disable no-shadow */
-import { EosEntityName, EosActionStruct } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
 import { toEosEntityName } from '../../helpers'
 
@@ -36,7 +36,7 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: any) => {
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data } = action
 
   if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {

@@ -1,5 +1,4 @@
-import { EosEntityName, EosPublicKey } from '../../models'
-import { ChainActionType } from '../../../../models'
+import { EosEntityName, EosPublicKey, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
 
 const actionName = 'create'
 
@@ -25,7 +24,7 @@ export const composeAction = ({
   publicKeyOwner,
   // pricekey,
   referralAccountName,
-}: createEscrowCreateParams) => ({
+}: createEscrowCreateParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -44,12 +43,12 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: any) => {
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data } = action
 
   if (name === actionName && data?.memo && data?.account && data?.ownerkey && data?.activekey && data?.origin) {
     return {
-      actionType: ChainActionType.CreateEscrowCreate,
+      actionType: EosChainActionType.CreateEscrowCreate,
       args: { ...data },
     }
   }

@@ -21,7 +21,7 @@ export const composeAction = ({
   tokenAmount,
   memo,
   permission,
-}: tokenTransferFromParams) => ({
+}: tokenTransferFromParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [

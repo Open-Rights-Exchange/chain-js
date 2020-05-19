@@ -11,7 +11,7 @@ interface tokenRetireParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({ contractName, ownerAccountName, tokenAmount, memo, permission }: tokenRetireParams) => ({
+export const composeAction = ({ contractName, ownerAccountName, tokenAmount, memo, permission }: tokenRetireParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [

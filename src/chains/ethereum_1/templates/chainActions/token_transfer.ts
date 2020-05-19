@@ -1,7 +1,7 @@
 // import { toHex } from 'web3-utils'
-import { EthereumTransactionAction, EthereumChainActionType } from '../../models'
+import { EthereumTransactionAction, EthereumChainActionType, EthereumDecomposeReturn } from '../../models'
 
-export const composeAction = (tokenTransferAction: EthereumTransactionAction) => {
+export const composeAction = (tokenTransferAction: EthereumTransactionAction): EthereumTransactionAction => {
   const { to, from, value, contract } = tokenTransferAction
   return {
     to,
@@ -11,11 +11,11 @@ export const composeAction = (tokenTransferAction: EthereumTransactionAction) =>
   }
 }
 
-export const decomposeAction = (action: any) => {
+export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, value, contract } = action
   if (to && from && value && contract) {
     return {
-      actionType: EthereumChainActionType.TokenTransfer,
+      chainActionType: EthereumChainActionType.TokenTransfer,
       args: { ...action },
     }
   }
