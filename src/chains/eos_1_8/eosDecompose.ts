@@ -19,7 +19,7 @@ import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/
 import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
-import { EosActionStruct, EosChainActionType } from './models'
+import { EosActionStruct, DecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
 
 // map a key name to a function that returns an object
@@ -47,15 +47,10 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   OreUpsertRight: OreUpsertRightTemplate,
 }
 
-type DecomposeActionResponse = {
-  chainActionType: ChainActionType | EosChainActionType
-  args: any
-}
-
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: EosActionStruct): DecomposeActionResponse[] {
+export function decomposeAction(action: EosActionStruct): DecomposeReturn[] {
   const decomposeActionFuncs = Object.values(DecomposeAction)
-  const actionData: any[] = []
+  const actionData: DecomposeReturn[] = []
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
   decomposeActionFuncs.forEach((decomposeFunc: any) => {

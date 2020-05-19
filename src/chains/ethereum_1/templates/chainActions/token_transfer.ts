@@ -37,7 +37,7 @@ export const decomposeAction = (action: EthereumTransactionAction) => {
   const { to, from, contract } = action
   if (to && from && contract) {
     return {
-      actionType: EthereumChainActionType.TokenTransfer,
+      chainActionType: EthereumChainActionType.TokenTransfer,
       args: { ...action },
     }
   }

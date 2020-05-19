@@ -1,11 +1,9 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable quote-props */
 
-import { ChainActionType } from '../../models'
-
 import { decomposeAction as CategorySomeActionTemplate } from './templates/chainActions/categorySomeAction'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
-import { EthereumTransactionAction, EthereumChainActionType } from './models'
+import { EthereumTransactionAction, EthDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
 
 // map a key name to a function that returns an object
@@ -14,13 +12,8 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   TokenTransfer: TokenTransferTemplate,
 }
 
-type DecomposeActionResponse = {
-  chainActionType: ChainActionType | EthereumChainActionType
-  args: any
-}
-
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: EthereumTransactionAction): DecomposeActionResponse[] {
+export function decomposeAction(action: EthereumTransactionAction): EthDecomposeReturn[] {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const actionData: any[] = []
 
