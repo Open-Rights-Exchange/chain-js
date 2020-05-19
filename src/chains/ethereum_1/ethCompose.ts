@@ -4,7 +4,7 @@
 import { ChainActionType } from '../../models'
 
 import { action as CategorySomeActionTemplate } from './templates/chainActions/categorySomeAction'
-import { action as TokenTransferTemplate } from './templates/chainActions/token_transfer'
+import { action as TokenTransferTemplate } from './templates/chainActions/eth_transfer'
 
 // map a key name to a function that returns an object
 export const ChainAction: { [key: string]: (args: any) => any } = {
