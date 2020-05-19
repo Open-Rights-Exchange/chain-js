@@ -1,4 +1,6 @@
 import { ChainActionType } from '../../models'
+import { EosChainActionType, EosActionStruct } from './models'
+import { notSupported } from '../../helpers'
 
 import { composeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { composeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
@@ -21,12 +23,20 @@ import { composeAction as TokenTransferTemplate } from './templates/chainActions
 import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
 
 // map a key name to a function that returns an object
-export const ComposeAction: { [key: string]: (args: any) => any } = {
+const ComposeAction: { [key: string]: (args: any) => any } = {
+  // Standard actions
   AccountCreate: AccountCreateTemplate,
   AccountDeleteAuth: AccountDeleteAuthTemplate,
   AccountLinkAuth: AccountLinkAuthTemplate,
   AccountUnlinkAuth: AccountUnlinkAuthTemplate,
   AccountUpdateAuth: AccountUpdateAuthTemplate,
+  TokenApprove: TokenApproveTemplate,
+  TokenCreate: TokenCreateTemplate,
+  TokenIssue: TokenIssueTemplate,
+  TokenRetire: TokenRetireTemplate,
+  TokenTransfer: TokenTransferTemplate,
+  TokenTransferFrom: TokenTransferFromTemplate,
+  // EOS - specific action
   CreateEscrowCreate: CreateEscrowCreateTemplate,
   CreateEscrowDefine: CreateEscrowDefineTemplate,
   CreateEscrowInit: CreateEscrowInitTemplate,
@@ -35,15 +45,13 @@ export const ComposeAction: { [key: string]: (args: any) => any } = {
   CreateEscrowWhitelist: CreateEscrowWhitelistTemplate,
   OreCreateAccount: OreCreateAccountTemplate,
   OreUpsertRight: OreUpsertRightTemplate,
-  TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
-  TokenTransfer: TokenTransferTemplate,
-  TokenTransferFrom: TokenTransferFromTemplate,
 }
 
-export function composeAction(chainActionType: ChainActionType, args: any): any {
+/** Compose an object for a chain contract action */
+export function composeAction(chainActionType: ChainActionType | EosChainActionType, args: any): EosActionStruct {
   const composerFunction = ComposeAction[chainActionType as string]
+  if (!composerFunction) {
+    notSupported()
+  }
   return composerFunction(args)
 }

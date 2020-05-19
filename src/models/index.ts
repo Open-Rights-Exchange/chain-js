@@ -1,3 +1,4 @@
+export * from './chainActionTypeModels'
 export * from './cryptoModels'
 export * from './errorModels'
 export * from './generalModels'

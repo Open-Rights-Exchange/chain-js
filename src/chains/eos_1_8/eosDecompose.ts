@@ -19,14 +19,24 @@ import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/
 import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+import { EosActionStruct, EosChainActionType } from './models'
+import { isNullOrEmpty } from '../../helpers'
 
 // map a key name to a function that returns an object
-export const DecomposeAction: { [key: string]: (args: any) => any } = {
+const DecomposeAction: { [key: string]: (args: any) => any } = {
+  // Standard actions
   AccountCreate: AccountCreateTemplate,
   AccountDeleteAuth: AccountDeleteAuthTemplate,
   AccountLinkAuth: AccountLinkAuthTemplate,
   AccountUnlinkAuth: AccountUnlinkAuthTemplate,
   AccountUpdateAuth: AccountUpdateAuthTemplate,
+  TokenApprove: TokenApproveTemplate,
+  TokenCreate: TokenCreateTemplate,
+  TokenIssue: TokenIssueTemplate,
+  TokenRetire: TokenRetireTemplate,
+  TokenTransfer: TokenTransferTemplate,
+  TokenTransferFrom: TokenTransferFromTemplate,
+  // EOS - specific action
   CreateEscrowCreate: CreateEscrowCreateTemplate,
   CreateEscrowDefine: CreateEscrowDefineTemplate,
   CreateEscrowInit: CreateEscrowInitTemplate,
@@ -35,26 +45,27 @@ export const DecomposeAction: { [key: string]: (args: any) => any } = {
   CreateEscrowWhitelist: CreateEscrowWhitelistTemplate,
   OreCreateAccount: OreCreateAccountTemplate,
   OreUpsertRight: OreUpsertRightTemplate,
-  TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
-  TokenTransfer: TokenTransferTemplate,
-  TokenTransferFrom: TokenTransferFromTemplate,
 }
 
-export function decomposeAction(action: any): { chainActionType: ChainActionType; args: any } {
-  const decomposeActionFuncs = Object.values(DecomposeAction)
-  let actionData = null
+type DecomposeActionResponse = {
+  chainActionType: ChainActionType | EosChainActionType
+  args: any
+}
 
-  // Using find to stop iterating once a match is found
-  decomposeActionFuncs.find((decomposeFunc: any) => {
+/** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
+export function decomposeAction(action: EosActionStruct): DecomposeActionResponse[] {
+  const decomposeActionFuncs = Object.values(DecomposeAction)
+  const actionData: any[] = []
+
+  // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
+  decomposeActionFuncs.forEach((decomposeFunc: any) => {
     const { actionType, args } = decomposeFunc(action) || {}
     if (actionType) {
-      actionData = { chainActionType: actionType, args }
+      actionData.push({ chainActionType: actionType, args })
       return true
     }
+    return false
   })
-
-  return actionData
+  // return null and not an empty array if no matches
+  return !isNullOrEmpty(actionData) ? actionData : null
 }

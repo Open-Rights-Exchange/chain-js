@@ -1,6 +1,7 @@
 /* eslint-disable no-shadow */
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName } from '../../helpers'
 
 const actionName = 'linkauth'
 
@@ -12,8 +13,14 @@ interface linkAuthParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
-  account: 'eosio',
+export const composeAction = ({
+  action,
+  authAccount,
+  authPermission,
+  contract,
+  permission,
+}: linkAuthParams): EosActionStruct => ({
+  account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
     {

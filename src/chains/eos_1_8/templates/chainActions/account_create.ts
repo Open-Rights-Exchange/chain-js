@@ -1,5 +1,6 @@
-import { EosEntityName, EosPublicKey, EosAsset } from '../../models'
+import { EosEntityName, EosPublicKey, EosAsset, EosActionStruct } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName } from '../../helpers'
 
 const actionName = 'newaccount'
 
@@ -24,9 +25,9 @@ export const composeAction = ({
   stakeNetQuantity,
   stakeCpuQuantity,
   transfer,
-}: createAccountNativeParams) => [
+}: createAccountNativeParams): EosActionStruct[] => [
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: actionName,
     authorization: [
       {
@@ -62,7 +63,7 @@ export const composeAction = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'buyrambytes',
     authorization: [
       {
@@ -77,7 +78,7 @@ export const composeAction = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'delegatebw',
     authorization: [
       {

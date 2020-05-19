@@ -1,5 +1,6 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName } from '../../helpers'
 
 const actionName = 'unlinkauth'
 
@@ -10,8 +11,13 @@ interface unlinkAuthParams {
   contract: EosEntityName
 }
 
-export const composeAction = ({ action, authAccount, authPermission, contract }: unlinkAuthParams) => ({
-  account: 'eosio',
+export const composeAction = ({
+  action,
+  authAccount,
+  authPermission,
+  contract,
+}: unlinkAuthParams): EosActionStruct => ({
+  account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
     {
