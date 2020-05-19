@@ -1,19 +1,41 @@
-// import { toHex } from 'web3-utils'
-import { EthereumTransactionAction, EthereumChainActionType } from '../../models'
+import {
+  EthereumChainActionType,
+  EthereumAddress,
+  EthereumTransactionAction,
+  EthereumActionContract,
+} from '../../models'
+import { erc20Abi } from '../abis/erc20Abi'
 
-export const composeAction = (tokenTransferAction: EthereumTransactionAction) => {
-  const { to, from, value, contract } = tokenTransferAction
-  return {
-    to,
-    from,
-    value,
-    contract,
-  }
+const actionName = 'transfer'
+
+interface tokenTransferParams {
+  fromAccountName?: EthereumAddress
+  toAccountName?: EthereumAddress
+  tokenAmount?: number
+  contractName?: EthereumAddress
+  contract?: EthereumActionContract
 }
 
-export const decomposeAction = (action: any) => {
-  const { to, from, value, contract } = action
-  if (to && from && value && contract) {
+export const composeAction = ({
+  fromAccountName,
+  toAccountName,
+  tokenAmount,
+  contractName,
+  contract,
+}: tokenTransferParams) => ({
+  from: fromAccountName,
+  to: contractName,
+  contract: {
+    abi: erc20Abi,
+    parameters: [toAccountName, tokenAmount],
+    method: actionName,
+    ...contract,
+  },
+})
+
+export const decomposeAction = (action: EthereumTransactionAction) => {
+  const { to, from, contract } = action
+  if (to && from && contract) {
     return {
       actionType: EthereumChainActionType.TokenTransfer,
       args: { ...action },
