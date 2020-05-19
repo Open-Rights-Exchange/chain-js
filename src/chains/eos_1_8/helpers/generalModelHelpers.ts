@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { EosDate, EosAsset, EosEntityName } from '../models/generalModels'
+import { EosDate, EosAsset, EosEntityName, EosSymbol } from '../models/generalModels'
 import { isNullOrEmpty } from '../../../helpers'
 
 /**  Expects a format of time_point/time_point_sec
@@ -10,12 +10,18 @@ export function isValidEosDate(str: string): str is EosDate {
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
 
-// A string representation of an EOSIO symbol, composed of a float with a precision of 4
-// ... and a symbol composed of capital letters between 1-7 letters separated by a space
+// A string representation of an EOSIO symbol, composed of a float with a precision of 3-4
+// ... and a symbol composed of capital letters between 1-3 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
   if (isNullOrEmpty(str)) return false
-  return str.match(/^\d{1,}\.\d{4} [A-Z]{3}$/) !== null
+  return str.match(/^\d{1,}\.\d{3,4} [A-Z]{3}$/) !== null
+}
+
+/** Expects a string composed of capital letters between 1-3 letters separated by a space */
+export function isValidEosSymbol(str: EosSymbol | string): str is EosSymbol {
+  if (isNullOrEmpty(str)) return false
+  return str.match(/^[A-Z]{3}$/) !== null
 }
 
 export function isValidEosEntityName(str: EosEntityName | string): str is EosEntityName {
@@ -42,7 +48,7 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
  *  e.g. '1.0000 EOS' */
 export function toEosAsset(amount: number, symbol: string): EosAsset {
   if (symbol.length !== 3) throw new Error('symbol must be 3 characters long')
-  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4 }).format(amount)
+  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 3 }).format(amount)
   const asset = `${value} ${symbol.toUpperCase()}`
   // Note: the check below allows Typescript to confirm that asset can be of type EosAsset
   // If we dont call isValidEosAsset then Typescript shows an error
@@ -50,6 +56,16 @@ export function toEosAsset(amount: number, symbol: string): EosAsset {
     return asset
   }
   throw new Error(`Should not get here. toEosAsset amount:${amount} symbol:${symbol}`)
+}
+
+/** Construct a valid EOS Symbol *
+ *  e.g. 'EOS' */
+export function toEosSymbol(symbol: string): EosSymbol {
+  if (symbol.length !== 3) throw new Error('symbol must be 3 characters long')
+  if (isValidEosSymbol(symbol)) {
+    return symbol
+  }
+  throw new Error(`Should not get here. toEosSymbol symbol:${symbol}`)
 }
 
 export function toEosEntityName(name: string): EosEntityName {
