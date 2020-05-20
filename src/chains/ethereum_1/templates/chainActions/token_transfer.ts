@@ -1,4 +1,9 @@
-import { EthereumChainActionType, EthereumAddress, EthereumTransactionAction, DecomposeReturn } from '../../models'
+import {
+  EthereumChainActionType,
+  EthereumAddress,
+  EthereumTransactionAction,
+  EthereumDecomposeReturn,
+} from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
 
 const actionName = 'transfer'
@@ -21,7 +26,7 @@ export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, con
   },
 })
 
-export const decomposeAction = (action: EthereumTransactionAction): DecomposeReturn => {
+export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (to && from && contract) {
     return {

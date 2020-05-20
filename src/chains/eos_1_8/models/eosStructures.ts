@@ -122,7 +122,7 @@ export interface EosTransactionStruct {
   available_keys: EosPublicKey[]
 }
 
-export type DecomposeReturn = {
+export type EosDecomposeReturn = {
   chainActionType: ChainActionType | EosChainActionType
   args: any
 }
