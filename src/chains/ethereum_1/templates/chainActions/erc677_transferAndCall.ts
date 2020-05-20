@@ -1,6 +1,12 @@
 // import { toHex } from 'web3-utils'
-import { EthereumAddress, EthereumValue } from '../../models'
-import { erc20Abi } from './data/erc20Abi'
+import {
+  EthereumAddress,
+  EthereumValue,
+  EthereumTransactionAction,
+  DecomposeReturn,
+  EthereumChainActionType,
+} from '../../models'
+import { erc20Abi } from '../abis/erc20Abi'
 
 interface erc20TransferParams {
   contractAddress: EthereumAddress
@@ -10,7 +16,7 @@ interface erc20TransferParams {
   data: EthereumValue[]
 }
 
-export const action = ({ contractAddress, from, to, value, data }: erc20TransferParams) => {
+export const composeAction = ({ contractAddress, from, to, value, data }: erc20TransferParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [to, value, data],
@@ -21,4 +27,16 @@ export const action = ({ contractAddress, from, to, value, data }: erc20Transfer
     from,
     contract,
   }
+}
+
+export const decomposeAction = (action: EthereumTransactionAction): DecomposeReturn => {
+  const { to, from, contract } = action
+  if (to && from && contract && contract.method === 'transferAndCall') {
+    return {
+      chainActionType: EthereumChainActionType.Erc677TransferAndCall,
+      args: { ...action },
+    }
+  }
+
+  return null
 }
