@@ -1,5 +1,10 @@
 import { EosEntityName, EosPublicKey, EosChainActionType, EosActionStruct, DecomposeReturn } from '../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosPublicKey, toEosEntityNameOrNull } from '../../helpers'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosPublicKey,
+  toEosEntityNameOrNull,
+} from '../../helpers'
 
 const actionName = 'createoreacc'
 

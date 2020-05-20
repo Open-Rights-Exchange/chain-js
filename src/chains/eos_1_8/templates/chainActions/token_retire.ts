@@ -1,6 +1,6 @@
 import { EosEntityName, EosAsset, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrEmptyString, toEosEntityNameOrNull } from '../../helpers'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'retire'
 
