@@ -1,4 +1,5 @@
 export enum EthereumChainActionType {
-  TokenTransfer = 'TokenTransfer',
   CategorySomeAction = 'CategorySomeAction',
+  TokenTransfer = 'TokenTransfer',
+  ValueTransfer = 'ValueTransfer',
 }
