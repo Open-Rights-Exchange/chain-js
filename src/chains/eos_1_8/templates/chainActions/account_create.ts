@@ -1,7 +1,19 @@
-import { EosEntityName, EosPublicKey, EosAsset, EosAuthorizationKeyStruct, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull, toEosPublicKey } from '../../helpers'
 import { getFirstValueIfOnlyOneExists } from '../../../../helpers'
+import {
+  EosEntityName,
+  EosPublicKey,
+  EosAsset,
+  EosAuthorizationKeyStruct,
+  EosActionStruct,
+  DecomposeReturn,
+} from '../../models'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityNameOrNull,
+  toEosPublicKeyOrNull,
+} from '../../helpers'
 
 const actionName = 'newaccount'
 
@@ -102,6 +114,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
 
   if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    // Only works if there's 1 key in the array otherwise we don't know which keys to return
     const ownerKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.owner.keys)
     const activeKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.active.keys)
 
@@ -109,8 +122,8 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
       accountName: toEosEntityName(data.name),
       creatorAccountName: toEosEntityName(data.creator),
       creatorPermission: toEosEntityNameOrNull(auth.permission),
-      publicKeyActive: ownerKey?.key,
-      publicKeyOwner: activeKey?.key,
+      publicKeyActive: toEosPublicKeyOrNull(ownerKey?.key),
+      publicKeyOwner: toEosPublicKeyOrNull(activeKey?.key),
     }
 
     return {

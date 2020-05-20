@@ -1,6 +1,6 @@
 import { isNullOrEmpty } from '../../../helpers'
 
-import { EosActionAuthorizationStruct, EosAuthorizationKeyStruct } from '../models'
+import { EosActionAuthorizationStruct } from '../models'
 
 const EOS_BASE = 31 // Base 31 allows us to leave out '.', as it's used for account scope
 
