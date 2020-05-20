@@ -10,7 +10,7 @@ interface erc721TransferFromParams {
   tokenId: number
 }
 
-export const action = ({ contractAddress, from, transferFrom, to, tokenId }: erc721TransferFromParams) => {
+export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId }: erc721TransferFromParams) => {
   const contract = {
     abi: erc721Abi,
     parameters: [transferFrom, to, tokenId],
