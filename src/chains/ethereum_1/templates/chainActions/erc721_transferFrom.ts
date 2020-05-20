@@ -1,6 +1,6 @@
 // import { toHex } from 'web3-utils'
 import { EthereumAddress } from '../../models'
-import { erc721Abi } from './data/erc721Abi'
+import { erc721Abi } from '../abis/erc721Abi'
 
 interface erc721TransferFromParams {
   contractAddress: EthereumAddress
