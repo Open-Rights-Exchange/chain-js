@@ -37,7 +37,7 @@ type GetAuthorizationInput = {
 
 /** Returns the first authorization in the array  */
 export function getAuthorization(authorization: GetAuthorizationInput[]): GetAuthorizationInput {
-  if (isNullOrEmpty(authorization)) {
+  if (!isNullOrEmpty(authorization)) {
     const [firstAuthorization] = authorization
 
     return firstAuthorization

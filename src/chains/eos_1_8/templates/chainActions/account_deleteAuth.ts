@@ -1,6 +1,6 @@
 import { EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName } from '../../helpers'
+import { toEosEntityName, getAuthorization } from '../../helpers'
 
 const actionName = 'deleteauth'
 
@@ -35,11 +35,11 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, authorization } = action
 
   if (name === actionName && data?.account && data?.permission) {
-    const [firstAuthorization] = authorization
+    const auth = getAuthorization(authorization)
     const returnData: deleteAuthParams = {
       account: toEosEntityName(data.account),
-      authAccount: toEosEntityName(firstAuthorization.actor),
-      authPermission: toEosEntityName(firstAuthorization.permission),
+      authAccount: toEosEntityName(auth.actor),
+      authPermission: toEosEntityName(auth.permission),
       permission: toEosEntityName(data.permission),
     }
     return {

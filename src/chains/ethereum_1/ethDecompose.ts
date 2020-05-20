@@ -19,9 +19,9 @@ export function decomposeAction(action: EthereumTransactionAction): EthereumDeco
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
   decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    const { actionType, args } = decomposeFunc(action) || {}
-    if (actionType) {
-      decomposedActions.push({ chainActionType: actionType, args })
+    const { chainActionType, args } = decomposeFunc(action) || {}
+    if (chainActionType) {
+      decomposedActions.push({ chainActionType, args })
     }
   })
   // return null and not an empty array if no matches
