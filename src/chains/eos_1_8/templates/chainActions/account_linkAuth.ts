@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 import { EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName } from '../../helpers'
+import { toEosEntityName, getAuthorization } from '../../helpers'
 
 const actionName = 'linkauth'
 
@@ -37,12 +37,21 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, authorization } = action
 
   if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {
+    const auth = getAuthorization(authorization)
+
+    const returnData: linkAuthParams = {
+      action: data?.action,
+      authAccount: toEosEntityName(data.account),
+      authPermission: toEosEntityName(auth.permission),
+      contract: toEosEntityName(data?.code),
+      permission: toEosEntityName(data?.requirement),
+    }
     return {
-      actionType: ChainActionType.AccountLinkAuth,
-      args: { ...data },
+      chainActionType: ChainActionType.AccountLinkAuth,
+      args: { ...returnData },
     }
   }
 

@@ -1,3 +1,7 @@
+import { isNullOrEmpty } from '../../../helpers'
+
+import { EosEntityName } from '../models'
+
 const EOS_BASE = 31 // Base 31 allows us to leave out '.', as it's used for account scope
 
 /** Returns a UNIX timestamp, that is EOS base32 encoded  */
@@ -24,4 +28,20 @@ export function randomEosBase32(): string {
       .toString(EOS_BASE)
       .substr(2),
   )
+}
+
+type GetAuthorizationInput = {
+  actor: EosEntityName
+  permission: EosEntityName
+}
+
+/** Returns the first authorization in the array  */
+export function getAuthorization(authorization: GetAuthorizationInput[]): GetAuthorizationInput {
+  if (isNullOrEmpty(authorization)) {
+    const [firstAuthorization] = authorization
+
+    return firstAuthorization
+  }
+
+  return null
 }

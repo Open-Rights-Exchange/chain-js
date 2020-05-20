@@ -32,12 +32,19 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, authorization } = action
 
   if (name === actionName && data?.account && data?.permission) {
+    const [firstAuthorization] = authorization
+    const returnData: deleteAuthParams = {
+      account: toEosEntityName(data.account),
+      authAccount: toEosEntityName(firstAuthorization.actor),
+      authPermission: toEosEntityName(firstAuthorization.permission),
+      permission: toEosEntityName(data.permission),
+    }
     return {
-      actionType: ChainActionType.AccountDeleteAuth,
-      args: { ...data },
+      chainActionType: ChainActionType.AccountDeleteAuth,
+      args: returnData,
     }
   }
 

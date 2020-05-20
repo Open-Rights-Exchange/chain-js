@@ -29,12 +29,20 @@ export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, r
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, account } = action
 
   if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {
+    const returnData: oreUpsertRightParams = {
+      contractName: toEosEntityName(account),
+      issuerWhitelist: toEosEntityName(data.issuer_whitelist),
+      oreAccountName: toEosEntityName(data.issuer),
+      rightName: toEosEntityName(data.right_name),
+      urls: data.urls,
+    }
+
     return {
-      actionType: EosChainActionType.OreUpsertRight,
-      args: { ...data },
+      chainActionType: EosChainActionType.OreUpsertRight,
+      args: { ...returnData },
     }
   }
 

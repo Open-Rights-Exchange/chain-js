@@ -1,4 +1,5 @@
 import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+import { toEosEntityName, getAuthorization } from '../../helpers'
 
 const actionName = 'reclaim'
 
@@ -27,12 +28,21 @@ export const composeAction = ({ accountName, appName, contractName, permission, 
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.reclaimer && data?.dapp && data?.sym) {
+    const auth = getAuthorization(authorization)
+    const returnData: createEscrowReclaimParams = {
+      accountName: toEosEntityName(data.reclaimer),
+      appName: data.dapp,
+      contractName: toEosEntityName(account),
+      permission: toEosEntityName(auth.permission),
+      symbol: data.sym,
+    }
+
     return {
-      actionType: EosChainActionType.CreateEscrowReclaim,
-      args: { ...data },
+      chainActionType: EosChainActionType.CreateEscrowReclaim,
+      args: { ...returnData },
     }
   }
 
