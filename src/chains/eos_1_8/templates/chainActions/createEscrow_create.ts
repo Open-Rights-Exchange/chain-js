@@ -1,4 +1,10 @@
 import { EosEntityName, EosPublicKey, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+import {
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityName,
+  toEosPublicKey,
+  toEosEntityNameOrNull,
+} from '../../helpers'
 
 const actionName = 'create'
 
@@ -44,12 +50,27 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { account, name, data, authorization } = action
 
   if (name === actionName && data?.memo && data?.account && data?.ownerkey && data?.activekey && data?.origin) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+
+    const returnData: Partial<createEscrowCreateParams> = {
+      accountName: toEosEntityName(data.account),
+      contractName: toEosEntityName(account),
+      appName: data.origin,
+      creatorAccountName: toEosEntityName(data.memo),
+      creatorPermission: toEosEntityNameOrNull(auth?.permission),
+      publicKeyActive: toEosPublicKey(data.activekey),
+      publicKeyOwner: toEosPublicKey(data.ownerkey),
+      pricekey: null,
+      referralAccountName: toEosEntityName(data.referral),
+    }
+
     return {
-      actionType: EosChainActionType.CreateEscrowCreate,
-      args: { ...data },
+      chainActionType: EosChainActionType.CreateEscrowCreate,
+      args: { ...returnData },
     }
   }
 

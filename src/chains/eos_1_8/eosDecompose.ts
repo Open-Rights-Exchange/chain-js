@@ -1,5 +1,3 @@
-import { ChainActionType } from '../../models'
-
 import { decomposeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
 import { decomposeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
 import { decomposeAction as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
@@ -54,12 +52,10 @@ export function decomposeAction(action: EosActionStruct): DecomposeReturn[] {
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
   decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    const { actionType, args } = decomposeFunc(action) || {}
-    if (actionType) {
-      actionData.push({ chainActionType: actionType, args })
-      return true
+    const { chainActionType, args } = decomposeFunc(action) || {}
+    if (chainActionType) {
+      actionData.push({ chainActionType, args })
     }
-    return false
   })
   // return null and not an empty array if no matches
   return !isNullOrEmpty(actionData) ? actionData : null

@@ -1,5 +1,6 @@
 import { EosEntityName, EosAsset, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'retire'
 
@@ -26,14 +27,21 @@ export const composeAction = ({ contractName, ownerAccountName, tokenAmount, mem
   },
 })
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.quantity) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: tokenRetireParams = {
+      contractName: toEosEntityName(account),
+      ownerAccountName: toEosEntityNameOrNull(auth?.actor),
+      tokenAmount: data.quantity,
+      memo: data.memo,
+      permission: toEosEntityNameOrNull(auth?.permission),
+    }
     return {
-      actionType: ChainActionType.TokenRetire,
-      args: {
-        ...data,
-      },
+      chainActionType: ChainActionType.TokenRetire,
+      args: { ...returnData },
     }
   }
 

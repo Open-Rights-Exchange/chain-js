@@ -1,5 +1,5 @@
 import { EosAsset, EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
-import { ChainActionType } from '../../../../models'
+import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName: string = 'transfer'
 
@@ -37,12 +37,22 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.from && data?.to && data?.quantity) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: Partial<createEscrowTransferParams> = {
+      accountName: toEosEntityName(data.from),
+      amount: data.quantity,
+      contractName: toEosEntityName(account),
+      createEscrowAccountName: toEosEntityName(data.to),
+      memo: data.memo,
+      permission: toEosEntityNameOrNull(auth?.permission),
+    }
     return {
-      actionType: EosChainActionType.CreateEscrowTransfer,
-      args: { ...data },
+      chainActionType: EosChainActionType.CreateEscrowTransfer,
+      args: { ...returnData },
     }
   }
 

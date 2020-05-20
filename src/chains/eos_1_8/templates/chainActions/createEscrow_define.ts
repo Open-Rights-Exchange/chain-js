@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { EosChainActionType, EosPublicKey, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { EosChainActionType, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'define'
 
 interface createEscrowDefineParams {
   accountName: EosEntityName
-  activekey: EosPublicKey
   airdrop: createEscrowAirdropParams
   appName: string
   contractName: EosEntityName
@@ -71,14 +71,21 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.owner && data?.dapp && data?.ram_bytes && data?.net && data?.cpu && data?.pricekey) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const returnedData: createEscrowDefineParams = {
-      ...data,
-      accountName: data?.owner,
-      appName: data?.dapp,
+      contractName: toEosEntityName(account),
+      permission: toEosEntityNameOrNull(auth?.permission),
+      accountName: toEosEntityName(data?.owner),
       ram: data?.ram_bytes,
+      cpu: data?.cpu,
+      net: data?.net,
+      pricekey: data?.pricekey,
+      appName: data?.dapp,
+      airdrop: data?.airdrop,
       rex: {
         netLoanPayment: data?.net_loan_payment,
         netLoanFund: data?.net_loan_fund,
@@ -89,7 +96,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
     }
 
     return {
-      actionType: EosChainActionType.CreateEscrowDefine,
+      chainActionType: EosChainActionType.CreateEscrowDefine,
       args: returnedData,
     }
   }
