@@ -1,12 +1,7 @@
-import {
-  EthereumAddress,
-  EthUnit,
-  EthereumChainActionType,
-  EthereumTransactionAction,
-  DecomposeReturn,
-} from '../../models'
+import { EthereumAddress, EthUnit, EthereumTransactionAction, DecomposeReturn } from '../../models'
 import { toWei } from '../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../ethConstants'
+import { ChainActionType } from '../../../../models'
 
 interface valueTransferParams {
   fromAccountName?: EthereumAddress
@@ -30,7 +25,7 @@ export const decomposeAction = (action: EthereumTransactionAction): DecomposeRet
   const { to, from, value } = action
   if (to && from && value) {
     return {
-      chainActionType: EthereumChainActionType.ValueTransfer,
+      chainActionType: ChainActionType.ValueTransfer,
       args: { ...action },
     }
   }
