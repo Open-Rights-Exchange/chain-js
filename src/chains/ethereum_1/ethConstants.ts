@@ -1,3 +1,5 @@
+import { EthUnit } from './models'
+
 // sign transaction default parameters
 export { TRANSACTION_ENCODING } from '../../constants'
 export const DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS = 30
@@ -9,3 +11,6 @@ export const ACCOUNT_NAME_MAX_LENGTH = 12
 export const DEFAULT_BLOCKS_TO_CHECK = 20
 export const DEFAULT_CHECK_INTERVAL = 500
 export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
+
+/** default values for ETH transfers */
+export const DEFAULT_ETH_SYMBOL = EthUnit.Wei

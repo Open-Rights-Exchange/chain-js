@@ -10,4 +10,5 @@ export enum ChainActionType {
   TokenRetire = 'TokenRetire',
   TokenTransfer = 'TokenTransfer',
   TokenTransferFrom = 'TokenTransferFrom',
+  ValueTransfer = 'ValueTransfer',
 }

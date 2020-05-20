@@ -1,24 +1,25 @@
-import { EosAsset, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn, EosSymbol } from '../../models'
 import { ChainActionType } from '../../../../models'
 import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
 import { DEFAULT_EOS_TOKEN_CONTRACT } from '../../eosConstants'
 
 const actionName = 'transfer'
-
 interface tokenTransferParams {
-  contractName: EosEntityName
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
-  tokenAmount: EosAsset
+  contractName: EosEntityName
+  tokenAmount: number
+  tokenSymbol: EosSymbol
   memo: string
   permission: EosEntityName
 }
 
 export const composeAction = ({
-  contractName,
+  contractName = toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
   fromAccountName,
   toAccountName,
   tokenAmount,
+  tokenSymbol,
   memo,
   permission,
 }: tokenTransferParams): EosActionStruct => ({
@@ -33,7 +34,7 @@ export const composeAction = ({
   data: {
     from: fromAccountName,
     to: toAccountName,
-    quantity: tokenAmount,
+    quantity: toEosAsset(tokenAmount, tokenSymbol),
     memo,
   },
 })
