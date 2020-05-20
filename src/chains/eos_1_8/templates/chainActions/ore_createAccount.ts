@@ -1,4 +1,12 @@
-import { EosEntityName, EosPublicKey } from '../../models'
+import { EosEntityName, EosPublicKey, EosChainActionType, EosActionStruct, DecomposeReturn } from '../../models'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosPublicKey,
+  toEosEntityNameOrNull,
+} from '../../helpers'
+
+const actionName = 'createoreacc'
 
 interface oreCreateAccountParams {
   accountName: EosEntityName
@@ -10,7 +18,7 @@ interface oreCreateAccountParams {
   referralAccountName: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -18,9 +26,9 @@ export const action = ({
   publicKeyOwner,
   pricekey,
   referralAccountName,
-}: oreCreateAccountParams) => ({
-  account: 'system.ore',
-  name: 'createoreacc',
+}: oreCreateAccountParams): EosActionStruct => ({
+  account: toEosEntityName('system.ore'),
+  name: actionName,
   authorization: [
     {
       actor: creatorAccountName,
@@ -36,3 +44,27 @@ export const action = ({
     referral: referralAccountName || '',
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data, authorization } = action
+
+  if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: oreCreateAccountParams = {
+      accountName: toEosEntityName(data.newname),
+      creatorAccountName: toEosEntityName(data.creator),
+      creatorPermission: toEosEntityNameOrNull(auth?.permission),
+      publicKeyActive: toEosPublicKey(data.ownerkey),
+      publicKeyOwner: toEosPublicKey(data.activekey),
+      pricekey: data.pricekey,
+      referralAccountName: toEosEntityName(data.referral),
+    }
+    return {
+      chainActionType: EosChainActionType.OreCreateAccount,
+      args: { ...returnData },
+    }
+  }
+
+  return null
+}

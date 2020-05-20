@@ -1,5 +1,9 @@
 /* eslint-disable no-shadow */
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+
+const actionName = 'linkauth'
 
 interface linkAuthParams {
   action: string
@@ -9,9 +13,15 @@ interface linkAuthParams {
   permission: EosEntityName
 }
 
-export const action = ({ action, authAccount, authPermission, contract, permission }: linkAuthParams) => ({
-  account: 'eosio',
-  name: 'linkauth',
+export const composeAction = ({
+  action,
+  authAccount,
+  authPermission,
+  contract,
+  permission,
+}: linkAuthParams): EosActionStruct => ({
+  account: toEosEntityName('eosio'),
+  name: actionName,
   authorization: [
     {
       actor: authAccount,
@@ -25,3 +35,26 @@ export const action = ({ action, authAccount, authPermission, contract, permissi
     requirement: permission,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data, authorization } = action
+
+  if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+
+    const returnData: linkAuthParams = {
+      action: data?.action,
+      authAccount: toEosEntityName(data.account),
+      authPermission: toEosEntityNameOrNull(auth?.permission),
+      contract: toEosEntityName(data?.code),
+      permission: toEosEntityName(data?.requirement),
+    }
+    return {
+      chainActionType: ChainActionType.AccountLinkAuth,
+      args: { ...returnData },
+    }
+  }
+
+  return null
+}

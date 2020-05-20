@@ -13,7 +13,8 @@ import {
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
-import { composeAction, EthereumChainActionType } from './ethCompose'
+import { composeAction } from './ethCompose'
+import { decomposeAction } from './ethDecompose'
 import { EthereumTransaction } from './ethTransaction'
 import { EthereumChainState } from './ethChainState'
 import { EthereumCreateAccount } from './ethCreateAccount'
@@ -25,6 +26,9 @@ import {
   EthereumPublicKey,
   EthereumAddress,
   EthereumDate,
+  EthereumTransactionAction,
+  EthereumChainActionType,
+  EthereumDecomposeReturn,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -81,8 +85,15 @@ class ChainEthereumV1 implements Chain {
     return this._chainState.chainInfo
   }
 
-  public composeAction = (actionType: ChainActionType | EthereumChainActionType, args: any): any => {
+  public composeAction = (
+    actionType: ChainActionType | EthereumChainActionType,
+    args: any,
+  ): EthereumTransactionAction => {
     return composeAction(actionType, args)
+  }
+
+  public decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn[] => {
+    return decomposeAction(action)
   }
 
   // eslint-disable-next-line class-methods-use-this

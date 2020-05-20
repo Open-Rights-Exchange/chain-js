@@ -1,4 +1,21 @@
-import { EosEntityName, EosPublicKey, EosAsset } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { getFirstValueIfOnlyOneExists } from '../../../../helpers'
+import {
+  EosEntityName,
+  EosPublicKey,
+  EosAsset,
+  EosAuthorizationKeyStruct,
+  EosActionStruct,
+  DecomposeReturn,
+} from '../../models'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityNameOrNull,
+  toEosPublicKeyOrNull,
+} from '../../helpers'
+
+const actionName = 'newaccount'
 
 interface createAccountNativeParams {
   accountName: EosEntityName
@@ -11,7 +28,7 @@ interface createAccountNativeParams {
   stakeCpuQuantity: EosAsset
   transfer: boolean
 }
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -21,10 +38,10 @@ export const action = ({
   stakeNetQuantity,
   stakeCpuQuantity,
   transfer,
-}: createAccountNativeParams) => [
+}: createAccountNativeParams): EosActionStruct[] => [
   {
-    account: 'eosio',
-    name: 'newaccount',
+    account: toEosEntityName('eosio'),
+    name: actionName,
     authorization: [
       {
         actor: creatorAccountName,
@@ -59,7 +76,7 @@ export const action = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'buyrambytes',
     authorization: [
       {
@@ -74,7 +91,7 @@ export const action = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'delegatebw',
     authorization: [
       {
@@ -91,3 +108,30 @@ export const action = ({
     },
   },
 ]
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data, authorization } = action
+
+  if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    // Only works if there's 1 key in the array otherwise we don't know which keys to return
+    const ownerKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.owner.keys)
+    const activeKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.active.keys)
+
+    const returnData: Partial<createAccountNativeParams> = {
+      accountName: toEosEntityName(data.name),
+      creatorAccountName: toEosEntityName(data.creator),
+      creatorPermission: toEosEntityNameOrNull(auth.permission),
+      publicKeyActive: toEosPublicKeyOrNull(ownerKey?.key),
+      publicKeyOwner: toEosPublicKeyOrNull(activeKey?.key),
+    }
+
+    return {
+      chainActionType: ChainActionType.AccountCreate,
+      args: { ...returnData },
+    }
+  }
+
+  return null
+}

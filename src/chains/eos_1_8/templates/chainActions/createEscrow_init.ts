@@ -1,4 +1,7 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+
+const actionName = 'init'
 
 interface createEscrowInitParams {
   contractName: EosEntityName
@@ -9,16 +12,16 @@ interface createEscrowInitParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   chainSymbol,
   newAccountContract,
   newAccountAction,
   minimumRAM,
   permission,
-}: createEscrowInitParams) => ({
+}: createEscrowInitParams): EosActionStruct => ({
   account: contractName,
-  name: 'init',
+  name: actionName,
   authorization: [
     {
       actor: contractName,
@@ -32,3 +35,27 @@ export const action = ({
     minimumram: minimumRAM,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data, account, authorization } = action
+
+  if (name === actionName && data?.symbol && data?.newaccountcontract && data?.newaccountaction && data?.minimumram) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: createEscrowInitParams = {
+      contractName: toEosEntityName(account),
+      chainSymbol: data.symbol,
+      newAccountContract: toEosEntityName(data.newaccountcontract),
+      newAccountAction: data.newaccountaction,
+      minimumRAM: data.minimumram,
+      permission: toEosEntityNameOrNull(auth?.permission),
+    }
+
+    return {
+      chainActionType: EosChainActionType.CreateEscrowInit,
+      args: { ...returnData },
+    }
+  }
+
+  return null
+}

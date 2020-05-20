@@ -1,5 +1,7 @@
 import { EosEntityName, EosAsset, EosDate } from './generalModels'
 import { EosPublicKey } from './cryptoModels'
+import { ChainActionType } from '../../../models'
+import { EosChainActionType } from './chainActionTypeModels'
 
 // Raw data Types from the EOS Chain
 
@@ -29,6 +31,11 @@ export type EOSGetTableRowsParams = {
   json: boolean
 }
 
+export type EosAuthorizationKeyStruct = {
+  key: EosPublicKey
+  weight: number
+}
+
 /** EOS Raw Data Structure for Authorization - i.e. account, permissions, and weights */
 export type EosAuthorizationStruct = {
   threshold: number
@@ -39,10 +46,7 @@ export type EosAuthorizationStruct = {
     }
     weight: number
   }[]
-  keys: {
-    key: EosPublicKey
-    weight: number
-  }[]
+  keys: EosAuthorizationKeyStruct[]
   waits: {
     wait_sec: number
     weight: number
@@ -91,14 +95,16 @@ export type EosAccountStruct = {
   voter_info: any
 }
 
+export type EosActionAuthorizationStruct = {
+  actor: EosEntityName
+  permission: EosEntityName
+}
+
 /** EOS Raw Data Structure for contract action - i.e. including name, authorizations, and serialized representation */
 export type EosActionStruct = {
   account: EosEntityName
   name: string
-  authorization: {
-    actor: EosEntityName
-    permission: EosEntityName
-  }[]
+  authorization: EosActionAuthorizationStruct[]
   data?: any
   hex_data?: string
 }
@@ -114,4 +120,9 @@ export interface EosTransactionStruct {
   context_free_actions: EosActionStruct[]
   actions: EosActionStruct[]
   available_keys: EosPublicKey[]
+}
+
+export type DecomposeReturn = {
+  chainActionType: ChainActionType | EosChainActionType
+  args: any
 }
