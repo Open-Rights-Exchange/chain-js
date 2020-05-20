@@ -1,4 +1,4 @@
-import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../models'
 import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName: string = 'whitelist'
@@ -33,7 +33,7 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.owner && data?.account && data?.dapp) {

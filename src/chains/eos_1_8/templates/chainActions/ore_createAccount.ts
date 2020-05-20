@@ -1,4 +1,4 @@
-import { EosEntityName, EosPublicKey, EosChainActionType, EosActionStruct, DecomposeReturn } from '../../models'
+import { EosEntityName, EosPublicKey, EosChainActionType, EosActionStruct, EosDecomposeReturn } from '../../models'
 import {
   toEosEntityName,
   getFirstAuthorizationIfOnlyOneExists,
@@ -45,7 +45,7 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, authorization } = action
 
   if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {

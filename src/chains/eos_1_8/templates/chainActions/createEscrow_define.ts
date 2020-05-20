@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { EosChainActionType, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { EosChainActionType, EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
 import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'define'
@@ -70,7 +70,7 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.owner && data?.dapp && data?.ram_bytes && data?.net && data?.cpu && data?.pricekey) {

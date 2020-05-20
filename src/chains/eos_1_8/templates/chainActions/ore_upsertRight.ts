@@ -1,4 +1,4 @@
-import { EosEntityName, DecomposeReturn, EosActionStruct, EosChainActionType } from '../../models'
+import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosChainActionType } from '../../models'
 import { toEosEntityName } from '../../helpers'
 
 const actionName = 'upsertright'
@@ -28,7 +28,7 @@ export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, r
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account } = action
 
   if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {

@@ -35,7 +35,7 @@ import {
   toEosAsset,
   toEosDate,
 } from './helpers'
-import { EosActionStruct, EosChainSettings, EosEntityName, EosDate, EosCreateAccountOptions, DecomposeReturn } from './models'
+import { EosActionStruct, EosChainSettings, EosEntityName, EosDate, EosCreateAccountOptions, EosDecomposeReturn } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -104,7 +104,7 @@ class ChainEosV18 implements Chain {
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
-  public decomposeAction = (action: EosActionStruct): DecomposeReturn[] => {
+  public decomposeAction = (action: EosActionStruct): EosDecomposeReturn[] => {
     return decomposeAction(action)
   }
 

@@ -1,4 +1,4 @@
-import { EosEntityName, EosActionStruct, DecomposeReturn, EosSymbol } from '../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
 import { ChainActionType } from '../../../../models'
 import { toEosEntityName, toEosSymbol } from '../../helpers'
 import { composeAction as tokenTransferComposeAction } from './token_transfer'
@@ -35,7 +35,7 @@ export const composeAction = ({
     permission,
   })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data } = action
 
   if (name === actionName && data?.from && data?.to && data?.quantity) {
