@@ -1,4 +1,7 @@
-import { EosEntityName, EosPublicKey } from '../../models'
+import { EosEntityName, EosPublicKey, EosChainActionType, EosActionStruct, DecomposeReturn } from '../../models'
+import { toEosEntityName } from '../../helpers'
+
+const actionName = 'createoreacc'
 
 interface oreCreateAccountParams {
   accountName: EosEntityName
@@ -10,7 +13,7 @@ interface oreCreateAccountParams {
   referralAccountName: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -18,9 +21,9 @@ export const action = ({
   publicKeyOwner,
   pricekey,
   referralAccountName,
-}: oreCreateAccountParams) => ({
-  account: 'system.ore',
-  name: 'createoreacc',
+}: oreCreateAccountParams): EosActionStruct => ({
+  account: toEosEntityName('system.ore'),
+  name: actionName,
   authorization: [
     {
       actor: creatorAccountName,
@@ -36,3 +39,16 @@ export const action = ({
     referral: referralAccountName || '',
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
+    return {
+      actionType: EosChainActionType.OreCreateAccount,
+      args: { ...data },
+    }
+  }
+
+  return null
+}

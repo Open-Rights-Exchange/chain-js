@@ -11,6 +11,7 @@ import { ChainAssetBrand, ChainDateBrand, ChainEntityNameBrand, KeyPairEncrypted
 export type EosEntityName = string & ChainEntityNameBrand
 export type EosDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EosAsset = string & ChainAssetBrand
+export type EosSymbol = string & ChainAssetBrand
 
 /** A simple container for account, permission, and public key */
 export type EosAuthorization = {

@@ -1,4 +1,6 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+
+const actionName: string = 'whitelist'
 
 interface createEscrowWhitelistParams {
   accountName: EosEntityName
@@ -8,15 +10,15 @@ interface createEscrowWhitelistParams {
   whitelistAccount: string
 }
 
-export const action = ({
+export const composeAction = ({
   accountName,
   appName,
   contractName,
   permission,
   whitelistAccount,
-}: createEscrowWhitelistParams) => ({
+}: createEscrowWhitelistParams): EosActionStruct => ({
   account: contractName,
-  name: 'whitelist',
+  name: actionName,
   authorization: [
     {
       actor: accountName,
@@ -29,3 +31,16 @@ export const action = ({
     dapp: appName,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === actionName && data?.owner && data?.account && data?.dapp) {
+    return {
+      actionType: EosChainActionType.CreateEscrowWhitelist,
+      args: { ...data },
+    }
+  }
+
+  return null
+}

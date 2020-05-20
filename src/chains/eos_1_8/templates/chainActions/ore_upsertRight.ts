@@ -1,4 +1,7 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, DecomposeReturn, EosActionStruct, EosChainActionType } from '../../models'
+import { toEosEntityName } from '../../helpers'
+
+const actionName = 'upsertright'
 
 interface oreUpsertRightParams {
   contractName: EosEntityName
@@ -8,13 +11,13 @@ interface oreUpsertRightParams {
   urls: string
 }
 
-export const action = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams) => ({
+export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams): EosActionStruct => ({
   account: contractName,
-  name: 'upsertright',
+  name: actionName,
   authorization: [
     {
       actor: oreAccountName,
-      permission: 'active',
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
@@ -24,3 +27,16 @@ export const action = ({ contractName, issuerWhitelist, oreAccountName, rightNam
     issuer_whitelist: issuerWhitelist,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {
+    return {
+      actionType: EosChainActionType.OreUpsertRight,
+      args: { ...data },
+    }
+  }
+
+  return null
+}

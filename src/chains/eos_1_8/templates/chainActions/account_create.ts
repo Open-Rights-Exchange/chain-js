@@ -1,4 +1,8 @@
-import { EosEntityName, EosPublicKey, EosAsset } from '../../models'
+import { EosEntityName, EosPublicKey, EosAsset, EosActionStruct } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { toEosEntityName } from '../../helpers'
+
+const actionName = 'newaccount'
 
 interface createAccountNativeParams {
   accountName: EosEntityName
@@ -11,7 +15,7 @@ interface createAccountNativeParams {
   stakeCpuQuantity: EosAsset
   transfer: boolean
 }
-export const action = ({
+export const composeAction = ({
   accountName,
   creatorAccountName,
   creatorPermission,
@@ -21,10 +25,10 @@ export const action = ({
   stakeNetQuantity,
   stakeCpuQuantity,
   transfer,
-}: createAccountNativeParams) => [
+}: createAccountNativeParams): EosActionStruct[] => [
   {
-    account: 'eosio',
-    name: 'newaccount',
+    account: toEosEntityName('eosio'),
+    name: actionName,
     authorization: [
       {
         actor: creatorAccountName,
@@ -59,7 +63,7 @@ export const action = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'buyrambytes',
     authorization: [
       {
@@ -74,7 +78,7 @@ export const action = ({
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'delegatebw',
     authorization: [
       {
@@ -91,3 +95,16 @@ export const action = ({
     },
   },
 ]
+
+export const decomposeAction = (action: any) => {
+  const { name, data } = action
+
+  if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
+    return {
+      actionType: ChainActionType.AccountCreate,
+      args: { ...data },
+    }
+  }
+
+  return null
+}

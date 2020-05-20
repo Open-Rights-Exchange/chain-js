@@ -1,4 +1,6 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+
+const actionName = 'init'
 
 interface createEscrowInitParams {
   contractName: EosEntityName
@@ -9,16 +11,16 @@ interface createEscrowInitParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   chainSymbol,
   newAccountContract,
   newAccountAction,
   minimumRAM,
   permission,
-}: createEscrowInitParams) => ({
+}: createEscrowInitParams): EosActionStruct => ({
   account: contractName,
-  name: 'init',
+  name: actionName,
   authorization: [
     {
       actor: contractName,
@@ -32,3 +34,16 @@ export const action = ({
     minimumram: minimumRAM,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === actionName && data?.symbol && data?.newaccountcontract && data?.newaccountaction && data?.minimumram) {
+    return {
+      actionType: EosChainActionType.CreateEscrowInit,
+      args: { ...data },
+    }
+  }
+
+  return null
+}

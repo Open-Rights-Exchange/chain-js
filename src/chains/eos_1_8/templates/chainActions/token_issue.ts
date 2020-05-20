@@ -1,4 +1,7 @@
-import { EosEntityName, EosAsset } from '../../models'
+import { EosEntityName, EosAsset, EosActionStruct, DecomposeReturn } from '../../models'
+import { ChainActionType } from '../../../../models'
+
+const actionName = 'issue'
 
 interface tokenIssueParams {
   contractName: EosEntityName
@@ -9,16 +12,16 @@ interface tokenIssueParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   ownerAccountName,
   toAccountName,
   tokenAmount,
   memo,
   permission,
-}: tokenIssueParams) => ({
+}: tokenIssueParams): EosActionStruct => ({
   account: contractName,
-  name: 'issue',
+  name: actionName,
   authorization: [
     {
       actor: ownerAccountName,
@@ -31,3 +34,16 @@ export const action = ({
     memo,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data } = action
+
+  if (name === actionName && data?.to && data?.quantity) {
+    return {
+      actionType: ChainActionType.TokenIssue,
+      args: { ...data },
+    }
+  }
+
+  return null
+}
