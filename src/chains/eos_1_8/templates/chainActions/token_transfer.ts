@@ -41,6 +41,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.from && data?.to) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const returnData: Partial<tokenTransferParams> = {
       contractName: toEosEntityName(account),

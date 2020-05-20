@@ -113,6 +113,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, authorization } = action
 
   if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     // Only works if there's 1 key in the array otherwise we don't know which keys to return
     const ownerKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.owner.keys)

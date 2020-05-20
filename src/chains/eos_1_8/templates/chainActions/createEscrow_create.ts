@@ -53,6 +53,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { account, name, data, authorization } = action
 
   if (name === actionName && data?.memo && data?.account && data?.ownerkey && data?.activekey && data?.origin) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
 
     const returnData: Partial<createEscrowCreateParams> = {

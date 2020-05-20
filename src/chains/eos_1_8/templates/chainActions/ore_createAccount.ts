@@ -49,6 +49,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, authorization } = action
 
   if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const returnData: oreCreateAccountParams = {
       accountName: toEosEntityName(data.newname),

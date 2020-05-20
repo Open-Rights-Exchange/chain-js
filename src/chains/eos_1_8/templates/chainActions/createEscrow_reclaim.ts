@@ -31,6 +31,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.reclaimer && data?.dapp && data?.sym) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const returnData: createEscrowReclaimParams = {
       accountName: toEosEntityName(data.reclaimer),
