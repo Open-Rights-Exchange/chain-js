@@ -64,3 +64,21 @@ export function toEosEntityName(name: string): EosEntityName {
   const rules = 'Up to 13 characters, last character can\'t be ".", 13th character can only be [1-5] or [a-j].'
   throw new Error(`Not a valid EOS Account name:${name}. ${rules}`)
 }
+
+/**
+ * Returns a valid eosEntityName or null (Useful when the name can be null)
+ */
+export function toEosEntityNameOrNull(name: string): EosEntityName {
+  if (name === null || name === undefined) return null
+
+  return toEosEntityName(name)
+}
+
+/**
+ * Returns a valid eosEntityName or empty string (Useful when eos transactions accepts empty string)
+ */
+export function toEosEntityNameOrEmptyString(name: string): EosEntityName | '' {
+  if (name === '') return ''
+
+  return toEosEntityName(name)
+}

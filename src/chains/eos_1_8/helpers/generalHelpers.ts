@@ -1,6 +1,6 @@
 import { isNullOrEmpty } from '../../../helpers'
 
-import { EosEntityName } from '../models'
+import { EosActionAuthorizationStruct, EosAuthorizationKeyStruct } from '../models'
 
 const EOS_BASE = 31 // Base 31 allows us to leave out '.', as it's used for account scope
 
@@ -30,14 +30,14 @@ export function randomEosBase32(): string {
   )
 }
 
-type GetAuthorizationInput = {
-  actor: EosEntityName
-  permission: EosEntityName
-}
-
-/** Returns the first authorization in the array  */
-export function getAuthorization(authorization: GetAuthorizationInput[]): GetAuthorizationInput {
-  if (!isNullOrEmpty(authorization)) {
+/**
+ * Returns an EosActionAuthorizationStruct if there is only 1 in the array, otherwise returns null
+ */
+export function getFirstAuthorizationIfOnlyOneExists(
+  authorization: EosActionAuthorizationStruct[],
+): EosActionAuthorizationStruct {
+  const lengthRequirement = 1
+  if (!isNullOrEmpty(authorization) && authorization.length === lengthRequirement) {
     const [firstAuthorization] = authorization
 
     return firstAuthorization
