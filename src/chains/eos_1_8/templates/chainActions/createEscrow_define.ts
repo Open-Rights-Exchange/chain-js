@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { EosChainActionType, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
-import { toEosEntityName, getAuthorization } from '../../helpers'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'define'
 
@@ -74,10 +74,10 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.owner && data?.dapp && data?.ram_bytes && data?.net && data?.cpu && data?.pricekey) {
-    const auth = getAuthorization(authorization)
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const returnedData: createEscrowDefineParams = {
       contractName: toEosEntityName(account),
-      permission: toEosEntityName(auth.permission),
+      permission: toEosEntityNameOrNull(auth?.permission),
       accountName: toEosEntityName(data?.owner),
       ram: data?.ram_bytes,
       cpu: data?.cpu,

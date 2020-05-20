@@ -1,6 +1,7 @@
-import { EosEntityName, EosPublicKey, EosAsset, EosActionStruct } from '../../models'
+import { EosEntityName, EosPublicKey, EosAsset, EosAuthorizationKeyStruct, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName } from '../../helpers'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull, toEosPublicKey } from '../../helpers'
+import { getFirstValueIfOnlyOneExists } from '../../../../helpers'
 
 const actionName = 'newaccount'
 
@@ -96,13 +97,25 @@ export const composeAction = ({
   },
 ]
 
-export const decomposeAction = (action: any) => {
-  const { name, data } = action
+export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
+  const { name, data, authorization } = action
 
   if (name === actionName && data?.creator && data?.name && data?.owner && data?.active) {
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const ownerKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.owner.keys)
+    const activeKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.active.keys)
+
+    const returnData: Partial<createAccountNativeParams> = {
+      accountName: toEosEntityName(data.name),
+      creatorAccountName: toEosEntityName(data.creator),
+      creatorPermission: toEosEntityNameOrNull(auth.permission),
+      publicKeyActive: ownerKey?.key,
+      publicKeyOwner: activeKey?.key,
+    }
+
     return {
-      actionType: ChainActionType.AccountCreate,
-      args: { ...data },
+      chainActionType: ChainActionType.AccountCreate,
+      args: { ...returnData },
     }
   }
 

@@ -1,6 +1,6 @@
 import { EosAsset, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { getAuthorization, toEosEntityName } from '../../helpers'
+import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'transfer'
 
@@ -41,14 +41,14 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
   const { name, data, account, authorization } = action
 
   if (name === actionName && data?.from && data?.to) {
-    const auth = getAuthorization(authorization)
-    const returnData: tokenTransferParams = {
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: Partial<tokenTransferParams> = {
       contractName: toEosEntityName(account),
       fromAccountName: toEosEntityName(data.from),
       toAccountName: toEosEntityName(data.to),
       tokenAmount: data.quantity,
       memo: data.memo,
-      permission: toEosEntityName(auth.permission),
+      permission: toEosEntityNameOrNull(auth?.permission),
     }
     return {
       chainActionType: ChainActionType.TokenTransfer,
