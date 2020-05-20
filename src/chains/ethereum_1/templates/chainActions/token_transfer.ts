@@ -1,7 +1,6 @@
-import { EthereumChainActionType, EthereumAddress, EthereumTransactionAction, DecomposeReturn } from '../../models'
-import { erc20Abi } from '../abis/erc20Abi'
-
-const actionName = 'transfer'
+import { ChainActionType } from '../../../../models'
+import { EthereumAddress, EthereumTransactionAction, DecomposeReturn } from '../../models'
+import { composeAction as erc20Transfer } from './erc20_transfer'
 
 interface tokenTransferParams {
   fromAccountName?: EthereumAddress
@@ -12,20 +11,19 @@ interface tokenTransferParams {
 
 // TODO: Call erc20 transfer compose action by default instead of recreating the values here
 export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: tokenTransferParams) => ({
-  from: fromAccountName,
-  to: contractName,
-  contract: {
-    abi: erc20Abi,
-    parameters: [toAccountName, tokenAmount],
-    method: actionName,
-  },
+  ...erc20Transfer({
+    contractAddress: contractName,
+    from: fromAccountName,
+    to: toAccountName,
+    value: tokenAmount,
+  }),
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): DecomposeReturn => {
   const { to, from, contract } = action
   if (to && from && contract) {
     return {
-      chainActionType: EthereumChainActionType.TokenTransfer,
+      chainActionType: ChainActionType.TokenTransfer,
       args: { ...action },
     }
   }
