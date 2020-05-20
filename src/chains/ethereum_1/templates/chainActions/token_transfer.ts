@@ -17,6 +17,7 @@ interface tokenTransferParams {
   contract?: EthereumActionContract
 }
 
+// TODO: Call erc20 transfer compose action by default instead of recreating the values here
 export const composeAction = ({
   fromAccountName,
   toAccountName,
