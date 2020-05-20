@@ -1,4 +1,10 @@
-import { EthereumAddress, EthUnit, EthereumChainActionType, EthereumTransactionAction } from '../../models'
+import {
+  EthereumAddress,
+  EthUnit,
+  EthereumChainActionType,
+  EthereumTransactionAction,
+  DecomposeReturn,
+} from '../../models'
 import { toWei } from '../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../ethConstants'
 
@@ -20,11 +26,11 @@ export const composeAction = ({
   value: toWei(tokenAmount, tokenSymbol),
 })
 
-export const decomposeAction = (action: EthereumTransactionAction) => {
+export const decomposeAction = (action: EthereumTransactionAction): DecomposeReturn => {
   const { to, from, value } = action
   if (to && from && value) {
     return {
-      actionType: EthereumChainActionType.ValueTransfer,
+      chainActionType: EthereumChainActionType.ValueTransfer,
       args: { ...action },
     }
   }

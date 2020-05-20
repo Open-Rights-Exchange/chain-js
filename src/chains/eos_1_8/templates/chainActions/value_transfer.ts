@@ -40,7 +40,7 @@ export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
 
   if (name === actionName && data?.from && data?.to && data?.quantity) {
     return {
-      actionType: ChainActionType.ValueTransfer,
+      chainActionType: ChainActionType.ValueTransfer,
       args: {
         ...data,
       },
