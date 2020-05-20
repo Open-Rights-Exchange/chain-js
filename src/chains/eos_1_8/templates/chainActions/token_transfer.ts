@@ -1,6 +1,7 @@
 import { EosAsset, EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
 import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
+import { DEFAULT_EOS_TOKEN_CONTRACT } from '../../eosConstants'
 
 const actionName = 'transfer'
 
