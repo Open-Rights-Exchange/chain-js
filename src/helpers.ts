@@ -107,3 +107,16 @@ export const notImplemented = () => {
 export const notSupported = () => {
   throw new Error('Not Supported')
 }
+
+/**
+ * Returns an the first value from the array if only 1 exists, otherwise returns null
+ */
+export function getFirstValueIfOnlyOneExists(array: any[]): any {
+  const lengthRequirement = 1
+  if (!isNullOrEmpty(array) && array.length === lengthRequirement) {
+    const [firstValue] = array
+    return firstValue
+  }
+
+  return null
+}

@@ -28,7 +28,7 @@ import {
   EthereumDate,
   EthereumTransactionAction,
   EthereumChainActionType,
-  EthDecomposeReturn,
+  EthereumDecomposeReturn,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -92,7 +92,7 @@ class ChainEthereumV1 implements Chain {
     return composeAction(actionType, args)
   }
 
-  public decomposeAction = (action: EthereumTransactionAction): EthDecomposeReturn[] => {
+  public decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn[] => {
     return decomposeAction(action)
   }
 

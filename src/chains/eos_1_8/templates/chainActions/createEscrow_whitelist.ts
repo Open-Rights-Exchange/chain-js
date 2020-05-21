@@ -1,4 +1,5 @@
-import { EosEntityName, EosActionStruct, DecomposeReturn, EosChainActionType } from '../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../models'
+import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName: string = 'whitelist'
 
@@ -32,13 +33,23 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.owner && data?.account && data?.dapp) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: createEscrowWhitelistParams = {
+      accountName: toEosEntityName(data.owner),
+      appName: data.dapp,
+      contractName: toEosEntityName(account),
+      permission: toEosEntityNameOrNull(auth?.permission),
+      whitelistAccount: data.accountName,
+    }
+
     return {
-      actionType: EosChainActionType.CreateEscrowWhitelist,
-      args: { ...data },
+      chainActionType: EosChainActionType.CreateEscrowWhitelist,
+      args: { ...returnData },
     }
   }
 

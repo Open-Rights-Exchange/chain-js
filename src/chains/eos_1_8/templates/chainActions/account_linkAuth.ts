@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
-import { EosEntityName, EosActionStruct, DecomposeReturn } from '../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName } from '../../helpers'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'linkauth'
 
@@ -36,13 +36,23 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, authorization } = action
 
   if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+
+    const returnData: linkAuthParams = {
+      action: data?.action,
+      authAccount: toEosEntityName(data.account),
+      authPermission: toEosEntityNameOrNull(auth?.permission),
+      contract: toEosEntityName(data?.code),
+      permission: toEosEntityName(data?.requirement),
+    }
     return {
-      actionType: ChainActionType.AccountLinkAuth,
-      args: { ...data },
+      chainActionType: ChainActionType.AccountLinkAuth,
+      args: { ...returnData },
     }
   }
 

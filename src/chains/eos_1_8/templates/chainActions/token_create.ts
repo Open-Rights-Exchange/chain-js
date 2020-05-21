@@ -1,5 +1,6 @@
-import { EosEntityName, EosAsset, DecomposeReturn, EosActionStruct } from '../../models'
+import { EosEntityName, EosAsset, EosDecomposeReturn, EosActionStruct } from '../../models'
 import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
 
 const actionName = 'create'
 
@@ -32,13 +33,22 @@ export const composeAction = ({
   },
 })
 
-export const decomposeAction = (action: EosActionStruct): DecomposeReturn => {
-  const { name, data } = action
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, account, authorization } = action
 
   if (name === actionName && data?.issuer && data?.maximum_supply) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: tokenCreateParams = {
+      contractName: toEosEntityName(account),
+      ownerAccountName: toEosEntityNameOrNull(auth?.actor),
+      toAccountName: toEosEntityName(data.issuer),
+      permission: toEosEntityNameOrNull(auth?.permission),
+      tokenAmount: data.maximum_supply,
+    }
     return {
-      actionType: ChainActionType.TokenCreate,
-      args: { ...data },
+      chainActionType: ChainActionType.TokenCreate,
+      args: { ...returnData },
     }
   }
 
