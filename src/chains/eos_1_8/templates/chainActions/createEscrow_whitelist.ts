@@ -39,17 +39,18 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.owner && data?.account && data?.dapp) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: createEscrowWhitelistParams = {
+    const returnData: Partial<createEscrowWhitelistParams> = {
       accountName: toEosEntityName(data.owner),
       appName: data.dapp,
       contractName: toEosEntityName(account),
       permission: toEosEntityNameOrNull(auth?.permission),
       whitelistAccount: data.accountName,
     }
-
+    const partial = !returnData?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowWhitelist,
-      args: { ...returnData },
+      args: returnData,
+      partial,
     }
   }
 

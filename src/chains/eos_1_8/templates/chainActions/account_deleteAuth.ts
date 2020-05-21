@@ -43,9 +43,12 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       authPermission: toEosEntityNameOrNull(auth?.permission),
       permission: toEosEntityName(data.permission),
     }
+    const partial = !returnData?.authPermission || !returnData?.authAccount
+
     return {
       chainActionType: ChainActionType.AccountDeleteAuth,
       args: returnData,
+      partial,
     }
   }
 
