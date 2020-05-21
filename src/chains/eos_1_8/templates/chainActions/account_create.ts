@@ -126,11 +126,11 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       publicKeyActive: toEosPublicKeyOrNull(ownerKey?.key),
       publicKeyOwner: toEosPublicKeyOrNull(activeKey?.key),
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.creatorPermission || !returnData.publicKeyActive || !returnData.publicKeyOwner
 
     return {
       chainActionType: ChainActionType.AccountCreate,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

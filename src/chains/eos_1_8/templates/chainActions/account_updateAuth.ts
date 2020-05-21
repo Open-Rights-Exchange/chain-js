@@ -42,10 +42,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       parent: toEosEntityName(data.parent),
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.permission
     return {
       chainActionType: ChainActionType.AccountUpdateAuth,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

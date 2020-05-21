@@ -40,10 +40,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       permission: toEosEntityNameOrNull(auth?.permission),
       symbol: data.sym,
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowReclaim,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

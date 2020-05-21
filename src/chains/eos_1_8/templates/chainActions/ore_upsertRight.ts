@@ -42,7 +42,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
 
     return {
       chainActionType: EosChainActionType.OreUpsertRight,
-      args: { ...returnData },
+      args: returnData,
     }
   }
 

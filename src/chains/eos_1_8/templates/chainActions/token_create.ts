@@ -46,10 +46,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       permission: toEosEntityNameOrNull(auth?.permission),
       tokenAmount: data.maximum_supply,
     }
-    const partial = !auth?.permission || !auth?.actor
+    const partial = !returnData?.permission || !returnData?.ownerAccountName
     return {
       chainActionType: ChainActionType.TokenCreate,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

@@ -50,10 +50,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       minimumRAM: data.minimumram,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowInit,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

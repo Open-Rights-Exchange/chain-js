@@ -44,10 +44,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       authPermission: toEosEntityNameOrNull(auth?.permission),
       contract: toEosEntityName(data.code),
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.authPermission
     return {
       chainActionType: ChainActionType.AccountUnlinkAuth,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

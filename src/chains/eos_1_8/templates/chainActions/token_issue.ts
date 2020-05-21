@@ -50,10 +50,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       memo: data.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-    const partial = !auth?.permission || !auth?.actor
+    const partial = !returnData?.permission || !returnData?.ownerAccountName
     return {
       chainActionType: ChainActionType.TokenIssue,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }

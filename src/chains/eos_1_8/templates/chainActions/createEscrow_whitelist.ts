@@ -46,10 +46,10 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       permission: toEosEntityNameOrNull(auth?.permission),
       whitelistAccount: data.accountName,
     }
-    const partial = !auth?.permission
+    const partial = !returnData?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowWhitelist,
-      args: { ...returnData },
+      args: returnData,
       partial,
     }
   }
