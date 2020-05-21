@@ -42,7 +42,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.symbol && data?.newaccountcontract && data?.newaccountaction && data?.minimumram) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: createEscrowInitParams = {
+    const returnData: Partial<createEscrowInitParams> = {
       contractName: toEosEntityName(account),
       chainSymbol: data.symbol,
       newAccountContract: toEosEntityName(data.newaccountcontract),
@@ -50,10 +50,11 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       minimumRAM: data.minimumram,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-
+    const partial = !auth?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowInit,
       args: { ...returnData },
+      partial,
     }
   }
 

@@ -125,4 +125,5 @@ export interface EosTransactionStruct {
 export type EosDecomposeReturn = {
   chainActionType: ChainActionType | EosChainActionType
   args: any
+  partial?: boolean
 }

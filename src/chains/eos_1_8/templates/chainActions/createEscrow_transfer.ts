@@ -50,9 +50,11 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       memo: data.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
+    const partial = !auth?.permission
     return {
       chainActionType: EosChainActionType.CreateEscrowTransfer,
       args: { ...returnData },
+      partial,
     }
   }
 

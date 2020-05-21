@@ -32,16 +32,18 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.quantity) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: tokenRetireParams = {
+    const returnData: Partial<tokenRetireParams> = {
       contractName: toEosEntityName(account),
       ownerAccountName: toEosEntityNameOrNull(auth?.actor),
       tokenAmount: data.quantity,
       memo: data.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
+    const partial = !auth?.permission || !auth?.actor
     return {
       chainActionType: ChainActionType.TokenRetire,
       args: { ...returnData },
+      partial,
     }
   }
 

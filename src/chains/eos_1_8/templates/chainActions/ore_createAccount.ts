@@ -51,7 +51,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: oreCreateAccountParams = {
+    const returnData: Partial<oreCreateAccountParams> = {
       accountName: toEosEntityName(data.newname),
       creatorAccountName: toEosEntityName(data.creator),
       creatorPermission: toEosEntityNameOrNull(auth?.permission),
@@ -60,9 +60,11 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       pricekey: data.pricekey,
       referralAccountName: toEosEntityName(data.referral),
     }
+    const partial = !auth?.permission
     return {
       chainActionType: EosChainActionType.OreCreateAccount,
       args: { ...returnData },
+      partial,
     }
   }
 

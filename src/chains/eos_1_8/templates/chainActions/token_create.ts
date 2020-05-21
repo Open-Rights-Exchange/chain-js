@@ -39,16 +39,18 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.issuer && data?.maximum_supply) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: tokenCreateParams = {
+    const returnData: Partial<tokenCreateParams> = {
       contractName: toEosEntityName(account),
       ownerAccountName: toEosEntityNameOrNull(auth?.actor),
       toAccountName: toEosEntityName(data.issuer),
       permission: toEosEntityNameOrNull(auth?.permission),
       tokenAmount: data.maximum_supply,
     }
+    const partial = !auth?.permission || !auth?.actor
     return {
       chainActionType: ChainActionType.TokenCreate,
       args: { ...returnData },
+      partial,
     }
   }
 
