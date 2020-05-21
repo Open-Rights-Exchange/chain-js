@@ -1,10 +1,4 @@
-import {
-  EthereumAddress,
-  EthUnit,
-  EthereumChainActionType,
-  EthereumTransactionAction,
-  EthereumDecomposeReturn,
-} from '../../models'
+import { EthereumAddress, EthUnit, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import { toWei } from '../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../ethConstants'
 import { ChainActionType } from '../../../../models'
