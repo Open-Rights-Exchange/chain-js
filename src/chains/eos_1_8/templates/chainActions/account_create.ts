@@ -122,14 +122,16 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     const returnData: Partial<createAccountNativeParams> = {
       accountName: toEosEntityName(data.name),
       creatorAccountName: toEosEntityName(data.creator),
-      creatorPermission: toEosEntityNameOrNull(auth.permission),
+      creatorPermission: toEosEntityNameOrNull(auth?.permission),
       publicKeyActive: toEosPublicKeyOrNull(ownerKey?.key),
       publicKeyOwner: toEosPublicKeyOrNull(activeKey?.key),
     }
+    const partial = !returnData?.creatorPermission || !returnData.publicKeyActive || !returnData.publicKeyOwner
 
     return {
       chainActionType: ChainActionType.AccountCreate,
-      args: { ...returnData },
+      args: returnData,
+      partial,
     }
   }
 

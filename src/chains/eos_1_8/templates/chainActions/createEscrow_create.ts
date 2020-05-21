@@ -67,10 +67,12 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       pricekey: null,
       referralAccountName: toEosEntityName(data.referral),
     }
+    const partial = !returnData?.creatorPermission
 
     return {
       chainActionType: EosChainActionType.CreateEscrowCreate,
-      args: { ...returnData },
+      args: returnData,
+      partial,
     }
   }
 

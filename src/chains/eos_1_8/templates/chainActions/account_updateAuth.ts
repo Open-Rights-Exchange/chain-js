@@ -35,16 +35,18 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.account && data?.permission && data?.parent && data?.auth) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: updateAuthParams = {
+    const returnData: Partial<updateAuthParams> = {
       auth: data.auth,
       authAccount: toEosEntityName(data.authAccount),
       authPermission: toEosEntityNameOrNull(auth?.permission),
       parent: toEosEntityName(data.parent),
       permission: toEosEntityNameOrNull(auth?.permission),
     }
+    const partial = !returnData?.permission
     return {
       chainActionType: ChainActionType.AccountUpdateAuth,
-      args: { ...returnData },
+      args: returnData,
+      partial,
     }
   }
 

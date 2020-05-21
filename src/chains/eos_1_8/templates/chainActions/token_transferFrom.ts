@@ -55,11 +55,11 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       memo: data.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
+    const partial = !returnData?.permission
     return {
       chainActionType: ChainActionType.TokenTransferFrom,
-      args: {
-        ...returnData,
-      },
+      args: returnData,
+      partial,
     }
   }
 

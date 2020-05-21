@@ -43,16 +43,19 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
 
-    const returnData: linkAuthParams = {
+    const returnData: Partial<linkAuthParams> = {
       action: data?.action,
       authAccount: toEosEntityName(data.account),
       authPermission: toEosEntityNameOrNull(auth?.permission),
       contract: toEosEntityName(data?.code),
       permission: toEosEntityName(data?.requirement),
     }
+    const partial = !returnData?.permission
+
     return {
       chainActionType: ChainActionType.AccountLinkAuth,
-      args: { ...returnData },
+      args: returnData,
+      partial,
     }
   }
 
