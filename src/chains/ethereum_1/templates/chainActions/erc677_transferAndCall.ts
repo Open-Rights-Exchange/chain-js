@@ -8,7 +8,7 @@ import {
 } from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
 
-interface erc20TransferParams {
+interface erc20TransferAndCallParams {
   contractAddress: EthereumAddress
   from: EthereumAddress
   to: EthereumAddress
@@ -16,7 +16,7 @@ interface erc20TransferParams {
   data: EthereumValue[]
 }
 
-export const composeAction = ({ contractAddress, from, to, value, data }: erc20TransferParams) => {
+export const composeAction = ({ contractAddress, from, to, value, data }: erc20TransferAndCallParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [to, value, data],
