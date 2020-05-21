@@ -7,13 +7,13 @@ import {
 } from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
 
-interface erc20IssueParams {
+interface erc20BurnParams {
   contractAddress: EthereumAddress
   from: EthereumAddress
   value: number
 }
 
-export const composeAction = ({ contractAddress, from, value }: erc20IssueParams) => {
+export const composeAction = ({ contractAddress, from, value }: erc20BurnParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [value],
