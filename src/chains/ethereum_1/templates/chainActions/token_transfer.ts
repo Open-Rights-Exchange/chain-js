@@ -1,12 +1,6 @@
-import {
-  EthereumChainActionType,
-  EthereumAddress,
-  EthereumTransactionAction,
-  EthereumDecomposeReturn,
-} from '../../models'
-import { erc20Abi } from '../abis/erc20Abi'
-
-const actionName = 'transfer'
+import { ChainActionType } from '../../../../models'
+import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
+import { composeAction as erc20Transfer } from './erc20_transfer'
 
 interface tokenTransferParams {
   fromAccountName?: EthereumAddress
