@@ -29,7 +29,7 @@ export const composeAction = ({ contractAddress, from, to, tokenId }: erc721Appr
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && from && contract && contract.method === 'approve') {
+  if (to && from && contract && contract.abi === erc721Abi && contract.method === 'approve') {
     return {
       chainActionType: EthereumChainActionType.Erc721Approve,
       args: { ...action },
