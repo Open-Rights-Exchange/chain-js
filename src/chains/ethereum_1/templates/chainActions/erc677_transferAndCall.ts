@@ -3,7 +3,7 @@ import {
   EthereumAddress,
   EthereumValue,
   EthereumTransactionAction,
-  DecomposeReturn,
+  EthereumDecomposeReturn,
   EthereumChainActionType,
 } from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
@@ -29,7 +29,7 @@ export const composeAction = ({ contractAddress, from, to, value, data }: erc20T
   }
 }
 
-export const decomposeAction = (action: EthereumTransactionAction): DecomposeReturn => {
+export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (to && from && contract && contract.method === 'transferAndCall') {
     return {
