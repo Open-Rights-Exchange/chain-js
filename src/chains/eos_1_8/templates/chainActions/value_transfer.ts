@@ -1,15 +1,10 @@
 import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
-import { ChainActionType } from '../../../../models'
+import { toEosEntityName, toEosSymbol } from '../../helpers'
 import {
-  toEosEntityName,
-  toEosSymbol,
-  getFirstAuthorizationIfOnlyOneExists,
-  toEosEntityNameOrNull,
-} from '../../helpers'
-import { composeAction as tokenTransferComposeAction } from './token_transfer'
+  composeAction as tokenTransferComposeAction,
+  decomposeAction as tokenTransferDecomposeAction,
+} from './token_transfer'
 import { DEFAULT_EOS_SYMBOL, DEFAULT_EOS_TOKEN_CONTRACT } from '../../eosConstants'
-
-const actionName = 'transfer'
 
 interface valueTransferParams {
   fromAccountName: EosEntityName
@@ -21,46 +16,16 @@ interface valueTransferParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({
-  fromAccountName,
-  toAccountName,
-  contractName = toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
-  tokenAmount,
-  tokenSymbol = toEosSymbol(DEFAULT_EOS_SYMBOL),
-  memo,
-  permission,
-}: valueTransferParams) =>
-  tokenTransferComposeAction({
-    fromAccountName,
-    toAccountName,
-    contractName,
-    tokenAmount,
-    tokenSymbol,
-    memo,
-    permission,
+// a value transfer for EOS just calls the standard transfer function
+// if no contractName or tokenSymbol is provided, use the chain defauult (e.g. 'EOS')
+export const composeAction = (params: valueTransferParams) => {
+  return tokenTransferComposeAction({
+    ...params,
+    contractName: params?.contractName ? params?.contractName : toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
+    tokenSymbol: params?.tokenSymbol ? params?.tokenSymbol : toEosSymbol(DEFAULT_EOS_SYMBOL),
   })
+}
 
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
-  const { name, data, account, authorization } = action
-
-  if (name === actionName && data?.from && data?.to) {
-    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
-    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<valueTransferParams> = {
-      contractName: toEosEntityName(account),
-      fromAccountName: toEosEntityName(data.from),
-      toAccountName: toEosEntityName(data.to),
-      tokenAmount: data.quantity,
-      memo: data.memo,
-      permission: toEosEntityNameOrNull(auth?.permission),
-    }
-    const partial = !returnData?.permission
-    return {
-      chainActionType: ChainActionType.ValueTransfer,
-      args: returnData,
-      partial,
-    }
-  }
-
-  return null
+  return tokenTransferDecomposeAction(action)
 }
