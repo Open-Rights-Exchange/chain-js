@@ -1,0 +1,34 @@
+import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
+import {
+  composeAction as tokenTransferFromComposeAction,
+  decomposeAction as tokenTransferFromDecomposeAction,
+} from './erc20_transferFrom'
+
+interface tokenTransferFromParams {
+  approvedAccountName: EthereumAddress
+  contractName: EthereumAddress
+  fromAccountName: EthereumAddress
+  toAccountName: EthereumAddress
+  tokenAmount: number
+}
+
+// Calls ERC20TransferFrom as default token template for Ethereum
+export const composeAction = ({
+  approvedAccountName,
+  fromAccountName,
+  toAccountName,
+  tokenAmount,
+  contractName,
+}: tokenTransferFromParams) => ({
+  ...tokenTransferFromComposeAction({
+    contractAddress: contractName,
+    from: approvedAccountName,
+    transferFrom: fromAccountName,
+    to: toAccountName,
+    value: tokenAmount,
+  }),
+})
+
+export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
+  return tokenTransferFromDecomposeAction(action)
+}
