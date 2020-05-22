@@ -1,6 +1,7 @@
 import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import { composeAction as erc20Burn } from './erc20_burn'
+import { erc20Abi } from '../abis/erc20Abi'
 
 interface tokenRetireParams {
   fromAccountName?: EthereumAddress
@@ -19,10 +20,17 @@ export const composeAction = ({ fromAccountName, tokenAmount, contractName }: to
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && from && contract && contract.method === 'burn') {
+  if (to && contract && contract.abi === erc20Abi && contract.method === 'burn') {
+    const returnData: Partial<tokenRetireParams> = {
+      contractName: to,
+      fromAccountName: from,
+      tokenAmount: contract.parameters[0] as number,
+    }
+    const partial = !returnData?.fromAccountName
     return {
       chainActionType: ChainActionType.TokenTransfer,
-      args: { ...action },
+      args: returnData,
+      partial,
     }
   }
   return null

@@ -9,7 +9,7 @@ import { erc20Abi } from '../abis/erc20Abi'
 
 interface erc20IssueParams {
   contractAddress: EthereumAddress
-  from: EthereumAddress
+  from?: EthereumAddress
   value: number
 }
 
@@ -28,10 +28,17 @@ export const composeAction = ({ contractAddress, from, value }: erc20IssueParams
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && from && contract && contract.abi === erc20Abi && contract.method === 'issue') {
+  if (to && contract && contract.abi === erc20Abi && contract.method === 'issue') {
+    const returnData: Partial<erc20IssueParams> = {
+      contractAddress: to,
+      from,
+      value: contract.parameters[0] as number,
+    }
+    const partial = !returnData?.from
     return {
       chainActionType: EthereumChainActionType.Erc20Issue,
-      args: { ...action },
+      args: returnData,
+      partial,
     }
   }
 

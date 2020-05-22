@@ -9,7 +9,7 @@ import { erc20Abi } from '../abis/erc20Abi'
 
 interface erc20BurnParams {
   contractAddress: EthereumAddress
-  from: EthereumAddress
+  from?: EthereumAddress
   value: number
 }
 
@@ -28,10 +28,17 @@ export const composeAction = ({ contractAddress, from, value }: erc20BurnParams)
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && from && contract && contract.method === 'burn') {
+  if (to && contract && contract.method === 'burn') {
+    const returnData: Partial<erc20BurnParams> = {
+      contractAddress: to,
+      from,
+      value: contract.parameters[0] as number,
+    }
+    const partial = !returnData?.from
     return {
       chainActionType: EthereumChainActionType.Erc20Burn,
-      args: { ...action },
+      args: returnData,
+      partial,
     }
   }
 
