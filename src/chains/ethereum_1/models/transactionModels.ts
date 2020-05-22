@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
 import { BN } from 'ethereumjs-util'
 import { EthereumValue } from './generalModels'
@@ -7,7 +8,7 @@ export type EthereumAbi = any[]
 export type EthereumActionContract = {
   abi: any
   method: string
-  parameters: (string | number)[]
+  parameters: (EthereumValue | EthereumValue[])[]
 }
 
 export type EthereumAddress = EthereumValue & (string | Buffer)
