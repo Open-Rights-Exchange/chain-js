@@ -1,3 +1,4 @@
+import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import { composeAction as tokenBurnComposeAction, decomposeAction as tokenBurnDecomposeAction } from './erc20_burn'
 
@@ -17,5 +18,8 @@ export const composeAction = ({ fromAccountName, tokenAmount, contractName }: to
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
-  return tokenBurnDecomposeAction(action)
+  return {
+    ...tokenBurnDecomposeAction(action),
+    chainActionType: ChainActionType.TokenRetire,
+  }
 }

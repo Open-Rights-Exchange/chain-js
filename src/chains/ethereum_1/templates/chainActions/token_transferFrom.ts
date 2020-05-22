@@ -1,3 +1,4 @@
+import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import {
   composeAction as tokenTransferFromComposeAction,
@@ -30,5 +31,8 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
-  return tokenTransferFromDecomposeAction(action)
+  return {
+    ...tokenTransferFromDecomposeAction(action),
+    chainActionType: ChainActionType.TokenTransfer,
+  }
 }

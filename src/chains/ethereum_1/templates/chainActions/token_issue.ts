@@ -1,3 +1,4 @@
+import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import { composeAction as tokenIssueComposeAction, decomposeAction as tokenIssueDecomposeAction } from './erc20_issue'
 
@@ -17,5 +18,8 @@ export const composeAction = ({ fromAccountName, tokenAmount, contractName }: to
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
-  return tokenIssueDecomposeAction(action)
+  return {
+    ...tokenIssueDecomposeAction(action),
+    chainActionType: ChainActionType.TokenIssue,
+  }
 }
