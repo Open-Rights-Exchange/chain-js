@@ -30,15 +30,15 @@ export const composeAction = ({ contractAddress, from, value }: erc20IssueParams
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract && contract.abi === erc20Abi && contract.method === 'issue') {
+  if (contract?.abi === erc20Abi && contract?.method === 'issue') {
     const returnData: Partial<erc20IssueParams> = {
       contractAddress: to,
       from,
-      value: getArrayIndexOrNull(contract.parameters, 0) as number,
+      value: getArrayIndexOrNull(contract?.parameters, 0) as number,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
-      chainActionType: EthereumChainActionType.Erc20Issue,
+      chainActionType: EthereumChainActionType.ERC20Issue,
       args: returnData,
       partial,
     }

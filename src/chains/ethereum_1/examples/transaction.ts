@@ -13,6 +13,7 @@ import {
   EthereumTransactionOptions,
   EthUnit,
   EthereumBlockType,
+  EthereumChainActionType,
 } from '../models'
 import { erc20Abi } from './data/exampleErc20Abi'
 
@@ -60,12 +61,9 @@ const { env } = process
     }
 
     const composeERC20TransferParams = {
-      to: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
-      contract: {
-        abi: erc20Abi,
-        parameters: ['0x27105356F6C1ede0e92020e6225E46DC1F496b81', 20], // 0xD38ADf7D0204a6f5b7ddDe509378e43B1447CDb6
-        method: 'transfer',
-      },
+      contractAddress: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
+      to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      value: 20, // 0xD38ADf7D0204a6f5b7ddDe509378e43B1447CDb6
     }
 
     const composeERC20MintParams = {
@@ -93,9 +91,12 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // // ---> Sign and send erc20 transfer Transaction
-    // const transaction = await ropsten.new.Transaction()
-    // // await transaction.addAction(sampleTransferTrx)
-    // transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeERC20TransferParams)]
+    const transaction = await ropsten.new.Transaction()
+    // await transaction.addAction(sampleTransferTrx)
+    transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    console.log(transaction.actions[0])
+    const decomposed = ropsten.decomposeAction(transaction.actions[0])
+    console.log(decomposed)
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])

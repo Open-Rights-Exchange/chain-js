@@ -30,15 +30,15 @@ export const composeAction = ({ contractAddress, from, value }: erc20BurnParams)
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract && contract.method === 'burn') {
+  if (contract?.abi === erc20Abi && contract?.method === 'burn') {
     const returnData: Partial<erc20BurnParams> = {
       contractAddress: to,
       from,
-      value: getArrayIndexOrNull(contract.parameters, 0) as number,
+      value: getArrayIndexOrNull(contract?.parameters, 0) as number,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
-      chainActionType: EthereumChainActionType.Erc20Burn,
+      chainActionType: EthereumChainActionType.ERC20Burn,
       args: returnData,
       partial,
     }

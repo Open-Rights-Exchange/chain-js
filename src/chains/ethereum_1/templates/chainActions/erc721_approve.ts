@@ -31,16 +31,16 @@ export const composeAction = ({ contractAddress, from, to, tokenId }: erc721Appr
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract && contract.abi === erc721Abi && contract.method === 'approve') {
+  if (contract?.abi === erc721Abi && contract?.method === 'approve') {
     const returnData: Partial<erc721ApproveParams> = {
       contractAddress: to,
       from,
-      to: toEthereumAddress(getArrayIndexOrNull(contract.parameters, 0) as string),
-      tokenId: getArrayIndexOrNull(contract.parameters, 1) as number,
+      to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
+      tokenId: getArrayIndexOrNull(contract?.parameters, 1) as number,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
-      chainActionType: EthereumChainActionType.Erc721Approve,
+      chainActionType: EthereumChainActionType.ERC721Approve,
       args: returnData,
       partial,
     }
