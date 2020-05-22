@@ -18,6 +18,13 @@ export function isNullOrEmpty(obj: any): boolean {
   return Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
+export function getArrayIndexOrNull(array: any[] = [], index: number) {
+  if (array.length > index && !isNullOrEmpty(array[index])) {
+    return array[index]
+  }
+  return null
+}
+
 // uses flatted library to allow stringifing on an object with circular references
 // NOTE: This does not produce output similar to JSON.stringify, it has it's own format
 // to allow you to stringify and parse and get back an object with circular references
