@@ -6,7 +6,8 @@ import {
   EthereumChainActionType,
 } from '../../models'
 import { erc721Abi } from '../abis/erc721Abi'
-import { toEthereumAddress } from '../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
+import { getArrayIndexOrNull } from '../../../../helpers'
 
 interface erc721TransferFromParams {
   contractAddress: EthereumAddress
@@ -31,15 +32,15 @@ export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && contract && contract.abi === erc721Abi && contract.method === 'transferFrom') {
+  if (contract && contract.abi === erc721Abi && contract.method === 'transferFrom') {
     const returnData: Partial<erc721TransferFromParams> = {
       contractAddress: to,
       from,
-      transferFrom: toEthereumAddress(contract.parameters[0] as string),
-      to: toEthereumAddress(contract.parameters[1] as string),
-      tokenId: contract.parameters[2] as number,
+      transferFrom: toEthereumAddress(getArrayIndexOrNull(contract.parameters, 0) as string),
+      to: toEthereumAddress(getArrayIndexOrNull(contract.parameters, 1) as string),
+      tokenId: getArrayIndexOrNull(contract.parameters, 2) as number,
     }
-    const partial = !returnData?.from
+    const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
       chainActionType: EthereumChainActionType.Erc721TransferFrom,
       args: returnData,

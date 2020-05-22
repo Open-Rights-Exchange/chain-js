@@ -6,6 +6,8 @@ import {
   EthereumDecomposeReturn,
 } from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
+import { getArrayIndexOrNull } from '../../../../helpers'
+import { ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 
 interface erc20BurnParams {
   contractAddress: EthereumAddress
@@ -28,13 +30,13 @@ export const composeAction = ({ contractAddress, from, value }: erc20BurnParams)
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && contract && contract.method === 'burn') {
+  if (contract && contract.method === 'burn') {
     const returnData: Partial<erc20BurnParams> = {
       contractAddress: to,
       from,
-      value: contract.parameters[0] as number,
+      value: getArrayIndexOrNull(contract.parameters, 0) as number,
     }
-    const partial = !returnData?.from
+    const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
       chainActionType: EthereumChainActionType.Erc20Burn,
       args: returnData,

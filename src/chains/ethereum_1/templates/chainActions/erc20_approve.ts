@@ -6,7 +6,8 @@ import {
   EthereumDecomposeReturn,
 } from '../../models'
 import { erc20Abi } from '../abis/erc20Abi'
-import { toEthereumAddress } from '../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
+import { getArrayIndexOrNull } from '../../../../helpers'
 
 interface erc20ApproveParams {
   contractAddress: EthereumAddress
@@ -30,14 +31,14 @@ export const composeAction = ({ contractAddress, from, spender, value }: erc20Ap
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (to && contract && contract.abi === erc20Abi && contract.method === 'approve') {
+  if (contract && contract.abi === erc20Abi && contract.method === 'approve') {
     const returnData: Partial<erc20ApproveParams> = {
       contractAddress: to,
       from,
-      spender: toEthereumAddress(contract.parameters[0] as string),
-      value: contract.parameters[1] as number,
+      spender: toEthereumAddress(getArrayIndexOrNull(contract.parameters, 0) as string),
+      value: getArrayIndexOrNull(contract.parameters, 1) as number,
     }
-    const partial = !returnData?.from
+    const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
       chainActionType: EthereumChainActionType.Erc20Approve,
       args: returnData,
