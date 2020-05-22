@@ -2,21 +2,21 @@
 /* eslint-disable quote-props */
 
 import { decomposeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
-import { decomposeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
+// import { decomposeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
 import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
 import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
-import { decomposeAction as Erc20ApproveTemplate } from './templates/chainActions/erc20_approve'
-import { decomposeAction as Erc20BurnTemplate } from './templates/chainActions/erc20_burn'
-import { decomposeAction as Erc20IssueTemplate } from './templates/chainActions/erc20_issue'
-import { decomposeAction as Erc20TransferTemplate } from './templates/chainActions/erc20_transfer'
-import { decomposeAction as Erc20TransferFromTemplate } from './templates/chainActions/erc20_transferFrom'
-import { decomposeAction as Erc677TransferAndCallTemplate } from './templates/chainActions/erc677_transferAndCall'
-import { decomposeAction as Erc721ApproveTemplate } from './templates/chainActions/erc721_approve'
-import { decomposeAction as Erc721TransferTemplate } from './templates/chainActions/erc721_transfer'
-import { decomposeAction as Erc721TransferFromTemplate } from './templates/chainActions/erc721_transferFrom'
+import { decomposeAction as ERC20ApproveTemplate } from './templates/chainActions/erc20_approve'
+import { decomposeAction as ERC20BurnTemplate } from './templates/chainActions/erc20_burn'
+import { decomposeAction as ERC20IssueTemplate } from './templates/chainActions/erc20_issue'
+import { decomposeAction as ERC20TransferTemplate } from './templates/chainActions/erc20_transfer'
+import { decomposeAction as ERC20TransferFromTemplate } from './templates/chainActions/erc20_transferFrom'
+import { decomposeAction as ERC677TransferAndCallTemplate } from './templates/chainActions/erc677_transferAndCall'
+import { decomposeAction as ERC721ApproveTemplate } from './templates/chainActions/erc721_approve'
+import { decomposeAction as ERC721TransferTemplate } from './templates/chainActions/erc721_transfer'
+import { decomposeAction as ERC721TransferFromTemplate } from './templates/chainActions/erc721_transferFrom'
 
 import { EthereumTransactionAction, EthereumDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
@@ -25,22 +25,22 @@ import { isNullOrEmpty } from '../../helpers'
 const DecomposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
   TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
+  // TokenCreate: TokenCreateTemplate,
   TokenIssue: TokenIssueTemplate,
   TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
   ValueTransfer: ValueTransferTemplate,
   // Eth - specific action
-  Erc20Approve: Erc20ApproveTemplate,
-  Erc20Burn: Erc20BurnTemplate,
-  Erc20Issue: Erc20IssueTemplate,
-  Erc20Transfer: Erc20TransferTemplate,
-  Erc20TransferFrom: Erc20TransferFromTemplate,
-  Erc677TransferAndCall: Erc677TransferAndCallTemplate,
-  Erc721Approve: Erc721ApproveTemplate,
-  Erc721Transfer: Erc721TransferTemplate,
-  Erc721TransferFrom: Erc721TransferFromTemplate,
+  ERC20Approve: ERC20ApproveTemplate,
+  ERC20Burn: ERC20BurnTemplate,
+  ERC20Issue: ERC20IssueTemplate,
+  ERC20Transfer: ERC20TransferTemplate,
+  ERC20TransferFrom: ERC20TransferFromTemplate,
+  ERC677TransferAndCall: ERC677TransferAndCallTemplate,
+  ERC721Approve: ERC721ApproveTemplate,
+  ERC721Transfer: ERC721TransferTemplate,
+  ERC721TransferFrom: ERC721TransferFromTemplate,
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */

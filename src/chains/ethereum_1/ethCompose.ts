@@ -4,8 +4,13 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
 
-import { composeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
+import { composeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
+// import { composeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
+import { composeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
+import { composeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
+import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+import { composeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
 import { composeAction as ERC20ApproveTemplate } from './templates/chainActions/erc20_approve'
 import { composeAction as ERC20BurnTemplate } from './templates/chainActions/erc20_burn'
 import { composeAction as ERC20IssueTemplate } from './templates/chainActions/erc20_issue'
@@ -15,12 +20,19 @@ import { composeAction as ERC677TransferAndCallTemplate } from './templates/chai
 import { composeAction as ERC721ApproveTemplate } from './templates/chainActions/erc721_approve'
 import { composeAction as ERC721TransferTemplate } from './templates/chainActions/erc721_transfer'
 import { composeAction as ERC721TransferFromTemplate } from './templates/chainActions/erc721_transferFrom'
-import { EthereumTransactionAction, EthereumChainActionType } from './models'
+import { EthereumChainActionType, EthereumTransactionAction } from './models'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any) => any } = {
-  ValueTransfer: ValueTransferTemplate,
+  // Standard actions
+  TokenApprove: TokenApproveTemplate,
+  // TokenCreate: TokenCreateTemplate,
+  TokenIssue: TokenIssueTemplate,
+  TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
+  TokenTransferFrom: TokenTransferFromTemplate,
+  ValueTransfer: ValueTransferTemplate,
+  // Eth - specific action
   ERC20Approve: ERC20ApproveTemplate,
   ERC20Burn: ERC20BurnTemplate,
   ERC20Issue: ERC20IssueTemplate,
