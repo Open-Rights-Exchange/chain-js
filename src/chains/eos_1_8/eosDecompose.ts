@@ -17,6 +17,7 @@ import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/
 import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
 import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
 import { EosActionStruct, EosDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
 
@@ -34,6 +35,7 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
+  ValueTransfer: ValueTransferTemplate,
   // EOS - specific action
   CreateEscrowCreate: CreateEscrowCreateTemplate,
   CreateEscrowDefine: CreateEscrowDefineTemplate,
@@ -51,16 +53,16 @@ export function decomposeAction(action: EosActionStruct): EosDecomposeReturn[] {
   const actionData: EosDecomposeReturn[] = []
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
-  try {
-    decomposeActionFuncs.forEach((decomposeFunc: any) => {
+  decomposeActionFuncs.forEach((decomposeFunc: any) => {
+    try {
       const { chainActionType, args, partial } = decomposeFunc(action) || {}
       if (chainActionType) {
         actionData.push({ chainActionType, args, partial })
       }
-    })
-  } catch (err) {
-    console.log(err)
-  }
+    } catch (err) {
+      // console.log('problem in decomposeAction:', err)
+    }
+  })
 
   // return null and not an empty array if no matches
   return !isNullOrEmpty(actionData) ? actionData : null
