@@ -1,9 +1,8 @@
-import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
-import { composeAction as erc20Transfer } from './erc20_transfer'
-import { erc20Abi } from '../abis/erc20Abi'
-import { getArrayIndexOrNull } from '../../../../helpers'
-import { ethereumTrxArgIsNullOrEmpty } from '../../helpers'
+import {
+  composeAction as tokenTransferComposeAction,
+  decomposeAction as tokenTransferDecomposeAction,
+} from './erc20_transfer'
 
 interface tokenTransferParams {
   fromAccountName?: EthereumAddress
@@ -12,9 +11,9 @@ interface tokenTransferParams {
   contractName?: EthereumAddress
 }
 
-// TODO: Call erc20 transfer compose action by default instead of recreating the values here
+// Calls ERC20Transfer as default token template for Ethereum
 export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: tokenTransferParams) => ({
-  ...erc20Transfer({
+  ...tokenTransferComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
     to: toAccountName,
@@ -23,20 +22,5 @@ export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, con
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
-  const { to, from, contract } = action
-  if (contract && contract.abi === erc20Abi && contract.method === 'transfer') {
-    const returnData: Partial<tokenTransferParams> = {
-      contractName: to,
-      fromAccountName: from,
-      tokenAmount: getArrayIndexOrNull(contract.parameters, 0) as number,
-    }
-    const partial = !returnData?.fromAccountName || ethereumTrxArgIsNullOrEmpty(to)
-    return {
-      chainActionType: ChainActionType.TokenTransfer,
-      args: returnData,
-      partial,
-    }
-  }
-
-  return null
+  return tokenTransferDecomposeAction(action)
 }
