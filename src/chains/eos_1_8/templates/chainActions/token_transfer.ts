@@ -10,7 +10,7 @@ interface tokenTransferParams {
   contractName: EosEntityName
   tokenAmount: number
   tokenSymbol: EosSymbol
-  memo: string
+  memo?: string
   permission: EosEntityName
 }
 
