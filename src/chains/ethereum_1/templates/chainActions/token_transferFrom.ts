@@ -31,8 +31,11 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
-  return {
-    ...tokenTransferFromDecomposeAction(action),
-    chainActionType: ChainActionType.TokenTransfer,
+  if (tokenTransferFromDecomposeAction(action)) {
+    return {
+      ...tokenTransferFromDecomposeAction(action),
+      chainActionType: ChainActionType.TokenTransfer,
+    }
   }
+  return null
 }
