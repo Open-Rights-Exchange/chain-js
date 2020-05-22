@@ -51,12 +51,17 @@ export function decomposeAction(action: EosActionStruct): EosDecomposeReturn[] {
   const actionData: EosDecomposeReturn[] = []
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
-  decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    const { chainActionType, args, partial } = decomposeFunc(action) || {}
-    if (chainActionType) {
-      actionData.push({ chainActionType, args, partial })
-    }
-  })
+  try {
+    decomposeActionFuncs.forEach((decomposeFunc: any) => {
+      const { chainActionType, args, partial } = decomposeFunc(action) || {}
+      if (chainActionType) {
+        actionData.push({ chainActionType, args, partial })
+      }
+    })
+  } catch (err) {
+    console.log(err)
+  }
+
   // return null and not an empty array if no matches
   return !isNullOrEmpty(actionData) ? actionData : null
 }

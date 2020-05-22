@@ -18,12 +18,17 @@ export function decomposeAction(action: EthereumTransactionAction): EthereumDeco
   const decomposedActions: EthereumDecomposeReturn[] = []
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
-  decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    const { chainActionType, args } = decomposeFunc(action) || {}
-    if (chainActionType) {
-      decomposedActions.push({ chainActionType, args })
-    }
-  })
+  try {
+    decomposeActionFuncs.forEach((decomposeFunc: any) => {
+      const { chainActionType, args } = decomposeFunc(action) || {}
+      if (chainActionType) {
+        decomposedActions.push({ chainActionType, args })
+      }
+    })
+  } catch (err) {
+    console.log(err)
+  }
+
   // return null and not an empty array if no matches
   return !isNullOrEmpty(decomposedActions) ? decomposedActions : null
 }
