@@ -185,6 +185,25 @@ export const erc20Abi: any[] = [
         type: 'uint256',
       },
     ],
+    name: 'issue',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
     name: 'mint',
     outputs: [
       {
