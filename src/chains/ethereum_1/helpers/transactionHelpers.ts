@@ -25,7 +25,7 @@ export function abiToFunctionSignature(methodName: string, abi: any[]): string {
 }
 
 /** Uses web3-utils toWei conversion */
-export function toWei(amount: number, type: EthUnit) {
+export function toWei(amount: number | BN, type: EthUnit) {
   const web3 = new Web3()
   return web3.utils.toWei(new BN(amount), type)
 }
