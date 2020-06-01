@@ -35,7 +35,14 @@ import {
   toEosAsset,
   toEosDate,
 } from './helpers'
-import { EosActionStruct, EosChainSettings, EosEntityName, EosDate, EosCreateAccountOptions, EosDecomposeReturn } from './models'
+import {
+  EosActionStruct,
+  EosChainSettings,
+  EosEntityName,
+  EosDate,
+  EosCreateAccountOptions,
+  EosDecomposeReturn,
+} from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface

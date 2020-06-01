@@ -5,7 +5,7 @@ import {
   decomposeAction as tokenApproveDecomposeAction,
 } from './erc20_approve'
 
-interface tokenApproveParams {
+interface TokenApproveParams {
   contractName: EthereumAddress
   fromAccountName: EthereumAddress
   toAccountName: EthereumAddress
@@ -13,7 +13,7 @@ interface tokenApproveParams {
 }
 
 // Calls ERC20Approve as default token template for Ethereum
-export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: tokenApproveParams) => ({
+export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: TokenApproveParams) => ({
   ...tokenApproveComposeAction({
     contractAddress: contractName,
     from: fromAccountName,

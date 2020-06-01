@@ -1,14 +1,21 @@
-import { EosEntityName, EosAsset, EosDecomposeReturn, EosActionStruct } from '../../models'
+import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosSymbol } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityNameOrNull,
+  toEosAsset,
+  EosAssetHelper,
+} from '../../helpers'
 
 const actionName = 'create'
 
-interface tokenCreateParams {
+interface TokenCreateParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
   toAccountName: EosEntityName
-  tokenAmount: EosAsset
+  amount: number
+  symbol: EosSymbol
   permission: EosEntityName
 }
 
@@ -16,9 +23,10 @@ export const composeAction = ({
   contractName,
   ownerAccountName,
   toAccountName,
-  tokenAmount,
+  amount,
+  symbol,
   permission,
-}: tokenCreateParams): EosActionStruct => ({
+}: TokenCreateParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -29,7 +37,8 @@ export const composeAction = ({
   ],
   data: {
     issuer: toAccountName,
-    maximum_supply: tokenAmount,
+    // todo: confirm this is an EOS asset and not just a number
+    maximum_supply: toEosAsset(amount, symbol),
   },
 })
 
@@ -39,12 +48,14 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.issuer && data?.maximum_supply) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<tokenCreateParams> = {
+    const maxSupplyAsset = new EosAssetHelper(data.maximum_supply)
+    const returnData: TokenCreateParams = {
       contractName: toEosEntityName(account),
       ownerAccountName: toEosEntityNameOrNull(auth?.actor),
       toAccountName: toEosEntityName(data.issuer),
       permission: toEosEntityNameOrNull(auth?.permission),
-      tokenAmount: data.maximum_supply,
+      amount: maxSupplyAsset.amount,
+      symbol: maxSupplyAsset.symbol,
     }
     const partial = !returnData?.permission || !returnData?.ownerAccountName
     return {

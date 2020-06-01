@@ -4,32 +4,34 @@ import { toWei, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../ethConstants'
 import { ChainActionType } from '../../../../models'
 
-interface valueTransferParams {
+interface ValueTransferParams {
   fromAccountName?: EthereumAddress
   toAccountName: EthereumAddress
-  tokenAmount: number | BN
-  tokenSymbol?: EthUnit
+  amount: number | BN
+  symbol?: EthUnit
+  // TODO: need memo - for compose and decompose
 }
 
 export const composeAction = ({
   fromAccountName,
   toAccountName,
-  tokenAmount,
-  tokenSymbol = DEFAULT_ETH_SYMBOL,
-}: valueTransferParams) => ({
+  amount,
+  symbol = DEFAULT_ETH_SYMBOL,
+}: ValueTransferParams) => ({
   from: fromAccountName,
   to: toAccountName,
-  value: toWei(tokenAmount, tokenSymbol),
+  value: toWei(amount, symbol),
 })
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, value, data, contract } = action
   if (to && value && !contract && ethereumTrxArgIsNullOrEmpty(data)) {
-    const returnData: Partial<valueTransferParams> = {
+    // todo: this should only be a Partial if we canb't recover all the data
+    const returnData: Partial<ValueTransferParams> = {
       toAccountName: to,
       fromAccountName: from,
-      tokenAmount: value as BN,
-      tokenSymbol: EthUnit.Wei,
+      amount: value as BN,
+      symbol: EthUnit.Wei,
     }
     const partial = !returnData?.fromAccountName
     return {

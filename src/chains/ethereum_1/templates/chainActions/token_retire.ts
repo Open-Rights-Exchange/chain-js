@@ -2,14 +2,14 @@ import { ChainActionType } from '../../../../models'
 import { EthereumAddress, EthereumTransactionAction, EthereumDecomposeReturn } from '../../models'
 import { composeAction as tokenBurnComposeAction, decomposeAction as tokenBurnDecomposeAction } from './erc20_burn'
 
-interface tokenRetireParams {
+interface TokenRetireParams {
   fromAccountName?: EthereumAddress
   tokenAmount?: number
   contractName?: EthereumAddress
 }
 
 // Calls ERC20Retire as default token template for Ethereum
-export const composeAction = ({ fromAccountName, tokenAmount, contractName }: tokenRetireParams) => ({
+export const composeAction = ({ fromAccountName, tokenAmount, contractName }: TokenRetireParams) => ({
   ...tokenBurnComposeAction({
     contractAddress: contractName,
     from: fromAccountName,

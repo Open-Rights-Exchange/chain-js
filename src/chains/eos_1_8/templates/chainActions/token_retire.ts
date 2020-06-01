@@ -1,18 +1,26 @@
-import { EosEntityName, EosAsset, EosActionStruct, EosDecomposeReturn } from '../../models'
+import { EosEntityName, EosAsset, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull, toEosAsset, EosAssetHelper } from '../../helpers'
 
 const actionName = 'retire'
 
-interface tokenRetireParams {
+interface TokenRetireParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
-  tokenAmount: EosAsset
-  memo: string
+  amount: number
+  symbol: EosSymbol
+  memo?: string
   permission: EosEntityName
 }
 
-export const composeAction = ({ contractName, ownerAccountName, tokenAmount, memo, permission }: tokenRetireParams): EosActionStruct => ({
+export const composeAction = ({
+  contractName,
+  ownerAccountName,
+  amount,
+  symbol,
+  memo,
+  permission,
+}: TokenRetireParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -22,8 +30,8 @@ export const composeAction = ({ contractName, ownerAccountName, tokenAmount, mem
     },
   ],
   data: {
-    quantity: tokenAmount,
-    memo,
+    quantity: toEosAsset(amount, symbol),
+    memo: memo || '',
   },
 })
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
@@ -32,11 +40,13 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.quantity) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<tokenRetireParams> = {
+    const quantityAsset = new EosAssetHelper(data.quantity)
+    const returnData: TokenRetireParams = {
       contractName: toEosEntityName(account),
       ownerAccountName: toEosEntityNameOrNull(auth?.actor),
-      tokenAmount: data.quantity,
-      memo: data.memo,
+      amount: quantityAsset.amount,
+      symbol: quantityAsset.symbol,
+      memo: data?.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
     const partial = !returnData?.permission || !returnData?.ownerAccountName

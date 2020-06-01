@@ -5,7 +5,7 @@ import {
   decomposeAction as tokenTransferFromDecomposeAction,
 } from './erc20_transferFrom'
 
-interface tokenTransferFromParams {
+interface TokenTransferFromParams {
   approvedAccountName: EthereumAddress
   contractName: EthereumAddress
   fromAccountName: EthereumAddress
@@ -20,7 +20,7 @@ export const composeAction = ({
   toAccountName,
   tokenAmount,
   contractName,
-}: tokenTransferFromParams) => ({
+}: TokenTransferFromParams) => ({
   ...tokenTransferFromComposeAction({
     contractAddress: contractName,
     from: approvedAccountName,
