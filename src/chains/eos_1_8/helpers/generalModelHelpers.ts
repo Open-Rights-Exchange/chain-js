@@ -58,6 +58,14 @@ export function toEosAsset(amount: number, symbol: string): EosAsset {
   throw new Error(`Should not get here. toEosAsset amount:${amount} symbol:${symbol}`)
 }
 
+export function toEosAssetFromString(assetStrimg: string): EosAsset {
+  const asset = assetStrimg.toUpperCase()
+  if (isValidEosAsset(asset)) {
+    return asset
+  }
+  throw new Error(`Should not get here. toEosAsset assetStrimg:${assetStrimg}`)
+}
+
 /** Construct a valid EOS Symbol *
  *  e.g. 'EOS' */
 export function toEosSymbol(symbol: string): EosSymbol {
@@ -97,4 +105,46 @@ export function toEosEntityNameOrEmptyString(name: string): EosEntityName | '' {
   if (name === '') return ''
 
   return toEosEntityName(name)
+}
+/** Create or decompose an EosAsset
+ *  Provide either qty and symbol OR a fully formed string (e.g. '1.000 EOS') */
+export class EosAssetHelper {
+  private _amount: number
+
+  private _symbol: EosSymbol
+
+  private _asset: EosAsset
+
+  constructor(amount?: number, symbol?: string, assetString?: string) {
+    if (assetString) {
+      this._asset = toEosAssetFromString(assetString)
+      this.parseAssetString(this._asset)
+    } else {
+      if (!amount || !symbol) {
+        throw new Error('Missing parameters: provide either number and symbol OR assetString')
+      }
+      this._asset = toEosAsset(amount, symbol)
+      this._amount = amount
+      this._symbol = toEosSymbol(symbol)
+    }
+  }
+
+  get asset() {
+    return this._asset
+  }
+
+  get amount() {
+    return this._amount
+  }
+
+  /** The options provided when the transaction class was created */
+  get symbol() {
+    return this._symbol
+  }
+
+  parseAssetString(assetString: string) {
+    const [amount, symbol] = assetString.split(' ')
+    this._amount = parseFloat(amount)
+    this._symbol = symbol
+  }
 }
