@@ -8,7 +8,7 @@ import {
 
 const actionName = 'create'
 
-interface createEscrowCreateParams {
+interface CreateEscrowCreateParams {
   accountName: EosEntityName
   contractName: EosEntityName
   appName: string
@@ -30,7 +30,7 @@ export const composeAction = ({
   publicKeyOwner,
   // pricekey,
   referralAccountName,
-}: createEscrowCreateParams): EosActionStruct => ({
+}: CreateEscrowCreateParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -56,7 +56,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
 
-    const returnData: Partial<createEscrowCreateParams> = {
+    const returnData: Partial<CreateEscrowCreateParams> = {
       accountName: toEosEntityName(data.account),
       contractName: toEosEntityName(account),
       appName: data.origin,

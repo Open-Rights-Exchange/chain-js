@@ -3,7 +3,7 @@ import { toEosEntityName } from '../../helpers'
 
 const actionName = 'upsertright'
 
-interface oreUpsertRightParams {
+interface OreUpsertRightParams {
   contractName: EosEntityName
   issuerWhitelist: string
   oreAccountName: EosEntityName
@@ -11,7 +11,13 @@ interface oreUpsertRightParams {
   urls: string
 }
 
-export const composeAction = ({ contractName, issuerWhitelist, oreAccountName, rightName, urls }: oreUpsertRightParams): EosActionStruct => ({
+export const composeAction = ({
+  contractName,
+  issuerWhitelist,
+  oreAccountName,
+  rightName,
+  urls,
+}: OreUpsertRightParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -32,7 +38,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   const { name, data, account } = action
 
   if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {
-    const returnData: oreUpsertRightParams = {
+    const returnData: OreUpsertRightParams = {
       contractName: toEosEntityName(account),
       issuerWhitelist: toEosEntityName(data.issuer_whitelist),
       oreAccountName: toEosEntityName(data.issuer),

@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'deleteauth'
 
-interface deleteAuthParams {
+interface DeleteAuthParams {
   account: EosEntityName
   authAccount: EosEntityName
   authPermission: EosEntityName
@@ -16,7 +16,7 @@ export const composeAction = ({
   authAccount,
   authPermission,
   permission,
-}: deleteAuthParams): EosActionStruct => ({
+}: DeleteAuthParams): EosActionStruct => ({
   account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
@@ -37,7 +37,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.account && data?.permission) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: deleteAuthParams = {
+    const returnData: DeleteAuthParams = {
       account: toEosEntityName(data.account),
       authAccount: toEosEntityNameOrNull(auth?.actor),
       authPermission: toEosEntityNameOrNull(auth?.permission),

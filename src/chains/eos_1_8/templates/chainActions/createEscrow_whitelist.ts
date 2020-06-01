@@ -3,7 +3,7 @@ import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameO
 
 const actionName: string = 'whitelist'
 
-interface createEscrowWhitelistParams {
+interface CreateEscrowWhitelistParams {
   accountName: EosEntityName
   appName: string
   contractName: EosEntityName
@@ -17,7 +17,7 @@ export const composeAction = ({
   contractName,
   permission,
   whitelistAccount,
-}: createEscrowWhitelistParams): EosActionStruct => ({
+}: CreateEscrowWhitelistParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -39,7 +39,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.owner && data?.account && data?.dapp) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<createEscrowWhitelistParams> = {
+    const returnData: Partial<CreateEscrowWhitelistParams> = {
       accountName: toEosEntityName(data.owner),
       appName: data.dapp,
       contractName: toEosEntityName(account),

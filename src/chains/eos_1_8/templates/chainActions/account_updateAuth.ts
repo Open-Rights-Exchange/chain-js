@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'updateauth'
 
-interface updateAuthParams {
+interface UpdateAuthParams {
   auth: EosAuthorizationStruct
   authAccount: EosEntityName
   authPermission: EosEntityName
@@ -12,7 +12,7 @@ interface updateAuthParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({ auth, authAccount, authPermission, parent, permission }: updateAuthParams): EosActionStruct => ({
+export const composeAction = ({ auth, authAccount, authPermission, parent, permission }: UpdateAuthParams): EosActionStruct => ({
   account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
@@ -35,7 +35,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.account && data?.permission && data?.parent && data?.auth) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<updateAuthParams> = {
+    const returnData: Partial<UpdateAuthParams> = {
       auth: data.auth,
       authAccount: toEosEntityName(data.authAccount),
       authPermission: toEosEntityNameOrNull(auth?.permission),

@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'define'
 
-interface createEscrowDefineParams {
+interface CreateEscrowDefineParams {
   accountName: EosEntityName
   airdrop: createEscrowAirdropParams
   appName: string
@@ -48,7 +48,7 @@ export const composeAction = ({
     cpuLoanFund: cpu_loan_fund,
   },
   useRex,
-}: createEscrowDefineParams): EosActionStruct => ({
+}: CreateEscrowDefineParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -76,7 +76,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.owner && data?.dapp && data?.ram_bytes && data?.net && data?.cpu && data?.pricekey) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<createEscrowDefineParams> = {
+    const returnData: Partial<CreateEscrowDefineParams> = {
       contractName: toEosEntityName(account),
       permission: toEosEntityNameOrNull(auth?.permission),
       accountName: toEosEntityName(data?.owner),

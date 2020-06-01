@@ -8,7 +8,7 @@ import {
 
 const actionName = 'createoreacc'
 
-interface oreCreateAccountParams {
+interface OreCreateAccountParams {
   accountName: EosEntityName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName
@@ -26,7 +26,7 @@ export const composeAction = ({
   publicKeyOwner,
   pricekey,
   referralAccountName,
-}: oreCreateAccountParams): EosActionStruct => ({
+}: OreCreateAccountParams): EosActionStruct => ({
   account: toEosEntityName('system.ore'),
   name: actionName,
   authorization: [
@@ -51,7 +51,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.creator && data?.newname && data?.ownerkey && data?.activekey) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<oreCreateAccountParams> = {
+    const returnData: Partial<OreCreateAccountParams> = {
       accountName: toEosEntityName(data.newname),
       creatorAccountName: toEosEntityName(data.creator),
       creatorPermission: toEosEntityNameOrNull(auth?.permission),

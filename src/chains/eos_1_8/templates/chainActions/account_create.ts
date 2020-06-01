@@ -17,7 +17,7 @@ import {
 
 const actionName = 'newaccount'
 
-interface createAccountNativeParams {
+interface CreateAccountNativeParams {
   accountName: EosEntityName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName
@@ -38,7 +38,7 @@ export const composeAction = ({
   stakeNetQuantity,
   stakeCpuQuantity,
   transfer,
-}: createAccountNativeParams): EosActionStruct[] => [
+}: CreateAccountNativeParams): EosActionStruct[] => [
   {
     account: toEosEntityName('eosio'),
     name: actionName,
@@ -119,7 +119,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     const ownerKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.owner.keys)
     const activeKey: EosAuthorizationKeyStruct = getFirstValueIfOnlyOneExists(data.active.keys)
 
-    const returnData: Partial<createAccountNativeParams> = {
+    const returnData: Partial<CreateAccountNativeParams> = {
       accountName: toEosEntityName(data.name),
       creatorAccountName: toEosEntityName(data.creator),
       creatorPermission: toEosEntityNameOrNull(auth?.permission),

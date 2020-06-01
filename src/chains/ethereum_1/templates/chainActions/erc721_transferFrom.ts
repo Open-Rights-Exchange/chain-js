@@ -9,7 +9,7 @@ import { erc721Abi } from '../abis/erc721Abi'
 import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 import { getArrayIndexOrNull } from '../../../../helpers'
 
-interface erc721TransferFromParams {
+interface Erc721TransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   transferFrom: EthereumAddress
@@ -17,7 +17,7 @@ interface erc721TransferFromParams {
   tokenId: number
 }
 
-export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId }: erc721TransferFromParams) => {
+export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId }: Erc721TransferFromParams) => {
   const contract = {
     abi: erc721Abi,
     parameters: [transferFrom, to, tokenId],
@@ -33,7 +33,7 @@ export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc721Abi && contract?.method === 'transferFrom') {
-    const returnData: Partial<erc721TransferFromParams> = {
+    const returnData: Partial<Erc721TransferFromParams> = {
       contractAddress: to,
       from,
       transferFrom: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),

@@ -3,7 +3,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'reclaim'
 
-interface createEscrowReclaimParams {
+interface CreateEscrowReclaimParams {
   accountName: EosEntityName
   appName: string
   contractName: EosEntityName
@@ -11,7 +11,13 @@ interface createEscrowReclaimParams {
   symbol: string
 }
 
-export const composeAction = ({ accountName, appName, contractName, permission, symbol }: createEscrowReclaimParams): EosActionStruct => ({
+export const composeAction = ({
+  accountName,
+  appName,
+  contractName,
+  permission,
+  symbol,
+}: CreateEscrowReclaimParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -33,7 +39,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.reclaimer && data?.dapp && data?.sym) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<createEscrowReclaimParams> = {
+    const returnData: Partial<CreateEscrowReclaimParams> = {
       accountName: toEosEntityName(data.reclaimer),
       appName: data.dapp,
       contractName: toEosEntityName(account),

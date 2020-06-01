@@ -5,7 +5,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'linkauth'
 
-interface linkAuthParams {
+interface LinkAuthParams {
   action: string
   authAccount: EosEntityName
   authPermission: EosEntityName
@@ -19,7 +19,7 @@ export const composeAction = ({
   authPermission,
   contract,
   permission,
-}: linkAuthParams): EosActionStruct => ({
+}: LinkAuthParams): EosActionStruct => ({
   account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
@@ -43,7 +43,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
 
-    const returnData: Partial<linkAuthParams> = {
+    const returnData: Partial<LinkAuthParams> = {
       action: data?.action,
       authAccount: toEosEntityName(data.account),
       authPermission: toEosEntityNameOrNull(auth?.permission),

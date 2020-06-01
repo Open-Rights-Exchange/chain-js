@@ -9,14 +9,14 @@ import { erc20Abi } from '../abis/erc20Abi'
 import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 import { getArrayIndexOrNull } from '../../../../helpers'
 
-interface erc20ApproveParams {
+interface Erc20ApproveParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   spender: EthereumAddress
   value: number
 }
 
-export const composeAction = ({ contractAddress, from, spender, value }: erc20ApproveParams) => {
+export const composeAction = ({ contractAddress, from, spender, value }: Erc20ApproveParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [spender, value],
@@ -32,7 +32,7 @@ export const composeAction = ({ contractAddress, from, spender, value }: erc20Ap
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc20Abi && contract?.method === 'approve') {
-    const returnData: Partial<erc20ApproveParams> = {
+    const returnData: Partial<Erc20ApproveParams> = {
       contractAddress: to,
       from,
       spender: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),

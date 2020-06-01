@@ -9,13 +9,13 @@ import { erc20Abi } from '../abis/erc20Abi'
 import { getArrayIndexOrNull } from '../../../../helpers'
 import { ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 
-interface erc20BurnParams {
+interface Erc20BurnParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   value: number
 }
 
-export const composeAction = ({ contractAddress, from, value }: erc20BurnParams) => {
+export const composeAction = ({ contractAddress, from, value }: Erc20BurnParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [value],
@@ -31,7 +31,7 @@ export const composeAction = ({ contractAddress, from, value }: erc20BurnParams)
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc20Abi && contract?.method === 'burn') {
-    const returnData: Partial<erc20BurnParams> = {
+    const returnData: Partial<Erc20BurnParams> = {
       contractAddress: to,
       from,
       value: getArrayIndexOrNull(contract?.parameters, 0) as number,

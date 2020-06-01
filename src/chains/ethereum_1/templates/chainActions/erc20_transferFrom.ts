@@ -9,7 +9,7 @@ import { erc20Abi } from '../abis/erc20Abi'
 import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
 import { getArrayIndexOrNull } from '../../../../helpers'
 
-interface erc20TransferFromParams {
+interface Erc20TransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   transferFrom: EthereumAddress
@@ -17,7 +17,7 @@ interface erc20TransferFromParams {
   value: number
 }
 
-export const composeAction = ({ contractAddress, from, transferFrom, to, value }: erc20TransferFromParams) => {
+export const composeAction = ({ contractAddress, from, transferFrom, to, value }: Erc20TransferFromParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [transferFrom, to, value],
@@ -33,7 +33,7 @@ export const composeAction = ({ contractAddress, from, transferFrom, to, value }
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc20Abi && contract?.method === 'transferFrom') {
-    const returnData: Partial<erc20TransferFromParams> = {
+    const returnData: Partial<Erc20TransferFromParams> = {
       contractAddress: to,
       from,
       transferFrom: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),

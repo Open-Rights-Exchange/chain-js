@@ -3,7 +3,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'init'
 
-interface createEscrowInitParams {
+interface CreateEscrowInitParams {
   contractName: EosEntityName
   chainSymbol: string
   newAccountContract: EosEntityName
@@ -19,7 +19,7 @@ export const composeAction = ({
   newAccountAction,
   minimumRAM,
   permission,
-}: createEscrowInitParams): EosActionStruct => ({
+}: CreateEscrowInitParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -42,7 +42,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.symbol && data?.newaccountcontract && data?.newaccountaction && data?.minimumram) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-    const returnData: Partial<createEscrowInitParams> = {
+    const returnData: Partial<CreateEscrowInitParams> = {
       contractName: toEosEntityName(account),
       chainSymbol: data.symbol,
       newAccountContract: toEosEntityName(data.newaccountcontract),
