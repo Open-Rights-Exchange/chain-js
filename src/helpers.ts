@@ -1,5 +1,6 @@
 import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
+import { ChainEntityName } from './models'
 
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
@@ -126,4 +127,21 @@ export function getFirstValueIfOnlyOneExists(array: any[]): any {
   }
 
   return null
+}
+
+/** Always returns true (unless empty */
+export function isValidChainEntityName(str: ChainEntityName | string): str is ChainEntityName {
+  if (isNullOrEmpty(str)) return false
+  return true
+}
+
+/** Coerce string into ChainEntityName */
+export function toChainEntityName(name: string): ChainEntityName {
+  if (name === '') {
+    return null
+  }
+  if (isValidChainEntityName(name)) {
+    return name
+  }
+  throw new Error(`Should not get here. toChainEntityName name:${name}`)
 }
