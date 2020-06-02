@@ -2,8 +2,8 @@
 import {
   EthereumAddress,
   EthereumTransactionAction,
-  EthereumDecomposeReturn,
   EthereumChainActionType,
+  EthereumDecomposeReturn,
 } from '../../../models'
 import { erc721Abi } from '../../abis/erc721Abi'
 import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
