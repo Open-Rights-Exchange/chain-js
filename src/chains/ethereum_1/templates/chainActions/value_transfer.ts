@@ -9,7 +9,6 @@ interface ValueTransferParams {
   toAccountName: EthereumAddress
   amount: number | BN
   symbol?: EthUnit
-  // TODO: need memo - for compose and decompose
 }
 
 export const composeAction = ({
@@ -26,8 +25,7 @@ export const composeAction = ({
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, value, data, contract } = action
   if (to && value && !contract && ethereumTrxArgIsNullOrEmpty(data)) {
-    // todo: this should only be a Partial if we canb't recover all the data
-    const returnData: Partial<ValueTransferParams> = {
+    const returnData: ValueTransferParams = {
       toAccountName: to,
       fromAccountName: from,
       amount: value as BN,
