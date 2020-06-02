@@ -21,7 +21,7 @@ export type EthereumRawTransaction = {
   gasPrice?: EthereumValue
   gasLimit?: EthereumValue
   to?: EthereumAddress
-  value?: EthereumValue | BN
+  value?: EthereumValue
   data?: EthereumTxData
   v?: EthereumValue
   r?: EthereumValue
@@ -36,7 +36,7 @@ export type EthereumRawTransaction = {
 export type EthereumTransactionAction = {
   to?: EthereumAddress
   from?: EthereumAddress
-  value?: EthereumValue | BN
+  value?: EthereumValue
   data?: EthereumTxData
   contract?: EthereumActionContract
 }
