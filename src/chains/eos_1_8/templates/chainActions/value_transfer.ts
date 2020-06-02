@@ -22,7 +22,7 @@ export const composeAction = (params: ValueTransferParams) => {
   return tokenTransferComposeAction({
     ...params,
     contractName: params?.contractName ? params?.contractName : toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
-    tokenSymbol: params?.symbol ? params?.symbol : toEosSymbol(DEFAULT_EOS_SYMBOL),
+    symbol: params?.symbol ? params?.symbol : toEosSymbol(DEFAULT_EOS_SYMBOL),
   })
 }
 

@@ -145,6 +145,6 @@ export class EosAssetHelper {
   parseAssetString(assetString: string) {
     const [amount, symbol] = assetString.split(' ')
     this._amount = parseFloat(amount)
-    this._symbol = symbol
+    this._symbol = toEosSymbol(symbol)
   }
 }

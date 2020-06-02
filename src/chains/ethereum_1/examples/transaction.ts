@@ -148,17 +148,17 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send erc20 issue Transaction
-    // const transaction = await ropsten.new.Transaction()
-    // // await transaction.addAction(sampleTransferTrx)
-    // transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
-    // console.log(transaction.actions[0])
-    // const decomposed = ropsten.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
-    // await transaction.prepareToBeSigned()
-    // await transaction.validate()
-    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
-    // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', JSON.stringify(await transaction.send()))
+    const transaction = await ropsten.new.Transaction()
+    // await transaction.addAction(sampleTransferTrx)
+    transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
+    console.log(transaction.actions[0])
+    const decomposed = ropsten.decomposeAction(transaction.actions[0])
+    console.log(decomposed)
+    await transaction.prepareToBeSigned()
+    await transaction.validate()
+    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    console.log('missing signatures: ', transaction.missingSignatures)
+    console.log('send response:', JSON.stringify(await transaction.send()))
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const transaction = await ropsten.new.Transaction()
