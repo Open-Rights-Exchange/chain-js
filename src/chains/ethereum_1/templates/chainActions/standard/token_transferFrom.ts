@@ -1,5 +1,5 @@
-import { ChainActionType, TokenTransferFromParams } from '../../../../../models'
-import { EthereumTransactionAction, EthereumDecomposeReturn } from '../../../models'
+import { ChainActionType, TokenTransferFromParams, ActionDecomposeReturn } from '../../../../../models'
+import { EthereumTransactionAction } from '../../../models'
 import {
   composeAction as erc20TokenTransferFromComposeAction,
   decomposeAction as erc20TokenTransferFromDecomposeAction,
@@ -22,11 +22,21 @@ export const composeAction = ({
   }),
 })
 
-export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
+export const decomposeAction = (action: EthereumTransactionAction): ActionDecomposeReturn => {
   const decomposed = erc20TokenTransferFromDecomposeAction(action)
+  const { contractAddress, from, transferFrom, to, value } = decomposed.args
   if (decomposed) {
     return {
       ...decomposed,
+      args: {
+        ...decomposed.args,
+        // coerce to string as EthereumAddress could be Buffer type
+        contractName: contractAddress as string,
+        approvedAccountName: from as string,
+        fromAccountName: transferFrom as string,
+        toAccountName: to as string,
+        amount: value as number,
+      },
       chainActionType: ChainActionType.TokenTransferFrom,
     }
   }

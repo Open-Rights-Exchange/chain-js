@@ -1,8 +1,8 @@
 import { BN } from 'ethereumjs-util'
-import { EthUnit, EthereumTransactionAction, EthereumDecomposeReturn } from '../../../models'
+import { EthUnit, EthereumTransactionAction } from '../../../models'
 import { toWei, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../../ethConstants'
-import { ChainActionType, ValueTransferParams } from '../../../../../models'
+import { ChainActionType, ValueTransferParams, ActionDecomposeReturn } from '../../../../../models'
 import { toChainEntityName } from '../../../../../helpers'
 
 export const composeAction = ({
@@ -16,7 +16,7 @@ export const composeAction = ({
   value: toWei(amount, symbol as EthUnit),
 })
 
-export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
+export const decomposeAction = (action: EthereumTransactionAction): ActionDecomposeReturn => {
   const { to, from, value, data, contract } = action
   if (to && value && !contract && ethereumTrxArgIsNullOrEmpty(data)) {
     const returnData: ValueTransferParams = {
