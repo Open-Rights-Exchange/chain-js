@@ -27,6 +27,12 @@ export function toEosPublicKey(value: string): EosPublicKey {
   throw new Error(`Not a valid EOS public key:${value}.`)
 }
 
+export function toEosPublicKeyOrNull(value: string): EosPublicKey {
+  if (value === null || value === undefined) return null
+
+  return toEosPublicKey(value)
+}
+
 export function toEosPrivateKey(value: string): EosPrivateKey {
   if (isValidEosPrivateKey(value)) {
     return value

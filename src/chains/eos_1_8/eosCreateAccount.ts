@@ -7,6 +7,7 @@ import {
   EosGeneratedKeys,
   EosNewAccountType,
   EosPublicKeys,
+  EosChainActionType,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -193,10 +194,10 @@ export class EosCreateAccount implements CreateAccount {
           createAccountActions = composeAction(ChainActionType.AccountCreate, params)
           break
         case EosNewAccountType.NativeOre:
-          createAccountActions = [composeAction(ChainActionType.OreCreateAccount, params)]
+          createAccountActions = [composeAction(EosChainActionType.OreCreateAccount, params)]
           break
         case EosNewAccountType.CreateEscrow:
-          createAccountActions = [composeAction(ChainActionType.CreateEscrowCreate, params)]
+          createAccountActions = [composeAction(EosChainActionType.CreateEscrowCreate, params)]
           break
         case EosNewAccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action

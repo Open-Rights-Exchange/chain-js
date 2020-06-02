@@ -1,4 +1,8 @@
-import { EosEntityName } from '../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+
+const actionName = 'deleteauth'
 
 interface deleteAuthParams {
   account: EosEntityName
@@ -7,9 +11,14 @@ interface deleteAuthParams {
   permission: EosEntityName
 }
 
-export const action = ({ account, authAccount, authPermission, permission }: deleteAuthParams) => ({
-  account: 'eosio',
-  name: 'deleteauth',
+export const composeAction = ({
+  account,
+  authAccount,
+  authPermission,
+  permission,
+}: deleteAuthParams): EosActionStruct => ({
+  account: toEosEntityName('eosio'),
+  name: actionName,
   authorization: [
     {
       actor: authAccount,
@@ -21,3 +30,27 @@ export const action = ({ account, authAccount, authPermission, permission }: del
     permission,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, authorization } = action
+
+  if (name === actionName && data?.account && data?.permission) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: deleteAuthParams = {
+      account: toEosEntityName(data.account),
+      authAccount: toEosEntityNameOrNull(auth?.actor),
+      authPermission: toEosEntityNameOrNull(auth?.permission),
+      permission: toEosEntityName(data.permission),
+    }
+    const partial = !returnData?.authPermission || !returnData?.authAccount
+
+    return {
+      chainActionType: ChainActionType.AccountDeleteAuth,
+      args: returnData,
+      partial,
+    }
+  }
+
+  return null
+}

@@ -1,4 +1,8 @@
-import { EosEntityName, EosAsset } from '../../models'
+import { EosEntityName, EosAsset, EosDecomposeReturn, EosActionStruct } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+
+const actionName = 'create'
 
 interface tokenCreateParams {
   contractName: EosEntityName
@@ -8,15 +12,15 @@ interface tokenCreateParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   ownerAccountName,
   toAccountName,
   tokenAmount,
   permission,
-}: tokenCreateParams) => ({
+}: tokenCreateParams): EosActionStruct => ({
   account: contractName,
-  name: 'create',
+  name: actionName,
   authorization: [
     {
       actor: ownerAccountName,
@@ -28,3 +32,27 @@ export const action = ({
     maximum_supply: tokenAmount,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, account, authorization } = action
+
+  if (name === actionName && data?.issuer && data?.maximum_supply) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: Partial<tokenCreateParams> = {
+      contractName: toEosEntityName(account),
+      ownerAccountName: toEosEntityNameOrNull(auth?.actor),
+      toAccountName: toEosEntityName(data.issuer),
+      permission: toEosEntityNameOrNull(auth?.permission),
+      tokenAmount: data.maximum_supply,
+    }
+    const partial = !returnData?.permission || !returnData?.ownerAccountName
+    return {
+      chainActionType: ChainActionType.TokenCreate,
+      args: returnData,
+      partial,
+    }
+  }
+
+  return null
+}

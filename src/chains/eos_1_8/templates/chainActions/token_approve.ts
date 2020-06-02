@@ -1,4 +1,8 @@
-import { EosEntityName, EosAsset } from '../../models'
+import { EosEntityName, EosAsset, EosDecomposeReturn, EosActionStruct } from '../../models'
+import { ChainActionType } from '../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+
+const actionName = 'approve'
 
 interface tokenApproveParams {
   contractName: EosEntityName
@@ -9,16 +13,16 @@ interface tokenApproveParams {
   permission: EosEntityName
 }
 
-export const action = ({
+export const composeAction = ({
   contractName,
   memo,
   fromAccountName,
   toAccountName,
   tokenAmount,
   permission,
-}: tokenApproveParams) => ({
+}: tokenApproveParams): EosActionStruct => ({
   account: contractName,
-  name: 'approve',
+  name: actionName,
   authorization: [
     {
       actor: fromAccountName,
@@ -32,3 +36,28 @@ export const action = ({
     memo,
   },
 })
+
+export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
+  const { name, data, account, authorization } = action
+
+  if (name === actionName && data?.from && data?.to && data?.quantity) {
+    // If there's more than 1 authorization, we can't be sure which one is correct so we return null
+    const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
+    const returnData: Partial<tokenApproveParams> = {
+      contractName: toEosEntityName(account),
+      memo: data.memo,
+      fromAccountName: toEosEntityName(data.from),
+      toAccountName: toEosEntityName(data.to),
+      tokenAmount: data.quantity,
+      permission: toEosEntityNameOrNull(auth?.permission),
+    }
+    const partial = !returnData?.permission
+    return {
+      chainActionType: ChainActionType.TokenApprove,
+      args: returnData,
+      partial,
+    }
+  }
+
+  return null
+}
