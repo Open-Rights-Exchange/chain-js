@@ -8,17 +8,17 @@ import {
 interface TokenTransferParams {
   fromAccountName?: EthereumAddress
   toAccountName?: EthereumAddress
-  tokenAmount?: number
+  amount?: number
   contractName?: EthereumAddress
 }
 
 // Calls ERC20Transfer as default token template for Ethereum
-export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: TokenTransferParams) => ({
+export const composeAction = ({ fromAccountName, toAccountName, amount, contractName }: TokenTransferParams) => ({
   ...tokenTransferComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
     to: toAccountName,
-    value: tokenAmount,
+    value: amount,
   }),
 })
 

@@ -4,16 +4,16 @@ import { composeAction as tokenBurnComposeAction, decomposeAction as tokenBurnDe
 
 interface TokenRetireParams {
   fromAccountName?: EthereumAddress
-  tokenAmount?: number
+  amount?: number
   contractName?: EthereumAddress
 }
 
 // Calls ERC20Retire as default token template for Ethereum
-export const composeAction = ({ fromAccountName, tokenAmount, contractName }: TokenRetireParams) => ({
+export const composeAction = ({ fromAccountName, amount, contractName }: TokenRetireParams) => ({
   ...tokenBurnComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
-    value: tokenAmount,
+    value: amount,
   }),
 })
 

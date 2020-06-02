@@ -4,16 +4,16 @@ import { composeAction as tokenIssueComposeAction, decomposeAction as tokenIssue
 
 interface TokenIssueParams {
   fromAccountName?: EthereumAddress
-  tokenAmount?: number
+  amount?: number
   contractName?: EthereumAddress
 }
 
 // Calls ERC20Issue as default token template for Ethereum
-export const composeAction = ({ fromAccountName, tokenAmount, contractName }: TokenIssueParams) => ({
+export const composeAction = ({ fromAccountName, amount, contractName }: TokenIssueParams) => ({
   ...tokenIssueComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
-    value: tokenAmount,
+    value: amount,
   }),
 })
 

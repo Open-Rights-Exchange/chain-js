@@ -9,16 +9,16 @@ interface TokenApproveParams {
   contractName: EthereumAddress
   fromAccountName: EthereumAddress
   toAccountName: EthereumAddress
-  tokenAmount: number
+  amount: number
 }
 
 // Calls ERC20Approve as default token template for Ethereum
-export const composeAction = ({ fromAccountName, toAccountName, tokenAmount, contractName }: TokenApproveParams) => ({
+export const composeAction = ({ fromAccountName, toAccountName, amount, contractName }: TokenApproveParams) => ({
   ...tokenApproveComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
     spender: toAccountName,
-    value: tokenAmount,
+    value: amount,
   }),
 })
 
