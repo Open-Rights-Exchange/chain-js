@@ -1,5 +1,5 @@
-import { ChainActionType } from '../../../../models'
-import { getFirstValueIfOnlyOneExists } from '../../../../helpers'
+import { ChainActionType } from '../../../../../models'
+import { getFirstValueIfOnlyOneExists } from '../../../../../helpers'
 import {
   EosEntityName,
   EosPublicKey,
@@ -7,13 +7,13 @@ import {
   EosAuthorizationKeyStruct,
   EosActionStruct,
   EosDecomposeReturn,
-} from '../../models'
+} from '../../../models'
 import {
   toEosEntityName,
   getFirstAuthorizationIfOnlyOneExists,
   toEosEntityNameOrNull,
   toEosPublicKeyOrNull,
-} from '../../helpers'
+} from '../../../helpers'
 
 const actionName = 'newaccount'
 

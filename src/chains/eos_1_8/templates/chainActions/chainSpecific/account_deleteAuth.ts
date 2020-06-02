@@ -1,6 +1,6 @@
-import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
-import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../../models'
+import { ChainActionType } from '../../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../../helpers'
 
 const actionName = 'deleteauth'
 

@@ -1,5 +1,5 @@
-import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosChainActionType } from '../../models'
-import { toEosEntityName } from '../../helpers'
+import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosChainActionType } from '../../../models'
+import { toEosEntityName } from '../../../helpers'
 
 const actionName = 'upsertright'
 

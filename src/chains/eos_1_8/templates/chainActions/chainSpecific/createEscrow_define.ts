@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { EosChainActionType, EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { EosChainActionType, EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../../helpers'
 
 const actionName = 'define'
 

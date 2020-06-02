@@ -1,5 +1,5 @@
-import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../models'
-import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../helpers'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../../models'
+import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull } from '../../../helpers'
 
 const actionName: string = 'whitelist'
 

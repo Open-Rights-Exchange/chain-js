@@ -1,16 +1,14 @@
-/* eslint-disable no-shadow */
-import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
-import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../../models'
+import { ChainActionType } from '../../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../../helpers'
 
-const actionName = 'linkauth'
+const actionName = 'unlinkauth'
 
-interface LinkAuthParams {
+interface UnlinkAuthParams {
   action: string
   authAccount: EosEntityName
   authPermission: EosEntityName
   contract: EosEntityName
-  permission: EosEntityName
 }
 
 export const composeAction = ({
@@ -18,8 +16,7 @@ export const composeAction = ({
   authAccount,
   authPermission,
   contract,
-  permission,
-}: LinkAuthParams): EosActionStruct => ({
+}: UnlinkAuthParams): EosActionStruct => ({
   account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [
@@ -32,28 +29,24 @@ export const composeAction = ({
     account: authAccount,
     code: contract,
     type: action,
-    requirement: permission,
   },
 })
 
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, authorization } = action
 
-  if (name === actionName && data?.account && data?.code && data?.type && data?.requirement) {
+  if (name === actionName && data?.account && data?.code && data?.type) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
-
-    const returnData: Partial<LinkAuthParams> = {
-      action: data?.action,
+    const returnData: Partial<UnlinkAuthParams> = {
+      action: data.type,
       authAccount: toEosEntityName(data.account),
       authPermission: toEosEntityNameOrNull(auth?.permission),
-      contract: toEosEntityName(data?.code),
-      permission: toEosEntityName(data?.requirement),
+      contract: toEosEntityName(data.code),
     }
-    const partial = !returnData?.permission
-
+    const partial = !returnData?.authPermission
     return {
-      chainActionType: ChainActionType.AccountLinkAuth,
+      chainActionType: ChainActionType.AccountUnlinkAuth,
       args: returnData,
       partial,
     }

@@ -1,6 +1,6 @@
-import { EosAuthorizationStruct, EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../models'
-import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { EosAuthorizationStruct, EosEntityName, EosActionStruct, EosDecomposeReturn } from '../../../models'
+import { ChainActionType } from '../../../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../../helpers'
 
 const actionName = 'updateauth'
 
@@ -12,7 +12,13 @@ interface UpdateAuthParams {
   permission: EosEntityName
 }
 
-export const composeAction = ({ auth, authAccount, authPermission, parent, permission }: UpdateAuthParams): EosActionStruct => ({
+export const composeAction = ({
+  auth,
+  authAccount,
+  authPermission,
+  parent,
+  permission,
+}: UpdateAuthParams): EosActionStruct => ({
   account: toEosEntityName('eosio'),
   name: actionName,
   authorization: [

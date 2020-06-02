@@ -1,5 +1,5 @@
-import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../helpers'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosChainActionType } from '../../../models'
+import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull } from '../../../helpers'
 
 const actionName = 'reclaim'
 
