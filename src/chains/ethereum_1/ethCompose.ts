@@ -4,31 +4,27 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
 
-import { composeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
-// import { composeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
-import { composeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
-import { composeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
-import { composeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
-import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
-import { composeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
-import { composeAction as ERC20ApproveTemplate } from './templates/chainActions/erc20_approve'
-import { composeAction as ERC20BurnTemplate } from './templates/chainActions/erc20_burn'
-import { composeAction as ERC20IssueTemplate } from './templates/chainActions/erc20_issue'
-import { composeAction as ERC20TransferTemplate } from './templates/chainActions/erc20_transfer'
-import { composeAction as ERC20TransferFromTemplate } from './templates/chainActions/erc20_transferFrom'
-import { composeAction as ERC677TransferAndCallTemplate } from './templates/chainActions/erc677_transferAndCall'
-import { composeAction as ERC721ApproveTemplate } from './templates/chainActions/erc721_approve'
-import { composeAction as ERC721TransferTemplate } from './templates/chainActions/erc721_transfer'
-import { composeAction as ERC721TransferFromTemplate } from './templates/chainActions/erc721_transferFrom'
+// standard actions
+import { composeAction as TokenApproveTemplate } from './templates/chainActions/standard/token_approve'
+import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/standard/token_transferFrom'
+import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
+import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+// Chain-specific actions
+import { composeAction as ERC20ApproveTemplate } from './templates/chainActions/chainSpecific/erc20_approve'
+import { composeAction as ERC20BurnTemplate } from './templates/chainActions/chainSpecific/erc20_burn'
+import { composeAction as ERC20IssueTemplate } from './templates/chainActions/chainSpecific/erc20_issue'
+import { composeAction as ERC20TransferTemplate } from './templates/chainActions/chainSpecific/erc20_transfer'
+import { composeAction as ERC20TransferFromTemplate } from './templates/chainActions/chainSpecific/erc20_transferFrom'
+import { composeAction as ERC677TransferAndCallTemplate } from './templates/chainActions/chainSpecific/erc677_transferAndCall'
+import { composeAction as ERC721ApproveTemplate } from './templates/chainActions/chainSpecific/erc721_approve'
+import { composeAction as ERC721TransferTemplate } from './templates/chainActions/chainSpecific/erc721_transfer'
+import { composeAction as ERC721TransferFromTemplate } from './templates/chainActions/chainSpecific/erc721_transferFrom'
 import { EthereumChainActionType, EthereumTransactionAction } from './models'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
   TokenApprove: TokenApproveTemplate,
-  // TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
   ValueTransfer: ValueTransferTemplate,

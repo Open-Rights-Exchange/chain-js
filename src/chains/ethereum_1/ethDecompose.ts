@@ -1,22 +1,21 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable quote-props */
 
-import { decomposeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
-// import { decomposeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
-import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
-import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
-import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
-import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
-import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
-import { decomposeAction as ERC20ApproveTemplate } from './templates/chainActions/erc20_approve'
-import { decomposeAction as ERC20BurnTemplate } from './templates/chainActions/erc20_burn'
-import { decomposeAction as ERC20IssueTemplate } from './templates/chainActions/erc20_issue'
-import { decomposeAction as ERC20TransferTemplate } from './templates/chainActions/erc20_transfer'
-import { decomposeAction as ERC20TransferFromTemplate } from './templates/chainActions/erc20_transferFrom'
-import { decomposeAction as ERC677TransferAndCallTemplate } from './templates/chainActions/erc677_transferAndCall'
-import { decomposeAction as ERC721ApproveTemplate } from './templates/chainActions/erc721_approve'
-import { decomposeAction as ERC721TransferTemplate } from './templates/chainActions/erc721_transfer'
-import { decomposeAction as ERC721TransferFromTemplate } from './templates/chainActions/erc721_transferFrom'
+// standard actions
+import { decomposeAction as TokenApproveTemplate } from './templates/chainActions/standard/token_approve'
+import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/standard/token_transferFrom'
+import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
+import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+// Chain-specific actions
+import { decomposeAction as ERC20ApproveTemplate } from './templates/chainActions/chainSpecific/erc20_approve'
+import { decomposeAction as ERC20BurnTemplate } from './templates/chainActions/chainSpecific/erc20_burn'
+import { decomposeAction as ERC20IssueTemplate } from './templates/chainActions/chainSpecific/erc20_issue'
+import { decomposeAction as ERC20TransferTemplate } from './templates/chainActions/chainSpecific/erc20_transfer'
+import { decomposeAction as ERC20TransferFromTemplate } from './templates/chainActions/chainSpecific/erc20_transferFrom'
+import { decomposeAction as ERC677TransferAndCallTemplate } from './templates/chainActions/chainSpecific/erc677_transferAndCall'
+import { decomposeAction as ERC721ApproveTemplate } from './templates/chainActions/chainSpecific/erc721_approve'
+import { decomposeAction as ERC721TransferTemplate } from './templates/chainActions/chainSpecific/erc721_transfer'
+import { decomposeAction as ERC721TransferFromTemplate } from './templates/chainActions/chainSpecific/erc721_transferFrom'
 
 import { EthereumTransactionAction, EthereumDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
@@ -25,9 +24,6 @@ import { isNullOrEmpty } from '../../helpers'
 const DecomposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
   TokenApprove: TokenApproveTemplate,
-  // TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
   ValueTransfer: ValueTransferTemplate,
