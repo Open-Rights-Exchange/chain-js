@@ -1,22 +1,29 @@
-import { decomposeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
-import { decomposeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
-import { decomposeAction as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
-import { decomposeAction as AccountUnlinkAuthTemplate } from './templates/chainActions/account_unlinkAuth'
-import { decomposeAction as AccountUpdateAuthTemplate } from './templates/chainActions/account_updateAuth'
-import { decomposeAction as CreateEscrowCreateTemplate } from './templates/chainActions/createEscrow_create'
-import { decomposeAction as CreateEscrowDefineTemplate } from './templates/chainActions/createEscrow_define'
-import { decomposeAction as CreateEscrowInitTemplate } from './templates/chainActions/createEscrow_init'
-import { decomposeAction as CreateEscrowReclaimTemplate } from './templates/chainActions/createEscrow_reclaim'
-import { decomposeAction as CreateEscrowTransferTemplate } from './templates/chainActions/createEscrow_transfer'
-import { decomposeAction as CreateEscrowWhitelistTemplate } from './templates/chainActions/createEscrow_whitelist'
-import { decomposeAction as OreCreateAccountTemplate } from './templates/chainActions/ore_createAccount'
-import { decomposeAction as OreUpsertRightTemplate } from './templates/chainActions/ore_upsertRight'
-import { decomposeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
-import { decomposeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
-import { decomposeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
-import { decomposeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
-import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
-import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
+// Standard actions
+import { decomposeAction as TokenApproveTemplate } from './templates/chainActions/standard/token_approve'
+import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
+import { decomposeAction as TokenTransferFromTemplate } from './templates/chainActions/standard/token_transferFrom'
+import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+// Chain-specific actions
+
+import { decomposeAction as AccountCreateTemplate } from './templates/chainActions/chainSpecific/account_create'
+import { decomposeAction as AccountDeleteAuthTemplate } from './templates/chainActions/chainSpecific/account_deleteAuth'
+import { decomposeAction as AccountLinkAuthTemplate } from './templates/chainActions/chainSpecific/account_linkAuth'
+import { decomposeAction as AccountUnlinkAuthTemplate } from './templates/chainActions/chainSpecific/account_unlinkAuth'
+import { decomposeAction as AccountUpdateAuthTemplate } from './templates/chainActions/chainSpecific/account_updateAuth'
+import { decomposeAction as CreateEscrowCreateTemplate } from './templates/chainActions/chainSpecific/createEscrow_create'
+import { decomposeAction as CreateEscrowDefineTemplate } from './templates/chainActions/chainSpecific/createEscrow_define'
+import { decomposeAction as CreateEscrowInitTemplate } from './templates/chainActions/chainSpecific/createEscrow_init'
+import { decomposeAction as CreateEscrowReclaimTemplate } from './templates/chainActions/chainSpecific/createEscrow_reclaim'
+import { decomposeAction as CreateEscrowTransferTemplate } from './templates/chainActions/chainSpecific/createEscrow_transfer'
+import { decomposeAction as CreateEscrowWhitelistTemplate } from './templates/chainActions/chainSpecific/createEscrow_whitelist'
+import { decomposeAction as EosTokenApproveTemplate } from './templates/chainActions/chainSpecific/eosToken_approve'
+import { decomposeAction as EosTokenCreateTemplate } from './templates/chainActions/chainSpecific/eosToken_create'
+import { decomposeAction as EosTokenIssueTemplate } from './templates/chainActions/chainSpecific/eosToken_issue'
+import { decomposeAction as EosTokenRetireTemplate } from './templates/chainActions/chainSpecific/eosToken_retire'
+import { decomposeAction as EosTokenTransferTemplate } from './templates/chainActions/chainSpecific/eosToken_transfer'
+import { decomposeAction as EosTokenTransferFromTemplate } from './templates/chainActions/chainSpecific/eosToken_transferFrom'
+import { decomposeAction as OreCreateAccountTemplate } from './templates/chainActions/chainSpecific/ore_createAccount'
+import { decomposeAction as OreUpsertRightTemplate } from './templates/chainActions/chainSpecific/ore_upsertRight'
 import { EosActionStruct, EosDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
 
@@ -29,11 +36,9 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   AccountUnlinkAuth: AccountUnlinkAuthTemplate,
   AccountUpdateAuth: AccountUpdateAuthTemplate,
   TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
+  ValueTransfer: ValueTransferTemplate,
   // EOS - specific action
   CreateEscrowCreate: CreateEscrowCreateTemplate,
   CreateEscrowDefine: CreateEscrowDefineTemplate,
@@ -41,6 +46,12 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   CreateEscrowReclaim: CreateEscrowReclaimTemplate,
   CreateEscrowTransfer: CreateEscrowTransferTemplate,
   CreateEscrowWhitelist: CreateEscrowWhitelistTemplate,
+  EosTokenApprove: EosTokenApproveTemplate,
+  EosTokenCreate: EosTokenCreateTemplate,
+  EosTokenIssue: EosTokenIssueTemplate,
+  EosTokenRetire: EosTokenRetireTemplate,
+  EosTokenTransfer: EosTokenTransferTemplate,
+  EosTokenTransferFrom: EosTokenTransferFromTemplate,
   OreCreateAccount: OreCreateAccountTemplate,
   OreUpsertRight: OreUpsertRightTemplate,
 }
@@ -52,11 +63,16 @@ export function decomposeAction(action: EosActionStruct): EosDecomposeReturn[] {
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
   decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    const { chainActionType, args, partial } = decomposeFunc(action) || {}
-    if (chainActionType) {
-      actionData.push({ chainActionType, args, partial })
+    try {
+      const { chainActionType, args, partial } = decomposeFunc(action) || {}
+      if (chainActionType) {
+        actionData.push({ chainActionType, args, partial })
+      }
+    } catch (err) {
+      // console.log('problem in decomposeAction:', err)
     }
   })
+
   // return null and not an empty array if no matches
   return !isNullOrEmpty(actionData) ? actionData : null
 }

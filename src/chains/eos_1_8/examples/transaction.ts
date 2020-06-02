@@ -6,7 +6,7 @@
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ConfirmType } from '../../../models'
-import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset } from '../helpers'
+import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset, toEosSymbol } from '../helpers'
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'
 import { ChainEosV18 } from '../ChainEosV18'
@@ -76,7 +76,8 @@ const { env } = process
     contractName: toEosEntityName('eosio.token'),
     fromAccountName: toEosEntityName('proppropprop'),
     toAccountName: toEosEntityName('oreidfunding'),
-    tokenAmount: toEosAsset(1, 'EOS'),
+    amount: 1,
+    symbol: toEosSymbol('EOS'),
     memo: 'memo',
     permission: toEosEntityName('active'),
   }

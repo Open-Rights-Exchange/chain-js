@@ -1,5 +1,11 @@
 import { EosPublicKey, EosAccountKeys } from './cryptoModels'
-import { ChainAssetBrand, ChainDateBrand, ChainEntityNameBrand, KeyPairEncrypted } from '../../../models'
+import {
+  ChainAssetBrand,
+  ChainDateBrand,
+  ChainEntityNameBrand,
+  KeyPairEncrypted,
+  ChainSymbolBrand,
+} from '../../../models'
 
 // using Enum 'brands' to force a string type to have a particular format
 // See - https://spin.atomicobject.com/2017/06/19/strongly-typed-date-string-typescript/
@@ -11,7 +17,7 @@ import { ChainAssetBrand, ChainDateBrand, ChainEntityNameBrand, KeyPairEncrypted
 export type EosEntityName = string & ChainEntityNameBrand
 export type EosDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EosAsset = string & ChainAssetBrand
-export type EosSymbol = string & ChainAssetBrand
+export type EosSymbol = string & ChainSymbolBrand
 
 /** A simple container for account, permission, and public key */
 export type EosAuthorization = {

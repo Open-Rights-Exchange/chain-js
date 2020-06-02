@@ -2,26 +2,31 @@ import { ChainActionType } from '../../models'
 import { EosChainActionType, EosActionStruct } from './models'
 import { notSupported } from '../../helpers'
 
-import { composeAction as AccountCreateTemplate } from './templates/chainActions/account_create'
-import { composeAction as AccountDeleteAuthTemplate } from './templates/chainActions/account_deleteAuth'
-import { composeAction as AccountLinkAuthTemplate } from './templates/chainActions/account_linkAuth'
-import { composeAction as AccountUnlinkAuthTemplate } from './templates/chainActions/account_unlinkAuth'
-import { composeAction as AccountUpdateAuthTemplate } from './templates/chainActions/account_updateAuth'
-import { composeAction as CreateEscrowCreateTemplate } from './templates/chainActions/createEscrow_create'
-import { composeAction as CreateEscrowDefineTemplate } from './templates/chainActions/createEscrow_define'
-import { composeAction as CreateEscrowInitTemplate } from './templates/chainActions/createEscrow_init'
-import { composeAction as CreateEscrowReclaimTemplate } from './templates/chainActions/createEscrow_reclaim'
-import { composeAction as CreateEscrowTransferTemplate } from './templates/chainActions/createEscrow_transfer'
-import { composeAction as CreateEscrowWhitelistTemplate } from './templates/chainActions/createEscrow_whitelist'
-import { composeAction as OreCreateAccountTemplate } from './templates/chainActions/ore_createAccount'
-import { composeAction as OreUpsertRightTemplate } from './templates/chainActions/ore_upsertRight'
-import { composeAction as TokenApproveTemplate } from './templates/chainActions/token_approve'
-import { composeAction as TokenCreateTemplate } from './templates/chainActions/token_create'
-import { composeAction as TokenIssueTemplate } from './templates/chainActions/token_issue'
-import { composeAction as TokenRetireTemplate } from './templates/chainActions/token_retire'
-import { composeAction as TokenTransferTemplate } from './templates/chainActions/token_transfer'
-import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/token_transferFrom'
-import { composeAction as ValueTransferTemplate } from './templates/chainActions/value_transfer'
+// Standard actions
+import { composeAction as TokenApproveTemplate } from './templates/chainActions/standard/token_approve'
+import { composeAction as TokenTransferFromTemplate } from './templates/chainActions/standard/token_transferFrom'
+import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
+import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+// Chain-specific actions
+import { composeAction as AccountCreateTemplate } from './templates/chainActions/chainSpecific/account_create'
+import { composeAction as AccountDeleteAuthTemplate } from './templates/chainActions/chainSpecific/account_deleteAuth'
+import { composeAction as AccountLinkAuthTemplate } from './templates/chainActions/chainSpecific/account_linkAuth'
+import { composeAction as AccountUnlinkAuthTemplate } from './templates/chainActions/chainSpecific/account_unlinkAuth'
+import { composeAction as AccountUpdateAuthTemplate } from './templates/chainActions/chainSpecific/account_updateAuth'
+import { composeAction as CreateEscrowCreateTemplate } from './templates/chainActions/chainSpecific/createEscrow_create'
+import { composeAction as CreateEscrowDefineTemplate } from './templates/chainActions/chainSpecific/createEscrow_define'
+import { composeAction as CreateEscrowInitTemplate } from './templates/chainActions/chainSpecific/createEscrow_init'
+import { composeAction as CreateEscrowReclaimTemplate } from './templates/chainActions/chainSpecific/createEscrow_reclaim'
+import { composeAction as CreateEscrowTransferTemplate } from './templates/chainActions/chainSpecific/createEscrow_transfer'
+import { composeAction as CreateEscrowWhitelistTemplate } from './templates/chainActions/chainSpecific/createEscrow_whitelist'
+import { composeAction as EosTokenApproveTemplate } from './templates/chainActions/chainSpecific/eosToken_approve'
+import { composeAction as EosTokenCreateTemplate } from './templates/chainActions/chainSpecific/eosToken_create'
+import { composeAction as EosTokenIssueTemplate } from './templates/chainActions/chainSpecific/eosToken_issue'
+import { composeAction as EosTokenRetireTemplate } from './templates/chainActions/chainSpecific/eosToken_retire'
+import { composeAction as EosTokenTransferTemplate } from './templates/chainActions/chainSpecific/eosToken_transfer'
+import { composeAction as EosTokenTransferFromTemplate } from './templates/chainActions/chainSpecific/eosToken_transferFrom'
+import { composeAction as OreCreateAccountTemplate } from './templates/chainActions/chainSpecific/ore_createAccount'
+import { composeAction as OreUpsertRightTemplate } from './templates/chainActions/chainSpecific/ore_upsertRight'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any) => any } = {
@@ -32,9 +37,6 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
   AccountUnlinkAuth: AccountUnlinkAuthTemplate,
   AccountUpdateAuth: AccountUpdateAuthTemplate,
   TokenApprove: TokenApproveTemplate,
-  TokenCreate: TokenCreateTemplate,
-  TokenIssue: TokenIssueTemplate,
-  TokenRetire: TokenRetireTemplate,
   TokenTransfer: TokenTransferTemplate,
   TokenTransferFrom: TokenTransferFromTemplate,
   ValueTransfer: ValueTransferTemplate,
@@ -45,6 +47,12 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
   CreateEscrowReclaim: CreateEscrowReclaimTemplate,
   CreateEscrowTransfer: CreateEscrowTransferTemplate,
   CreateEscrowWhitelist: CreateEscrowWhitelistTemplate,
+  EosTokenApprove: EosTokenApproveTemplate,
+  EosTokenCreate: EosTokenCreateTemplate,
+  EosTokenIssue: EosTokenIssueTemplate,
+  EosTokenRetire: EosTokenRetireTemplate,
+  EosTokenTransfer: EosTokenTransferTemplate,
+  EosTokenTransferFrom: EosTokenTransferFromTemplate,
   OreCreateAccount: OreCreateAccountTemplate,
   OreUpsertRight: OreUpsertRightTemplate,
 }
