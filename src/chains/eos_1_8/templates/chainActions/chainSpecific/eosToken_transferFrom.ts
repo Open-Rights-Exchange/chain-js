@@ -1,43 +1,46 @@
-import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosSymbol } from '../../models'
-import { ChainActionType } from '../../../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../../models'
+import { ChainActionType } from '../../../../../models'
 import {
-  toEosEntityName,
   getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityName,
   toEosEntityNameOrNull,
   toEosAsset,
   EosAssetHelper,
-} from '../../helpers'
+} from '../../../helpers'
 
-const actionName = 'approve'
+const actionName = 'transferFrom'
 
-interface TokenApproveParams {
+interface TokenTransferFromParams {
+  approvedAccountName: EosEntityName
   contractName: EosEntityName
-  memo?: string
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
   amount: number
   symbol: EosSymbol
+  memo?: string
   permission: EosEntityName
 }
 
 export const composeAction = ({
+  approvedAccountName,
   contractName,
-  memo,
   fromAccountName,
   toAccountName,
   amount,
   symbol,
+  memo,
   permission,
-}: TokenApproveParams): EosActionStruct => ({
+}: TokenTransferFromParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
     {
-      actor: fromAccountName,
+      actor: approvedAccountName,
       permission,
     },
   ],
   data: {
+    sender: approvedAccountName,
     from: fromAccountName,
     to: toAccountName,
     quantity: toEosAsset(amount, symbol),
@@ -48,22 +51,23 @@ export const composeAction = ({
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account, authorization } = action
 
-  if (name === actionName && data?.from && data?.to && data?.quantity) {
+  if (name === actionName && data?.from && data?.to && data?.sender && data?.quantity) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const quantityAsset = new EosAssetHelper(data.quantity)
-    const returnData: TokenApproveParams = {
+    const returnData: Partial<TokenTransferFromParams> = {
       contractName: toEosEntityName(account),
-      memo: data?.memo,
+      approvedAccountName: toEosEntityName(data.sender),
       fromAccountName: toEosEntityName(data.from),
       toAccountName: toEosEntityName(data.to),
       amount: quantityAsset.amount,
       symbol: quantityAsset.symbol,
+      memo: data?.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
     const partial = !returnData?.permission
     return {
-      chainActionType: ChainActionType.TokenApprove,
+      chainActionType: ChainActionType.TokenTransferFrom,
       args: returnData,
       partial,
     }

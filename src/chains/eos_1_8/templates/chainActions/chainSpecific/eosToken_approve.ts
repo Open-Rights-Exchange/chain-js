@@ -1,57 +1,69 @@
-import { EosEntityName, EosAsset, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
-import { ChainActionType } from '../../../../models'
-import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameOrNull, toEosAsset, EosAssetHelper } from '../../helpers'
+import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosSymbol } from '../../../models'
+import { ChainActionType } from '../../../../../models'
+import {
+  toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityNameOrNull,
+  toEosAsset,
+  EosAssetHelper,
+} from '../../../helpers'
 
-const actionName = 'retire'
+const actionName = 'approve'
 
-interface TokenRetireParams {
+interface TokenApproveParams {
   contractName: EosEntityName
-  ownerAccountName: EosEntityName
+  memo?: string
+  fromAccountName: EosEntityName
+  toAccountName: EosEntityName
   amount: number
   symbol: EosSymbol
-  memo?: string
   permission: EosEntityName
 }
 
 export const composeAction = ({
   contractName,
-  ownerAccountName,
+  memo,
+  fromAccountName,
+  toAccountName,
   amount,
   symbol,
-  memo,
   permission,
-}: TokenRetireParams): EosActionStruct => ({
+}: TokenApproveParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
     {
-      actor: ownerAccountName,
+      actor: fromAccountName,
       permission,
     },
   ],
   data: {
+    from: fromAccountName,
+    to: toAccountName,
     quantity: toEosAsset(amount, symbol),
     memo: memo || '',
   },
 })
+
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account, authorization } = action
 
-  if (name === actionName && data?.quantity) {
+  if (name === actionName && data?.from && data?.to && data?.quantity) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const quantityAsset = new EosAssetHelper(data.quantity)
-    const returnData: TokenRetireParams = {
+    const returnData: TokenApproveParams = {
       contractName: toEosEntityName(account),
-      ownerAccountName: toEosEntityNameOrNull(auth?.actor),
+      memo: data?.memo,
+      fromAccountName: toEosEntityName(data.from),
+      toAccountName: toEosEntityName(data.to),
       amount: quantityAsset.amount,
       symbol: quantityAsset.symbol,
-      memo: data?.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-    const partial = !returnData?.permission || !returnData?.ownerAccountName
+    const partial = !returnData?.permission
     return {
-      chainActionType: ChainActionType.TokenRetire,
+      chainActionType: ChainActionType.TokenApprove,
       args: returnData,
       partial,
     }

@@ -1,19 +1,20 @@
-import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
-import { ChainActionType } from '../../../../models'
+import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../../models'
+import { ChainActionType } from '../../../../../models'
 import {
-  getFirstAuthorizationIfOnlyOneExists,
   toEosEntityName,
+  getFirstAuthorizationIfOnlyOneExists,
   toEosEntityNameOrNull,
   toEosAsset,
   EosAssetHelper,
-} from '../../helpers'
-import { DEFAULT_EOS_TOKEN_CONTRACT } from '../../eosConstants'
+} from '../../../helpers'
 
-const actionName = 'transfer'
-interface TokenTransferParams {
-  fromAccountName: EosEntityName
-  toAccountName: EosEntityName
+const actionName = 'issue'
+
+interface TokenIssueParams {
   contractName: EosEntityName
+  ownerAccountName: EosEntityName
+  toAccountName: EosEntityName
+  // todo: change calling code to send amount and symbol
   amount: number
   symbol: EosSymbol
   memo?: string
@@ -21,24 +22,23 @@ interface TokenTransferParams {
 }
 
 export const composeAction = ({
-  contractName = toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
-  fromAccountName,
+  contractName,
+  ownerAccountName,
   toAccountName,
   amount,
   symbol,
   memo,
   permission,
-}: TokenTransferParams): EosActionStruct => ({
+}: TokenIssueParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
     {
-      actor: fromAccountName,
+      actor: ownerAccountName,
       permission,
     },
   ],
   data: {
-    from: fromAccountName,
     to: toAccountName,
     quantity: toEosAsset(amount, symbol),
     memo: memo || '',
@@ -48,22 +48,22 @@ export const composeAction = ({
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, account, authorization } = action
 
-  if (name === actionName && data?.from && data?.to) {
+  if (name === actionName && data?.to && data?.quantity) {
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const quantityAsset = new EosAssetHelper(data.quantity)
-    const returnData: TokenTransferParams = {
+    const returnData: TokenIssueParams = {
       contractName: toEosEntityName(account),
-      fromAccountName: toEosEntityName(data.from),
-      toAccountName: toEosEntityName(data.to),
+      ownerAccountName: toEosEntityNameOrNull(auth?.actor),
+      toAccountName: data.to,
       amount: quantityAsset.amount,
       symbol: quantityAsset.symbol,
       memo: data?.memo,
       permission: toEosEntityNameOrNull(auth?.permission),
     }
-    const partial = !returnData?.permission
+    const partial = !returnData?.permission || !returnData?.ownerAccountName
     return {
-      chainActionType: ChainActionType.TokenTransfer,
+      chainActionType: ChainActionType.TokenIssue,
       args: returnData,
       partial,
     }

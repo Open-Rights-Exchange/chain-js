@@ -1,6 +1,12 @@
 import { EosEntityName, EosActionStruct, EosDecomposeReturn, EosSymbol } from '../../models'
 import { ChainActionType } from '../../../../models'
-import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameOrNull, toEosAsset, EosAssetHelper } from '../../helpers'
+import {
+  getFirstAuthorizationIfOnlyOneExists,
+  toEosEntityName,
+  toEosEntityNameOrNull,
+  toEosAsset,
+  EosAssetHelper,
+} from '../../helpers'
 
 const actionName = 'transferFrom'
 
