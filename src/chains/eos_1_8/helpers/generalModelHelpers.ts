@@ -47,8 +47,8 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
 /** Construct a well-formatted EOS Asset string *
  *  e.g. '1.0000 EOS' */
 export function toEosAsset(amount: number, symbol: string): EosAsset {
-  if (symbol.length !== 3) throw new Error('symbol must be 3 characters long')
-  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 3 }).format(amount)
+  if (symbol.length < 3 || symbol.length > 4) throw new Error('symbol must be 3 or 4 characters long')
+  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4 }).format(amount)
   const asset = `${value} ${symbol.toUpperCase()}`
   // Note: the check below allows Typescript to confirm that asset can be of type EosAsset
   // If we dont call isValidEosAsset then Typescript shows an error
@@ -56,14 +56,6 @@ export function toEosAsset(amount: number, symbol: string): EosAsset {
     return asset
   }
   throw new Error(`Should not get here. toEosAsset amount:${amount} symbol:${symbol}`)
-}
-
-export function toEosAssetFromString(assetStrimg: string): EosAsset {
-  const asset = assetStrimg.toUpperCase()
-  if (isValidEosAsset(asset)) {
-    return asset
-  }
-  throw new Error(`Should not get here. toEosAsset assetStrimg:${assetStrimg}`)
 }
 
 /** Construct a valid EOS Symbol *
@@ -117,8 +109,7 @@ export class EosAssetHelper {
 
   constructor(amount?: number, symbol?: string, assetString?: string) {
     if (assetString) {
-      this._asset = toEosAssetFromString(assetString)
-      this.parseAssetString(this._asset)
+      this._asset = this.toEosAssetFromString(assetString)
     } else {
       if (!amount || !symbol) {
         throw new Error('Missing parameters: provide either number and symbol OR assetString')
@@ -142,9 +133,15 @@ export class EosAssetHelper {
     return this._symbol
   }
 
-  parseAssetString(assetString: string) {
+  /** Convert a string with a number and symbol into a well-formed EOS asset string - if possible */
+  toEosAssetFromString(assetString: string = ''): EosAsset {
     const [amount, symbol] = assetString.split(' ')
-    this._amount = parseFloat(amount)
-    this._symbol = toEosSymbol(symbol)
+    if (amount && symbol) {
+      this._asset = toEosAsset(parseFloat(amount), symbol)
+      this._amount = parseFloat(amount)
+      this._symbol = toEosSymbol(symbol)
+      return
+    }
+    throw new Error('Cant parse assetString. Should contain a number and symbol')
   }
 }
