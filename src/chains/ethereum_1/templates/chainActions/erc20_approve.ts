@@ -32,7 +32,7 @@ export const composeAction = ({ contractAddress, from, spender, value }: Erc20Ap
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc20Abi && contract?.method === 'approve') {
-    const returnData: Partial<Erc20ApproveParams> = {
+    const returnData: Erc20ApproveParams = {
       contractAddress: to,
       from,
       spender: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
