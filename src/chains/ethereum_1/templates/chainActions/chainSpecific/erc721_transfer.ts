@@ -4,23 +4,23 @@ import {
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
-} from '../../models'
-import { erc721Abi } from '../abis/erc721Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
-import { getArrayIndexOrNull } from '../../../../helpers'
+} from '../../../models'
+import { erc721Abi } from '../../abis/erc721Abi'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { getArrayIndexOrNull } from '../../../../../helpers'
 
-interface Erc721ApproveParams {
+interface Erc721TransferParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   to: EthereumAddress
   tokenId: number
 }
 
-export const composeAction = ({ contractAddress, from, to, tokenId }: Erc721ApproveParams) => {
+export const composeAction = ({ contractAddress, from, to, tokenId }: Erc721TransferParams) => {
   const contract = {
     abi: erc721Abi,
     parameters: [to, tokenId],
-    method: 'approve',
+    method: 'transfer',
   }
   return {
     to: contractAddress,
@@ -31,8 +31,8 @@ export const composeAction = ({ contractAddress, from, to, tokenId }: Erc721Appr
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract?.abi === erc721Abi && contract?.method === 'approve') {
-    const returnData: Erc721ApproveParams = {
+  if (contract?.abi === erc721Abi && contract?.method === 'transfer') {
+    const returnData: Erc721TransferParams = {
       contractAddress: to,
       from,
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
@@ -40,7 +40,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
-      chainActionType: EthereumChainActionType.ERC721Approve,
+      chainActionType: EthereumChainActionType.ERC721Transfer,
       args: returnData,
       partial,
     }

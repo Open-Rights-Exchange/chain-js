@@ -4,16 +4,17 @@ import {
   EthereumTransactionAction,
   EthereumChainActionType,
   EthereumDecomposeReturn,
-} from '../../models'
-import { erc20Abi } from '../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
-import { getArrayIndexOrNull } from '../../../../helpers'
+  EthereumValue,
+} from '../../../models'
+import { erc20Abi } from '../../abis/erc20Abi'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { getArrayIndexOrNull } from '../../../../../helpers'
 
 interface Erc20ApproveParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   spender: EthereumAddress
-  value: number
+  value: EthereumValue
 }
 
 export const composeAction = ({ contractAddress, from, spender, value }: Erc20ApproveParams) => {

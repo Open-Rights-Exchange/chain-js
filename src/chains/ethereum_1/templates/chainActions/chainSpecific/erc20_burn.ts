@@ -4,22 +4,23 @@ import {
   EthereumChainActionType,
   EthereumTransactionAction,
   EthereumDecomposeReturn,
-} from '../../models'
-import { erc20Abi } from '../abis/erc20Abi'
-import { getArrayIndexOrNull } from '../../../../helpers'
-import { ethereumTrxArgIsNullOrEmpty } from '../../helpers'
+  EthereumValue,
+} from '../../../models'
+import { erc20Abi } from '../../abis/erc20Abi'
+import { getArrayIndexOrNull } from '../../../../../helpers'
+import { ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
 
-interface Erc20IssueParams {
+interface Erc20BurnParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
-  value: number
+  value: EthereumValue
 }
 
-export const composeAction = ({ contractAddress, from, value }: Erc20IssueParams) => {
+export const composeAction = ({ contractAddress, from, value }: Erc20BurnParams) => {
   const contract = {
     abi: erc20Abi,
     parameters: [value],
-    method: 'issue',
+    method: 'burn',
   }
   return {
     to: contractAddress,
@@ -30,15 +31,15 @@ export const composeAction = ({ contractAddress, from, value }: Erc20IssueParams
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract?.abi === erc20Abi && contract?.method === 'issue') {
-    const returnData: Erc20IssueParams = {
+  if (contract?.abi === erc20Abi && contract?.method === 'burn') {
+    const returnData: Erc20BurnParams = {
       contractAddress: to,
       from,
       value: getArrayIndexOrNull(contract?.parameters, 0) as number,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
-      chainActionType: EthereumChainActionType.ERC20Issue,
+      chainActionType: EthereumChainActionType.ERC20Burn,
       args: returnData,
       partial,
     }

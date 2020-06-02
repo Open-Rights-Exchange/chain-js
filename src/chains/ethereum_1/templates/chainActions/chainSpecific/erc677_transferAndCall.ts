@@ -5,16 +5,16 @@ import {
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
-} from '../../models'
-import { erc20Abi } from '../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../helpers'
-import { getArrayIndexOrNull } from '../../../../helpers'
+} from '../../../models'
+import { erc20Abi } from '../../abis/erc20Abi'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { getArrayIndexOrNull } from '../../../../../helpers'
 
 interface Erc20TransferAndCallParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   to: EthereumAddress
-  value: number
+  value: EthereumValue
   data: EthereumValue[]
 }
 
