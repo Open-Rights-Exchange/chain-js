@@ -36,7 +36,7 @@ export type ChainSymbol = string & ChainSymbolBrand
 
 /** Supported chain types */
 export enum ChainType {
-  EosV18 = 'eos',
+  EosV2 = 'eos',
   EthereumV1 = 'ethereum',
 }
 

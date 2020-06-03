@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { ChainEosV18 } from '../ChainEosV18'
+import { ChainEosV2 } from '../ChainEosV2'
 import { RpcError } from 'eosjs'
 import { ChainActionType } from '../../../models'
 
@@ -39,10 +39,10 @@ const { env } = process
   // const moonlightorePrivateKey_apporeid = toEosPrivateKey('xxxx')
 
   // Create an EOS chain and call a few functions
-  const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
+  const kylin = new ChainFactory().create(ChainType.EosV2, kylinEndpoints, chainSettings)
   await kylin.connect()
 
-  const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
+  const oreStaging = new ChainFactory().create(ChainType.EosV2, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
 
   // Misc examples

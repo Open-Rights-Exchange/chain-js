@@ -47,7 +47,7 @@ import {
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
-class ChainEosV18 implements Chain {
+class ChainEosV2 implements Chain {
   private _endpoints: ChainEndpoint[]
 
   private _settings: EosChainSettings
@@ -279,13 +279,13 @@ class ChainEosV18 implements Chain {
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this
   public get chainType(): ChainType {
-    return ChainType.EosV18
+    return ChainType.EosV2
   }
 
   /** Returns chain plug-in name */
   // eslint-disable-next-line class-methods-use-this
   public get description(): string {
-    return 'EOS 1.8 Chain'
+    return 'EOS 2.x Chain'
   }
 
   /** Whether any info has been retrieved from the chain */
@@ -306,4 +306,4 @@ class ChainEosV18 implements Chain {
   }
 }
 
-export { ChainEosV18 }
+export { ChainEosV2 }

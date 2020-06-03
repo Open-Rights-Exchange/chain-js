@@ -13,7 +13,7 @@ import {
   UnlinkPermissionsParams,
 } from '../models'
 import { EosAccount } from '../eosAccount'
-import { ChainEosV18 } from '../ChainEosV18'
+import { ChainEosV2 } from '../ChainEosV2'
 import { toEosEntityName, toEosAsset, toEosPublicKey } from '../helpers'
 
 require('dotenv').config()
@@ -23,7 +23,7 @@ export const { env } = process
 // Helper functions
 export const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV18).new.Transaction()
+  const transaction = (chain as ChainEosV2).new.Transaction()
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
@@ -242,13 +242,13 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // then from the command line inside this directory, run using ... npx ts-node --files ./thisfilename.ts
 
   // Create an EOS chain and call a few functions
-  const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
+  const kylin = new ChainFactory().create(ChainType.EosV2, kylinEndpoints, chainSettings)
   await kylin.connect()
 
-  const eosMain = new ChainFactory().create(ChainType.EosV18, eosMainEndpoints, chainSettings)
+  const eosMain = new ChainFactory().create(ChainType.EosV2, eosMainEndpoints, chainSettings)
   await eosMain.connect()
 
-  const oreStaging = new ChainFactory().create(ChainType.EosV18, oreStagingEndpoints, chainSettings)
+  const oreStaging = new ChainFactory().create(ChainType.EosV2, oreStagingEndpoints, chainSettings)
   await oreStaging.connect()
 
   // -------------------- Create Account -----------------------

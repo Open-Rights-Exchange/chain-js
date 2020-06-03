@@ -10,7 +10,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
 
 ```javascript
   // get a chain object (for an EOS chain using Kylin testnet)
-  const eosChain = new ChainFactory().create(ChainType.ChainEosV1_8, kylinEndpoints, chainSettings)
+  const eosChain = new ChainFactory().create(ChainType.ChainEosV2, kylinEndpoints, chainSettings)
 
   // new account options
   const accountOptions = {
@@ -40,9 +40,9 @@ Although you can do most common tasks using the unified ChainJs api, you can sti
 
 ```javascript
    /** Using chain-specifc features - ex. eosjs */
-   const myChain = new ChainFactory().create(ChainType.ChainEosV18, kylinEndpoints, chainSettings)
+   const myChain = new ChainFactory().create(ChainType.ChainEosV2, kylinEndpoints, chainSettings)
    // (Typescript) cast generic chain to EOS chain object
-   const eosChain = (mychain as ChainEosV18) // EOSIO node version 1.8
+   const eosChain = (mychain as ChainEosV2) // EOSIO node version 2.x
    eosChain.eosjs.api.transact({...})
 ```
 
