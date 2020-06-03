@@ -51,4 +51,4 @@ export type EthereumString = {
 }
 
 // similar to ethereum-js BufferLike but also includes string
-export type EthereumValue = string | number | Buffer
+export type EthereumValue = string | number | Buffer | BN

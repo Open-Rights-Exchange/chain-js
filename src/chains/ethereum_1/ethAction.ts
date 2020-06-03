@@ -22,7 +22,7 @@ export class EthereumActionHelper {
 
   private _to: EthereumAddress
 
-  private _value: EthereumValue | BN
+  private _value: EthereumValue
 
   private _from: EthereumAddress
 

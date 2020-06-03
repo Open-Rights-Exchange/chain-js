@@ -18,6 +18,11 @@ export enum ChainEntityNameBrand {
 export enum ChainAssetBrand {
   _ = '',
 }
+
+/** Brand signifiying a valid value - assigned by using toSymbol */
+export enum ChainSymbolBrand {
+  _ = '',
+}
 /** Parameters used to create an account on the chain */
 export type CreateAccountOptions = any
 /** Date string formatted correctly for the type of chain */
@@ -26,10 +31,12 @@ export type ChainDate = string & ChainDateBrand
 export type ChainEntityName = string & ChainEntityNameBrand
 /** Token Asset string formatted correctly for the type of chain */
 export type ChainAsset = string & ChainAssetBrand
+/** Token or value symbol */
+export type ChainSymbol = string & ChainSymbolBrand
 
 /** Supported chain types */
 export enum ChainType {
-  EosV18 = 'eos',
+  EosV2 = 'eos',
   EthereumV1 = 'ethereum',
 }
 
