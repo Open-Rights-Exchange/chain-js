@@ -9,7 +9,7 @@ import { ChainActionType, ConfirmType } from '../../../models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset, toEosSymbol } from '../helpers'
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'
-import { ChainEosV18 } from '../ChainEosV18'
+import { ChainEosV2 } from '../ChainEosV2'
 import { toEncryptedDataString } from '../../../crypto/aesCrypto'
 
 require('dotenv').config()
@@ -18,7 +18,7 @@ require('dotenv').config()
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV18).new.Transaction()
+  const transaction = (chain as ChainEosV2).new.Transaction()
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
@@ -83,7 +83,7 @@ const { env } = process
   }
 
   // Create an EOS chain and call a few functions
-  const kylin = new ChainFactory().create(ChainType.EosV18, kylinEndpoints, chainSettings)
+  const kylin = new ChainFactory().create(ChainType.EosV2, kylinEndpoints, chainSettings)
   await kylin.connect()
 
   //  ---> set transaction from serialized
