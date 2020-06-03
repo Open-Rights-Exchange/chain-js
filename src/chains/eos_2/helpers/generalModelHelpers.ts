@@ -48,7 +48,7 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
  *  e.g. '1.0000 EOS' */
 export function toEosAsset(amount: number, symbol: string): EosAsset {
   if (symbol.length < 3 || symbol.length > 4) throw new Error('symbol must be 3 or 4 characters long')
-  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4 }).format(amount)
+  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, useGrouping: false }).format(amount)
   const asset = `${value} ${symbol.toUpperCase()}`
   // Note: the check below allows Typescript to confirm that asset can be of type EosAsset
   // If we dont call isValidEosAsset then Typescript shows an error
