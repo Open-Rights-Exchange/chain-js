@@ -4,7 +4,7 @@ import {
   decomposeAction as eosTokenApproveDecomposeAction,
 } from '../chainSpecific/eosToken_approve'
 
-// Calls ERC20Approve as default token template for Ethereum
+/** Calls EosTokenApprove as default token template for Ethereum */
 export const composeAction = ({
   fromAccountName,
   toAccountName,

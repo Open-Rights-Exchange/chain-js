@@ -1,10 +1,10 @@
 import { ChainActionType, ActionDecomposeReturn, TokenTransferParams } from '../../../../../models'
 import {
-  composeAction as erc20TokenTransferComposeAction,
-  decomposeAction as erc20TokenTransferDecomposeAction,
+  composeAction as eosTokenTransferComposeAction,
+  decomposeAction as eosTokenTransferDecomposeAction,
 } from '../chainSpecific/eosToken_transfer'
 
-// Calls ERC20Transfer as default token template for Ethereum
+/** Calls EosTokenTransfer as default token template for Ethereum */
 export const composeAction = ({
   contractName,
   fromAccountName,
@@ -14,7 +14,7 @@ export const composeAction = ({
   memo,
   permission,
 }: TokenTransferParams) => ({
-  ...erc20TokenTransferComposeAction({
+  ...eosTokenTransferComposeAction({
     contractName,
     fromAccountName,
     toAccountName,
@@ -26,7 +26,7 @@ export const composeAction = ({
 })
 
 export const decomposeAction = (action: any): ActionDecomposeReturn => {
-  const decomposed = erc20TokenTransferDecomposeAction(action)
+  const decomposed = eosTokenTransferDecomposeAction(action)
   if (decomposed) {
     return {
       ...decomposed,
