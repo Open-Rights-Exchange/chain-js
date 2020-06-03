@@ -5,7 +5,7 @@ import {
   decomposeAction as erc20TokenTransferFromDecomposeAction,
 } from '../chainSpecific/erc20_transferFrom'
 
-// Calls ERC20TransferFrom as default token template for Ethereum
+/** Calls ERC20TransferFrom as default token template for Ethereum */
 export const composeAction = ({
   approvedAccountName,
   contractName,

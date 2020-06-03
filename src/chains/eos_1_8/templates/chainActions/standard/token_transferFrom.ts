@@ -4,7 +4,7 @@ import {
   decomposeAction as eosTokenTransferFromDecomposeAction,
 } from '../chainSpecific/eosToken_transferFrom'
 
-// Calls ERC20TransferFrom as default token template for Ethereum
+/** Calls EosTokenTransferFrom as default token template for Ethereum */
 export const composeAction = ({
   approvedAccountName,
   contractName,

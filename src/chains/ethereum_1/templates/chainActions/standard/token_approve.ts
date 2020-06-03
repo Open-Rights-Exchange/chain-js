@@ -5,7 +5,7 @@ import {
   decomposeAction as erc20TokenApproveDecomposeAction,
 } from '../chainSpecific/erc20_approve'
 
-// Calls ERC20Approve as default token template for Ethereum
+/** Calls ERC20Approve as default token template for Ethereum */
 export const composeAction = ({ fromAccountName, toAccountName, amount, contractName }: TokenApproveParams) => ({
   ...erc20TokenApproveComposeAction({
     contractAddress: contractName,
