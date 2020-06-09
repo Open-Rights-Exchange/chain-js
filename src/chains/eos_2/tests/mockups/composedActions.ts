@@ -1,16 +1,55 @@
-export const createAccount = [
+import { toEosEntityName } from '../../helpers'
+
+export const composedNewAccount = {
+  account: toEosEntityName('eosio'),
+  name: toEosEntityName('newaccount'),
+  authorization: [
+    {
+      actor: toEosEntityName('creatoracc'),
+      permission: toEosEntityName('active'),
+    },
+  ],
+  data: {
+    creator: toEosEntityName('creatoracc'),
+    name: toEosEntityName('accountname'),
+    owner: {
+      threshold: 1,
+      keys: [
+        {
+          key: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
+          weight: 1,
+        },
+      ],
+      accounts: Array<any>(),
+      waits: Array<any>(),
+    },
+    active: {
+      threshold: 1,
+      keys: [
+        {
+          key: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
+          weight: 1,
+        },
+      ],
+      accounts: Array<any>(),
+      waits: Array<any>(),
+    },
+  },
+}
+
+export const composedCreate = [
   {
-    account: 'eosio',
-    name: 'newaccount',
+    account: toEosEntityName('eosio'),
+    name: toEosEntityName('newaccount'),
     authorization: [
       {
-        actor: 'creatoracc',
-        permission: 'active',
+        actor: toEosEntityName('creatoracc'),
+        permission: toEosEntityName('active'),
       },
     ],
     data: {
-      creator: 'creatoracc',
-      name: 'accountName',
+      creator: toEosEntityName('creatoracc'),
+      name: toEosEntityName('accountname'),
       owner: {
         threshold: 1,
         keys: [
@@ -36,32 +75,32 @@ export const createAccount = [
     },
   },
   {
-    account: 'eosio',
+    account: toEosEntityName('eosio'),
     name: 'buyrambytes',
     authorization: [
       {
-        actor: 'creatoracc',
-        permission: 'active',
+        actor: toEosEntityName('creatoracc'),
+        permission: toEosEntityName('active'),
       },
     ],
     data: {
-      payer: 'creatoracc',
-      receiver: 'accountName',
+      payer: toEosEntityName('creatoracc'),
+      receiver: toEosEntityName('accountname'),
       bytes: 3072,
     },
   },
   {
-    account: 'eosio',
-    name: 'delegatebw',
+    account: toEosEntityName('eosio'),
+    name: toEosEntityName('delegatebw'),
     authorization: [
       {
-        actor: 'creatoracc',
-        permission: 'active',
+        actor: toEosEntityName('creatoracc'),
+        permission: toEosEntityName('active'),
       },
     ],
     data: {
-      from: 'creatoracc',
-      receiver: 'accountName',
+      from: toEosEntityName('creatoracc'),
+      receiver: toEosEntityName('accountname'),
       stake_net_quantity: '1.0000 EOS',
       stake_cpu_quantity: '1.0000 EOS',
       transfer: false,
@@ -69,75 +108,93 @@ export const createAccount = [
   },
 ]
 
-export const deleteAuth = {
-  account: 'eosio',
-  name: 'deleteauth',
-  authorization: [{ actor: 'authAccount', permission: 'authPermission' }],
-  data: { account: 'accountName', permission: 'permission' },
+export const composedDeleteAuth = {
+  account: toEosEntityName('eosio'),
+  name: toEosEntityName('deleteauth'),
+  authorization: [{ actor: toEosEntityName('authaccount'), permission: toEosEntityName('active') }],
+  data: { account: toEosEntityName('accountname'), permission: toEosEntityName('permission') },
 }
 
-export const linkAuth = {
-  account: 'eosio',
-  name: 'linkauth',
+export const composedLinkAuth = {
+  account: toEosEntityName('eosio'),
+  name: toEosEntityName('linkauth'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    account: 'accountName',
-    code: 'contract',
-    type: 'linkauth',
-    requirement: 'permission',
+    account: toEosEntityName('accountname'),
+    code: toEosEntityName('contract'),
+    type: toEosEntityName('linkauth'),
+    requirement: toEosEntityName('permission'),
   },
 }
 
-export const unlinkAuth = {
-  account: 'eosio',
-  name: 'unlinkauth',
+export const composedUnlinkAuth = {
+  account: toEosEntityName('eosio'),
+  name: toEosEntityName('unlinkauth'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    account: 'accountName',
-    code: 'contract',
-    type: 'unlinkauth',
+    account: toEosEntityName('accountname'),
+    code: toEosEntityName('contract'),
+    type: toEosEntityName('unlinkauth'),
   },
 }
 
-export const updateAuth = {
-  account: 'eosio',
-  name: 'updateauth',
+export const composedUpdateAuth = {
+  account: toEosEntityName('eosio'),
+  name: toEosEntityName('updateauth'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    account: 'accountName',
-    permission: 'permission',
-    parent: 'parent',
-    auth: 'auth',
+    account: toEosEntityName('accountname'),
+    permission: toEosEntityName('permission'),
+    parent: toEosEntityName('parent'),
+    auth: {
+      threshold: 1,
+      accounts: [
+        {
+          permission: {
+            actor: toEosEntityName('accountname'),
+            permission: toEosEntityName('owner'),
+          },
+          weight: 1,
+        },
+      ],
+      keys: [{ key: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma', weight: 1 }],
+      waits: [
+        {
+          wait_sec: 1,
+          weight: 1,
+        },
+      ],
+    },
   },
 }
 
-export const createEscrowCreate = {
-  account: 'createescrow',
-  name: 'create',
+export const composedCreateEscrowCreate = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('create'),
   authorization: [
     {
-      actor: 'creator',
-      permission: 'active',
+      actor: toEosEntityName('creator'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    memo: 'creator',
-    account: 'accountName',
+    memo: toEosEntityName('creator'),
+    account: toEosEntityName('accountname'),
     ownerkey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
     activekey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
     origin: 'app',
@@ -145,24 +202,24 @@ export const createEscrowCreate = {
   },
 }
 
-export const createEscrowDefine = {
-  account: 'createescrow',
-  name: 'define',
+export const composedCreateEscrowDefine = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('define'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    owner: 'accountName',
+    owner: toEosEntityName('accountname'),
     dapp: 'app',
     ram_bytes: '0',
     net: '1.0000 EOS',
     cpu: '1.0000 EOS',
     pricekey: '1',
     airdrop: {
-      contract: 'airdroper',
+      contract: toEosEntityName('airdroper'),
       tokens: '0.0000 AIR',
       limit: '0.0000 AIR',
     },
@@ -171,127 +228,127 @@ export const createEscrowDefine = {
   },
 }
 
-export const createEscrowInit = {
-  account: 'createescrow',
-  name: 'init',
+export const composedCreateEscrowInit = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('init'),
   authorization: [
     {
-      actor: 'createescrow',
-      permission: 'active',
+      actor: toEosEntityName('createescrow'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
     symbol: 'EOS,4',
-    newaccountcontract: 'eosio',
-    newaccountaction: 'newaccount',
+    newaccountcontract: toEosEntityName('eosio'),
+    newaccountaction: toEosEntityName('newaccount'),
     minimumram: '0',
   },
 }
 
-export const createEscrowReclaim = {
-  account: 'createescrow',
-  name: 'reclaim',
+export const composedCreateEscrowReclaim = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('reclaim'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    reclaimer: 'accountName',
+    reclaimer: toEosEntityName('accountname'),
     dapp: 'app',
     sym: 'EOS,4',
   },
 }
 
-export const createEscrowTransfer = {
-  account: 'createescrow',
-  name: 'transfer',
+export const composedCreateEscrowTransfer = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('transfer'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    from: 'accountName',
-    to: 'escrowname',
+    from: toEosEntityName('accountname'),
+    to: toEosEntityName('escrowname'),
     quantity: '10.0000 EOS',
     memo: 'memo',
   },
 }
 
-export const createEscrowWhitelist = {
-  account: 'createescrow',
-  name: 'whitelist',
+export const composedCreateEscrowWhitelist = {
+  account: toEosEntityName('createescrow'),
+  name: toEosEntityName('whitelist'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    owner: 'accountName',
-    account: 'whitelisted',
+    owner: toEosEntityName('accountname'),
+    account: toEosEntityName('whitelisted'),
     dapp: 'app',
   },
 }
 
-export const eosTokenApprove = {
-  account: 'eosio.token',
-  name: 'approve',
+export const composedEosTokenApprove = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('approve'),
   authorization: [
     {
-      actor: 'fromaccount',
-      permission: 'active',
+      actor: toEosEntityName('fromaccount'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    from: 'fromaccount',
-    to: 'toaccount',
+    from: toEosEntityName('fromaccount'),
+    to: toEosEntityName('toaccount'),
     quantity: '5.0000 EOS',
     memo: 'memo',
   },
 }
 
-export const eosTokenCreate = {
-  account: 'eosio.token',
-  name: 'create',
+export const composedEosTokenCreate = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('create'),
   authorization: [
     {
-      actor: 'eosio',
-      permission: 'active',
+      actor: toEosEntityName('eosio'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    issuer: 'eosio.token',
+    issuer: toEosEntityName('eosio.token'),
     maximum_supply: '10000.0000 EOS',
   },
 }
 
-export const eosTokenIssue = {
-  account: 'eosio.token',
-  name: 'issue',
+export const composedEosTokenIssue = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('issue'),
   authorization: [
     {
-      actor: 'eosio',
-      permission: 'active',
+      actor: toEosEntityName('eosio'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    to: 'eosio.token',
+    to: toEosEntityName('eosio.token'),
     quantity: '1000.0000 EOS',
     memo: 'memoo',
   },
 }
 
-export const eosTokenRetire = {
-  account: 'eosio.token',
-  name: 'retire',
+export const composedEosTokenRetire = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('retire'),
   authorization: [
     {
-      actor: 'eosio',
-      permission: 'active',
+      actor: toEosEntityName('eosio'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
@@ -300,53 +357,53 @@ export const eosTokenRetire = {
   },
 }
 
-export const eosTokenTransfer = {
-  account: 'eosio.token',
-  name: 'transfer',
+export const composedEosTokenTransfer = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('transfer'),
   authorization: [
     {
-      actor: 'fromaccount',
-      permission: 'active',
+      actor: toEosEntityName('fromaccount'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    from: 'fromaccount',
-    to: 'toaccount',
+    from: toEosEntityName('fromaccount'),
+    to: toEosEntityName('toaccount'),
     quantity: '100.0000 EOS',
     memo: 'memo',
   },
 }
 
-export const eosTokenTransferFrom = {
-  account: 'eosio.token',
-  name: 'transferFrom',
+export const composedEosTokenTransferFrom = {
+  account: toEosEntityName('eosio.token'),
+  name: toEosEntityName('transferFrom'),
   authorization: [
     {
-      actor: 'approved',
-      permission: 'active',
+      actor: toEosEntityName('approved'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    sender: 'approved',
-    from: 'fromaccount',
-    to: 'toaccount',
+    sender: toEosEntityName('approved'),
+    from: toEosEntityName('fromaccount'),
+    to: toEosEntityName('toaccount'),
     quantity: '100.0000 EOS',
     memo: 'memo',
   },
 }
 
-export const oreCreateAccount = {
-  account: 'system.ore',
-  name: 'createoreacc',
+export const composedOreCreateAccount = {
+  account: toEosEntityName('system.ore'),
+  name: toEosEntityName('createoreacc'),
   authorization: [
     {
-      actor: 'creator',
-      permission: 'active',
+      actor: toEosEntityName('creator'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    creator: 'creator',
-    newname: 'accountName', // Some versions of the system contract are running a different version of the newaccount code
+    creator: toEosEntityName('creator'),
+    newname: toEosEntityName('accountname'), // Some versions of the system contract are running a different version of the newaccount code
     ownerkey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
     activekey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
     pricekey: '1',
@@ -354,19 +411,19 @@ export const oreCreateAccount = {
   },
 }
 
-export const oreUpsertRight = {
-  account: 'rights.ore',
-  name: 'upsertright',
+export const composedOreUpsertRight = {
+  account: toEosEntityName('rights.ore'),
+  name: toEosEntityName('upsertright'),
   authorization: [
     {
-      actor: 'accountName',
-      permission: 'active',
+      actor: toEosEntityName('accountname'),
+      permission: toEosEntityName('active'),
     },
   ],
   data: {
-    issuer: 'accountName',
+    issuer: toEosEntityName('accountname'),
     right_name: 'test',
     urls: 'www.aikon.com',
-    issuer_whitelist: '[accountName]',
+    issuer_whitelist: [toEosEntityName('accountname')],
   },
 }
