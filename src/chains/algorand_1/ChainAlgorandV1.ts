@@ -42,13 +42,11 @@ class ChainAlgorandV1 implements Chain {
   /** Compose an object for a chain contract action */
   public composeAction = (): any => {
     // ALGOTODO
-    // return composeAction(actionType, args)
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
   public decomposeAction = (): any => {
     // ALGOTODO
-    // return decomposeAction(action)
   }
 
   /** Returns a chain Account class
