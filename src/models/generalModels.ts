@@ -31,6 +31,7 @@ export type ChainAsset = string & ChainAssetBrand
 export enum ChainType {
   EosV18 = 'eos',
   EthereumV1 = 'ethereum',
+  AlgorandV1 = 'algorand',
 }
 
 /** Chain urls and related details used to connect to chain */
