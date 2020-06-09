@@ -8,13 +8,13 @@ import {
   composedCreateEscrowDefine,
   composedCreateEscrowInit,
   composedCreateEscrowReclaim,
-  // composedCreateEscrowTransfer,
+  composedCreateEscrowTransfer,
   composedCreateEscrowWhitelist,
   composedEosTokenApprove,
   composedEosTokenCreate,
   composedEosTokenIssue,
   composedEosTokenRetire,
-  // composedEosTokenTransfer,
+  composedEosTokenTransfer,
   composedEosTokenTransferFrom,
   composedOreCreateAccount,
   composedOreUpsertRight,
@@ -225,26 +225,26 @@ describe('Decompose Chain Actions', () => {
     expect(actAction).toEqual(expAction)
   })
 
-  // Returns all transfer decompose results. Needs differeciater
-  // it('decomposes createEscrow transfer action object', async () => {
-  //   const expAction = [
-  //     {
-  //       chainActionType: 'CreateEscrowTransfer',
-  //       args: {
-  //         accountName: 'accountname',
-  //         amount: '10.0000 EOS',
-  //         contractName: 'createescrow',
-  //         createEscrowAccountName: 'escrowname',
-  //         memo: 'memo',
-  //         permission: 'active',
-  //       },
-  //       partial: false,
-  //     },
-  //   ]
-  //   const actAction = decomposeAction(composedCreateEscrowTransfer)
-
-  //   expect(actAction).toEqual(expAction)
-  // })
+  // Returns all transfer decompose results. Needs differentiator
+  // decomposeAction returns more than one result (because pattern matches token and value transfer as well as escrow transfer)
+  it('decomposes createEscrow transfer action object', async () => {
+    const expAction = [
+      {
+        chainActionType: 'CreateEscrowTransfer',
+        args: {
+          accountName: 'accountname',
+          amount: '10.0000 EOS',
+          contractName: 'createescrow',
+          createEscrowAccountName: 'escrowname',
+          memo: 'memo',
+          permission: 'active',
+        },
+        partial: false,
+      },
+    ]
+    const actActions = decomposeAction(composedCreateEscrowTransfer)
+    expect(actActions).toEqual(expAction)
+  })
 
   it('decomposes createEscroe whitelist action object', async () => {
     const expAction = [
@@ -302,7 +302,7 @@ describe('Decompose Chain Actions', () => {
   it('decomposes eosToken create action object', async () => {
     const expAction = [
       {
-        chainActionType: 'TokenCreate',
+        chainActionType: 'EosTokenCreate',
         args: {
           contractName: 'eosio.token',
           ownerAccountName: 'eosio',
@@ -322,7 +322,7 @@ describe('Decompose Chain Actions', () => {
   it('decomposes eosToken issue action object', async () => {
     const expAction = [
       {
-        chainActionType: 'TokenIssue',
+        chainActionType: 'EosTokenIssue',
         args: {
           contractName: 'eosio.token',
           ownerAccountName: 'eosio',
@@ -343,7 +343,7 @@ describe('Decompose Chain Actions', () => {
   it('decomposes eosToken retire action object', async () => {
     const expAction = [
       {
-        chainActionType: 'TokenRetire',
+        chainActionType: 'EosTokenRetire',
         args: {
           contractName: 'eosio.token',
           ownerAccountName: 'eosio',
@@ -360,41 +360,41 @@ describe('Decompose Chain Actions', () => {
     expect(actAction).toEqual(expAction)
   })
 
-  // it('decomposes eosToken transfer action object', async () => {
-  //   const expAction = [
-  //     {
-  //       chainActionType: 'TokenTransfer',
-  //       args: {
-  //         fromAccountName: 'fromaccount',
-  //         toAccountName: 'toaccount',
-  //         contractName: 'eosio.token',
-  //         amount: 100,
-  //         symbol: 'EOS',
-  //         memo: 'memo',
-  //         permission: 'active',
-  //       },
-  //       partial: false,
-  //     },
-  //     {
-  //       chainActionType: 'EosTokenTransfer',
-  //       args: {
-  //         fromAccountName: 'fromaccount',
-  //         toAccountName: 'toaccount',
-  //         contractName: 'eosio.token',
-  //         amount: 100,
-  //         symbol: 'EOS',
-  //         memo: 'memo',
-  //         permission: 'active',
-  //       },
-  //       partial: false,
-  //     },
-  //   ]
-  //   const actAction = decomposeAction(composedEosTokenTransfer)
+  it('decomposes eosToken transfer action object', async () => {
+    const expAction = [
+      {
+        chainActionType: 'TokenTransfer',
+        args: {
+          fromAccountName: 'fromaccount',
+          toAccountName: 'toaccount',
+          contractName: 'eosio.token',
+          amount: 100,
+          symbol: 'EOS',
+          memo: 'memo',
+          permission: 'active',
+        },
+        partial: false,
+      },
+      {
+        chainActionType: 'EosTokenTransfer',
+        args: {
+          fromAccountName: 'fromaccount',
+          toAccountName: 'toaccount',
+          contractName: 'eosio.token',
+          amount: 100,
+          symbol: 'EOS',
+          memo: 'memo',
+          permission: 'active',
+        },
+        partial: false,
+      },
+    ]
+    const actAction = decomposeAction(composedEosTokenTransfer)
 
-  //   console.log(actAction)
+    console.log(actAction)
 
-  //   expect(actAction).toEqual(expAction)
-  // })
+    expect(actAction).toEqual(expAction)
+  })
 
   it('decomposes eosToken transferFrom action object', async () => {
     const expAction = [
@@ -413,7 +413,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
       {
-        chainActionType: 'TokenTransferFrom',
+        chainActionType: 'EosTokenTransferFrom',
         args: {
           approvedAccountName: 'approved',
           contractName: 'eosio.token',

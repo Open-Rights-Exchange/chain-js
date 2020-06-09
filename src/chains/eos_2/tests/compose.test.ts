@@ -179,8 +179,8 @@ describe('Compose Chain Actions', () => {
       memo: 'memo',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowTransfer, args)
-    expect(actAction).toEqual(composedCreateEscrowTransfer)
+    const actActions = composeAction(EosChainActionType.CreateEscrowTransfer, args)
+    expect(actActions).toEqual(composedCreateEscrowTransfer)
   })
 
   it('creates createEscrow whitelist action object', async () => {
