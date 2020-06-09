@@ -44,7 +44,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       appName: data.dapp,
       contractName: toEosEntityName(account),
       permission: toEosEntityNameOrNull(auth?.permission),
-      whitelistAccount: data.accountName,
+      whitelistAccount: data.account,
     }
     const partial = !returnData?.permission
     return {

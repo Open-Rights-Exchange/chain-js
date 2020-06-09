@@ -29,7 +29,6 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
     return {
       ...decomposed,
       args: {
-        ...decomposed.args,
         // coerce to string as EthereumAddress could be Buffer type
         contractName: contractAddress as string,
         approvedAccountName: from as string,

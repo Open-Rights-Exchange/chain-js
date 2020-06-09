@@ -5,6 +5,12 @@ export enum EosChainActionType {
   CreateEscrowReclaim = 'CreateEscrowReclaim',
   CreateEscrowTransfer = 'CreateEscrowTransfer',
   CreateEscrowWhitelist = 'CreateEscrowWhitelist',
+  EosTokenApprove = 'EosTokenApprove',
+  EosTokenCreate = 'EosTokenCreate',
+  EosTokenIssue = 'EosTokenIssue',
+  EosTokenRetire = 'EosTokenRetire',
+  EosTokenTransfer = 'EosTokenTransfer',
+  EosTokenTransferFrom = 'EosTokenTransferFrom',
   OreCreateAccount = 'OreCreateAccount',
   OreUpsertRight = 'OreUpsertRight',
 }
