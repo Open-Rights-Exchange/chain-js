@@ -44,7 +44,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
 
     const returnData: Partial<LinkAuthParams> = {
-      action: data?.action,
+      action: data.type,
       authAccount: toEosEntityName(data.account),
       authPermission: toEosEntityNameOrNull(auth?.permission),
       contract: toEosEntityName(data?.code),

@@ -1,5 +1,4 @@
-import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosSymbol } from '../../../models'
-import { ChainActionType } from '../../../../../models'
+import { EosEntityName, EosDecomposeReturn, EosActionStruct, EosSymbol, EosChainActionType } from '../../../models'
 import {
   toEosEntityName,
   getFirstAuthorizationIfOnlyOneExists,
@@ -59,7 +58,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     }
     const partial = !returnData?.permission || !returnData?.ownerAccountName
     return {
-      chainActionType: ChainActionType.TokenCreate,
+      chainActionType: EosChainActionType.EosTokenCreate,
       args: returnData,
       partial,
     }

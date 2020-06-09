@@ -1,4 +1,4 @@
-import { ValueTransferParams, ActionDecomposeReturn } from '../../../../../models'
+import { ValueTransferParams, ActionDecomposeReturn, ChainActionType } from '../../../../../models'
 import { toEosEntityName, toEosSymbol } from '../../../helpers'
 import {
   composeAction as eosTokenTransferComposeAction,
@@ -20,5 +20,12 @@ export const composeAction = (params: ValueTransferParams) => {
 }
 
 export const decomposeAction = (action: any): ActionDecomposeReturn => {
-  return eosTokenTransferDecomposeAction(action) as ActionDecomposeReturn
+  const decomposed = eosTokenTransferDecomposeAction(action)
+  if (decomposed) {
+    return {
+      ...decomposed,
+      chainActionType: ChainActionType.ValueTransfer,
+    }
+  }
+  return null
 }
