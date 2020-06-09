@@ -1,18 +1,18 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { toEosEntityName } from '../chains/eos_2/helpers'
-import { ChainFactory, ChainType } from '../index'
-import { ChainActionType, ChainEndpoint } from '../models'
-import { toEthereumPrivateKey } from '../chains/ethereum_1/helpers'
-import { EthereumChainSettings, EthereumChainForkType } from '../chains/ethereum_1/models'
+import { ChainFactory, ChainType, Chain } from '../index'
+import { ChainActionType, ChainEndpoint, ConfirmType } from '../models'
+import { EthereumChainForkType } from '../chains/ethereum_1/models'
 
 require('dotenv').config()
 
 const { env } = process
 
+// Eos chain creation options (for Kylin test network)
 const kylinEndpoints = [
   {
     url: new URL('https:api-kylin.eosasia.one:443'),
@@ -20,100 +20,110 @@ const kylinEndpoints = [
   },
 ]
 
-const chainSettings = { unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' }
-
+// Ethereum chain creation options (for Ropsten test network)
 const ropstenEndpoints: ChainEndpoint[] = [
   {
     url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
   },
 ]
-
 const ropstenChainOptions: EthereumChainForkType = {
   chainName: 'ropsten',
   hardFork: 'istanbul',
 }
 
-const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
-  chainForkType: ropstenChainOptions,
-} as EthereumChainSettings)
-
-const kylin = new ChainFactory().create(ChainType.EosV2, kylinEndpoints, chainSettings)
-
-const ethComposeValueTransferParams = {
-  toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-  amount: 10,
-}
-const eosComposeValueTransferParams = {
-  fromAccountName: toEosEntityName('oreidfunding'),
-  toAccountName: toEosEntityName('proppropprop'),
-  amount: 10,
-}
-const ethComposeTokenTransferParams = {
-  toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-  amount: 10,
-}
-const eosComposeTokenTransferParams = {
-  fromAccountName: toEosEntityName('oreidfunding'),
-  toAccountName: toEosEntityName('proppropprop'),
-  amount: 10,
-  symbol: 'EOS',
-  permission: toEosEntityName('active'),
-}
-
-const platforms = [
-  {
-    chain: kylin,
+// Example set of options to send tokens for each chain type
+const chainSendTokenData = {
+  eos: {
     privateKey: env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY,
-    composeValueTransferParams: eosComposeValueTransferParams,
-    composeTokenTransferParams: eosComposeTokenTransferParams,
+    composeTokenTransferParams: {
+      fromAccountName: 'oreidfunding',
+      toAccountName: 'proppropprop',
+      amount: 10,
+      symbol: 'EOS',
+      permission: 'active',
+    },
   },
-  {
-    chain: ropsten,
-    privateKey: toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY),
-    composeValueTransferParams: ethComposeValueTransferParams,
-    composeTokenTransferParams: ethComposeTokenTransferParams,
+  ethereum: {
+    privateKey: env.ROPSTEN_erc20acc_PRIVATE_KEY,
+    composeTokenTransferParams: {
+      toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      amount: 10,
+    },
   },
-]
-
-async function runner(platform: any) {
-  try {
-    const { chain, privateKey, composeValueTransferParams, composeTokenTransferParams } = platform
-    await chain.connect()
-    console.log(privateKey)
-
-    // // ---> Sign and send ethereum transfer with compose Action
-    // const transaction = await chain.new.Transaction()
-    // transaction.actions = [chain.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
-    // console.log(transaction.actions[0])
-    // const decomposed = chain.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
-    // await transaction.prepareToBeSigned()
-    // await transaction.validate()
-    // await transaction.sign([privateKey])
-    // console.log('missing signatures: ', transaction.missingSignatures)
-    // console.log('send response:', JSON.stringify(await transaction.send()))
-
-    //   // ---> Sign and send erc20 transfer Transaction
-    //   const transaction = await chain.new.Transaction()
-    //   transaction.actions = [chain.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)]
-    //   console.log(transaction.actions[0])
-    //   const decomposed = chain.decomposeAction(transaction.actions[0])
-    //   console.log(decomposed)
-    //   await transaction.prepareToBeSigned()
-    //   await transaction.validate()
-    //   await transaction.sign([privateKey])
-    //   console.log('missing signatures: ', transaction.missingSignatures)
-    //   console.log('send response:', JSON.stringify(await transaction.send()))
-  } catch (error) {
-    console.log(error)
-  }
 }
-;(async () => {
-  try {
-    platforms.forEach(platform => {
-      runner(platform)
-    })
-  } catch (err) {
-    console.log(err)
-  }
+
+// Example set of options to send currency (which is just sending a value between accounts) for each chain type
+const chainSendCurrencyData = {
+  eos: {
+    privateKey: env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY,
+    composeValueTransferParams: {
+      fromAccountName: 'oreidfunding',
+      toAccountName: 'proppropprop',
+      amount: 5,
+    },
+  },
+  ethereum: {
+    privateKey: env.ROPSTEN_erc20acc_PRIVATE_KEY,
+    composeValueTransferParams: {
+      toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      amount: 5,
+    },
+  },
+}
+
+/** Transfer token between accounts (uses most popular token type for each chain - e.g. ERC20 on Ethereum) */
+async function sendToken(chain: Chain, options: any) {
+  const sendTokenTx = await chain.new.Transaction()
+  sendTokenTx.actions = [chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
+  await sendTokenTx.prepareToBeSigned()
+  await sendTokenTx.validate()
+  await sendTokenTx.sign([options.privateKey])
+  const response =  sendTokenTx.send(ConfirmType.None)
+  return response
+}
+
+/** Send 'cryptocurrency' (value) between accounts on the chain */
+async function sendCurrency(chain: Chain, options: any) {
+  const sendCurrencyTx = await chain.new.Transaction()
+  sendCurrencyTx.actions = [chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
+  await sendCurrencyTx.prepareToBeSigned()
+  await sendCurrencyTx.validate()
+  console.log('private key eth:', options.privateKey)
+  await sendCurrencyTx.sign([options.privateKey])
+  const response = await sendCurrencyTx.send(ConfirmType.None)
+  return response
+}
+
+/** Run the same functions (e.g. transfer a token) for one or more chains using the same code */
+async function runFunctionsForMultipleChains() {
+  const chains = [
+    new ChainFactory().create(ChainType.EosV2, kylinEndpoints),
+    new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, { chainForkType: ropstenChainOptions }),
+  ]
+
+  // after creating a chain, connect to it to make sure the endpoint is running (and get current block info)
+  // We'll use await Promise.all to wait for all connections to complete before continuing
+  await Promise.all(
+    chains.map(async chain => {
+      await chain.connect()
+    }),
+  )
+
+  // for each, we'll get the appropriate optiond for sending a token and then call the generic sendToken function
+  chains.map(async chain => {
+    const response = await sendToken(chain, chainSendTokenData[chain.chainType])
+    console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
+  })
+
+  chains.map(async chain => {
+    const response = await sendCurrency(chain, chainSendCurrencyData[chain.chainType])
+    console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
+  })
+
+}
+
+/** Run the example code automatically */
+;( async () => {
+  await runFunctionsForMultipleChains()
+  process.exit() // exit Node execution
 })()
