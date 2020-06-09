@@ -2,25 +2,25 @@
 import { composeAction } from '../eosCompose'
 import { ChainActionType } from '../../../models'
 import {
-  deleteAuth,
-  createAccount,
-  linkAuth,
-  unlinkAuth,
-  updateAuth,
-  createEscrowCreate,
-  createEscrowDefine,
-  createEscrowInit,
-  createEscrowReclaim,
-  createEscrowTransfer,
-  createEscrowWhitelist,
-  eosTokenApprove,
-  eosTokenCreate,
-  eosTokenIssue,
-  eosTokenRetire,
-  eosTokenTransfer,
-  eosTokenTransferFrom,
-  oreCreateAccount,
-  oreUpsertRight,
+  composedCreate,
+  composedDeleteAuth,
+  composedLinkAuth,
+  composedUnlinkAuth,
+  composedUpdateAuth,
+  composedCreateEscrowCreate,
+  composedCreateEscrowDefine,
+  composedCreateEscrowInit,
+  composedCreateEscrowReclaim,
+  composedCreateEscrowTransfer,
+  composedCreateEscrowWhitelist,
+  composedEosTokenApprove,
+  composedEosTokenCreate,
+  composedEosTokenIssue,
+  composedEosTokenRetire,
+  composedEosTokenTransfer,
+  composedEosTokenTransferFrom,
+  composedOreCreateAccount,
+  composedOreUpsertRight,
 } from './mockups/composedActions'
 import { EosChainActionType } from '../models'
 
@@ -29,7 +29,7 @@ describe('Compose Chain Actions', () => {
 
   it('creates createAccount action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       creatorAccountName: 'creatoracc',
       creatorPermission: 'active',
       publicKeyActive: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
@@ -40,58 +40,76 @@ describe('Compose Chain Actions', () => {
       transfer: false,
     }
     const actAction = composeAction(ChainActionType.AccountCreate, args)
-    expect(actAction).toEqual(createAccount)
+    expect(actAction).toEqual(composedCreate)
   })
 
   it('creates deleteAuth action object', async () => {
     const args = {
-      account: 'accountName',
-      authAccount: 'authAccount',
-      authPermission: 'authPermission',
+      account: 'accountname',
+      authAccount: 'authaccount',
+      authPermission: 'active',
       permission: 'permission',
     }
     const actAction = composeAction(ChainActionType.AccountDeleteAuth, args)
-    expect(actAction).toEqual(deleteAuth)
+    expect(actAction).toEqual(composedDeleteAuth)
   })
 
   it('creates linkAuth action object', async () => {
     const args = {
       action: 'linkauth',
-      authAccount: 'accountName',
+      authAccount: 'accountname',
       authPermission: 'active',
       contract: 'contract',
       permission: 'permission',
     }
     const actAction = composeAction(ChainActionType.AccountLinkAuth, args)
-    expect(actAction).toEqual(linkAuth)
+    expect(actAction).toEqual(composedLinkAuth)
   })
 
   it('creates unlinkAuth action object', async () => {
     const args = {
       action: 'unlinkauth',
-      authAccount: 'accountName',
+      authAccount: 'accountname',
       authPermission: 'active',
       contract: 'contract',
     }
     const actAction = composeAction(ChainActionType.AccountUnlinkAuth, args)
-    expect(actAction).toEqual(unlinkAuth)
+    expect(actAction).toEqual(composedUnlinkAuth)
   })
 
   it('creates updateAuth action object', async () => {
     const args = {
-      auth: 'auth',
-      authAccount: 'accountName',
+      auth: {
+        threshold: 1,
+        accounts: [
+          {
+            permission: {
+              actor: 'accountname',
+              permission: 'owner',
+            },
+            weight: 1,
+          },
+        ],
+        keys: [{ key: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma', weight: 1 }],
+        waits: [
+          {
+            wait_sec: 1,
+            weight: 1,
+          },
+        ],
+      },
+      authAccount: 'accountname',
       authPermission: 'active',
       parent: 'parent',
       permission: 'permission',
     }
     const actAction = composeAction(ChainActionType.AccountUpdateAuth, args)
-    expect(actAction).toEqual(updateAuth)
+    expect(actAction).toEqual(composedUpdateAuth)
   })
 
   it('creates createEscrow create action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       contractName: 'createescrow',
       appName: 'app',
       creatorAccountName: 'creator',
@@ -102,12 +120,12 @@ describe('Compose Chain Actions', () => {
       referralAccountName: 'referral',
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowCreate, args)
-    expect(actAction).toEqual(createEscrowCreate)
+    expect(actAction).toEqual(composedCreateEscrowCreate)
   })
 
   it('creates createEscrow define action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       airdrop: {
         contract: 'airdroper',
         tokens: '0.0000 AIR',
@@ -124,7 +142,7 @@ describe('Compose Chain Actions', () => {
       useRex: false,
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowDefine, args)
-    expect(actAction).toEqual(createEscrowDefine)
+    expect(actAction).toEqual(composedCreateEscrowDefine)
   })
 
   it('creates createEscrow init action object', async () => {
@@ -137,24 +155,24 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowInit, args)
-    expect(actAction).toEqual(createEscrowInit)
+    expect(actAction).toEqual(composedCreateEscrowInit)
   })
 
   it('creates createEscrow reclaim action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       appName: 'app',
       contractName: 'createescrow',
       permission: 'active',
       symbol: 'EOS,4',
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowReclaim, args)
-    expect(actAction).toEqual(createEscrowReclaim)
+    expect(actAction).toEqual(composedCreateEscrowReclaim)
   })
 
   it('creates createEscrow transfer action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       amount: '10.0000 EOS',
       contractName: 'createescrow',
       createEscrowAccountName: 'escrowname',
@@ -162,19 +180,19 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowTransfer, args)
-    expect(actAction).toEqual(createEscrowTransfer)
+    expect(actAction).toEqual(composedCreateEscrowTransfer)
   })
 
   it('creates createEscrow whitelist action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       appName: 'app',
       contractName: 'createescrow',
       permission: 'active',
       whitelistAccount: 'whitelisted',
     }
     const actAction = composeAction(EosChainActionType.CreateEscrowWhitelist, args)
-    expect(actAction).toEqual(createEscrowWhitelist)
+    expect(actAction).toEqual(composedCreateEscrowWhitelist)
   })
 
   it('creates eosToken approve action object', async () => {
@@ -188,7 +206,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenApprove, args)
-    expect(actAction).toEqual(eosTokenApprove)
+    expect(actAction).toEqual(composedEosTokenApprove)
   })
 
   it('creates eosToken create action object', async () => {
@@ -201,7 +219,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenCreate, args)
-    expect(actAction).toEqual(eosTokenCreate)
+    expect(actAction).toEqual(composedEosTokenCreate)
   })
 
   it('creates eosToken issue action object', async () => {
@@ -215,7 +233,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenIssue, args)
-    expect(actAction).toEqual(eosTokenIssue)
+    expect(actAction).toEqual(composedEosTokenIssue)
   })
 
   it('creates eosToken retire action object', async () => {
@@ -228,7 +246,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenRetire, args)
-    expect(actAction).toEqual(eosTokenRetire)
+    expect(actAction).toEqual(composedEosTokenRetire)
   })
 
   it('creates eosToken transfer action object', async () => {
@@ -242,7 +260,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenTransfer, args)
-    expect(actAction).toEqual(eosTokenTransfer)
+    expect(actAction).toEqual(composedEosTokenTransfer)
   })
 
   it('creates eosToken transferFrom action object', async () => {
@@ -257,12 +275,12 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
     }
     const actAction = composeAction(EosChainActionType.EosTokenTransferFrom, args)
-    expect(actAction).toEqual(eosTokenTransferFrom)
+    expect(actAction).toEqual(composedEosTokenTransferFrom)
   })
 
   it('creates ore createAccout action object', async () => {
     const args = {
-      accountName: 'accountName',
+      accountName: 'accountname',
       creatorAccountName: 'creator',
       creatorPermission: 'active',
       publicKeyActive: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
@@ -271,18 +289,18 @@ describe('Compose Chain Actions', () => {
       referralAccountName: 'referral',
     }
     const actAction = composeAction(EosChainActionType.OreCreateAccount, args)
-    expect(actAction).toEqual(oreCreateAccount)
+    expect(actAction).toEqual(composedOreCreateAccount)
   })
 
   it('creates ore upsertRight action object', async () => {
     const args = {
       contractName: 'rights.ore',
-      issuerWhitelist: '[accountName]',
-      oreAccountName: 'accountName',
+      issuerWhitelist: ['accountname'],
+      oreAccountName: 'accountname',
       rightName: 'test',
       urls: 'www.aikon.com',
     }
     const actAction = composeAction(EosChainActionType.OreUpsertRight, args)
-    expect(actAction).toEqual(oreUpsertRight)
+    expect(actAction).toEqual(composedOreUpsertRight)
   })
 })
