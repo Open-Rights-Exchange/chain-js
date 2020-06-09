@@ -5,7 +5,7 @@ const actionName = 'upsertright'
 
 interface OreUpsertRightParams {
   contractName: EosEntityName
-  issuerWhitelist: string
+  issuerWhitelist: EosEntityName[]
   oreAccountName: EosEntityName
   rightName: string
   urls: string
@@ -40,15 +40,15 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
   if (name === actionName && data?.issuer && data?.right_name && data?.issuer_whitelist) {
     const returnData: OreUpsertRightParams = {
       contractName: toEosEntityName(account),
-      issuerWhitelist: toEosEntityName(data.issuer_whitelist),
+      issuerWhitelist: data.issuer_whitelist,
       oreAccountName: toEosEntityName(data.issuer),
       rightName: toEosEntityName(data.right_name),
       urls: data.urls,
     }
-
     return {
       chainActionType: EosChainActionType.OreUpsertRight,
       args: returnData,
+      partial: false,
     }
   }
 
