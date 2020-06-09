@@ -228,22 +228,20 @@ describe('Decompose Chain Actions', () => {
   // Returns all transfer decompose results. Needs differentiator
   // decomposeAction returns more than one result (because pattern matches token and value transfer as well as escrow transfer)
   it('decomposes createEscrow transfer action object', async () => {
-    const expAction = [
-      {
-        chainActionType: 'CreateEscrowTransfer',
-        args: {
-          accountName: 'accountname',
-          amount: '10.0000 EOS',
-          contractName: 'createescrow',
-          createEscrowAccountName: 'escrowname',
-          memo: 'memo',
-          permission: 'active',
-        },
-        partial: false,
+    const expAction = {
+      chainActionType: 'CreateEscrowTransfer',
+      args: {
+        accountName: 'accountname',
+        amount: '10.0000 EOS',
+        contractName: 'createescrow',
+        createEscrowAccountName: 'escrowname',
+        memo: 'memo',
+        permission: 'active',
       },
-    ]
+      partial: false,
+    }
     const actActions = decomposeAction(composedCreateEscrowTransfer)
-    expect(actActions).toEqual(expAction)
+    expect(actActions).toContainEqual(expAction)
   })
 
   it('decomposes createEscroe whitelist action object', async () => {
@@ -266,37 +264,22 @@ describe('Decompose Chain Actions', () => {
   })
 
   it('decomposes eosToken approve action object', async () => {
-    const expAction = [
-      {
-        chainActionType: 'TokenApprove',
-        args: {
-          contractName: 'eosio.token',
-          memo: 'memo',
-          fromAccountName: 'fromaccount',
-          toAccountName: 'toaccount',
-          amount: 5,
-          symbol: 'EOS',
-          permission: 'active',
-        },
-        partial: false,
+    const expAction = {
+      chainActionType: 'EosTokenApprove',
+      args: {
+        contractName: 'eosio.token',
+        memo: 'memo',
+        fromAccountName: 'fromaccount',
+        toAccountName: 'toaccount',
+        amount: 5,
+        symbol: 'EOS',
+        permission: 'active',
       },
-      {
-        chainActionType: 'EosTokenApprove',
-        args: {
-          contractName: 'eosio.token',
-          memo: 'memo',
-          fromAccountName: 'fromaccount',
-          toAccountName: 'toaccount',
-          amount: 5,
-          symbol: 'EOS',
-          permission: 'active',
-        },
-        partial: false,
-      },
-    ]
+      partial: false,
+    }
     const actAction = decomposeAction(composedEosTokenApprove)
 
-    expect(actAction).toEqual(expAction)
+    expect(actAction).toContainEqual(expAction)
   })
 
   it('decomposes eosToken create action object', async () => {
@@ -361,39 +344,22 @@ describe('Decompose Chain Actions', () => {
   })
 
   it('decomposes eosToken transfer action object', async () => {
-    const expAction = [
-      {
-        chainActionType: 'TokenTransfer',
-        args: {
-          fromAccountName: 'fromaccount',
-          toAccountName: 'toaccount',
-          contractName: 'eosio.token',
-          amount: 100,
-          symbol: 'EOS',
-          memo: 'memo',
-          permission: 'active',
-        },
-        partial: false,
+    const expAction = {
+      chainActionType: 'EosTokenTransfer',
+      args: {
+        fromAccountName: 'fromaccount',
+        toAccountName: 'toaccount',
+        contractName: 'eosio.token',
+        amount: 100,
+        symbol: 'EOS',
+        memo: 'memo',
+        permission: 'active',
       },
-      {
-        chainActionType: 'EosTokenTransfer',
-        args: {
-          fromAccountName: 'fromaccount',
-          toAccountName: 'toaccount',
-          contractName: 'eosio.token',
-          amount: 100,
-          symbol: 'EOS',
-          memo: 'memo',
-          permission: 'active',
-        },
-        partial: false,
-      },
-    ]
+      partial: false,
+    }
     const actAction = decomposeAction(composedEosTokenTransfer)
 
-    console.log(actAction)
-
-    expect(actAction).toEqual(expAction)
+    expect(actAction).toContainEqual(expAction)
   })
 
   it('decomposes eosToken transferFrom action object', async () => {
