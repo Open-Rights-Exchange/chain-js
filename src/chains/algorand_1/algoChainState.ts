@@ -124,6 +124,10 @@ export class AlgorandChainState {
     }
   }
 
+  /**
+   * Confirms a transaction on chain by repeatedly checking if the given transaction id is in the pending transactions on the chain
+   * Transactions are generally confirmed in less than 5 seconds on Algorand
+   */
   async waitForTransactionConfirmation(transactionId: string) {
     let waitingConfirmation = true
 
@@ -138,7 +142,7 @@ export class AlgorandChainState {
   }
 
   /** Broadcast a signed transaction to the chain
-  /* if ConfirmType.None, returns the transaction hash without waiting for further tx receipt
+  /* if ConfirmType.None, returns the transaction id without waiting for further tx receipt
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
   */
   async sendTransaction(
