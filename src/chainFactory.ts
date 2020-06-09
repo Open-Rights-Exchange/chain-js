@@ -1,5 +1,6 @@
 import { ChainEosV18 } from './chains/eos_1_8/ChainEosV18'
 import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
+import { ChainAlgorandV1 } from './chains/algorand_1/ChainAlgorandV1'
 import { Chain } from './interfaces'
 import { ChainType, ChainEndpoint } from './models'
 import { throwNewError } from './errors'
@@ -14,6 +15,8 @@ export class ChainFactory {
         return new ChainEosV18(endpoints, settings)
       case ChainType.EthereumV1:
         return new ChainEthereumV1(endpoints, settings)
+      case ChainType.AlgorandV1:
+        return new ChainAlgorandV1(endpoints, settings)
       default:
         throwNewError(`Chain type ${chainType} is not supported`)
     }
