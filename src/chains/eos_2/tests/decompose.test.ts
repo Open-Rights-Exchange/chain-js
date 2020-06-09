@@ -146,7 +146,7 @@ describe('Decompose Chain Actions', () => {
           publicKeyActive: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
           publicKeyOwner: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
           // pricekey: '1',
-          pricekey: null,
+          pricekey: null as number,
           referralAccountName: 'referral',
         },
         partial: false,
