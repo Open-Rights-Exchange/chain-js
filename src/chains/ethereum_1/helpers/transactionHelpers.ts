@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import { BN, bufferToHex } from 'ethereumjs-util'
 import { isNullOrEmpty } from '../../../helpers'
 import { EthUnit, EthereumActionContract } from '../models'
-import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../../../constants'
+import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../ethConstants'
 import { toEthereumTxData } from './cryptoModelHelpers'
 
 /** Converts functionSignature to hexadecimal string */
