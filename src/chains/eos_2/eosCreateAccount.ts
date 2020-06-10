@@ -320,15 +320,13 @@ export class EosCreateAccount implements CreateAccount {
   private async generateAccountKeys(overridePublicKeys: EosPublicKeys): Promise<void> {
     // generate new account owner/active keys if they weren't provided
     const { newKeysOptions } = this._options
-    const { password, salt, iter, mode } = newKeysOptions || {}
+    const { password, encryptionOptions } = newKeysOptions || {}
     const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(
       password,
       {
         publicKeys: overridePublicKeys,
       },
-      salt,
-      iter,
-      mode,
+      encryptionOptions,
     )
     this._generatedKeys = {
       ...this._generatedKeys,

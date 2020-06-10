@@ -151,11 +151,11 @@ class ChainEosV2 implements Chain {
 
   // --------- Chain crytography functions */
 
-  /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
+  /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
   decrypt = eoscrypto.decrypt
 
-  /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
+  /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
   encrypt = eoscrypto.encrypt
 
@@ -194,7 +194,7 @@ class ChainEosV2 implements Chain {
   sign = eoscrypto.sign
 
   /** Generates new owner and active key pairs (public and private)
-   *  Encrypts private keys with provided password and optional salt
+   *  Encrypts private keys with provided password and optional params
    *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 

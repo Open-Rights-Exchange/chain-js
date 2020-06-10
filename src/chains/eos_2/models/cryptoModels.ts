@@ -20,4 +20,8 @@ export type EosAccountKeys = {
   }
 }
 
+/** Additional parameters for encryption/decryption - for SHA256 algorithm */
+export type EncryptionOptions = aesCrypto.AesEncryptionOptions
+
+/** Encryption modes supported by crypto library (default is gcm) */
 export type EncryptionMode = aesCrypto.EncryptionMode
