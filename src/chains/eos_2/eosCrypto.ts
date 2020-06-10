@@ -1,13 +1,18 @@
 import * as ecc from 'eosjs-ecc'
 import * as aesCrypto from '../../crypto/aesCrypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
-import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
+import { EncryptionMode, EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
 import { KeyPair, KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
 
 const { Keygen } = require('eosjs-keygen')
+
+// eslint-disable-next-line prefer-destructuring
+export const defaultIter = aesCrypto.defaultIter
+// eslint-disable-next-line prefer-destructuring
+export const defaultMode = aesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -19,17 +24,30 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
   return aesCrypto.toEncryptedDataString(value)
 }
 
-/** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+/** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
-export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
-  return aesCrypto.decrypt(encrypted, password, salt)
+export function decrypt(
+  encrypted: EncryptedDataString | any,
+  password: string,
+  salt?: string,
+  iter: number = defaultIter, // optional
+  mode: EncryptionMode = defaultMode, // optional
+): string {
+  return aesCrypto.decrypt(encrypted, password, salt, iter, mode)
 }
 
-/** Encrypts a string using a password and salt */
-export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
-  return aesCrypto.encrypt(unencrypted, password, salt)
+/** Encrypts a string using a password and optional salt */
+export function encrypt(
+  unencrypted: string,
+  password: string,
+  salt?: string,
+  iter: number = defaultIter, // optional
+  mode: EncryptionMode = defaultMode, // optional
+): EncryptedDataString {
+  return aesCrypto.encrypt(unencrypted, password, salt, iter, mode)
 }
 
+/** Signs data with private key */
 export function sign(
   data: string | Buffer,
   privateKey: EosPrivateKey | string,
@@ -38,6 +56,7 @@ export function sign(
   return ecc.sign(data, privateKey, encoding)
 }
 
+/** Returns public key from signature */
 export function getPublicKeyFromSignature(
   signature: Signature | EosSignature | string | Buffer,
   data: string | Buffer,
@@ -62,17 +81,23 @@ export async function generateRawKeyPair(): Promise<KeyPair> {
 }
 
 /** Replaces unencrypted privateKeys (owner and active) in keys object
- *  Encrypts keys using password and salt */
-export function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, salt: string) {
+ *  Encrypts keys using password and optional salt */
+function encryptAccountPrivateKeysIfNeeded(
+  keys: any,
+  password: string,
+  salt?: string,
+  iter?: number,
+  mode?: EncryptionMode,
+) {
   const { privateKeys, publicKeys } = keys
   const encryptedKeys = {
     privateKeys: {
       owner: isEncryptedDataString(privateKeys.owner)
         ? privateKeys.owner
-        : encrypt(privateKeys.owner, password, salt).toString(),
+        : encrypt(privateKeys.owner, password, salt, iter, mode).toString(),
       active: isEncryptedDataString(privateKeys.active)
         ? privateKeys.active
-        : encrypt(privateKeys.active, password, salt).toString(),
+        : encrypt(privateKeys.active, password, salt, iter, mode).toString(),
     },
     publicKeys: { ...publicKeys },
   }
@@ -80,12 +105,14 @@ export function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, s
 }
 
 /** Generates new owner and active key pairs (public and private)
- *  Encrypts private keys with provided password and salt
+ *  Encrypts private keys with provided password and optional salt
  *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
-  salt: string,
   overrideKeys: any = {},
+  salt?: string,
+  iter?: number,
+  mode?: EncryptionMode,
 ) {
   // remove any empty values passed-in (e.g. active=undefined or '' )
   removeEmptyValuesInJsonObject(overrideKeys)
@@ -102,17 +129,21 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
       ...overrideKeys.privateKeys,
     },
   }
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(replacedKeys, password, salt)
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(replacedKeys, password, salt, iter, mode)
   return encryptedKeys
 }
 
-/** Generate a random private/public key pair and encrypt using provided password and salt */
-export async function generateKeyPairAndEncryptPrivateKeys(password: string, salt: string): Promise<KeyPairEncrypted> {
+/** Generate a random private/public key pair and encrypt using provided password and optional salt */
+export async function generateKeyPairAndEncryptPrivateKeys(
+  password: string,
+  salt?: string,
+  iter?: number,
+  mode?: EncryptionMode,
+): Promise<KeyPairEncrypted> {
   if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
-  if (isNullOrEmpty(salt)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide salt for new keys')
   const keys = await generateRawKeyPair()
   return {
     public: toEosPublicKey(keys.public),
-    privateEncrypted: toEncryptedDataString(encrypt(keys.private, password, salt)),
+    privateEncrypted: toEncryptedDataString(encrypt(keys.private, password, salt, iter, mode)),
   }
 }
