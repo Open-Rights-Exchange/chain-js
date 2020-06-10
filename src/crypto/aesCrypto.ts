@@ -3,11 +3,19 @@ import { isArray } from 'util'
 import { EncryptedDataString } from '../models'
 import { isAString, isAnObject } from '../helpers'
 
+/** Encryption modes supported by crypto library (default is gcm) */
 export enum EncryptionMode {
   Gcm = 'gcm',
   Ccm = 'ccm',
   Ocb2 = 'ocb2',
   Cbc = 'cbc',
+}
+
+/** Additional parameters for encryption/decryption - for SHA256 algorithm */
+export type AesEncryptionOptions = {
+  salt?: string
+  iter?: number
+  mode?: EncryptionMode
 }
 
 export type SjclCipherParams = {
@@ -90,10 +98,9 @@ export function decryptWithKey(
 export function decrypt(
   encrypted: EncryptedDataString | any,
   password: string,
-  salt?: string,
-  iter: number = defaultIter,
-  mode: EncryptionMode = defaultMode,
+  options?: AesEncryptionOptions,
 ): string {
+  const { iter = defaultIter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherParams
   return decryptWithKey(encrypted, cryptoParams, deriveKey(password, iter, salt))
 }
@@ -113,13 +120,8 @@ export function encryptWithKey(
 }
 
 /** Encrypts a string using a password and optional salt */
-export function encrypt(
-  unencrypted: string,
-  password: string,
-  salt?: string,
-  iter: number = defaultIter,
-  mode: EncryptionMode = defaultMode,
-): EncryptedDataString {
+export function encrypt(unencrypted: string, password: string, options?: AesEncryptionOptions): EncryptedDataString {
+  const { iter = defaultIter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherParams
   return toEncryptedDataString(
     JSON.stringify(encryptWithKey(unencrypted, cryptoParams, deriveKey(password, iter, salt))),
