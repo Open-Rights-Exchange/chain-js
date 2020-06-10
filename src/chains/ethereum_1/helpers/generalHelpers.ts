@@ -1,5 +1,5 @@
 import { toBuffer } from 'ethereumjs-util'
-import { HEX_PREFIX } from '../../../constants'
+import { HEX_PREFIX } from '../ethConstants'
 
 /** Attempts to transform a value to a standard Buffer class */
 export function toEthBuffer(data: string | Buffer | number): Buffer {

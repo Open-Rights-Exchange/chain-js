@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import { bufferToInt, privateToAddress, bufferToHex, publicToAddress } from 'ethereumjs-util'
-import { EMPTY_HEX } from '../../constants'
+import { EMPTY_HEX } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
