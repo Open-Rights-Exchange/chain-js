@@ -129,9 +129,9 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password, salt } = newKeysOptions || {}
+    const { password, salt, iter, mode } = newKeysOptions || {}
 
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {})
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, {}, salt, iter, mode)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
@@ -154,9 +154,9 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private assertValidOptionNewKeys() {
     const { newKeysOptions } = this._options
-    const { password, salt } = newKeysOptions || {}
-    if (isNullOrEmpty(password) || isNullOrEmpty(salt)) {
-      throwNewError('Invalid Option - You must provide a password AND salt to generate new keys')
+    const { password } = newKeysOptions || {}
+    if (isNullOrEmpty(password)) {
+      throwNewError('Invalid Option - You must provide a password to generate new keys')
     }
   }
 }
