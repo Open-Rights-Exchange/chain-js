@@ -4,7 +4,7 @@ import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util
 import * as aesCrypto from '../../crypto/aesCrypto'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { EncryptionMode, EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
+import { EncryptionOptions, EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer } from './helpers/generalHelpers'
 // eslint-disable-next-line import/no-cycle
 import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
@@ -27,25 +27,13 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
-export function decrypt(
-  encrypted: EncryptedDataString | any,
-  password: string,
-  salt?: string,
-  iter: number = defaultIter, // optional
-  mode: EncryptionMode = defaultMode, // optional
-): string {
-  return aesCrypto.decrypt(encrypted, password, salt, iter, mode)
+export function decrypt(encrypted: EncryptedDataString | any, password: string, options: EncryptionOptions): string {
+  return aesCrypto.decrypt(encrypted, password, options)
 }
 
 /** Encrypts a string using a password and optional salt */
-export function encrypt(
-  unencrypted: string,
-  password: string,
-  salt?: string,
-  iter: number = defaultIter, // optional
-  mode: EncryptionMode = defaultMode, // optional
-): EncryptedDataString {
-  return aesCrypto.encrypt(unencrypted, password, salt, iter, mode)
+export function encrypt(unencrypted: string, password: string, options: EncryptionOptions): EncryptedDataString {
+  return aesCrypto.encrypt(unencrypted, password, options)
 }
 
 /** Signs data with private key */
@@ -72,18 +60,10 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 
 /** Replaces unencrypted privateKey in keys object
  *  Encrypts key using password and optional salt */
-function encryptAccountPrivateKeysIfNeeded(
-  keys: any,
-  password: string,
-  salt?: string,
-  iter?: number,
-  mode?: EncryptionMode,
-) {
+function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, options: EncryptionOptions) {
   const { privateKey, publicKey } = keys
   const encryptedKeys = {
-    privateKey: isEncryptedDataString(privateKey)
-      ? privateKey
-      : encrypt(privateKey, password, salt, iter, mode).toString(),
+    privateKey: isEncryptedDataString(privateKey) ? privateKey : encrypt(privateKey, password, options).toString(),
     publicKey,
   }
   return encryptedKeys
@@ -95,15 +75,13 @@ function encryptAccountPrivateKeysIfNeeded(
 export function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
-  salt?: string,
-  iter?: number,
-  mode?: EncryptionMode,
+  options: EncryptionOptions,
 ): any {
   const wallet = Wallet.generate()
   const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
   const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
   const keys = { privateKey, publicKey }
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt, iter, mode)
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }
 

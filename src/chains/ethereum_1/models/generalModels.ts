@@ -1,7 +1,7 @@
 import { BN } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
 import { EncryptedDataString, ChainEntityNameBrand, ChainAssetBrand, ChainDateBrand } from '../../../models'
-import { EncryptionMode, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
+import { EncryptionOptions, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
 
 /** Category of chain functions - useful in error mapping */
 export enum ChainFunctionCategory {
@@ -43,9 +43,7 @@ export type EthereumGeneratedKeys = {
 
 export type EthereumNewKeysOptions = {
   password: string
-  salt?: string
-  iter?: number
-  mode?: EncryptionMode
+  encryptionOptions?: EncryptionOptions
 }
 
 export type EthereumString = {

@@ -146,11 +146,11 @@ class ChainEthereumV1 implements Chain {
 
   // --------- Chain crytography functions */
 
-  /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
+  /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
   decrypt = ethcrypto.decrypt
 
-  /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
+  /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
   encrypt = ethcrypto.encrypt
 

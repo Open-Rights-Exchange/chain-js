@@ -129,9 +129,8 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password, salt, iter, mode } = newKeysOptions || {}
-
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, {}, salt, iter, mode)
+    const { password, encryptionOptions } = newKeysOptions || {}
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, {}, encryptionOptions)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
