@@ -1,4 +1,4 @@
-import { EosPublicKey, EosAccountKeys } from './cryptoModels'
+import { EncryptionMode, EosPublicKey, EosAccountKeys } from './cryptoModels'
 import {
   ChainAssetBrand,
   ChainDateBrand,
@@ -72,8 +72,10 @@ export type EosGeneratedPermissionKeys = {
 }
 
 export type EosNewKeysOptions = {
-  password?: string
+  password: string
   salt?: string
+  iter?: number
+  mode?: EncryptionMode
 }
 
 export type EosPermission = {
