@@ -1,6 +1,6 @@
 import sjcl from 'sjcl'
 import { EncryptedDataString } from '../models'
-import { isAString } from '../helpers'
+import { isAString, isAnObject } from '../helpers'
 
 // casting and type conversion
 
@@ -42,7 +42,7 @@ export function deriveKey(password: string, salt: string): sjcl.BitArray {
 /** Decrypts the encrypted value with the derived key */
 export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey: sjcl.BitArray): string {
   let parsedObject = encrypted
-  if (isAString) {
+  if (!isAnObject(encrypted)) {
     parsedObject = JSON.parse(encrypted)
   }
   const encryptedData = { ...parsedObject, mode: 'gcm' } as sjcl.SjclCipherEncrypted
