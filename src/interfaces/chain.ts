@@ -60,12 +60,12 @@ export interface Chain {
 
   // Chain Crypto functions
 
-  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+  /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt(encrypted: EncryptedDataString, password: string, salt: string): string
-  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+  decrypt(encrypted: EncryptedDataString, password: string, salt?: string, iter?: number): string
+  /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString
+  encrypt(unencrypted: string, password: string, salt?: string, iter?: number): EncryptedDataString
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */
