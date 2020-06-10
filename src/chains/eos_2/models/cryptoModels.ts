@@ -1,4 +1,5 @@
 import { EncryptedDataString, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
+import * as aesCrypto from '../../../crypto/aesCrypto'
 
 /** a public key string - formatted correctly for EOS */
 export type EosPublicKey = string & PublicKeyBrand
@@ -18,3 +19,5 @@ export type EosAccountKeys = {
     active: EosPrivateKey | EncryptedDataString
   }
 }
+
+export type EncryptionMode = aesCrypto.EncryptionMode
