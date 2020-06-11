@@ -9,6 +9,7 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
   let salt: string
   let walletPassword: string
   let encrypted: string
+  let encrypted2: string
   let encryptionOptions: AesEncryptionOptions
 
   beforeAll(() => {
@@ -21,7 +22,7 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       iter,
     }
     encrypted = encrypt(privateKey, walletPassword, encryptionOptions)
-    console.log('salt:', salt)
+    encrypted2 = encrypt(privateKey, walletPassword, { salt, iter: 1000 })
   })
 
   describe('deriveKey', () => {
@@ -50,6 +51,9 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       it('returns an encrypted string', () => {
         expect(encrypted).toEqual(expect.not.stringContaining(privateKey))
       })
+      it('returns an encrypted string with different options', () => {
+        expect(encrypted2).toEqual(expect.not.stringContaining(privateKey))
+      })
     })
 
     describe('decrypt', () => {
@@ -60,6 +64,10 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       it('does not throw with no (optional) salt and iter', () => {
         const decrypted = decrypt(encrypted, walletPassword)
         expect(decrypted.toString()).toMatch(privateKey)
+      })
+      it('automatically infers iter value from encrypted value (iter:1000)', () => {
+        const decrypted2 = decrypt(encrypted2, walletPassword, { salt })
+        expect(decrypted2.toString()).toMatch(privateKey)
       })
     })
   })
