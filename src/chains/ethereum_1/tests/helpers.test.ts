@@ -1,5 +1,5 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
-import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../../../constants'
+import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../ethConstants'
 import { toWei, toEthereumAddress, toEthereumPrivateKey, ethereumTrxArgIsNullOrEmpty } from '../helpers'
 import { EthUnit } from '../models'
 

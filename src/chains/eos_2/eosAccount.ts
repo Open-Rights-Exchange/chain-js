@@ -212,15 +212,15 @@ export class EosAccount implements Account {
     return actions
   }
 
-  /** Both new password and salt must be provided if any permissions are missing public keys */
+  /** A new password must be provided if any permissions are missing public keys */
   private assertValidOptionNewKeys = (
     permissionsToAdd: Partial<EosPermissionSimplified>[],
     newKeysOptions?: EosNewKeysOptions,
   ) => {
     const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
-    const { password, salt } = newKeysOptions || {}
-    if (isAnyPublicKeyMissing && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
-      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    const { password } = newKeysOptions || {}
+    if (isAnyPublicKeyMissing && isNullOrEmpty(password)) {
+      throwNewError('Invalid Option - You must provide either public keys or a password to generate new keys')
     }
   }
 }

@@ -1,7 +1,7 @@
 import { BN } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
 import { EncryptedDataString, ChainEntityNameBrand, ChainAssetBrand, ChainDateBrand } from '../../../models'
-import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
+import { EncryptionOptions, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
 
 /** Category of chain functions - useful in error mapping */
 export enum ChainFunctionCategory {
@@ -42,8 +42,8 @@ export type EthereumGeneratedKeys = {
 }
 
 export type EthereumNewKeysOptions = {
-  password?: string
-  salt?: string
+  password: string
+  encryptionOptions?: EncryptionOptions
 }
 
 export type EthereumString = {
@@ -52,3 +52,32 @@ export type EthereumString = {
 
 // similar to ethereum-js BufferLike but also includes string
 export type EthereumValue = string | number | Buffer | BN
+
+/** Ethereum value units */
+export enum EthUnit {
+  Noether = 'noether',
+  Wei = 'wei',
+  Kwei = 'kwei',
+  Babbage = 'babbage',
+  femtoether = 'femtoether',
+  Mwei = 'mwei',
+  Lovelace = 'lovelace',
+  Picoether = 'picoether',
+  Qwei = 'gwei',
+  Gwei = 'Gwei',
+  Shannon = 'shannon',
+  Nanoether = 'nanoether',
+  Nano = 'nano',
+  Szabo = 'szabo',
+  Microether = 'microether',
+  Micro = 'micro',
+  Finney = 'finney',
+  Milliether = 'milliether',
+  Milli = 'milli',
+  Ether = 'ether',
+  Kether = 'kether',
+  Grand = 'grand',
+  Mether = 'mether',
+  Gether = 'gether',
+  Thether = 'tether',
+}

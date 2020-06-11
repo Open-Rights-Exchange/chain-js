@@ -1,4 +1,3 @@
-import { BN } from 'ethereumjs-util'
 import { isNullOrEmpty } from '../../helpers'
 import {
   ethereumTrxArgIsNullOrEmpty,
@@ -13,7 +12,7 @@ import {
   EthereumTransactionAction,
   EthereumActionContract,
 } from './models'
-import { ZERO_HEX, ZERO_ADDRESS } from '../../constants'
+import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
 
 /** Helper class to ensure transaction actions properties are set correctly */

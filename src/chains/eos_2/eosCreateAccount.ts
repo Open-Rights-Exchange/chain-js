@@ -320,10 +320,14 @@ export class EosCreateAccount implements CreateAccount {
   private async generateAccountKeys(overridePublicKeys: EosPublicKeys): Promise<void> {
     // generate new account owner/active keys if they weren't provided
     const { newKeysOptions } = this._options
-    const { password, salt } = newKeysOptions || {}
-    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt, {
-      publicKeys: overridePublicKeys,
-    })
+    const { password, encryptionOptions } = newKeysOptions || {}
+    const generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(
+      password,
+      {
+        publicKeys: overridePublicKeys,
+      },
+      encryptionOptions,
+    )
     this._generatedKeys = {
       ...this._generatedKeys,
       accountKeys: generatedKeys,
@@ -416,9 +420,9 @@ export class EosCreateAccount implements CreateAccount {
 
   private assertValidOptionNewKeys() {
     const { newKeysOptions, publicKeys } = this._options
-    const { password, salt } = newKeysOptions || {}
-    if (isNullOrEmpty(publicKeys) && (isNullOrEmpty(password) || isNullOrEmpty(salt))) {
-      throwNewError('Invalid Option - You must provide either public keys or a password AND salt to generate new keys')
+    const { password } = newKeysOptions || {}
+    if (isNullOrEmpty(publicKeys) && isNullOrEmpty(password)) {
+      throwNewError('Invalid Option - You must provide either public keys or a password to generate new keys')
     }
   }
 
