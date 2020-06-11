@@ -64,6 +64,15 @@ export function bitArrayToString(value: sjcl.BitArray | string): string {
   return sjcl.codec.base64.fromBits(value as BitArray)
 }
 
+/** If the encrypted param isn't already a JSON object, parse the stringfied value into one
+ *  Returns a JSON object */
+export function ensureEncryptedValueIsObject(encrypted: EncryptedDataString | any) {
+  if (isAnObject(encrypted)) {
+    return encrypted
+  }
+  return JSON.parse(encrypted)
+}
+
 // decrypt and encrypt
 
 // NOTE Passing in at least an empty string for the salt, will prevent cached keys, which can lead to false positives in the test suite
@@ -83,11 +92,8 @@ export function decryptWithKey(
   cryptoParams: SjclCipherParams,
   derivedKey: sjcl.BitArray,
 ): string {
-  let parsedObject = encrypted
-  if (!isAnObject(encrypted)) {
-    parsedObject = JSON.parse(encrypted)
-  }
-  const encryptedData = { ...parsedObject, ...cryptoParams } as sjcl.SjclCipherEncrypted
+  const encryptedAsObject = ensureEncryptedValueIsObject(encrypted)
+  const encryptedData = { ...encryptedAsObject, ...cryptoParams } as sjcl.SjclCipherEncrypted
   const encryptedDataString = JSON.stringify(encryptedData)
   return sjcl.decrypt(derivedKey, encryptedDataString)
 }
@@ -100,9 +106,16 @@ export function decrypt(
   password: string,
   options?: AesEncryptionOptions,
 ): string {
-  const { iter = defaultIter, mode = defaultMode, salt } = options || {}
+  const { iter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherParams
-  return decryptWithKey(encrypted, cryptoParams, deriveKey(password, iter, salt))
+  if (iter) {
+    cryptoParams.iter = iter
+  } else {
+    // get iter from encrypted string
+    const parsedObject = ensureEncryptedValueIsObject(encrypted)
+    cryptoParams.iter = parsedObject.iter
+  }
+  return decryptWithKey(encrypted, cryptoParams, deriveKey(password, cryptoParams.iter, salt))
 }
 
 /** Encrypts the private key with the derived key  */
@@ -115,7 +128,7 @@ export function encryptWithKey(
     ...cryptoParams,
     salt: stringToBitArray(cryptoParams.salt || ''),
   } as sjcl.SjclCipherEncryptParams
-  const encrypted = JSON.parse(sjcl.encrypt(derivedKey, unencrypted, params) as any)
+  const encrypted = ensureEncryptedValueIsObject(sjcl.encrypt(derivedKey, unencrypted, params) as any)
   return encrypted
 }
 
