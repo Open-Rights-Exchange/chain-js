@@ -52,8 +52,6 @@ export type EosChainEndpoint = {
   }
   /** Between 0 and 1 - 0 is not responding, 1 is very fast */
   health?: number
-  /** Settings for chain endpoint (chain-specific) */
-  settings?: any
 }
 
 /** Monitor services listenting to the chain */
