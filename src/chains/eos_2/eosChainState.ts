@@ -1,10 +1,10 @@
 import { Api, JsonRpc, RpcInterfaces } from 'eosjs'
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
-import nodeFetch from 'node-fetch' // node only; not needed in browsers
+import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { ChainError, throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ChainEndpoint, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
-import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
+import { fetchWrapper, trimTrailingChars, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
   EosSignature,
   EosEntityName,
@@ -119,8 +119,9 @@ export class EosChainState {
       // we don't store keys in chain state so JsSignatureProvider keys are empty
       this._signatureProvider = new JsSignatureProvider([])
       if (!this._rpc) {
-        const url = this.determineUrl()
-        this._rpc = new JsonRpc(url, { fetch: this._chainSettings?.fetch || nodeFetch })
+        const { url, endpoint } = this.selectEndpoint()
+        const fetchWithOptions = this.configureFetchForEndpoint(this._chainSettings?.fetch || nodeFetch, endpoint)
+        this._rpc = new JsonRpc(url, { fetch: fetchWithOptions })
       }
       if (!this._api) {
         this._api = new Api({
@@ -153,13 +154,24 @@ export class EosChainState {
 
   // TODO: sort based on health info
   /** Choose the best Chain endpoint based on health and response time */
-  private determineUrl(): string {
+  private selectEndpoint(): { url: string; endpoint: ChainEndpoint } {
     // Allow 'empty' list of endpoints - the fetch module might have its own approach for providing urls
     if (isNullOrEmpty(this.endpoints)) {
-      return ''
+      return { url: '', endpoint: null }
     }
-    const url = this.endpoints[0]?.url?.href
-    return trimTrailingChars(url, '/')
+    // Just choose the first endpoint for now
+    const endpoint = this.endpoints[0]
+    const url = endpoint?.url?.href
+    return { url: trimTrailingChars(url, '/'), endpoint }
+  }
+
+  /** Configure fetch object with heaqders from chainEndpoint (if any) */
+  private configureFetchForEndpoint(fetch: any, chainEndpoint: ChainEndpoint): any {
+    const endpointHeaders = chainEndpoint ? arrayToObject(chainEndpoint?.options?.headers) : null
+    if (isNullOrEmpty(endpointHeaders)) return fetch
+    const headers = new NodeFetchHeaders(endpointHeaders)
+    // add chainEndpoint headers to fetch headers
+    return fetchWrapper(fetch, { headers })
   }
 
   /** Retrieve a specific block from the chain */
