@@ -251,7 +251,7 @@ export class PermissionsHelper {
     newKeysOptions: EosNewKeysOptions,
   ) => {
     const generatedKeys: EosGeneratedPermissionKeys[] = []
-    const { password, salt } = newKeysOptions || {}
+    const { password, encryptionOptions } = newKeysOptions || {}
 
     if (isNullOrEmpty(permissionsToAdd)) {
       return null
@@ -261,7 +261,7 @@ export class PermissionsHelper {
     const keysToFix = permissionsToAdd.map(async p => {
       if (!p.publicKey) {
         const updatedPerm = p
-        const keys = await generateKeyPairAndEncryptPrivateKeys(password, salt)
+        const keys = await generateKeyPairAndEncryptPrivateKeys(password, encryptionOptions)
         updatedPerm.publicKey = keys.public
         updatedPerm.publicKeyWeight = 1
         generatedKeys.push({ permissionName: updatedPerm.name, keyPair: keys })

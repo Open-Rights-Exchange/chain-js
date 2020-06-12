@@ -1,7 +1,6 @@
 import { RpcError } from 'eosjs'
 import {
   ChainActionType,
-  ChainEndpoint,
   ChainInfo,
   TransactionOptions,
   ChainType,
@@ -42,19 +41,20 @@ import {
   EosDate,
   EosCreateAccountOptions,
   EosDecomposeReturn,
+  EosChainEndpoint,
 } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
 class ChainEosV2 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: EosChainEndpoint[]
 
   private _settings: EosChainSettings
 
   private _chainState: EosChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: EosChainSettings) {
+  constructor(endpoints: EosChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EosChainState(endpoints, settings)
@@ -151,11 +151,11 @@ class ChainEosV2 implements Chain {
 
   // --------- Chain crytography functions */
 
-  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
+  /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
   decrypt = eoscrypto.decrypt
 
-  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+  /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
   encrypt = eoscrypto.encrypt
 
@@ -194,7 +194,7 @@ class ChainEosV2 implements Chain {
   sign = eoscrypto.sign
 
   /** Generates new owner and active key pairs (public and private)
-   *  Encrypts private keys with provided password and salt
+   *  Encrypts private keys with provided password and optional params
    *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
@@ -273,7 +273,7 @@ class ChainEosV2 implements Chain {
     return this.toEosSignature(value) as Signature
   }
 
-  /** Ensures that the value comforms to a well-formed EOS private Key */
+  /** Ensures that the value comforms to a well-formed EOS signature */
   toEosSignature = toEosSignature
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */

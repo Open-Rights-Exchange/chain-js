@@ -1,4 +1,5 @@
 import { EncryptedDataString, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
+import * as aesCrypto from '../../../crypto/aesCrypto'
 
 /** a public key string - formatted correctly for EOS */
 export type EosPublicKey = string & PublicKeyBrand
@@ -18,3 +19,9 @@ export type EosAccountKeys = {
     active: EosPrivateKey | EncryptedDataString
   }
 }
+
+/** Additional parameters for encryption/decryption - for SHA256 algorithm */
+export type EncryptionOptions = aesCrypto.AesEncryptionOptions
+
+/** Encryption modes supported by crypto library (default is gcm) */
+export type EncryptionMode = aesCrypto.EncryptionMode

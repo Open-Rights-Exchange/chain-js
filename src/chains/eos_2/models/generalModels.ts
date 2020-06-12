@@ -1,4 +1,4 @@
-import { EosPublicKey, EosAccountKeys } from './cryptoModels'
+import { EosPublicKey, EosAccountKeys, EncryptionOptions } from './cryptoModels'
 import {
   ChainAssetBrand,
   ChainDateBrand,
@@ -40,6 +40,20 @@ export type EosChainSettings = {
   unusedAccountPublicKey?: string
 }
 
+/** Chain urls and related details used to connect to chain */
+export type EosChainEndpoint = {
+  /** api endpoint url - including http(s):// prefix */
+  url: URL
+  /** Options are name/value pairs used to configure chain endpoint */
+  options?: {
+    /** Array of headers to be included in HTTP requests to chain endpoint
+     *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
+    headers?: [{ [key: string]: string }]
+  }
+  /** Between 0 and 1 - 0 is not responding, 1 is very fast */
+  health?: number
+}
+
 /** Monitor services listenting to the chain */
 export enum EosChainMonitorType {
   NONE,
@@ -72,8 +86,8 @@ export type EosGeneratedPermissionKeys = {
 }
 
 export type EosNewKeysOptions = {
-  password?: string
-  salt?: string
+  password: string
+  encryptionOptions?: EncryptionOptions
 }
 
 export type EosPermission = {

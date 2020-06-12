@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BN } from 'ethereumjs-util'
 import { Chain } from '../../interfaces'
-import {
-  ChainActionType,
-  ChainEndpoint,
-  ChainInfo,
-  ChainType,
-  ChainAsset,
-  ChainEntityName,
-  ChainDate,
-} from '../../models'
+import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -21,6 +13,7 @@ import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
 import { mapChainError } from './ethErrors'
 import {
+  EthereumChainEndpoint,
   EthereumChainSettings,
   EthereumCreateAccountOptions,
   EthereumPublicKey,
@@ -49,13 +42,13 @@ import { notImplemented } from '../../helpers'
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
 class ChainEthereumV1 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: EthereumChainEndpoint[]
 
   private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
+  constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EthereumChainState(endpoints, settings)
@@ -144,26 +137,40 @@ class ChainEthereumV1 implements Chain {
     Transaction: this.newTransaction,
   }
 
-  // Chain Crypto Functions
+  // --------- Chain crytography functions */
 
+  /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
+   * Expects the encrypted value to be a stringified JSON object */
   decrypt = ethcrypto.decrypt
 
+  /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
+   * The returned, encrypted value is a stringified JSON object */
   encrypt = ethcrypto.encrypt
 
+  /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
+  /** Verifies that the value is a valid, stringified JSON ciphertext */
   isValidEncryptedData = ethcrypto.isEncryptedDataString
 
+  /** Ensures that the value comforms to a well-formed private Key */
   toEncryptedDataString = ethcrypto.toEncryptedDataString
 
+  /** Ensures that the value comforms to a well-formed Eos private Key */
   isValidPrivateKey = isValidEthereumPrivateKey
 
+  /** Ensures that the value comforms to a well-formed public Key */
   isValidPublicKey = isValidEthereumPublicKey
 
+  /** Generates new key pairs (public and private)
+   *  Encrypts private key with provided password (and optional salt)
+   *  Returns: { privateKey, publicKey } */
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
+  /** Generate a signature given some data and a private key */
   sign = ethcrypto.sign
 
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
 
   // Chain Helper Functions
@@ -216,12 +223,16 @@ class ChainEthereumV1 implements Chain {
     return toEthereumDate(value) as ChainDate
   }
 
+  /** Ensures that the value comforms to a well-formed EOS public Key */
   toPublicKey = toEthereumPublicKey
 
+  /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey = toEthereumPrivateKey
 
+  /** Ensures that the value comforms to a well-formed signature */
   toSignature = toEthereumSignature
 
+  /** Returns a new EthereumAccount class using the provided ethereum public key */
   public setPublicKey = (publicKey: EthereumPublicKey) => {
     return new EthereumAccount(this._chainState).setPublicKey(publicKey)
   }

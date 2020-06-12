@@ -50,7 +50,7 @@ export class EthereumAccount implements Account {
     this._address = address
   }
 
-  /** Sets the ethereum publie key and address */
+  /** Sets the ethereum public key and address */
   setPublicKey = async (publicKey: EthereumPublicKey) => {
     this.assertValidEthereumPublickey(publicKey)
     this._publicKey = publicKey
