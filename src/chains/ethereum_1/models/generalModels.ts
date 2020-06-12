@@ -28,6 +28,28 @@ export type EthereumChainForkType = {
   hardFork: string
 }
 
+/** Chain urls and related details used to connect to chain */
+export type EthereumChainEndpoint = {
+  /** api endpoint url - including http(s):// prefix */
+  url: URL
+  /** Options are same as defined in web3-core-helpers.HttpProviderOptions - https://github.com/ethereum/web3.js/tree/1.x/packages/web3-providers-http#usage
+   *  Except: Headers are provided here as {'headerName':'headerValue'} and mapped to EthereumHttpHeader format {name:string, value:string} */
+  options?: {
+    keepAlive?: boolean
+    timeout?: number
+    /** Array of headers to be included in HTTP requests to chain endpoint
+     *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
+    headers?: [{ [key: string]: string }]
+    withCredentials?: boolean
+    /** Type HttpAgent - from web3-core-helpers */
+    agent?: any
+  }
+  /** between 0 and 1 - 0 is not responding, 1 is very fast */
+  health?: number
+  /** settings for chain endpoint (chain-specific) */
+  settings?: any
+}
+
 /** For future use - add any settings needed to customize communication with API endpoint */
 export type EthereumChainSettingsCommunicationSettings = {}
 

@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BN } from 'ethereumjs-util'
 import { Chain } from '../../interfaces'
-import {
-  ChainActionType,
-  ChainEndpoint,
-  ChainInfo,
-  ChainType,
-  ChainAsset,
-  ChainEntityName,
-  ChainDate,
-} from '../../models'
+import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -21,6 +13,7 @@ import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
 import { mapChainError } from './ethErrors'
 import {
+  EthereumChainEndpoint,
   EthereumChainSettings,
   EthereumCreateAccountOptions,
   EthereumPublicKey,
@@ -49,13 +42,13 @@ import { notImplemented } from '../../helpers'
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
 class ChainEthereumV1 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: EthereumChainEndpoint[]
 
   private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
+  constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EthereumChainState(endpoints, settings)

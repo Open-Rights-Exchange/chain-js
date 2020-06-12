@@ -1,7 +1,8 @@
 import Web3 from 'web3'
+import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ChainEndpoint, ConfirmType } from '../../models'
+import { ChainInfo, ConfirmType } from '../../models'
 import { trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
@@ -9,6 +10,7 @@ import {
   EthereumAddress,
   EthereumBlockNumber,
   EthereumBlockType,
+  EthereumChainEndpoint,
   EthereumChainSettings,
   EthereumChainSettingsCommunicationSettings,
   EthereumTxResult,
@@ -22,25 +24,25 @@ import { ensureHexPrefix } from './helpers'
 export class EthereumChainState {
   private ethChainInfo: BlockTransactionString
 
-  private _activeEndpoint: ChainEndpoint
+  private _activeEndpoint: EthereumChainEndpoint
 
   private _chainInfo: ChainInfo
 
   private _chainSettings: EthereumChainSettings
 
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: EthereumChainEndpoint[]
 
   private _isConnected: boolean = false
 
   private _web3: Web3 // Ethereum chain api endpoint
 
-  constructor(endpoints: ChainEndpoint[], settings?: EthereumChainSettings) {
+  constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
     this._chainSettings = settings
   }
 
   /** Return chain URL endpoints */
-  public get activeEndpoint(): ChainEndpoint {
+  public get activeEndpoint(): EthereumChainEndpoint {
     return this._activeEndpoint
   }
 
@@ -62,7 +64,7 @@ export class EthereumChainState {
   }
 
   /** Return chain URL endpoints */
-  public get endpoints(): ChainEndpoint[] {
+  public get endpoints(): EthereumChainEndpoint[] {
     return this._endpoints
   }
 
@@ -78,7 +80,8 @@ export class EthereumChainState {
     try {
       if (!this._web3) {
         const { url, endpoint } = this.selectEndpoint()
-        const web3HttpProvider = new Web3.providers.HttpProvider(url, endpoint.options)
+        const httpProviderOptions = this.mapOptionsToWeb3HttpProviderOptions(endpoint)
+        const web3HttpProvider = new Web3.providers.HttpProvider(url, httpProviderOptions)
         this._web3 = new Web3(web3HttpProvider)
       }
       await this.getChainInfo()
@@ -86,6 +89,21 @@ export class EthereumChainState {
     } catch (error) {
       throwAndLogError('Problem connecting to chain', 'chainConnectFailed', error)
     }
+  }
+
+  /** Map endpoint options to web3 HttpProviderOptions type */
+  public mapOptionsToWeb3HttpProviderOptions(endpoint: EthereumChainEndpoint): HttpProviderOptions {
+    const headers: { name: string; value: string }[] = []
+    // convert [{'Header-Name':'headervalue'}] => [{name:'Header-Name', value:'headervalue'}]
+    endpoint.options?.headers.forEach(header => {
+      const key = Object.keys(header)[0]
+      headers.push({ name: key, value: header[key] })
+    })
+    const webOptions: HttpProviderOptions = {
+      ...endpoint.options,
+      headers,
+    }
+    return webOptions
   }
 
   /** Retrieve lastest chain info including head block number and time */
@@ -110,7 +128,7 @@ export class EthereumChainState {
 
   // TODO: sort based on health info
   /** Choose the best Chain endpoint based on health and response time */
-  private selectEndpoint(): { url: string; endpoint: ChainEndpoint } {
+  private selectEndpoint(): { url: string; endpoint: EthereumChainEndpoint } {
     // Just choose the first endpoint for now
     const endpoint = this.endpoints[0]
     const url = endpoint?.url?.href
