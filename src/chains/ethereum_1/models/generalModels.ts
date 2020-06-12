@@ -46,8 +46,6 @@ export type EthereumChainEndpoint = {
   }
   /** between 0 and 1 - 0 is not responding, 1 is very fast */
   health?: number
-  /** settings for chain endpoint (chain-specific) */
-  settings?: any
 }
 
 /** For future use - add any settings needed to customize communication with API endpoint */
