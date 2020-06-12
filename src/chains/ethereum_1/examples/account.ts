@@ -4,13 +4,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint } from '../../../models/generalModels'
+import { EthereumChainEndpoint } from '../models'
 
 require('dotenv').config()
 
 export const { env } = process
 
-export const ropstenEndpoints: ChainEndpoint[] = [
+export const ropstenEndpoints: EthereumChainEndpoint[] = [
   {
     url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
   },
