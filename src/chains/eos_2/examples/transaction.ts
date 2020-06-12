@@ -36,6 +36,17 @@ const { env } = process
       url: new URL('https:api-kylin.eosasia.one:443'),
       chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
     },
+    {
+      url: new URL('https://kylin.eos.dfuse.io'),
+      chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
+      options: {
+        headers: [
+          {
+            Authorization: 'Bearer ey...',
+          },
+        ],
+      },
+    },
   ]
   const oreStagingEndpoints = [
     {
@@ -76,7 +87,7 @@ const { env } = process
     contractName: toEosEntityName('eosio.token'),
     fromAccountName: toEosEntityName('proppropprop'),
     toAccountName: toEosEntityName('oreidfunding'),
-    amount: 1,
+    amount: 0.0001,
     symbol: toEosSymbol('EOS'),
     memo: 'memo',
     permission: toEosEntityName('active'),
@@ -144,4 +155,5 @@ const { env } = process
   // console.log('sign buffer', transaction.signBuffer)
 
   // ----<
+  process.exit()
 })()

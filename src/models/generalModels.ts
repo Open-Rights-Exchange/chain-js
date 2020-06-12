@@ -44,6 +44,10 @@ export enum ChainType {
 export type ChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
   url: URL
+  /** Options are name/value pairs set to chain endpoint - they are chain-specific
+   *  Often includes array of headers to be included in HTTP requests to chain endpoint
+   *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
+  options?: { [key: string]: any }
   /** between 0 and 1 - 0 is not responding, 1 is very fast */
   health?: number
   /** settings for chain endpoint (chain-specific) */
@@ -57,3 +61,6 @@ export type ChainInfo = {
   version: string
   nativeInfo: any
 }
+
+/** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */
+export type IndexedObject = { [key: string]: string }

@@ -1,6 +1,6 @@
 import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
-import { ChainEntityName } from './models'
+import { ChainEntityName, IndexedObject } from './models'
 
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
@@ -144,4 +144,26 @@ export function toChainEntityName(name: string): ChainEntityName {
     return name
   }
   throw new Error(`Should not get here. toChainEntityName name:${name}`)
+}
+
+/* Provides a wrapper around a fetch object to allow injection of options into each fetch request
+   Returns fetch reponse */
+export function fetchWrapper(fetchService: any, globalOptions = {}) {
+  // standard fetch interface so that this can be plugged-into any code that accepts a fetch object type
+  return async function fetch(url: any, options = {}): Promise<any> {
+    const fetchOptions = { ...globalOptions, ...options }
+    const response = await fetchService(url, fetchOptions)
+    return response
+  }
+}
+
+/** Conver an array to a JSON object e.g. [{'key1':value1}, {'key2':value2}] =>  {{'key1':value1}, {'key2':value2}} */
+export function arrayToObject(array: IndexedObject[]) {
+  const result: any = {}
+  if (isNullOrEmpty(array)) return null
+  array.forEach(header => {
+    const key = Object.keys(header)[0]
+    result[key] = header[key]
+  })
+  return result
 }

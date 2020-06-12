@@ -1,7 +1,6 @@
 import { RpcError } from 'eosjs'
 import {
   ChainActionType,
-  ChainEndpoint,
   ChainInfo,
   TransactionOptions,
   ChainType,
@@ -42,19 +41,20 @@ import {
   EosDate,
   EosCreateAccountOptions,
   EosDecomposeReturn,
+  EosChainEndpoint,
 } from './models'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
 class ChainEosV2 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: EosChainEndpoint[]
 
   private _settings: EosChainSettings
 
   private _chainState: EosChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: EosChainSettings) {
+  constructor(endpoints: EosChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new EosChainState(endpoints, settings)

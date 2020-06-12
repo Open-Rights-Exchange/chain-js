@@ -5,12 +5,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, ChainErrorType, ConfirmType } from '../../../models'
+import { ChainActionType, ChainErrorType, ConfirmType } from '../../../models'
 import { toEthereumPrivateKey, toWei } from '../helpers'
-import { EthereumChainSettings, EthereumChainForkType, EthUnit } from '../models'
+import { EthereumChainSettings, EthereumChainForkType, EthUnit, EthereumChainEndpoint } from '../models'
 ;(async () => {
   try {
-    const ropstenEndpoints: ChainEndpoint[] = [
+    const ropstenEndpoints: EthereumChainEndpoint[] = [
       {
         url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
       },

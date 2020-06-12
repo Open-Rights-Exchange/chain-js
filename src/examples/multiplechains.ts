@@ -78,7 +78,7 @@ async function sendToken(chain: Chain, options: any) {
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
   await sendTokenTx.sign([options.privateKey])
-  const response =  sendTokenTx.send(ConfirmType.None)
+  const response = sendTokenTx.send(ConfirmType.None)
   return response
 }
 
@@ -88,7 +88,6 @@ async function sendCurrency(chain: Chain, options: any) {
   sendCurrencyTx.actions = [chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()
-  console.log('private key eth:', options.privateKey)
   await sendCurrencyTx.sign([options.privateKey])
   const response = await sendCurrencyTx.send(ConfirmType.None)
   return response
@@ -110,20 +109,28 @@ async function runFunctionsForMultipleChains() {
   )
 
   // for each, we'll get the appropriate optiond for sending a token and then call the generic sendToken function
-  chains.map(async chain => {
-    const response = await sendToken(chain, chainSendTokenData[chain.chainType])
-    console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
-  })
+  await Promise.all(
+    chains.map(async chain => {
+      const response = await sendToken(chain, chainSendTokenData[chain.chainType])
+      console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
+    }),
+  )
 
-  chains.map(async chain => {
-    const response = await sendCurrency(chain, chainSendCurrencyData[chain.chainType])
-    console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
-  })
-
+  await Promise.all(
+    chains.map(async chain => {
+      const response = await sendCurrency(chain, chainSendCurrencyData[chain.chainType])
+      console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
+    }),
+  )
 }
 
 /** Run the example code automatically */
-;( async () => {
-  await runFunctionsForMultipleChains()
-  process.exit() // exit Node execution
+;(async () => {
+  try {
+    await runFunctionsForMultipleChains()
+    console.log('done')
+  } catch (error) {
+    console.log(error)
+  }
+  process.exit()
 })()
