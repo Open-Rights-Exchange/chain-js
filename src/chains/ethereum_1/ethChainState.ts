@@ -77,8 +77,9 @@ export class EthereumChainState {
   public async connect(): Promise<void> {
     try {
       if (!this._web3) {
-        const url = this.determineUrl()
-        this._web3 = new Web3(url)
+        const { url, endpoint } = this.selectEndpoint()
+        const web3HttpProvider = new Web3.providers.HttpProvider(url, endpoint.options)
+        this._web3 = new Web3(web3HttpProvider)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -108,10 +109,12 @@ export class EthereumChainState {
   }
 
   // TODO: sort based on health info
-  /**  * Choose the best Chain endpoint based on health and response time */
-  private determineUrl(): string {
-    const url = this.endpoints[0].url.href
-    return trimTrailingChars(url, '/')
+  /** Choose the best Chain endpoint based on health and response time */
+  private selectEndpoint(): { url: string; endpoint: ChainEndpoint } {
+    // Just choose the first endpoint for now
+    const endpoint = this.endpoints[0]
+    const url = endpoint?.url?.href
+    return { url: trimTrailingChars(url, '/'), endpoint }
   }
 
   /** Retrieve a specific block from the chain */
