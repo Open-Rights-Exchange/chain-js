@@ -6,15 +6,15 @@ export type Algo = any
  * token's format: {'X-API-Key': '...'}
  */
 export type AlgorandConnectionSettings = {
-  server: string
+  server: URL
   token: string
   port?: string
 }
 
-/**  ALGO TODO: Currently nothing is needed in algorand chain settings. 
- Once any such parameter is there, change the type from any to an object containing specific properties */
+/** Currently nothing is needed in algorand chain settings.
+ * Once any such parameter is there, change the type from any to an object containing specific properties */
 export type AlgorandChainSettings = any
 
-/**  ALGO TODO: Currently nothing is needed in algorand chain communication settings. 
+/**  Currently nothing is needed in algorand chain communication settings. 
  Once any such parameter is there, change the type from any to an object containing specific properties */
 export type AlgorandChainSettingsCommunicationSettings = any
