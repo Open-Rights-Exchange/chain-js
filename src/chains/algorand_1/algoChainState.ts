@@ -7,7 +7,6 @@ import {
   AlgorandChainSettings,
   AlgorandConnectionSettings,
 } from './models/generalModels'
-import { trimTrailingChars } from '../../helpers'
 import { AlgorandTxResult } from './models/transactionModels'
 
 export class AlgorandChainState {
@@ -21,7 +20,7 @@ export class AlgorandChainState {
 
   private _isConnected: boolean = false
 
-  private _algo: Algo
+  private _algoClient: Algo
 
   constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -65,9 +64,9 @@ export class AlgorandChainState {
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   public async connect(): Promise<void> {
     try {
-      if (!this._algo) {
-        const { token, server, port } = this.determineAlgorandConnectionSettings()
-        this._algo = new algosdk.Algod(token, server, port)
+      if (!this._algoClient) {
+        const { token, server, port } = this.getAlgorandConnectionSettings()
+        this._algoClient = new algosdk.Algod(token, server, port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -79,7 +78,7 @@ export class AlgorandChainState {
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<ChainInfo> {
     try {
-      const nodeInfo = await this._algo.status()
+      const nodeInfo = await this._algoClient.status()
       const { lastRound, lastConsensusVersion, timeSinceLastRound } = nodeInfo
       this._chainInfo = {
         headBlockNumber: lastRound,
@@ -97,10 +96,9 @@ export class AlgorandChainState {
 
   // TODO: sort based on health info
   /**  * Choose the best Chain endpoint based on health and response time */
-  private determineAlgorandConnectionSettings(): AlgorandConnectionSettings {
-    const urlSetting = this.endpoints[0]
-    const url = trimTrailingChars(urlSetting.url.href, '/')
-    const { token, port = '' } = urlSetting.settings
+  private getAlgorandConnectionSettings(): AlgorandConnectionSettings {
+    const { url, settings } = this.endpoints[0]
+    const { token, port = '' } = settings
     return { server: url, token, port }
   }
 
@@ -116,7 +114,7 @@ export class AlgorandChainState {
    */
   async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
     try {
-      const { txId: transactionId } = await this._algo.sendRawTransaction(signedTransaction)
+      const { txId: transactionId } = await this._algoClient.sendRawTransaction(signedTransaction)
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
@@ -133,7 +131,7 @@ export class AlgorandChainState {
 
     while (waitingConfirmation) {
       // eslint-disable-next-line no-await-in-loop
-      const pendingTransaction = await this._algo.pendingTransactionInformation(transactionId)
+      const pendingTransaction = await this._algoClient.pendingTransactionInformation(transactionId)
       if (pendingTransaction.round != null && pendingTransaction.round > 0) {
         // Got the completed Transaction
         waitingConfirmation = false
@@ -166,10 +164,10 @@ export class AlgorandChainState {
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        const transactionId = await this._algo.sendRawTransaction(signedTransaction)
+        const transactionId = await this._algoClient.sendRawTransaction(signedTransaction)
         await this.waitForTransactionConfirmation(transactionId)
         sendResult.transactionId = transactionId
-        sendResult.chainResponse = await this._algo.transactionById(transactionId)
+        sendResult.chainResponse = await this._algoClient.transactionById(transactionId)
       }
     } catch (error) {
       // ALGO TODO: map chain error
@@ -182,6 +180,6 @@ export class AlgorandChainState {
   /** Return instance of algo API */
   public get algo(): Algo {
     this.assertIsConnected()
-    return this._algo
+    return this._algoClient
   }
 }
