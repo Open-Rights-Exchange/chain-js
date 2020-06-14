@@ -1,0 +1,1 @@
+export const DEFAULT_TIMEOUT_FOR_TRX_CONFIRM = 500
