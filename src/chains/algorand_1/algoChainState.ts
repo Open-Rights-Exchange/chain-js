@@ -2,10 +2,10 @@ import algosdk from 'algosdk'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
 import {
-  Algo,
   AlgorandChainSettingsCommunicationSettings,
   AlgorandChainSettings,
   AlgorandConnectionSettings,
+  AlgoClient,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
 
@@ -20,7 +20,7 @@ export class AlgorandChainState {
 
   private _isConnected: boolean = false
 
-  private _algoClient: Algo
+  private _algoClient: AlgoClient
 
   constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -179,7 +179,7 @@ export class AlgorandChainState {
   }
 
   /** Return instance of algo API */
-  public get algo(): Algo {
+  public get algo(): AlgoClient {
     this.assertIsConnected()
     return this._algoClient
   }
