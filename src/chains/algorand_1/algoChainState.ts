@@ -79,10 +79,11 @@ export class AlgorandChainState {
   public async getChainInfo(): Promise<ChainInfo> {
     try {
       const nodeInfo = await this._algoClient.status()
-      const { lastRound, lastConsensusVersion, timeSinceLastRound } = nodeInfo
+      const { lastRound, lastConsensusVersion } = nodeInfo
+      const { timestamp } = await this._algoClient.block(lastRound)
       this._chainInfo = {
         headBlockNumber: lastRound,
-        headBlockTime: new Date(timeSinceLastRound),
+        headBlockTime: new Date(timestamp),
         // version example: 'https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f'
         version: lastConsensusVersion,
         nativeInfo: nodeInfo,
