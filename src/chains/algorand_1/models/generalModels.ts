@@ -1,4 +1,4 @@
-export type Algo = any
+export type AlgoClient = any
 
 /**
  * server: chain endpoint
