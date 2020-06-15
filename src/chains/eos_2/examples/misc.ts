@@ -15,7 +15,8 @@ require('dotenv').config()
 // Example client code
 
 const { env } = process
-;(async () => {
+
+async function run() {
   // Reusable Settings
   const kylinEndpoints = [
     {
@@ -59,9 +60,9 @@ const { env } = process
   // console.log('deleteAuthAction action:', deleteAuthAction)
 
   // crypto
-  const encrypted = kylin.encrypt('mystring', 'password', 'mysalt')
+  const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
   console.log('encrypted text:', encrypted)
-  const decrypted = kylin.decrypt(encrypted, 'password', 'mysalt')
+  const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
   console.log('decrypted text:', decrypted)
 
   // error mapping
@@ -83,5 +84,13 @@ const { env } = process
   // })
   // const chainError = kylin.mapChainError(err)
   // console.log('chainError type is:', chainError.errorType)
-
+  
+}
+;(async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
+  }
+  process.exit()
 })()

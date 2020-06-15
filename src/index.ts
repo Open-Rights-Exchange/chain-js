@@ -4,6 +4,7 @@ import { Account, Chain, CreateAccount, Transaction } from './interfaces'
 import * as EosV2 from './chains/eos_2'
 import { ChainEosV2 } from './chains/eos_2/ChainEosV2'
 import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
+import * as Crypto from './crypto'
 import * as Ethereum10 from './chains/ethereum_1'
 import * as Models from './models'
 import * as ModelsEos from './chains/eos_2/models'
@@ -20,6 +21,7 @@ export {
   ChainFactory,
   ChainType,
   CreateAccount,
+  Crypto,
   EosV2,
   Ethereum10,
   Models,
