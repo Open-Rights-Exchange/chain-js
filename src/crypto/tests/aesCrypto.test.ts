@@ -35,14 +35,14 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
   describe('decryptWithKey', () => {
     it('returns the original private key', () => {
       const key = deriveKey(walletPassword, iter, salt)
-      const decrypted = decryptWithKey(encrypted, encryptionOptions, key)
+      const decrypted = decryptWithKey(encrypted, key)
       expect(decrypted).toMatch(privateKey)
     })
 
     it('does not return privateKey with a bad key', () => {
       const badPassword = 'BadPassword'
       const key = deriveKey(badPassword, iter, salt)
-      expect(() => decryptWithKey(encrypted, encryptionOptions, key)).toThrow(
+      expect(() => decryptWithKey(encrypted, key)).toThrow(
         expect.objectContaining({ message: "gcm: tag doesn't match" }),
       )
     })
@@ -61,8 +61,8 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
         const decrypted = decrypt(encrypted, walletPassword, encryptionOptions)
         expect(decrypted.toString()).toMatch(privateKey)
       })
-      it('does not throw with no (optional) salt and iter', () => {
-        const decrypted = decrypt(encrypted, walletPassword)
+      it('does not throw with no (optional) iter', () => {
+        const decrypted = decrypt(encrypted, walletPassword, { salt })
         expect(decrypted.toString()).toMatch(privateKey)
       })
       it('automatically infers iter value from encrypted value (iter:1000)', () => {
