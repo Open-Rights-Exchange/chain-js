@@ -1,9 +1,9 @@
-import * as nacl from 'tweetnacl'
-import { encodeBase64, encodeUTF8, decodeBase64, decodeUTF8 } from 'tweetnacl-util'
-import { EncryptedDataString, Signature } from '../../models'
-import { AlgorandPrivateKey, AlgorandSignature, AlgorandPublicKey } from './models/cryptoModels'
-
-const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
+import * as algosdk from 'algosdk'
+import { encodeBase64, encodeUTF8, decodeUTF8 } from 'tweetnacl-util'
+import { EncryptedDataString } from '../../models'
+import { AlgorandPublicKey, AlgorandPrivateKey, AlgorandSignature, AlgorandKeyPair } from './models/cryptoModels'
+import * as ed25519Crypto from '../../crypto/ed25519Crypto'
+import { AlgorandAccountStruct } from './models/algoStructures'
 
 /** Converts a string to uint8 array */
 function toUnit8Array(encodedString: string) {
@@ -16,44 +16,63 @@ function toStringFromUnit8Array(array: Uint8Array) {
 
 /** Encrypts a string using a password and a nonce */
 export function encrypt(unencrypted: string, password: string): EncryptedDataString {
-  const keyUint8Array = decodeBase64(password)
-  const nonce = newNonce()
-  const messageUint8 = decodeUTF8(unencrypted)
-  const box = nacl.secretbox(messageUint8, nonce, keyUint8Array)
-
-  const fullMessage = new Uint8Array(nonce.length + box.length)
-  fullMessage.set(nonce)
-  fullMessage.set(box, nonce.length)
-
-  const base64FullMessage = encodeBase64(fullMessage)
-  return base64FullMessage as EncryptedDataString
+  const encrypted = ed25519Crypto.encrypt(unencrypted, password)
+  const base64EncryptedMessage = encodeBase64(encrypted)
+  return base64EncryptedMessage as EncryptedDataString
 }
 
 /** Decrypts the encrypted value using a password, ausing nacl
  * The encrypted value is either a stringified JSON object */
 export function decrypt(encrypted: EncryptedDataString | any, password: string): string {
-  const keyUint8Array = decodeBase64(password)
-  const messageWithNonceAsUint8Array = decodeBase64(encrypted)
-  const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength)
-  const message = messageWithNonceAsUint8Array.slice(nacl.secretbox.nonceLength, encrypted.length)
-
-  const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array)
-
-  if (!decrypted) {
-    throw new Error('Could not decrypt message')
-  }
-
+  const decrypted = ed25519Crypto.decrypt(encrypted, password)
   const base64DecryptedMessage = encodeUTF8(decrypted)
   return base64DecryptedMessage
 }
 
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = nacl.sign.detached(toUnit8Array(data), toUnit8Array(privateKey))
+  const signature = ed25519Crypto.sign(toUnit8Array(data), toUnit8Array(privateKey))
   return toStringFromUnit8Array(signature) as AlgorandSignature
 }
 
-// export function getPublicKeyFromSignature(
-//   signature: Signature | AlgorandSignature | string | Buffer,
-//   data: string | Buffer,
-// ): AlgorandPublicKey {}
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+export function verifySignedWithPublicKey(
+  data: string,
+  publicKey: AlgorandPublicKey,
+  signature: AlgorandSignature,
+): boolean {
+  return ed25519Crypto.verify(toUnit8Array(data), toUnit8Array(publicKey), toUnit8Array(signature))
+}
+
+/** Replaces unencrypted privateKey in keys object
+ *  Encrypts key using password */
+function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string) {
+  const { privateKey, publicKey } = keys
+  const encryptedKeys = {
+    privateKey: ed25519Crypto.isEncryptedDataString(privateKey)
+      ? privateKey
+      : encodeBase64(ed25519Crypto.encrypt(privateKey, password)),
+    publicKey,
+  }
+  return encryptedKeys as AlgorandKeyPair
+}
+
+/** Gets the algorand public key from the given private key in the account */
+export function getAlgorandKeyPairFromAccount(account: AlgorandAccountStruct): AlgorandKeyPair {
+  const { sk: privateKey } = account
+  const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
+  return {
+    publicKey: encodeBase64(publicKey) as AlgorandPublicKey,
+    privateKey: encodeBase64(secretKey) as AlgorandPrivateKey,
+  }
+}
+
+/** Generates new public and private key pair
+ * Encrypts the private key using password
+ */
+export function generateNewAccountKeysAndEncryptPrivateKeys(password: string): any {
+  const newAccount = algosdk.generateAccount()
+  const keys = getAlgorandKeyPairFromAccount(newAccount)
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password)
+  return encryptedKeys
+}
