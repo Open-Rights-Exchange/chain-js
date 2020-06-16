@@ -23,7 +23,7 @@ export function isEncryptedDataString(value: string): value is EncryptedDataStri
   return value !== null
 }
 
-/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+/** Ensures that the value confirms to a well-formed, stringified JSON Encrypted Object */
 export function toEncryptedDataString(value: any): EncryptedDataString {
   if (isEncryptedDataString(value)) {
     return value
