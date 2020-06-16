@@ -14,6 +14,16 @@ function toStringFromUnit8Array(array: Uint8Array) {
   return encodeUTF8(array)
 }
 
+/** Verifies that the value is a valid encrypted string */
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  return ed25519Crypto.isEncryptedDataString(value)
+}
+
+/** Ensures that the value confirms to a well-formed and encrypted string */
+export function toEncryptedDataString(value: any): EncryptedDataString {
+  return ed25519Crypto.toEncryptedDataString(value)
+}
+
 /** Encrypts a string using a password and a nonce */
 export function encrypt(unencrypted: string, password: string): EncryptedDataString {
   const encrypted = ed25519Crypto.encrypt(unencrypted, password)
