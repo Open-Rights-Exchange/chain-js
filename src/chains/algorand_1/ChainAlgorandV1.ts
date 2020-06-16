@@ -3,6 +3,7 @@ import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import { AlgorandChainSettings } from './models/generalModels'
 import { AlgorandChainState } from './algoChainState'
+import * as algoCrypto from './algoCrypto'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -78,17 +79,12 @@ class ChainAlgorandV1 implements Chain {
 
   // --------- Chain crytography functions */
 
-  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
-   * Expects the encrypted value to be a stringified JSON object */
-  decrypt = (): any => {
-    // ALGOTODO
-  }
+  /** Decrypts the encrypted value with a password, and using ed25519 algorithm and SHA512 hash function */
+  decrypt = algoCrypto.decrypt
 
-  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+  /** Encrypts a string with a password, and using ed25519 algorithm and SHA512 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = (): any => {
-    // ALGOTODO
-  }
+  encrypt = algoCrypto.encrypt
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
@@ -96,14 +92,10 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Verifies that the value is a valid, stringified JSON ciphertext */
-  isValidEncryptedData = (): any => {
-    // ALGOTODO
-  }
+  isValidEncryptedData = algoCrypto.isEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
-  toEncryptedDataString = (): any => {
-    // ALGOTODO
-  }
+  toEncryptedDataString = algoCrypto.toEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (): any => {
@@ -116,16 +108,12 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Generate a signature given some data and a private key */
-  sign = (): any => {
-    // ALGOTODO
-  }
+  sign = algoCrypto.sign
 
-  /** Generates new owner and active key pairs (public and private)
-   *  Encrypts private keys with provided password and salt
-   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
-  generateNewAccountKeysWithEncryptedPrivateKeys = (): any => {
-    // ALGOTODO
-  }
+  /** Generates new key pairs (public and private)
+   *  Encrypts private key with provided password
+   *  Returns: { privateKey, publicKey } */
+  generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = (): any => {
