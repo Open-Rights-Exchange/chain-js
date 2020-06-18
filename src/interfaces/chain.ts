@@ -13,6 +13,7 @@ import {
   Signature,
   EncryptedDataString,
   TransactionOptions,
+  TokenQuery,
 } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
@@ -33,6 +34,10 @@ export interface Chain {
   composeAction(chainActionType: any, args: any): any
   /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
   decomposeAction(action: any): { chainActionType: any; args: any; partial?: boolean }[]
+  /** Compose an object for a balance checking on chain  */
+  composeBalanceCheck(contract: string, chainAccount: string, symbol?: string): TokenQuery
+  /** Fetch token balance */
+  fetchTokenBalance(tokenQuery: TokenQuery): Promise<{ balance: string }>
   /** Fetch data from an on-chain contract table */
   fetchContractData(
     contract: string,

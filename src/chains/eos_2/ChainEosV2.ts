@@ -10,6 +10,7 @@ import {
   PublicKey,
   PrivateKey,
   Signature,
+  TokenQuery,
 } from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
@@ -113,6 +114,25 @@ class ChainEosV2 implements Chain {
   /** Decompose a contract action and return the action type (if any) and its data */
   public decomposeAction = (action: EosActionStruct): EosDecomposeReturn[] => {
     return decomposeAction(action)
+  }
+
+  /**
+   * Composes the necessary structure to query token balances using fetchTokenBalance
+   */
+  public composeBalanceCheck(contract: string, chainAccount: string, symbol: string): TokenQuery {
+    return {
+      contract,
+      chainAccount,
+      symbol,
+    }
+  }
+
+  /** Compose object structure necessary for checking token balances */
+  public async fetchTokenBalance(tokenQuery: TokenQuery): Promise<{ balance: string }> {
+    const { contract, chainAccount, symbol } = tokenQuery
+    const response = (await this._chainState.rpc.get_currency_balance(contract, chainAccount, symbol)) || []
+    const [balance] = response
+    return { balance }
   }
 
   /** Returns a chain Account class

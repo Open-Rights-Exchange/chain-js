@@ -22,6 +22,7 @@ import {
   EthereumTransactionAction,
   EthereumChainActionType,
   EthereumDecomposeReturn,
+  EthereumAbi,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -36,7 +37,8 @@ import {
   toEthereumPrivateKey,
   toEthereumSignature,
 } from './helpers'
-import { notImplemented } from '../../helpers'
+import { notImplemented, isNullOrEmpty } from '../../helpers'
+import { erc20Abi } from './templates/abis/erc20Abi'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -92,6 +94,37 @@ class ChainEthereumV1 implements Chain {
   // eslint-disable-next-line class-methods-use-this
   public get description(): string {
     return 'Etereum 1.0 Chain'
+  }
+
+  /**
+   * Composes the necessary structure to query token balances using fetchTokenBalance
+   * TODO: Handle tokens other than ERC-20
+   */
+  public composeBalanceCheck(contract: string, chainAccount: string) {
+    return {
+      abi: erc20Abi,
+      contract,
+      chainAccount,
+    }
+  }
+
+  /** Compose object structure necessary for checking token balances */
+  public async fetchTokenBalance(data: any): Promise<{ balance: string }> {
+    const { abi, contract, chainAccount } = data
+
+    const tokenContract: any = new this._chainState._web3.eth.Contract(abi, contract)
+    if (isNullOrEmpty(tokenContract)) {
+      throw Error(`Cannot find tokenContract at ${contract}`)
+    }
+
+    const balance = await tokenContract.methods?.balanceOf(chainAccount)?.call()
+    const decimal = await tokenContract.methods?.decimals()?.call()
+    // TODO: Confirm whether or not we want to use token name
+    const tokenName = await tokenContract.methods?.name()?.call()
+    const tokenSymbol = await tokenContract.methods?.symbol()?.call()
+    const amount = balance / 10 ** decimal
+    const formatedBalance = `${amount?.toString()} ${tokenSymbol} (${tokenName})`
+    return { balance: formatedBalance }
   }
 
   /** Fetch data from an on-chain contract table */

@@ -34,7 +34,7 @@ export class EthereumChainState {
 
   private _isConnected: boolean = false
 
-  private _web3: Web3 // Ethereum chain api endpoint
+  public _web3: Web3 // Ethereum chain api endpoint
 
   constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
