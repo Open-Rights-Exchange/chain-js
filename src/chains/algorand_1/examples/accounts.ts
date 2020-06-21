@@ -15,6 +15,12 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
     },
   },
 ]
+
+export const CreateAccountOptions = {
+  newKeysOptions: {
+    password: '2233',
+  },
+}
 ;(async () => {
   // Create an Algo chain instance and call a few functions
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -22,4 +28,8 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoPureStakeTestnet)
   }
+  const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
+  await createAccount.generateKeysIfNeeded()
+  console.log('generatedKeys:', createAccount.generatedKeys)
+  console.log('address:', createAccount.accountName)
 })()
