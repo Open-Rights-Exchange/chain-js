@@ -1,9 +1,19 @@
 import * as algosdk from 'algosdk'
+import * as nacl from 'tweetnacl'
+import * as base32 from 'hi-base32'
 import { encodeBase64, encodeUTF8, decodeUTF8 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../../models'
-import { AlgorandPublicKey, AlgorandPrivateKey, AlgorandSignature, AlgorandKeyPair } from './models/cryptoModels'
+import {
+  AlgorandPublicKey,
+  AlgorandPrivateKey,
+  AlgorandSignature,
+  AlgorandKeyPair,
+  AlgorandAddress,
+} from './models/cryptoModels'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { AlgorandAccountStruct } from './models/algoStructures'
+import { ALGORAND_CHECKSUM_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_ADDRESS_BYTE_LENGTH } from './algoConstants'
+import { concatArrays, genericHash } from './helpers/cryptoModelHelpers'
 
 /** Converts a string to uint8 array */
 function toUnit8Array(encodedString: string) {
@@ -85,4 +95,44 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string): a
   const keys = getAlgorandKeyPairFromAccount(newAccount)
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password)
   return encryptedKeys
+}
+
+/** Computes algorand address from the algorand public key */
+function encode(publicKey: AlgorandPublicKey): AlgorandAddress {
+  // compute checksum
+  const checksum = genericHash(decodeUTF8(publicKey)).slice(
+    nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
+    nacl.sign.publicKeyLength,
+  )
+  const address = base32.encode(concatArrays(publicKey, checksum))
+
+  return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
+}
+
+/** Computes algorand public key from the algorand address */
+function decode(address: AlgorandAddress) {
+  const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
+  if (!(typeof address === 'string')) throw new Error(ADDRESS_MALFORMED_ERROR)
+
+  // try to decode
+  const decoded = base32.decode.asBytes(address)
+
+  // Sanity check
+  if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
+
+  const pk = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
+  const cs = new Uint8Array(decoded.slice(nacl.sign.publicKeyLength, ALGORAND_ADDRESS_BYTE_LENGTH))
+
+  return { publicKey: pk, checksum: cs }
+}
+
+/** Computes algorand address from the algorand public key */
+export function getAlgorandAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
+  return encode(publicKey)
+}
+
+/** Computes algorand public key from the algorand address */
+export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
+  const { publicKey } = decode(address)
+  return encodeBase64(publicKey) as AlgorandPublicKey
 }
