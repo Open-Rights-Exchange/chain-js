@@ -4,6 +4,8 @@ import { Chain } from '../../interfaces'
 import { AlgorandChainSettings } from './models/generalModels'
 import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
+import { AlgorandCreateAccount } from './algoCreateAccount'
+import { AlgorandCreateAccountOptions } from './models/accountModels'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -56,9 +58,10 @@ class ChainAlgorandV1 implements Chain {
     // ALGOTODO
   }
 
-  /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): any {
-    // ALGOTODO
+  /** Return a ChainAccount class used to perform any function with the chain account */
+  private newCreateAccount(options?: AlgorandCreateAccountOptions): AlgorandCreateAccount {
+    this.assertIsConnected()
+    return new AlgorandCreateAccount(this._chainState, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
