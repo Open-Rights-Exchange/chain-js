@@ -1,7 +1,7 @@
 import * as nacl from 'tweetnacl'
 import { decodeBase64, decodeUTF8 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../models'
-import { isAString } from '../helpers'
+import { isAString, isNullOrEmpty } from '../helpers'
 
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
@@ -66,11 +66,21 @@ export function getKeyPairFromPrivateKey(privateKey: ed25519PrivateKey): ed25519
 }
 
 /** Signs the message using the private key and returns a signature. */
-export function sign(data: Uint8Array, privateKey: ed25519PrivateKey): ed25519Signature {
-  return nacl.sign.detached(data, privateKey)
+export function sign(value: Uint8Array, privateKey: ed25519PrivateKey): ed25519Signature {
+  return nacl.sign.detached(value, privateKey)
 }
 
 /** Verifies the signature for the message and returns true if verification succeeded or false if it failed. */
-export function verify(data: Uint8Array, publicKey: ed25519PublicKey, signature: ed25519Signature): boolean {
-  return nacl.sign.detached.verify(data, signature, publicKey)
+export function verify(value: Uint8Array, publicKey: ed25519PublicKey, signature: ed25519Signature): boolean {
+  return nacl.sign.detached.verify(value, signature, publicKey)
+}
+
+export function isValidPublicKey(value: Uint8Array): boolean {
+  if (isNullOrEmpty(value)) return false
+  return value.length === 32
+}
+
+export function isValidPrivateKey(value: Uint8Array): boolean {
+  if (isNullOrEmpty(value)) return false
+  return value.length === 64
 }
