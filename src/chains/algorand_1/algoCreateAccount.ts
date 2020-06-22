@@ -64,7 +64,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     return this._options
   }
 
-  /** ETH does not require the chain to execute a createAccount transaction
+  /** Algorand does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
     return false
