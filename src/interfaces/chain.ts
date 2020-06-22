@@ -14,6 +14,7 @@ import {
   EncryptedDataString,
   TransactionOptions,
   TokenQuery,
+  TokenData,
 } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
@@ -28,6 +29,8 @@ export interface Chain {
   chainType: ChainType
   /** Returns chain plug-in name */
   description: string
+  /** Returns chain specific native token symbol */
+  nativeTokenData: TokenData
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   connect(): Promise<void>
   /** Compose an object for a chain contract action */

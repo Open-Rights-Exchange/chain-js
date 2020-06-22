@@ -1,7 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BN } from 'ethereumjs-util'
+import { Contract } from 'web3-eth-contract'
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
+import {
+  ChainActionType,
+  ChainInfo,
+  ChainType,
+  ChainAsset,
+  ChainEntityName,
+  ChainDate,
+  TokenData,
+  TokenQuery,
+} from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -22,7 +32,6 @@ import {
   EthereumTransactionAction,
   EthereumChainActionType,
   EthereumDecomposeReturn,
-  EthereumAbi,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -37,7 +46,7 @@ import {
   toEthereumPrivateKey,
   toEthereumSignature,
 } from './helpers'
-import { notImplemented, isNullOrEmpty } from '../../helpers'
+import { notImplemented, isNullOrEmpty, getDefaultTokenBalance } from '../../helpers'
 import { erc20Abi } from './templates/abis/erc20Abi'
 
 /** Provides support for the Ethereum blockchain
@@ -96,35 +105,69 @@ class ChainEthereumV1 implements Chain {
     return 'Etereum 1.0 Chain'
   }
 
+  /** Returns chain specific native token symbol */
+  public get nativeTokenData(): TokenData {
+    return {
+      contract: null,
+      symbol: 'ETH',
+    }
+  }
+
   /**
    * Composes the necessary structure to query token balances using fetchTokenBalance
-   * TODO: Handle tokens other than ERC-20
    */
-  public composeBalanceCheck(contract: string, chainAccount: string) {
+  public composeBalanceCheck(contract: string, chainAccount: string, symbol: string) {
     return {
       abi: erc20Abi,
       contract,
       chainAccount,
+      symbol,
     }
   }
 
-  /** Compose object structure necessary for checking token balances */
-  public async fetchTokenBalance(data: any): Promise<{ balance: string }> {
-    const { abi, contract, chainAccount } = data
+  /** Utilizes native web3 method to get ETH token balance */
+  public async getBalance(data: TokenQuery) {
+    const result = await this._chainState._web3.eth.getBalance(data?.chainAccount)
+    if (isNullOrEmpty(result)) {
+      throw Error(`Cannot find balance for account ${data?.chainAccount}`)
+    }
 
-    const tokenContract: any = new this._chainState._web3.eth.Contract(abi, contract)
+    const balance = this._chainState._web3.utils.fromWei(result, 'ether')
+    return { balance: `${balance} ${this.nativeTokenData.symbol}` }
+  }
+
+  /** Compose object structure necessary for checking token balances */
+  public async fetchTokenBalance(data: TokenQuery): Promise<{ balance: string }> {
+    const { abi, contract, chainAccount, symbol } = data
+
+    // Calls native function for native token
+    if (symbol === this.nativeTokenData.symbol) {
+      return this.getBalance(data)
+    }
+
+    const tokenContract: Contract = new this._chainState._web3.eth.Contract(abi, contract)
     if (isNullOrEmpty(tokenContract)) {
       throw Error(`Cannot find tokenContract at ${contract}`)
     }
 
-    const balance = await tokenContract.methods?.balanceOf(chainAccount)?.call()
-    const decimal = await tokenContract.methods?.decimals()?.call()
-    // TODO: Confirm whether or not we want to use token name
-    const tokenName = await tokenContract.methods?.name()?.call()
-    const tokenSymbol = await tokenContract.methods?.symbol()?.call()
-    const amount = balance / 10 ** decimal
-    const formatedBalance = `${amount?.toString()} ${tokenSymbol} (${tokenName})`
-    return { balance: formatedBalance }
+    const balance = await this.parseBalanceResult(tokenContract, chainAccount)
+
+    return { balance }
+  }
+
+  private async parseBalanceResult(contract: Contract, chainAccount: string) {
+    const balance = await contract?.methods?.balanceOf(chainAccount)?.call()
+    const decimal = await contract?.methods?.decimals()?.call()
+    const tokenName = await contract?.methods?.name()?.call()
+    const tokenSymbol = await contract?.methods?.symbol()?.call()
+
+    if (balance && decimal) {
+      const amount = balance / 10 ** decimal
+      const formatedBalance = `${amount?.toString()} ${tokenSymbol} (${tokenName})`
+      return formatedBalance
+    }
+
+    return getDefaultTokenBalance(tokenSymbol)
   }
 
   /** Fetch data from an on-chain contract table */

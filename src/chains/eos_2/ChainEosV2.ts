@@ -11,6 +11,7 @@ import {
   PrivateKey,
   Signature,
   TokenQuery,
+  TokenData,
 } from '../../models'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
@@ -44,6 +45,7 @@ import {
   EosDecomposeReturn,
   EosChainEndpoint,
 } from './models'
+import { getDefaultTokenBalance } from '../../helpers'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -77,6 +79,33 @@ class ChainEosV2 implements Chain {
   public get chainInfo(): ChainInfo {
     this.assertIsConnected()
     return this._chainState.chainInfo
+  }
+
+  /** Returns chain specific native token symbol */
+  public get nativeTokenData(): TokenData {
+    return {
+      symbol: 'EOS',
+      contract: 'eosio.token',
+    }
+  }
+
+  /**
+   * Composes the necessary structure to query token balances using fetchTokenBalance
+   */
+  public composeBalanceCheck(contract: string, chainAccount: string, symbol: string): TokenQuery {
+    return {
+      contract,
+      chainAccount,
+      symbol,
+    }
+  }
+
+  /** Compose object structure necessary for checking token balances */
+  public async fetchTokenBalance(tokenQuery: TokenQuery): Promise<{ balance: string }> {
+    const { contract, chainAccount, symbol } = tokenQuery
+    const response = (await this._chainState.rpc.get_currency_balance(contract, chainAccount, symbol)) || []
+    const [balance] = response
+    return { balance: balance || getDefaultTokenBalance(symbol) }
   }
 
   /** Fetch data from an on-chain contract table */
@@ -114,25 +143,6 @@ class ChainEosV2 implements Chain {
   /** Decompose a contract action and return the action type (if any) and its data */
   public decomposeAction = (action: EosActionStruct): EosDecomposeReturn[] => {
     return decomposeAction(action)
-  }
-
-  /**
-   * Composes the necessary structure to query token balances using fetchTokenBalance
-   */
-  public composeBalanceCheck(contract: string, chainAccount: string, symbol: string): TokenQuery {
-    return {
-      contract,
-      chainAccount,
-      symbol,
-    }
-  }
-
-  /** Compose object structure necessary for checking token balances */
-  public async fetchTokenBalance(tokenQuery: TokenQuery): Promise<{ balance: string }> {
-    const { contract, chainAccount, symbol } = tokenQuery
-    const response = (await this._chainState.rpc.get_currency_balance(contract, chainAccount, symbol)) || []
-    const [balance] = response
-    return { balance }
   }
 
   /** Returns a chain Account class

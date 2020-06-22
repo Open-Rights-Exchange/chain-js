@@ -72,5 +72,11 @@ export type TokenQuery = {
   chainAccount: string
 }
 
+/** Contract and symbol of a chain specific token */
+export type TokenData = {
+  symbol: string
+  contract?: string
+}
+
 /** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */
 export type IndexedObject = { [key: string]: string }
