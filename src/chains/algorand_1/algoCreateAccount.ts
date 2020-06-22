@@ -70,12 +70,12 @@ export class AlgorandCreateAccount implements CreateAccount {
     return false
   }
 
-  /** Ethereum account creation doesn't require any on chain transactions.
-   * Hence there is no transaction object attached to EthereumCreateAccount class
+  /** Algorand account creation doesn't require any on chain transactions.
+   * Hence there is no transaction object attached to AlgorandCreateAccount class
    */
   get transaction(): any {
     throwNewError(
-      'Ethereum account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
+      'Algorand account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
     )
     return null
   }
@@ -93,7 +93,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     notSupported()
   }
 
-  /* Not supported for Ethereum */
+  /* Not supported for Algorand */
   async generateAccountName(): Promise<any> {
     notSupported()
     return null
