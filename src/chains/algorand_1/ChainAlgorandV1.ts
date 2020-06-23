@@ -1,8 +1,14 @@
+import { notImplemented } from '../../helpers'
 import { ChainEndpoint, ChainInfo, ChainType } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import { AlgorandChainSettings } from './models/generalModels'
 import { AlgorandChainState } from './algoChainState'
+import * as algoCrypto from './algoCrypto'
+import { AlgorandCreateAccount } from './algoCreateAccount'
+import { AlgorandCreateAccountOptions } from './models/accountModels'
+import { AlgorandAddress } from './models/cryptoModels'
+import { AlgorandAccount } from './algoAccount'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -36,33 +42,39 @@ class ChainAlgorandV1 implements Chain {
 
   /** Fetch data from an on-chain contract table */
   public fetchContractData = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Compose an object for a chain contract action */
   public composeAction = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
   public decomposeAction = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Returns a chain Account class
    * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
-  private newAccount = (): any => {
-    // ALGOTODO
+  private async newAccount(accountName?: AlgorandAddress): Promise<AlgorandAccount> {
+    this.assertIsConnected()
+    const account = new AlgorandAccount(this._chainState)
+    if (accountName) {
+      await account.load(accountName)
+    }
+    return account
   }
 
-  /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(): any {
-    // ALGOTODO
+  /** Return a ChainAccount class used to perform any function with the chain account */
+  private newCreateAccount(options?: AlgorandCreateAccountOptions): AlgorandCreateAccount {
+    this.assertIsConnected()
+    return new AlgorandCreateAccount(this._chainState, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
   private newTransaction(): any {
-    // ALGOTODO
+    notImplemented()
   }
 
   public new = {
@@ -78,105 +90,92 @@ class ChainAlgorandV1 implements Chain {
 
   // --------- Chain crytography functions */
 
-  /** Decrypts the encrypted value using a password, and salt using AES algorithm and SHA256 hash function
-   * Expects the encrypted value to be a stringified JSON object */
-  decrypt = (): any => {
-    // ALGOTODO
-  }
+  /** Decrypts the encrypted value with a password, and using ed25519 algorithm and SHA512 hash function */
+  decrypt = algoCrypto.decrypt
 
-  /** Encrypts a string using a password and salt using AES algorithm and SHA256 hash function
+  /** Encrypts a string with a password, and using ed25519 algorithm and SHA512 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = (): any => {
-    // ALGOTODO
-  }
+  encrypt = algoCrypto.encrypt
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Verifies that the value is a valid, stringified JSON ciphertext */
-  isValidEncryptedData = (): any => {
-    // ALGOTODO
-  }
+  isValidEncryptedData = algoCrypto.isEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
-  toEncryptedDataString = (): any => {
-    // ALGOTODO
-  }
+  toEncryptedDataString = algoCrypto.toEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
   public isValidPublicKey = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Generate a signature given some data and a private key */
-  sign = (): any => {
-    // ALGOTODO
-  }
+  sign = algoCrypto.sign
 
-  /** Generates new owner and active key pairs (public and private)
-   *  Encrypts private keys with provided password and salt
-   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
-  generateNewAccountKeysWithEncryptedPrivateKeys = (): any => {
-    // ALGOTODO
-  }
+  /** Generates new key pairs (public and private)
+   *  Encrypts private key with provided password
+   *  Returns: { privateKey, publicKey } */
+  generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   // --------- Chain helper functions
 
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   public isValidEntityName = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Verifies that the value is a valid chain asset string */
   public isValidAsset = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Verifies that the value is a valid chain date */
   public isValidDate = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed chain asset string */
   public toAsset = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
   public toEntityName = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed chain date string */
   public toDate = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
   public toPublicKey = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed private Key */
   public toPrivateKey = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed EOS signature */
   public toSignature = (): any => {
-    // ALGOTODO
+    notImplemented()
   }
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
