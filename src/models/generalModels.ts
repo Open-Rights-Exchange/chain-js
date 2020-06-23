@@ -50,8 +50,6 @@ export type ChainEndpoint = {
   options?: { [key: string]: any }
   /** between 0 and 1 - 0 is not responding, 1 is very fast */
   health?: number
-  /** settings for chain endpoint (chain-specific) */
-  settings?: any
 }
 
 /** Chain information including head block number and time and software version */
