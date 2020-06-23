@@ -18,7 +18,7 @@ import { AlgorandMultiSigOptions, AlgorandMutliSigAccount } from './models/gener
 import { AlgorandGenerateAccountResponse } from './models/accountModels'
 
 /** Converts a string to uint8 array */
-function toUnit8Array(encodedString: string) {
+function toUint8Array(encodedString: string) {
   return decodeUTF8(encodedString)
 }
 
@@ -53,7 +53,7 @@ export function decrypt(encrypted: EncryptedDataString | any, password: string):
 
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = ed25519Crypto.sign(toUnit8Array(data), toUnit8Array(privateKey))
+  const signature = ed25519Crypto.sign(toUint8Array(data), toUint8Array(privateKey))
   return toStringFromUnit8Array(signature) as AlgorandSignature
 }
 
@@ -63,7 +63,7 @@ export function verifySignedWithPublicKey(
   publicKey: AlgorandPublicKey,
   signature: AlgorandSignature,
 ): boolean {
-  return ed25519Crypto.verify(toUnit8Array(data), toUnit8Array(publicKey), toUnit8Array(signature))
+  return ed25519Crypto.verify(toUint8Array(data), toUint8Array(publicKey), toUint8Array(signature))
 }
 
 /** Replaces unencrypted privateKey in keys object

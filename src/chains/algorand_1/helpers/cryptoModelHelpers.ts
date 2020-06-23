@@ -13,8 +13,8 @@ export function isValidAlgorandAddress(address: string): boolean {
   return isValidAddress(address)
 }
 
-/** Converts a string to uint8 array */
-export function toUnit8Array(encodedString: string) {
+/** Converts a string to an Uint8 array */
+export function toUint8Array(encodedString: string) {
   return decodeUTF8(encodedString)
 }
 
