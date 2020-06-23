@@ -3,12 +3,6 @@ import { PrivateKeyBrand, PublicKeyBrand, SignatureBrand } from '../../../models
 /** an address string - formatted correctly for algorand */
 export type AlgorandAddress = string
 
-/** an account object - in the format returned from algosdk */
-export type AlgorandAccount = {
-  addr: AlgorandAddress
-  sk: AlgorandPrivateKey
-}
-
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
