@@ -11,10 +11,10 @@ import {
   AlgorandAddress,
 } from './models/cryptoModels'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import { AlgorandAccountStruct } from './models/algoStructures'
 import { ALGORAND_CHECKSUM_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_ADDRESS_BYTE_LENGTH } from './algoConstants'
 import { concatArrays, genericHash } from './helpers/cryptoModelHelpers'
 import { AlgorandMultiSigOptions, AlgorandMutliSigAccount } from './models/generalModels'
+import { AlgorandGenerateAccountResponse } from './models/accountModels'
 
 /** Converts a string to uint8 array */
 function toUnit8Array(encodedString: string) {
@@ -81,7 +81,7 @@ function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: stri
 /** Gets the algorand public key from the given private key in the account
  * Returns base64 encoded public key and private key
  */
-export function getAlgorandKeyPairFromAccount(account: AlgorandAccountStruct): AlgorandKeyPair {
+export function getAlgorandKeyPairFromAccount(account: AlgorandGenerateAccountResponse): AlgorandKeyPair {
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
   return {
