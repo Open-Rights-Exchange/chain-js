@@ -1,7 +1,7 @@
 import * as algosdk from 'algosdk'
 import * as nacl from 'tweetnacl'
 import * as base32 from 'hi-base32'
-import { encodeBase64, encodeUTF8, decodeUTF8 } from 'tweetnacl-util'
+import { encodeBase64, encodeUTF8, decodeBase64, decodeUTF8 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../../models'
 import {
   AlgorandPublicKey,
@@ -14,6 +14,7 @@ import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { AlgorandAccountStruct } from './models/algoStructures'
 import { ALGORAND_CHECKSUM_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_ADDRESS_BYTE_LENGTH } from './algoConstants'
 import { concatArrays, genericHash } from './helpers/cryptoModelHelpers'
+import { AlgorandMultiSigOptions, AlgorandMutliSigAccount } from './models/generalModels'
 
 /** Converts a string to uint8 array */
 function toUnit8Array(encodedString: string) {
@@ -42,10 +43,10 @@ export function encrypt(unencrypted: string, password: string): EncryptedDataStr
 }
 
 /** Decrypts the encrypted value using a password, ausing nacl
- * The encrypted value is either a stringified JSON object */
+ * The encrypted value is a base64 encoded decrypted string */
 export function decrypt(encrypted: EncryptedDataString | any, password: string): string {
   const decrypted = ed25519Crypto.decrypt(encrypted, password)
-  const base64DecryptedMessage = encodeUTF8(decrypted)
+  const base64DecryptedMessage = encodeBase64(decrypted)
   return base64DecryptedMessage
 }
 
@@ -77,7 +78,9 @@ function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: stri
   return encryptedKeys as AlgorandKeyPair
 }
 
-/** Gets the algorand public key from the given private key in the account */
+/** Gets the algorand public key from the given private key in the account
+ * Returns base64 encoded public key and private key
+ */
 export function getAlgorandKeyPairFromAccount(account: AlgorandAccountStruct): AlgorandKeyPair {
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
@@ -90,7 +93,7 @@ export function getAlgorandKeyPairFromAccount(account: AlgorandAccountStruct): A
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(password: string): any {
+export function generateNewAccountKeysAndEncryptPrivateKeys(password: string) {
   const newAccount = algosdk.generateAccount()
   const keys = getAlgorandKeyPairFromAccount(newAccount)
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password)
@@ -98,14 +101,14 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string): a
 }
 
 /** Computes algorand address from the algorand public key */
-function encode(publicKey: AlgorandPublicKey): AlgorandAddress {
+function encode(publicKey: AlgorandPublicKey): any {
   // compute checksum
-  const checksum = genericHash(decodeUTF8(publicKey)).slice(
+  const decodedPublicKey = decodeBase64(publicKey)
+  const checksum = genericHash(decodedPublicKey).slice(
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
     nacl.sign.publicKeyLength,
   )
-  const address = base32.encode(concatArrays(publicKey, checksum))
-
+  const address = base32.encode(concatArrays(decodedPublicKey, checksum))
   return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
 }
 
@@ -135,4 +138,16 @@ export function getAlgorandAddressFromPublicKey(publicKey: AlgorandPublicKey): A
 export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const { publicKey } = decode(address)
   return encodeBase64(publicKey) as AlgorandPublicKey
+}
+
+/** Generates a new multisig address using the multisig options including version, threshhold and addresses */
+export function generateMultiSigAccount(multiSigOptions: AlgorandMultiSigOptions) {
+  const mSigOptions = {
+    version: multiSigOptions.version,
+    threshold: multiSigOptions.threshold,
+    addrs: multiSigOptions.accounts,
+  }
+  const multisigAddress: AlgorandMutliSigAccount = algosdk.multisigAddress(mSigOptions)
+  const publicKey = getAlgorandPublicKeyFromAddress(multisigAddress)
+  return { publicKey }
 }
