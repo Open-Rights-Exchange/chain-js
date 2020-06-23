@@ -2,6 +2,7 @@ import * as algosdk from 'algosdk'
 import * as nacl from 'tweetnacl'
 import * as base32 from 'hi-base32'
 import { encodeBase64, encodeUTF8, decodeBase64, decodeUTF8 } from 'tweetnacl-util'
+import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
   AlgorandPublicKey,
@@ -115,7 +116,7 @@ function encode(publicKey: AlgorandPublicKey): any {
 /** Computes algorand public key from the algorand address */
 function decode(address: AlgorandAddress) {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
-  if (!(typeof address === 'string')) throw new Error(ADDRESS_MALFORMED_ERROR)
+  if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
 
   // try to decode
   const decoded = base32.decode.asBytes(address)
