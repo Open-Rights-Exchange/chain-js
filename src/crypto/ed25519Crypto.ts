@@ -31,12 +31,14 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
   throw new Error(`Not valid encrypted data string:${value}`)
 }
 
-/** Encrypts a string using a password and a nonce */
+/** Encrypts a string using a password and a nonce
+ *  Password is a base64 encoded string
+ */
 export function encrypt(unencrypted: string, password: string): Uint8Array {
-  const keyUint8Array = decodeBase64(password)
+  const passwordUint8Array = decodeBase64(password)
   const nonce = newNonce()
   const messageUint8 = decodeUTF8(unencrypted)
-  const box = nacl.secretbox(messageUint8, nonce, keyUint8Array)
+  const box = nacl.secretbox(messageUint8, nonce, passwordUint8Array)
 
   const fullMessage = new Uint8Array(nonce.length + box.length)
   fullMessage.set(nonce)
@@ -45,7 +47,9 @@ export function encrypt(unencrypted: string, password: string): Uint8Array {
   return fullMessage
 }
 
-/** Decrypts the encrypted value using a password */
+/** Decrypts the encrypted value using a password
+ * Password is a base64 encoded string
+ */
 export function decrypt(encrypted: EncryptedDataString | any, password: string): Uint8Array {
   const keyUint8Array = decodeBase64(password)
   const messageWithNonceAsUint8Array = decodeBase64(encrypted)
