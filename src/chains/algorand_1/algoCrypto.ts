@@ -131,7 +131,7 @@ function decode(address: AlgorandAddress) {
 }
 
 /** Computes algorand address from the algorand public key */
-export function getAlgorandAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
+export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
   return encode(publicKey)
 }
 
