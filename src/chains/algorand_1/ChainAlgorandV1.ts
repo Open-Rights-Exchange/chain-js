@@ -6,6 +6,8 @@ import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
 import { AlgorandCreateAccount } from './algoCreateAccount'
 import { AlgorandCreateAccountOptions } from './models/accountModels'
+import { AlgorandAddress } from './models/cryptoModels'
+import { AlgorandAccount } from './algoAccount'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -54,8 +56,13 @@ class ChainAlgorandV1 implements Chain {
 
   /** Returns a chain Account class
    * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
-  private newAccount = (): any => {
-    // ALGOTODO
+  private async newAccount(accountName?: AlgorandAddress): Promise<AlgorandAccount> {
+    this.assertIsConnected()
+    const account = new AlgorandAccount(this._chainState)
+    if (accountName) {
+      await account.load(accountName)
+    }
+    return account
   }
 
   /** Return a ChainAccount class used to perform any function with the chain account */
