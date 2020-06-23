@@ -1,5 +1,6 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
+import { AlgorandMultiSigOptions } from '../models/generalModels'
 
 require('dotenv').config()
 
@@ -21,15 +22,39 @@ export const CreateAccountOptions = {
     password: '2233',
   },
 }
+
+export const multiSigOptions: AlgorandMultiSigOptions = {
+  version: 1,
+  threshold: 2,
+  accounts: [
+    'LE6IM6NPZ7DPF3LTVQT62ARING2VSXO7KOYFHCUCNXKSQLVW4I3AKXUMPI',
+    'S4N2Q4H3ZDZHR7OL6C7FLXI76K7W5XTPFNOXHOSUPL7GPMXU4PT4XCHXLE',
+    'O24FOKUAML2OB3KLQXWIZ2S4VFTEMO6E2PZFYBDT6HX22C5O7DCRHUIUWU',
+  ],
+}
+
+export const CreateMultiSigAccountOptions = {
+  ...CreateAccountOptions,
+  multiSigOptions,
+}
 ;(async () => {
-  // Create an Algo chain instance and call a few functions
+  /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoPureStakeTestnet)
   }
+
+  /** Create Algorand account */
   const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
   await createAccount.generateKeysIfNeeded()
-  console.log('generatedKeys:', createAccount.generatedKeys)
-  console.log('address:', createAccount.accountName)
+  const { accountName, generatedKeys } = createAccount
+  console.log('generatedKeys:', generatedKeys)
+  console.log('account:', accountName)
+
+  /** Create Algorand multisig account */
+  const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
+  await createMultiSigAccount.generateKeysIfNeeded()
+  const { accountName: multiSigAccountName } = createMultiSigAccount
+  console.log('mulitsig account:', multiSigAccountName)
 })()
