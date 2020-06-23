@@ -102,9 +102,9 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string) {
 }
 
 /** Computes algorand address from the algorand public key */
-function encode(publicKey: AlgorandPublicKey): any {
-  // compute checksum
+export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
   const decodedPublicKey = decodeBase64(publicKey)
+  // compute checksum
   const checksum = genericHash(decodedPublicKey).slice(
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
     nacl.sign.publicKeyLength,
@@ -114,7 +114,7 @@ function encode(publicKey: AlgorandPublicKey): any {
 }
 
 /** Computes algorand public key from the algorand address */
-function decode(address: AlgorandAddress) {
+export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
   if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
 
@@ -124,20 +124,7 @@ function decode(address: AlgorandAddress) {
   // Sanity check
   if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
 
-  const pk = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
-  const cs = new Uint8Array(decoded.slice(nacl.sign.publicKeyLength, ALGORAND_ADDRESS_BYTE_LENGTH))
-
-  return { publicKey: pk, checksum: cs }
-}
-
-/** Computes algorand address from the algorand public key */
-export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
-  return encode(publicKey)
-}
-
-/** Computes algorand public key from the algorand address */
-export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
-  const { publicKey } = decode(address)
+  const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
   return encodeBase64(publicKey) as AlgorandPublicKey
 }
 
