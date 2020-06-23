@@ -9,7 +9,7 @@ import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 import {
   generateMultiSigAccount,
   generateNewAccountKeysAndEncryptPrivateKeys,
-  getAlgorandAddressFromPublicKey,
+  getAddressFromPublicKey,
 } from './algoCrypto'
 
 /** Helper class to compose a transction for creating a new chain account
@@ -128,7 +128,7 @@ export class AlgorandCreateAccount implements CreateAccount {
         publicKey = this._generatedKeys?.publicKey
       }
     }
-    this._accountName = await getAlgorandAddressFromPublicKey(publicKey)
+    this._accountName = await getAddressFromPublicKey(publicKey)
     this._accountType = AlgorandNewAccountType.Native
   }
 
