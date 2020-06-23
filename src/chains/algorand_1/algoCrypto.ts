@@ -129,7 +129,7 @@ export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): Algor
 }
 
 /** Generates a new multisig address using the multisig options including version, threshhold and addresses */
-export function generateMultiSigAccount(multiSigOptions: AlgorandMultiSigOptions) {
+export function generateMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
   const mSigOptions = {
     version: multiSigOptions.version,
     threshold: multiSigOptions.threshold,
@@ -137,5 +137,5 @@ export function generateMultiSigAccount(multiSigOptions: AlgorandMultiSigOptions
   }
   const multisigAddress: AlgorandMutliSigAccount = algosdk.multisigAddress(mSigOptions)
   const publicKey = getAlgorandPublicKeyFromAddress(multisigAddress)
-  return { publicKey }
+  return { multisigAddress, publicKey }
 }

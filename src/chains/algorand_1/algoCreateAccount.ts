@@ -7,9 +7,9 @@ import { AlgorandNewAccountType, AlgorandCreateAccountOptions } from './models/a
 import { AlgorandGeneratedKeys, AlgorandMultiSigOptions } from './models/generalModels'
 import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 import {
-  generateMultiSigAccount,
-  generateNewAccountKeysAndEncryptPrivateKeys,
   getAddressFromPublicKey,
+  generateMultiSigAddress,
+  generateNewAccountKeysAndEncryptPrivateKeys,
 } from './algoCrypto'
 
 /** Helper class to compose a transction for creating a new chain account
@@ -143,7 +143,7 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private async generateMultiSigAccountKeys(): Promise<void> {
     const { multiSigOptions } = this._options?.newKeysOptions || {}
-    this._generatedKeys = await generateMultiSigAccount(multiSigOptions)
+    this._generatedKeys = await generateMultiSigAddress(multiSigOptions)
   }
 
   /** extract keys from options
