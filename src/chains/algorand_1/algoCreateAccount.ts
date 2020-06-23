@@ -4,9 +4,13 @@ import { isNullOrEmpty, notSupported } from '../../helpers'
 import { AlgorandAddress, AlgorandPublicKey } from './models/cryptoModels'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandNewAccountType, AlgorandCreateAccountOptions } from './models/accountModels'
-import { AlgorandGeneratedKeys } from './models/generalModels'
+import { AlgorandGeneratedKeys, AlgorandMultiSigOptions } from './models/generalModels'
 import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
-import { generateNewAccountKeysAndEncryptPrivateKeys, getAlgorandAddressFromPublicKey } from './algoCrypto'
+import {
+  generateMultiSigAccount,
+  generateNewAccountKeysAndEncryptPrivateKeys,
+  getAlgorandAddressFromPublicKey,
+} from './algoCrypto'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -110,11 +114,19 @@ export class AlgorandCreateAccount implements CreateAccount {
     let publicKey: AlgorandPublicKey
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
-    // get keys from options or generate
-    publicKey = this.getPublicKeysFromOptions()
-    if (!publicKey) {
-      await this.generateAccountKeys()
+
+    const multiSigOptions = this.getMultiSigOptionsFromOptions()
+    // if multisig options are given, then generate a multisig account using the passed in algorand addresses
+    if (multiSigOptions) {
+      await this.generateMultiSigAccountKeys()
       publicKey = this._generatedKeys?.publicKey
+    } else {
+      // get keys from options or generate
+      publicKey = this.getPublicKeysFromOptions()
+      if (!publicKey) {
+        await this.generateAccountKeys()
+        publicKey = this._generatedKeys?.publicKey
+      }
     }
     this._accountName = await getAlgorandAddressFromPublicKey(publicKey)
     this._accountType = AlgorandNewAccountType.Native
@@ -129,6 +141,11 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
+  private async generateMultiSigAccountKeys(): Promise<void> {
+    const { multiSigOptions } = this._options?.newKeysOptions || {}
+    this._generatedKeys = await generateMultiSigAccount(multiSigOptions)
+  }
+
   /** extract keys from options
    *  Returns publicKeys */
   private getPublicKeysFromOptions(): AlgorandPublicKey {
@@ -137,6 +154,16 @@ export class AlgorandCreateAccount implements CreateAccount {
       return null
     }
     return publicKey
+  }
+
+  /** extract multisig options from options
+   *  Returns multisig options including version, threshhold and addresses */
+  private getMultiSigOptionsFromOptions(): AlgorandMultiSigOptions {
+    const { multiSigOptions } = this._options?.newKeysOptions || {}
+    if (!multiSigOptions) {
+      return null
+    }
+    return multiSigOptions
   }
 
   private assertValidOptionPublicKeys() {
