@@ -77,24 +77,15 @@ export function ensureEncryptedValueIsObject(encrypted: EncryptedDataString | an
 
 // NOTE Passing in at least an empty string for the salt, will prevent cached keys, which can lead to false positives in the test suite
 /** Derive the key used for encryption/decryption */
-export function deriveKey(password: string, iter: number, salt?: string): sjcl.BitArray {
-  const params: sjcl.Pbkdf2Params = { iter }
-  if (salt) {
-    params.salt = salt
-  }
-  const { key } = sjcl.misc.cachedPbkdf2(password, params)
+export function deriveKey(password: string, iter: number, salt: string = ''): sjcl.BitArray {
+  const { key } = sjcl.misc.cachedPbkdf2(password, { iter, salt })
   return key
 }
 
 /** Decrypts the encrypted value with the derived key */
-export function decryptWithKey(
-  encrypted: EncryptedDataString | any,
-  cryptoParams: SjclCipherParams,
-  derivedKey: sjcl.BitArray,
-): string {
+export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey: sjcl.BitArray): string {
   const encryptedAsObject = ensureEncryptedValueIsObject(encrypted)
-  const encryptedData = { ...encryptedAsObject, ...cryptoParams } as sjcl.SjclCipherEncrypted
-  const encryptedDataString = JSON.stringify(encryptedData)
+  const encryptedDataString = JSON.stringify(encryptedAsObject)
   return sjcl.decrypt(derivedKey, encryptedDataString)
 }
 
@@ -106,16 +97,13 @@ export function decrypt(
   password: string,
   options?: AesEncryptionOptions,
 ): string {
-  const { iter, mode = defaultMode, salt } = options || {}
-  const cryptoParams = { mode, iter } as SjclCipherParams
-  if (iter) {
-    cryptoParams.iter = iter
-  } else {
-    // get iter from encrypted string
-    const parsedObject = ensureEncryptedValueIsObject(encrypted)
-    cryptoParams.iter = parsedObject.iter
-  }
-  return decryptWithKey(encrypted, cryptoParams, deriveKey(password, cryptoParams.iter, salt))
+  const { salt } = options || {}
+  const parsedObject = ensureEncryptedValueIsObject(encrypted)
+
+  // get iter from encrypted string (can be overridden by options)
+  const iter = options?.iter || parsedObject?.iter
+
+  return decryptWithKey(encrypted, deriveKey(password, iter, salt))
 }
 
 /** Encrypts the private key with the derived key  */
@@ -124,10 +112,7 @@ export function encryptWithKey(
   cryptoParams: SjclCipherParams,
   derivedKey: sjcl.BitArray,
 ): sjcl.SjclCipherEncrypted {
-  const params = {
-    ...cryptoParams,
-    salt: stringToBitArray(cryptoParams.salt || ''),
-  } as sjcl.SjclCipherEncryptParams
+  const params = { ...cryptoParams } as sjcl.SjclCipherEncryptParams
   const encrypted = ensureEncryptedValueIsObject(sjcl.encrypt(derivedKey, unencrypted, params) as any)
   return encrypted
 }
