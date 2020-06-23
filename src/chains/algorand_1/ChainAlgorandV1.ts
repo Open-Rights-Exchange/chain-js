@@ -1,3 +1,4 @@
+import { notImplemented } from '../../helpers'
 import { ChainEndpoint, ChainInfo, ChainType } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
@@ -42,16 +43,19 @@ class ChainAlgorandV1 implements Chain {
   /** Fetch data from an on-chain contract table */
   public fetchContractData = (): any => {
     // ALGOTODO
+    notImplemented()
   }
 
   /** Compose an object for a chain contract action */
   public composeAction = (): any => {
     // ALGOTODO
+    notImplemented()
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
   public decomposeAction = (): any => {
     // ALGOTODO
+    notImplemented()
   }
 
   /** Returns a chain Account class
@@ -73,6 +77,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Return a ChainTransaction class used to compose and send transactions */
   private newTransaction(): any {
+    notImplemented()
     // ALGOTODO
   }
 
@@ -98,6 +103,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
@@ -109,11 +115,13 @@ class ChainAlgorandV1 implements Chain {
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
   public isValidPublicKey = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
@@ -127,6 +135,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
@@ -134,16 +143,19 @@ class ChainAlgorandV1 implements Chain {
 
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   public isValidEntityName = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Verifies that the value is a valid chain asset string */
   public isValidAsset = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Verifies that the value is a valid chain date */
   public isValidDate = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
@@ -154,26 +166,31 @@ class ChainAlgorandV1 implements Chain {
 
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
   public toEntityName = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Ensures that the value comforms to a well-formed chain date string */
   public toDate = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
   public toPublicKey = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Ensures that the value comforms to a well-formed private Key */
   public toPrivateKey = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
   /** Ensures that the value comforms to a well-formed EOS signature */
   public toSignature = (): any => {
+    notImplemented()
     // ALGOTODO
   }
 
