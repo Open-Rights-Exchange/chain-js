@@ -49,12 +49,14 @@ export const CreateMultiSigAccountOptions = {
   const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
-  console.log('generatedKeys:', generatedKeys)
-  console.log('account:', accountName)
+  console.log('generatedKeys: %o', generatedKeys)
+  console.log('account name: %o', accountName)
+  const account = await algoTest.new.Account(accountName)
+  console.log('account: %o', account.name)
 
   /** Create Algorand multisig account */
   const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
   await createMultiSigAccount.generateKeysIfNeeded()
   const { accountName: multiSigAccountName } = createMultiSigAccount
-  console.log('mulitsig account:', multiSigAccountName)
+  console.log('mulitsig account: %o', multiSigAccountName)
 })()
