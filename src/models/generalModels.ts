@@ -1,5 +1,3 @@
-import { EthereumAbi } from '../chains/ethereum_1/models'
-
 /** Type of account to craate */
 export enum NewAccountType {
   /** Native account for chain tyep (EOS, Ethereum, etc.) */
@@ -62,20 +60,6 @@ export type ChainInfo = {
   headBlockTime: Date
   version: string
   nativeInfo: any
-}
-
-/** */
-export type TokenQuery = {
-  abi?: EthereumAbi
-  symbol?: string
-  contract: string
-  chainAccount: string
-}
-
-/** Contract and symbol of a chain specific token */
-export type TokenData = {
-  symbol: string
-  contract?: string
 }
 
 /** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */

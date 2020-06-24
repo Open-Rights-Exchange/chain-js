@@ -9,6 +9,7 @@ import { Chain, ChainFactory, ChainType } from '../../../index'
 import { ChainEosV2 } from '../ChainEosV2'
 import { RpcError } from 'eosjs'
 import { ChainActionType } from '../../../models'
+import { toEosEntityName, toEosSymbol } from '../helpers'
 
 require('dotenv').config()
 
@@ -49,7 +50,7 @@ async function run() {
   // Misc examples
 
   // read balance table from token contract
-  console.log('create bridge balances:', await kylin.fetchContractData('createbridge', 'balances', 'createbridge'))
+  // console.log('create bridge balances:', await kylin.fetchContractData('createbridge', 'balances', 'createbridge'))
 
   // compose
   // const deleteAuthAction = kylin.composeAction(ChainActionType.AccountDeleteAuth, {
@@ -60,10 +61,14 @@ async function run() {
   // console.log('deleteAuthAction action:', deleteAuthAction)
 
   // crypto
-  const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
-  console.log('encrypted text:', encrypted)
-  const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
-  console.log('decrypted text:', decrypted)
+  // const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
+  // console.log('encrypted text:', encrypted)
+  // const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
+  // console.log('decrypted text:', decrypted)
+
+  // get token balance
+  console.log('get token balance:', await kylin.fetchBalance(toEosEntityName('oreoreoreore'), toEosSymbol('EOS')))
+  console.log('get everipediaiq token balance:', await kylin.fetchBalance(toEosEntityName('everipediaiq'), toEosSymbol('IQ'), 'everipediaiq'))
 
   // error mapping
   // const err = new RpcError({

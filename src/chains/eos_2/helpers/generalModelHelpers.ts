@@ -18,10 +18,10 @@ export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
   return str.match(/^\d{1,}\.\d{3,4} [A-Z]{3}$/) !== null
 }
 
-/** Expects a string composed of capital letters between 1-3 letters separated by a space */
+/** Expects a string composed of up to 7 upper-case letters */
 export function isValidEosSymbol(str: EosSymbol | string): str is EosSymbol {
   if (isNullOrEmpty(str)) return false
-  return str.match(/^[A-Z]{3}$/) !== null
+  return str.match(/^[A-Z]{1,7}$/) !== null
 }
 
 export function isValidEosEntityName(str: EosEntityName | string): str is EosEntityName {
@@ -58,14 +58,12 @@ export function toEosAsset(amount: number, symbol: string): EosAsset {
   throw new Error(`Should not get here. toEosAsset amount:${amount} symbol:${symbol}`)
 }
 
-/** Construct a valid EOS Symbol *
- *  e.g. 'EOS' */
-export function toEosSymbol(symbol: string): EosSymbol {
-  if (symbol.length !== 3) throw new Error('symbol must be 3 characters long')
+/** Construct a valid EOS Symbol - e.g. 'EOS' */
+export function toEosSymbol(symbol: string = ''): EosSymbol {
   if (isValidEosSymbol(symbol)) {
     return symbol
   }
-  throw new Error(`Should not get here. toEosSymbol symbol:${symbol}`)
+  throw new Error('Symbol must be between 1 and 7 upper-case letters')
 }
 
 export function toEosEntityName(name: string): EosEntityName {

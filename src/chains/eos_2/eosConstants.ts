@@ -18,6 +18,7 @@ export const DEFAULT_CREATEESCROW_CONTRACT = 'createescrow'
 export const DEFAULT_ORE_ACCOUNT_PRICEKEY = 1
 export const DEFAULT_CREATEESCROW_APPNAME = 'free'
 
-/** default values for EOS transfers */
-export const DEFAULT_EOS_TOKEN_CONTRACT = 'eosio.token'
-export const DEFAULT_EOS_SYMBOL = 'EOS'
+// token related
+export const NATIVE_CHAIN_SYMBOL = 'EOS'
+/** The chain address of the default token contract (if any) */
+export const DEFAULT_CHAIN_TOKEN_ADDRESS = 'eosio.token'

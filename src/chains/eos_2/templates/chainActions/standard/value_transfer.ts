@@ -4,7 +4,7 @@ import {
   composeAction as eosTokenTransferComposeAction,
   decomposeAction as eosTokenTransferDecomposeAction,
 } from '../chainSpecific/eosToken_transfer'
-import { DEFAULT_EOS_SYMBOL, DEFAULT_EOS_TOKEN_CONTRACT } from '../../../eosConstants'
+import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from '../../../eosConstants'
 
 /** a value transfer for EOS just calls the standard transfer function
  *  if no contractName or tokenSymbol is provided, use the chain defauult (e.g. 'EOS') */
@@ -13,9 +13,9 @@ export const composeAction = (params: ValueTransferParams) => {
   return eosTokenTransferComposeAction({
     ...params,
     amount: amount as number, // handle possible BN
-    contractName: contractName || toEosEntityName(DEFAULT_EOS_TOKEN_CONTRACT),
+    contractName: contractName || toEosEntityName(DEFAULT_CHAIN_TOKEN_ADDRESS),
     permission: permission ? toEosEntityName(permission) : toEosEntityName('active'),
-    symbol: symbol ? toEosSymbol(symbol) : toEosSymbol(DEFAULT_EOS_SYMBOL),
+    symbol: symbol ? toEosSymbol(symbol) : toEosSymbol(NATIVE_CHAIN_SYMBOL),
   })
 }
 
