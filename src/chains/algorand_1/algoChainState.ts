@@ -67,11 +67,10 @@ export class AlgorandChainState {
   public async connect(): Promise<void> {
     try {
       if (!this._algoClient) {
-        const { url, endpoint } = this.selectEndpoint()
-        this.assertEndpointHasTokenHeader()
-        const { port = '' } = url
+        const { endpoint } = this.selectEndpoint()
         this._activeEndpoint = endpoint
-        const token = this.getTokenFromEndpointHeader()
+        this.assertEndpointHasTokenHeader()
+        const { token, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
         this._algoClient = new algosdk.Algod(token, url, port)
       }
       await this.getChainInfo()
@@ -182,13 +181,11 @@ export class AlgorandChainState {
     return this._algoClient
   }
 
-  // TODO: sort based on health info
-  /**  * Choose the best Chain endpoint based on health and response time */
-  private selectEndpoint(): { url: URL; endpoint: AlgorandChainEndpoint } {
-    // Just choose the first endpoint for now
-    const endpoint = this.endpoints[0]
-    const url = endpoint?.url?.href
-    return { url: new URL(trimTrailingChars(url, '/')), endpoint }
+  /** Checks for required header 'X-API_key' */
+  private assertEndpointHasTokenHeader(): void {
+    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
+      throwNewError('X-API-Key header is required to call algorand endpoint')
+    }
   }
 
   /** returns the 'X-API-Key' header required to call algorand chain endpoint */
@@ -200,10 +197,19 @@ export class AlgorandChainState {
     return token
   }
 
-  /** Checks for required header 'X-API_key' */
-  private assertEndpointHasTokenHeader(): void {
-    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
-      throwNewError('X-API-Key header is required to call algorand endpoint')
-    }
+  private getAlgorandConnectionSettingsForEndpoint() {
+    const { url } = this._activeEndpoint
+    const { port = '' } = url
+    const token = this.getTokenFromEndpointHeader()
+    return { url, token, port }
+  }
+
+  // TODO: sort based on health info
+  /**  * Choose the best Chain endpoint based on health and response time */
+  private selectEndpoint(): { url: URL; endpoint: AlgorandChainEndpoint } {
+    // Just choose the first endpoint for now
+    const endpoint = this.endpoints[0]
+    const url = endpoint?.url?.href
+    return { url: new URL(trimTrailingChars(url, '/')), endpoint }
   }
 }
