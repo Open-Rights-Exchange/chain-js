@@ -1,17 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BN } from 'ethereumjs-util'
-import { Contract } from 'web3-eth-contract'
 import { Chain } from '../../interfaces'
-import {
-  ChainActionType,
-  ChainInfo,
-  ChainType,
-  ChainAsset,
-  ChainEntityName,
-  ChainDate,
-  TokenData,
-  TokenQuery,
-} from '../../models'
+import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -32,6 +22,7 @@ import {
   EthereumTransactionAction,
   EthereumChainActionType,
   EthereumDecomposeReturn,
+  EthereumSymbol,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -45,9 +36,9 @@ import {
   toEthereumPublicKey,
   toEthereumPrivateKey,
   toEthereumSignature,
+  toEthereumSymbol,
 } from './helpers'
-import { notImplemented, isNullOrEmpty, getDefaultTokenBalance } from '../../helpers'
-import { erc20Abi } from './templates/abis/erc20Abi'
+import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './ethConstants'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -102,72 +93,27 @@ class ChainEthereumV1 implements Chain {
 
   // eslint-disable-next-line class-methods-use-this
   public get description(): string {
-    return 'Etereum 1.0 Chain'
+    return 'Ethereum 1.0 Chain'
   }
 
-  /** Returns chain specific native token symbol */
-  public get nativeTokenData(): TokenData {
+  /** Returns chain native token symbol and default token contract address */
+  public get nativeToken(): { symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
     return {
-      contract: null,
-      symbol: 'ETH',
+      symbol: toEthereumSymbol(NATIVE_CHAIN_SYMBOL),
+      tokenAddress: DEFAULT_CHAIN_TOKEN_ADDRESS,
     }
   }
 
-  /**
-   * Composes the necessary structure to query token balances using fetchTokenBalance
-   */
-  public composeBalanceCheck(contract: string, chainAccount: string, symbol: string) {
-    return {
-      abi: erc20Abi,
-      contract,
-      chainAccount,
-      symbol,
-    }
-  }
-
-  /** Utilizes native web3 method to get ETH token balance */
-  public async getBalance(data: TokenQuery) {
-    const result = await this._chainState._web3.eth.getBalance(data?.chainAccount)
-    if (isNullOrEmpty(result)) {
-      throw Error(`Cannot find balance for account ${data?.chainAccount}`)
-    }
-
-    const balance = this._chainState._web3.utils.fromWei(result, 'ether')
-    return { balance: `${balance} ${this.nativeTokenData.symbol}` }
-  }
-
-  /** Compose object structure necessary for checking token balances */
-  public async fetchTokenBalance(data: TokenQuery): Promise<{ balance: string }> {
-    const { abi, contract, chainAccount, symbol } = data
-
-    // Calls native function for native token
-    if (symbol === this.nativeTokenData.symbol) {
-      return this.getBalance(data)
-    }
-
-    const tokenContract: Contract = new this._chainState._web3.eth.Contract(abi, contract)
-    if (isNullOrEmpty(tokenContract)) {
-      throw Error(`Cannot find tokenContract at ${contract}`)
-    }
-
-    const balance = await this.parseBalanceResult(tokenContract, chainAccount)
-
-    return { balance }
-  }
-
-  private async parseBalanceResult(contract: Contract, chainAccount: string) {
-    const balance = await contract?.methods?.balanceOf(chainAccount)?.call()
-    const decimal = await contract?.methods?.decimals()?.call()
-    const tokenName = await contract?.methods?.name()?.call()
-    const tokenSymbol = await contract?.methods?.symbol()?.call()
-
-    if (balance && decimal) {
-      const amount = balance / 10 ** decimal
-      const formatedBalance = `${amount?.toString()} ${tokenSymbol} (${tokenName})`
-      return formatedBalance
-    }
-
-    return getDefaultTokenBalance(tokenSymbol)
+  /** Get the balance for an account from the chain
+   *  If tokenAddress is provided, returns balance for ERC20 token
+   *  If symbol = 'eth', returns Eth balance (in units of Ether)
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: EthereumAddress,
+    symbol: EthereumSymbol,
+    tokenAddress?: EthereumAddress,
+  ): Promise<{ balance: string }> {
+    return this._chainState.fetchBalance(account, symbol, tokenAddress)
   }
 
   /** Fetch data from an on-chain contract table */
