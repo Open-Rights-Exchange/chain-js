@@ -53,3 +53,12 @@ export type AlgorandNewKeysOptions = {
   password: string
   multiSigOptions?: AlgorandMultiSigOptions
 }
+
+/** Algorand value units */
+export enum AlgorandUnit {
+  Microalgo = 'microalgo',
+  Algo = 'algo',
+}
+
+/** Algorand general value type */
+export type AlgorandValue = string | number | Buffer
