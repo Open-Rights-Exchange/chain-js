@@ -9,7 +9,7 @@ import {
   AlgorandHeader,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
-import { isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -191,16 +191,9 @@ export class AlgorandChainState {
     return { url: new URL(trimTrailingChars(url, '/')), endpoint }
   }
 
-  /** returns the required header from the array of objects. For ex: headers: [{'X-API-Key': '...'}]  */
-  private getHeader(key: string) {
-    const { headers } = this._activeEndpoint?.options
-    const header = headers.find((val: {}) => Object.keys(val).includes(key))
-    return header
-  }
-
   /** returns the 'X-API-Key' header required to call algorand chain endpoint */
   private getTokenFromEndpointHeader(): AlgorandHeader {
-    const token = this.getHeader('X-API-Key')
+    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')
     if (isNullOrEmpty(token)) {
       return null
     }
@@ -209,7 +202,7 @@ export class AlgorandChainState {
 
   /** Checks for required header 'X-API_key' */
   private assertEndpointHasTokenHeader(): void {
-    if (!this.getHeader('X-API-Key')) {
+    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
       throwNewError('X-API-Key header is required to call algorand endpoint')
     }
   }
