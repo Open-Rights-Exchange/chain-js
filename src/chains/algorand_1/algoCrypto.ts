@@ -1,20 +1,20 @@
 import * as algosdk from 'algosdk'
 import * as nacl from 'tweetnacl'
 import * as base32 from 'hi-base32'
-import { encodeBase64, encodeUTF8, decodeBase64, decodeUTF8 } from 'tweetnacl-util'
+import { decodeBase64, decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util'
 import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
-  AlgorandPublicKey,
-  AlgorandPrivateKey,
-  AlgorandSignature,
-  AlgorandKeyPair,
   AlgorandAddress,
+  AlgorandKeyPair,
+  AlgorandPrivateKey,
+  AlgorandPublicKey,
+  AlgorandSignature,
 } from './models/cryptoModels'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import { ALGORAND_CHECKSUM_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_ADDRESS_BYTE_LENGTH } from './algoConstants'
+import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
 import { concatArrays, genericHash } from './helpers/cryptoModelHelpers'
-import { AlgorandMultiSigOptions, AlgorandMutliSigAccount } from './models/generalModels'
+import { AlgorandMutliSigAccount, AlgorandMultiSigOptions } from './models/generalModels'
 import { AlgorandGenerateAccountResponse } from './models/accountModels'
 
 /** Converts a string to uint8 array */

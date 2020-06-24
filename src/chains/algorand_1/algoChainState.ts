@@ -2,14 +2,14 @@ import algosdk from 'algosdk'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
 import {
-  AlgorandChainSettingsCommunicationSettings,
-  AlgorandChainSettings,
   AlgoClient,
   AlgorandChainEndpoint,
+  AlgorandChainSettings,
+  AlgorandChainSettingsCommunicationSettings,
   AlgorandHeader,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
-import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
+import { getHeaderValueFromEndpoint, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
