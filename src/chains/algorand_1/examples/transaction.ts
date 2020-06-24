@@ -31,12 +31,6 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
   },
 ]
 
-export const CreateAccountOptions = {
-  newKeysOptions: {
-    password: '2233',
-  },
-}
-
 interface valueTransferParams {
   fromAccountName?: AlgorandAddress
   toAccountName: AlgorandAddress
