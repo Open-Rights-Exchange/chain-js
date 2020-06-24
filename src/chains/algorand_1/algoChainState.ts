@@ -193,12 +193,14 @@ export class AlgorandChainState {
     return { url: trimTrailingChars(url, '/'), endpoint }
   }
 
+  /** returns the required header from the array of objects. For ex: headers: [{'X-API-Key': '...'}]  */
   private getHeader(key: string) {
     const { headers } = this._activeEndpoint?.options
     const header = headers.find((val: {}) => Object.keys(val).includes(key))
     return header
   }
 
+  /** returns the 'X-API-Key' header required to call algorand chain endpoint */
   private getAlgorandConnectionHeader(): AlgorandHeader {
     const token = this.getHeader('X-API-Key')
     if (isNullOrEmpty(token)) {
