@@ -10,6 +10,7 @@ import {
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
 import { isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { ALGORAND_POST_CONTENT_TYPE } from './algoConstants'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -23,6 +24,8 @@ export class AlgorandChainState {
   private _isConnected: boolean = false
 
   private _algoClient: AlgoClient
+
+  private _algoPostClient: AlgoClient
 
   constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -71,7 +74,12 @@ export class AlgorandChainState {
         const { port = '' } = url
         this._activeEndpoint = endpoint
         const token = this.getAlgorandConnectionHeader()
+        const postToken = {
+          ...token,
+          ...ALGORAND_POST_CONTENT_TYPE,
+        }
         this._algoClient = new algosdk.Algod(token, url, port)
+        this._algoPostClient = new algosdk.Algod(postToken, url, port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -110,9 +118,9 @@ export class AlgorandChainState {
   /** Submits the transaction to the chain and waits only until it gets a transaction id
    * Does not wait for the transaction to be finalized on the chain
    */
-  async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
+  async sendTransactionWithoutWaitingForConfirm(signedTransaction: Uint8Array) {
     try {
-      const { txId: transactionId } = await this._algoClient.sendRawTransaction(signedTransaction)
+      const { txId: transactionId } = await this._algoPostClient.sendRawTransaction(signedTransaction)
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
@@ -142,7 +150,7 @@ export class AlgorandChainState {
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
   */
   async sendTransaction(
-    signedTransaction: string,
+    signedTransaction: Uint8Array,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: AlgorandChainSettingsCommunicationSettings,
@@ -162,7 +170,7 @@ export class AlgorandChainState {
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        const transactionId = await this._algoClient.sendRawTransaction(signedTransaction)
+        const transactionId = await this._algoPostClient.sendRawTransaction(signedTransaction)
         await this.waitForTransactionConfirmation(transactionId)
         sendResult.transactionId = transactionId
         sendResult.chainResponse = await this._algoClient.transactionById(transactionId)
@@ -176,9 +184,17 @@ export class AlgorandChainState {
   }
 
   /** Return instance of algo API */
-  public get algo(): AlgoClient {
+  public get algoClient(): AlgoClient {
     this.assertIsConnected()
     return this._algoClient
+  }
+
+  /** Return instance of algo API  with content type set as
+   * 'application/x-binary'
+   */
+  public get algoPostClient(): AlgoClient {
+    this.assertIsConnected()
+    return this._algoPostClient
   }
 
   // TODO: sort based on health info
