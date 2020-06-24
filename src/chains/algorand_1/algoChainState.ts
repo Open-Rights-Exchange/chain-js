@@ -4,10 +4,12 @@ import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
 import {
   AlgorandChainSettingsCommunicationSettings,
   AlgorandChainSettings,
-  AlgorandConnectionSettings,
   AlgoClient,
+  AlgorandChainEndpoint,
+  AlgorandHeader,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
+import { isNullOrEmpty, trimTrailingChars } from '../../helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -65,8 +67,10 @@ export class AlgorandChainState {
   public async connect(): Promise<void> {
     try {
       if (!this._algoClient) {
-        const { token, server, port } = this.getAlgorandConnectionSettings()
-        this._algoClient = new algosdk.Algod(token, server, port)
+        const { url, endpoint } = this.selectEndpoint()
+        this._activeEndpoint = endpoint
+        const token = this.getAlgorandConnectionHeader()
+        this._algoClient = new algosdk.Algod(token, url, '')
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -93,14 +97,6 @@ export class AlgorandChainState {
       // ALGO TODO: map chain error
       throw new Error()
     }
-  }
-
-  // TODO: sort based on health info
-  /**  * Choose the best Chain endpoint based on health and response time */
-  private getAlgorandConnectionSettings(): AlgorandConnectionSettings {
-    const { url, settings } = this.endpoints[0]
-    const { token, port = '' } = settings
-    return { server: url, token, port }
   }
 
   /** Confirm that we've connected to the chain - throw if not */
@@ -182,5 +178,32 @@ export class AlgorandChainState {
   public get algo(): AlgoClient {
     this.assertIsConnected()
     return this._algoClient
+  }
+
+  // TODO: sort based on health info
+  /**  * Choose the best Chain endpoint based on health and response time */
+  private selectEndpoint(): { url: string; endpoint: AlgorandChainEndpoint } {
+    // Allow 'empty' list of endpoints - the fetch module might have its own approach for providing urls
+    if (isNullOrEmpty(this.endpoints)) {
+      return { url: '', endpoint: null }
+    }
+    // Just choose the first endpoint for now
+    const endpoint = this.endpoints[0]
+    const url = endpoint?.url?.href
+    return { url: trimTrailingChars(url, '/'), endpoint }
+  }
+
+  private getHeader(key: string) {
+    const { headers } = this._activeEndpoint?.options
+    const header = headers.find((val: {}) => Object.keys(val).includes(key))
+    return header
+  }
+
+  private getAlgorandConnectionHeader(): AlgorandHeader {
+    const token = this.getHeader('X-API-Key')
+    if (isNullOrEmpty(token)) {
+      throwNewError('X-API-Key header is required to call algorand endpoint')
+    }
+    return token
   }
 }
