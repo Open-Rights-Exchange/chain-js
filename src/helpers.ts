@@ -1,6 +1,6 @@
 import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
-import { ChainEntityName, IndexedObject } from './models'
+import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
@@ -166,4 +166,11 @@ export function arrayToObject(array: IndexedObject[]) {
     result[key] = header[key]
   })
   return result
+}
+
+/** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'X-API-Key': '...'}]  */
+export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, key: string) {
+  const { headers } = endpoint?.options
+  const header = headers.find((val: {}) => Object.keys(val).includes(key))
+  return header
 }

@@ -2,14 +2,14 @@ import algosdk from 'algosdk'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
 import {
-  AlgorandChainSettingsCommunicationSettings,
-  AlgorandChainSettings,
   AlgoClient,
   AlgorandChainEndpoint,
+  AlgorandChainSettings,
+  AlgorandChainSettingsCommunicationSettings,
   AlgorandHeader,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
-import { isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE } from './algoConstants'
 
 export class AlgorandChainState {
@@ -70,10 +70,10 @@ export class AlgorandChainState {
   public async connect(): Promise<void> {
     try {
       if (!this._algoClient) {
-        const { url, endpoint } = this.selectEndpoint()
-        const { port = '' } = url
+        const { endpoint } = this.selectEndpoint()
         this._activeEndpoint = endpoint
-        const token = this.getAlgorandConnectionHeader()
+        this.assertEndpointHasTokenHeader()
+        const { token, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
         const postToken = {
           ...token,
           ...ALGORAND_POST_CONTENT_TYPE,
@@ -197,6 +197,29 @@ export class AlgorandChainState {
     return this._algoPostClient
   }
 
+  /** Checks for required header 'X-API_key' */
+  private assertEndpointHasTokenHeader(): void {
+    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
+      throwNewError('X-API-Key header is required to call algorand endpoint')
+    }
+  }
+
+  /** returns the 'X-API-Key' header required to call algorand chain endpoint */
+  private getTokenFromEndpointHeader(): AlgorandHeader {
+    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')
+    if (isNullOrEmpty(token)) {
+      return null
+    }
+    return token
+  }
+
+  private getAlgorandConnectionSettingsForEndpoint() {
+    const { url } = this._activeEndpoint
+    const { port = '' } = url
+    const token = this.getTokenFromEndpointHeader()
+    return { url, token, port }
+  }
+
   // TODO: sort based on health info
   /**  * Choose the best Chain endpoint based on health and response time */
   private selectEndpoint(): { url: URL; endpoint: AlgorandChainEndpoint } {
@@ -204,21 +227,5 @@ export class AlgorandChainState {
     const endpoint = this.endpoints[0]
     const url = endpoint?.url?.href
     return { url: new URL(trimTrailingChars(url, '/')), endpoint }
-  }
-
-  /** returns the required header from the array of objects. For ex: headers: [{'X-API-Key': '...'}]  */
-  private getHeader(key: string) {
-    const { headers } = this._activeEndpoint?.options
-    const header = headers.find((val: {}) => Object.keys(val).includes(key))
-    return header
-  }
-
-  /** returns the 'X-API-Key' header required to call algorand chain endpoint */
-  private getAlgorandConnectionHeader(): AlgorandHeader {
-    const token = this.getHeader('X-API-Key')
-    if (isNullOrEmpty(token)) {
-      throwNewError('X-API-Key header is required to call algorand endpoint')
-    }
-    return token
   }
 }
