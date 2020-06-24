@@ -57,5 +57,5 @@ export function isValidAlgorandSignature(signature: AlgorandSignature): boolean 
   if (!isNullOrEmpty(signature)) {
     return true
   }
-  return true
+  return false
 }
