@@ -2,13 +2,15 @@ import { notImplemented } from '../../helpers'
 import { ChainEndpoint, ChainInfo, ChainType } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
-import { AlgorandChainSettings } from './models/generalModels'
+import { AlgorandChainSettings, AlgorandSymbol } from './models/generalModels'
 import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
 import { AlgorandCreateAccount } from './algoCreateAccount'
 import { AlgorandCreateAccountOptions } from './models/accountModels'
 import { AlgorandAddress } from './models/cryptoModels'
 import { AlgorandAccount } from './algoAccount'
+import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
+import { toAlgorandSymbol } from './helpers/generalModelHelpers'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -188,6 +190,26 @@ class ChainAlgorandV1 implements Chain {
   // eslint-disable-next-line class-methods-use-this
   public get description(): string {
     return 'Algorand v1 chain'
+  }
+
+  /** Returns chain native token symbol and default token contract address */
+  public get nativeToken(): { symbol: AlgorandSymbol; tokenAddress: AlgorandAddress } {
+    return {
+      symbol: toAlgorandSymbol(NATIVE_CHAIN_SYMBOL),
+      tokenAddress: DEFAULT_CHAIN_TOKEN_ADDRESS,
+    }
+  }
+
+  /** Get the balance for an account from the chain
+   *  If tokenAddress is provided, returns balance for ERC20 token
+   *  If symbol = 'eth', returns Eth balance (in units of Ether)
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: AlgorandAddress,
+    symbol: AlgorandSymbol,
+    tokenAddress?: AlgorandAddress,
+  ): Promise<{ balance: string }> {
+    return this._chainState.fetchBalance(account, symbol, tokenAddress)
   }
 
   /** Whether any info has been retrieved from the chain */
