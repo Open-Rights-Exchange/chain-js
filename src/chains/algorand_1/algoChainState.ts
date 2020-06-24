@@ -107,7 +107,7 @@ export class AlgorandChainState {
 
   /** Get the balance for an account from the chain
    *  If symbol = 'algo', returns Algo balance (in units of Algo)
-   *  Else returns the asset balance of the account for the provided symbol(asset symbol) if the symbol is valid
+   *  Else returns the asset balance of the account for the provided symbol (asset symbol),  if the symbol is valid
    *  Returns a string representation of the value to accomodate large numbers */
   public async fetchBalance(
     account: AlgorandAddress,
