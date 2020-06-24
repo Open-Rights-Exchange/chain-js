@@ -122,6 +122,7 @@ export class EosChainState {
       this._signatureProvider = new JsSignatureProvider([])
       if (!this._rpc) {
         const { url, endpoint } = this.selectEndpoint()
+        this._activeEndpoint = endpoint
         const fetchWithOptions = this.configureFetchForEndpoint(this._chainSettings?.fetch || nodeFetch, endpoint)
         this._rpc = new JsonRpc(url, { fetch: fetchWithOptions })
       }

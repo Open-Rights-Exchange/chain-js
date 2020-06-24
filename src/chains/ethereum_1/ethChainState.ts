@@ -85,6 +85,7 @@ export class EthereumChainState {
     try {
       if (!this._web3) {
         const { url, endpoint } = this.selectEndpoint()
+        this._activeEndpoint = endpoint
         const httpProviderOptions = this.mapOptionsToWeb3HttpProviderOptions(endpoint)
         const web3HttpProvider = new Web3.providers.HttpProvider(url, httpProviderOptions)
         this._web3 = new Web3(web3HttpProvider)
