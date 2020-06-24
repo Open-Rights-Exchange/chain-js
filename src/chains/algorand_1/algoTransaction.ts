@@ -241,13 +241,6 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Throws if transaction is missing any signatures */
-  private assertHasSignature(): void {
-    if (!this.hasAnySignatures) {
-      throwNewError('Missing Signature', 'transaction_missing_signature')
-    }
-  }
-
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey = (publicKey: AlgorandPublicKey): boolean => {
     return this?._fromPublicKey === publicKey
