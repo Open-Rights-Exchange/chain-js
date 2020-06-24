@@ -251,16 +251,9 @@ export class AlgorandTransaction implements Transaction {
     return this?._fromAddress === authorization
   }
 
-  /** Whether signature is attached to transaction (and/or whether the signature is correct)
-   * If a specific action.from is specifed, ensure that attached signature matches its address/public key */
-  // ALGO TODO
+  /** Whether signature is attached to transaction (and/or whether the signature is correct) */
   public get hasAllRequiredSignatures(): boolean {
-    // If a specific action.from is specifed, ensure that a signature is attached that matches its address/public key
-    if (this.isFromIsValidAddress()) {
-      return this.requiredAuthorization === this._fromAddress
-    }
-    // if no specific action.from, just confirm any signature is attached
-    return this.hasAnySignatures
+    return this.requiredAuthorization === this._fromAddress
   }
 
   /** Throws if transaction is missing any signatures */
