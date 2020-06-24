@@ -1,4 +1,4 @@
-import { EncryptedDataString } from '../../../models'
+import { EncryptedDataString, ChainSymbolBrand } from '../../../models'
 import { AlgorandAddress, AlgorandPublicKey, AlgorandPrivateKey } from './cryptoModels'
 
 export type AlgoClient = any
@@ -53,3 +53,11 @@ export type AlgorandNewKeysOptions = {
   password: string
   multiSigOptions?: AlgorandMultiSigOptions
 }
+
+/** Algorand value units */
+export enum AlgorandUnit {
+  Microalgo = 'microalgo',
+  Algo = 'algo',
+}
+
+export type AlgorandSymbol = string & ChainSymbolBrand
