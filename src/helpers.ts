@@ -167,8 +167,3 @@ export function arrayToObject(array: IndexedObject[]) {
   })
   return result
 }
-
-/** Returns formatted default token balance string */
-export function getDefaultTokenBalance(tokenSymbol: string): string {
-  return `0.0000 ${tokenSymbol}`
-}
