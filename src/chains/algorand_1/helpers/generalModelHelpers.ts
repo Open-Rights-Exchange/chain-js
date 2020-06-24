@@ -7,7 +7,7 @@ export function isValidAlgorandSymbol(str: AlgorandSymbol | string): str is Algo
   return true
 }
 
-/** Construct a valid Ethereum symbol */
+/** Construct a valid algorand symbol */
 export function toAlgorandSymbol(symbol: string): AlgorandSymbol {
   if (isValidAlgorandSymbol(symbol)) {
     return symbol
