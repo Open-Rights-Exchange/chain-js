@@ -8,7 +8,6 @@ import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { AlgorandMultiSigOptions } from '../models/generalModels'
 import { toAlgorandSymbol } from '../helpers/generalModelHelpers'
-import { toAlgorandAddress } from '../helpers/cryptoModelHelpers'
 
 require('dotenv').config()
 
