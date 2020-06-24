@@ -68,9 +68,10 @@ export class AlgorandChainState {
     try {
       if (!this._algoClient) {
         const { url, endpoint } = this.selectEndpoint()
+        this.assertEndpointHasTokenHeader()
         const { port = '' } = url
         this._activeEndpoint = endpoint
-        const token = this.getAlgorandConnectionHeader()
+        const token = this.getTokenFromEndpointHeader()
         this._algoClient = new algosdk.Algod(token, url, port)
       }
       await this.getChainInfo()
@@ -198,11 +199,18 @@ export class AlgorandChainState {
   }
 
   /** returns the 'X-API-Key' header required to call algorand chain endpoint */
-  private getAlgorandConnectionHeader(): AlgorandHeader {
+  private getTokenFromEndpointHeader(): AlgorandHeader {
     const token = this.getHeader('X-API-Key')
     if (isNullOrEmpty(token)) {
-      throwNewError('X-API-Key header is required to call algorand endpoint')
+      return null
     }
     return token
+  }
+
+  /** Checks for required header 'X-API_key' */
+  private assertEndpointHasTokenHeader(): void {
+    if (!this.getHeader('X-API-Key')) {
+      throwNewError('X-API-Key header is required to call algorand endpoint')
+    }
   }
 }
