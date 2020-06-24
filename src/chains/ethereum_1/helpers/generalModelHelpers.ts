@@ -1,6 +1,6 @@
 import moment from 'moment'
 import { BN } from 'ethereumjs-util'
-import { EthereumDate, EthereumEntityName, EthereumAsset } from '../models/generalModels'
+import { EthereumDate, EthereumEntityName, EthereumAsset, EthereumSymbol } from '../models/generalModels'
 import { isNullOrEmpty, isInEnum } from '../../../helpers'
 import { toWei } from './transactionHelpers'
 import {
@@ -35,6 +35,12 @@ export function isValidEthereumEntityName(str: EthereumEntityName | string): str
   )
 }
 
+/** A string - assumption is that it follows ERC20 naming convention */
+export function isValidEthereumSymbol(str: EthereumSymbol | string): str is EthereumSymbol {
+  if (isNullOrEmpty(str)) return false
+  return true
+}
+
 export function toEthereumDate(date: string | Date | moment.Moment | EthereumDate): EthereumDate {
   if (typeof date === 'string') {
     if (isValidEthereumDateString(date)) {
@@ -67,4 +73,12 @@ export function toEthereumEntityName(name: string): EthereumEntityName {
   throw new Error(
     `Not a valid Ethereum entity :${name}. Ethereum entity can valid address, public key, private key or transaction data.`,
   )
+}
+
+/** Construct a valid Ethereum symbol */
+export function toEthereumSymbol(symbol: string): EthereumSymbol {
+  if (isValidEthereumSymbol(symbol)) {
+    return symbol
+  }
+  throw new Error(`Not a valid Ethereum symbol:${symbol}`)
 }
