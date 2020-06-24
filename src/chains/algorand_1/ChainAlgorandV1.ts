@@ -201,8 +201,8 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Get the balance for an account from the chain
-   *  If tokenAddress is provided, returns balance for ERC20 token
-   *  If symbol = 'eth', returns Eth balance (in units of Ether)
+   *  If symbol = 'algo', returns Algo balance (in units of Algo)
+   *  Else returns the asset balance of the account for the provided symbol(asset symbol) if the symbol is valid
    *  Returns a string representation of the value to accomodate large numbers */
   public async fetchBalance(
     account: AlgorandAddress,
