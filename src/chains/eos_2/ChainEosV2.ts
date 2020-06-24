@@ -11,6 +11,7 @@ import {
   PrivateKey,
   Signature,
 } from '../../models'
+import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './eosConstants'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as eoscrypto from './eosCrypto'
@@ -33,6 +34,7 @@ import {
   toEosEntityName,
   toEosAsset,
   toEosDate,
+  toEosSymbol,
 } from './helpers'
 import {
   EosActionStruct,
@@ -42,6 +44,7 @@ import {
   EosCreateAccountOptions,
   EosDecomposeReturn,
   EosChainEndpoint,
+  EosSymbol,
 } from './models'
 
 /** Provides support for the EOS blockchain
@@ -76,6 +79,25 @@ class ChainEosV2 implements Chain {
   public get chainInfo(): ChainInfo {
     this.assertIsConnected()
     return this._chainState.chainInfo
+  }
+
+  /** Returns chain native token symbol and default token contract address */
+  public get nativeToken(): { symbol: EosSymbol; tokenAddress: EosEntityName } {
+    return {
+      symbol: toEosSymbol(NATIVE_CHAIN_SYMBOL),
+      tokenAddress: toEosEntityName(DEFAULT_CHAIN_TOKEN_ADDRESS),
+    }
+  }
+
+  /** Get the token balance for an account from the chain
+   *  If tokenAddress is not provided, uses eosio.token as default
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: EosEntityName,
+    symbol: EosSymbol,
+    tokenAddress: EosEntityName = this.nativeToken.tokenAddress,
+  ): Promise<{ balance: string }> {
+    return this._chainState.fetchBalance(account, symbol, tokenAddress)
   }
 
   /** Fetch data from an on-chain contract table */
