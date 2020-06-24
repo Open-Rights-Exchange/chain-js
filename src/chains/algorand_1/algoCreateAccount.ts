@@ -3,7 +3,7 @@ import { CreateAccount } from '../../interfaces'
 import { isNullOrEmpty, notSupported } from '../../helpers'
 import { AlgorandAddress, AlgorandPublicKey } from './models/cryptoModels'
 import { AlgorandChainState } from './algoChainState'
-import { AlgorandNewAccountType, AlgorandCreateAccountOptions } from './models/accountModels'
+import { AlgorandCreateAccountOptions, AlgorandNewAccountType } from './models/accountModels'
 import { AlgorandGeneratedKeys, AlgorandMultiSigOptions } from './models/generalModels'
 import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 import {

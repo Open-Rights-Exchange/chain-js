@@ -14,10 +14,12 @@ const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps1'
 export const algoTestnetEndpoints: ChainEndpoint[] = [
   {
     url: new URL(algoPureStakeTestnet),
-    settings: {
-      token: {
-        'X-API-Key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
-      },
+    options: {
+      headers: [
+        {
+          'X-API-Key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
+        },
+      ],
     },
   },
 ]

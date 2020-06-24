@@ -3,15 +3,25 @@ import { AlgorandAddress, AlgorandPublicKey, AlgorandPrivateKey } from './crypto
 
 export type AlgoClient = any
 
+/** Chain urls and related details used to connect to chain */
+export type AlgorandChainEndpoint = {
+  /** api endpoint url - including http(s):// prefix */
+  url: URL
+  /** Options are name/value pairs used to configure chain endpoint */
+  options?: {
+    /** Array of headers to be included in HTTP requests to chain endpoint
+     *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
+    headers?: [{ [key: string]: string }]
+  }
+  /** Between 0 and 1 - 0 is not responding, 1 is very fast */
+  health?: number
+}
+
 /**
- * server: chain endpoint
- * token: api token required to access the chain network
- * token's format: {'X-API-Key': '...'}
+ * Algorand token: {'X-API-Key': '...'}
  */
-export type AlgorandConnectionSettings = {
-  server: URL
-  token: string
-  port?: string
+export type AlgorandHeader = {
+  'X-API-Key': string
 }
 
 /** Currently nothing is needed in algorand chain settings.
