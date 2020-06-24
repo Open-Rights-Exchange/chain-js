@@ -68,9 +68,10 @@ export class AlgorandChainState {
     try {
       if (!this._algoClient) {
         const { url, endpoint } = this.selectEndpoint()
+        const { port = '' } = url
         this._activeEndpoint = endpoint
         const token = this.getAlgorandConnectionHeader()
-        this._algoClient = new algosdk.Algod(token, url, '')
+        this._algoClient = new algosdk.Algod(token, url, port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -182,15 +183,11 @@ export class AlgorandChainState {
 
   // TODO: sort based on health info
   /**  * Choose the best Chain endpoint based on health and response time */
-  private selectEndpoint(): { url: string; endpoint: AlgorandChainEndpoint } {
-    // Allow 'empty' list of endpoints - the fetch module might have its own approach for providing urls
-    if (isNullOrEmpty(this.endpoints)) {
-      return { url: '', endpoint: null }
-    }
+  private selectEndpoint(): { url: URL; endpoint: AlgorandChainEndpoint } {
     // Just choose the first endpoint for now
     const endpoint = this.endpoints[0]
     const url = endpoint?.url?.href
-    return { url: trimTrailingChars(url, '/'), endpoint }
+    return { url: new URL(trimTrailingChars(url, '/')), endpoint }
   }
 
   /** returns the required header from the array of objects. For ex: headers: [{'X-API-Key': '...'}]  */
