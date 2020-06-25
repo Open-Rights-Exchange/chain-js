@@ -1,5 +1,5 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainInfo, ChainType } from '../../models'
+import { ChainEndpoint, ChainInfo, ChainType, ChainActionType, ActionDecomposeReturn } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import { AlgorandChainSettings, AlgorandSymbol } from './models/generalModels'
@@ -9,6 +9,11 @@ import { AlgorandCreateAccount } from './algoCreateAccount'
 import { AlgorandCreateAccountOptions } from './models/accountModels'
 import { AlgorandAddress } from './models/cryptoModels'
 import { AlgorandAccount } from './algoAccount'
+import { AlgorandTransaction } from './algoTransaction'
+import { AlgorandTransactionOptions, AlgorandTransactionAction } from './models/transactionModels'
+import { composeAction } from './algoCompose'
+import { decomposeAction } from './algoDecompose'
+import { AlgorandChainActionType } from './models/chainActionTypeModels'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
 import { toAlgorandSymbol } from './helpers/generalModelHelpers'
 
@@ -48,13 +53,16 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (): any => {
-    notImplemented()
+  public composeAction = (
+    actionType: ChainActionType | AlgorandChainActionType,
+    args: any,
+  ): AlgorandTransactionAction => {
+    return composeAction(actionType, args)
   }
 
-  /** Decompose a contract action and return the action type (if any) and its data */
-  public decomposeAction = (): any => {
-    notImplemented()
+  /** Decompose an action and return the action type (if any) and its data */
+  public decomposeAction = (action: AlgorandTransactionAction): ActionDecomposeReturn[] => {
+    return decomposeAction(action)
   }
 
   /** Returns a chain Account class
@@ -75,8 +83,9 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newTransaction(): any {
-    notImplemented()
+  private newTransaction(options?: AlgorandTransactionOptions): any {
+    this.assertIsConnected()
+    return new AlgorandTransaction(this._chainState, options)
   }
 
   public new = {

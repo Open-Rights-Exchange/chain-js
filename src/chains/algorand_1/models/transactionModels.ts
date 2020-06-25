@@ -1,3 +1,6 @@
+import { AlgorandValue } from './generalModels'
+import { AlgorandAddress } from './cryptoModels'
+
 /**
  * Chain response type after a transaction is confirmed on the chain
  */
@@ -28,4 +31,45 @@ export type AlgorandTxChainResponse = {
 export type AlgorandTxResult = {
   transactionId: string
   chainResponse: AlgorandTxChainResponse
+}
+
+/** Transaction properties that contain the genesis information and fee required to construct a transaction */
+export type AlgorandTransactionHeader = {
+  genesisID: AlgorandValue
+  genesisHash: AlgorandValue
+  firstRound: number
+  lastRound: number
+  fee: AlgorandValue
+  flatFee: boolean
+}
+
+/** Transaction 'header' options set to chain along with the content type */
+export type AlgorandTransactionOptions = {
+  fee?: AlgorandValue
+  flatFee?: boolean
+}
+
+/** Raw transaction ready to be signed */
+export type AlgorandRawTransaction = {
+  from: AlgorandAddress
+  to: AlgorandAddress
+  amount: AlgorandValue
+  note: AlgorandValue
+  genesisID: AlgorandValue
+  genesisHash: AlgorandValue
+  firstRound: number
+  lastRound: number
+  fee: AlgorandValue
+  flatFee: boolean
+}
+
+/** Properties of an Algorand transaction action
+ *  Can be used to create or compose a new Algorand action
+ *  from - must be present
+ */
+export type AlgorandTransactionAction = {
+  to?: AlgorandAddress
+  from: AlgorandAddress
+  amount?: AlgorandValue
+  note?: AlgorandValue
 }

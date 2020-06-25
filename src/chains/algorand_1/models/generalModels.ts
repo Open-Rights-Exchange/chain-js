@@ -60,4 +60,6 @@ export enum AlgorandUnit {
   Algo = 'algo',
 }
 
+/** Algorand general value type */
+export type AlgorandValue = string | number | Buffer
 export type AlgorandSymbol = string & ChainSymbolBrand

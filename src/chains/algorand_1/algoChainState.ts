@@ -11,9 +11,9 @@ import {
   AlgorandSymbol,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
-import { getHeaderValueFromEndpoint, isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
+import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
 import { AlgorandAddress } from './models/cryptoModels'
-import { NATIVE_CHAIN_SYMBOL } from './algoConstants'
 import { toAlgo } from './helpers/generalHelpers'
 
 export class AlgorandChainState {
@@ -28,6 +28,8 @@ export class AlgorandChainState {
   private _isConnected: boolean = false
 
   private _algoClient: AlgoClient
+
+  private _algoClientWithTxHeader: AlgoClient
 
   constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -76,7 +78,12 @@ export class AlgorandChainState {
         this._activeEndpoint = endpoint
         this.assertEndpointHasTokenHeader()
         const { token, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
+        const postToken = {
+          ...token,
+          ...ALGORAND_POST_CONTENT_TYPE,
+        }
         this._algoClient = new algosdk.Algod(token, url, port)
+        this._algoClientWithTxHeader = new algosdk.Algod(postToken, url, port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -150,9 +157,9 @@ export class AlgorandChainState {
   /** Submits the transaction to the chain and waits only until it gets a transaction id
    * Does not wait for the transaction to be finalized on the chain
    */
-  async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
+  async sendTransactionWithoutWaitingForConfirm(signedTransaction: Uint8Array) {
     try {
-      const { txId: transactionId } = await this._algoClient.sendRawTransaction(signedTransaction)
+      const { txId: transactionId } = await this._algoClientWithTxHeader.sendRawTransaction(signedTransaction)
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
@@ -182,7 +189,7 @@ export class AlgorandChainState {
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
   */
   async sendTransaction(
-    signedTransaction: string,
+    signedTransaction: Uint8Array,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: AlgorandChainSettingsCommunicationSettings,
@@ -202,7 +209,7 @@ export class AlgorandChainState {
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        const transactionId = await this._algoClient.sendRawTransaction(signedTransaction)
+        const transactionId = await this._algoClientWithTxHeader.sendRawTransaction(signedTransaction)
         await this.waitForTransactionConfirmation(transactionId)
         sendResult.transactionId = transactionId
         sendResult.chainResponse = await this._algoClient.transactionById(transactionId)
@@ -215,10 +222,18 @@ export class AlgorandChainState {
     return sendResult as AlgorandTxResult
   }
 
-  /** Return instance of algo API */
-  public get algo(): AlgoClient {
+  /** Return instance of algo sdk */
+  public get algoClient(): AlgoClient {
     this.assertIsConnected()
     return this._algoClient
+  }
+
+  /** Return instance of algo sdk for sending transactions
+   * Includes content-type: 'application/x-binary' in the header
+   */
+  public get algoClientWithTxHeader(): AlgoClient {
+    this.assertIsConnected()
+    return this._algoClientWithTxHeader
   }
 
   /** Checks for required header 'X-API_key' */
