@@ -4,7 +4,7 @@ import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { ChainError, throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
-import { fetchWrapper, trimTrailingChars, isNullOrEmpty, arrayToObject } from '../../helpers'
+import { fetchWrapper, trimTrailingChars, isAString, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
   EosSignature,
   EosEntityName,
@@ -13,6 +13,7 @@ import {
   EosChainSettingsCommunicationSettings,
   EosTxResult,
   EosChainEndpoint,
+  EosSymbol,
 } from './models'
 import { mapChainError } from './eosErrors'
 import {
@@ -121,6 +122,7 @@ export class EosChainState {
       this._signatureProvider = new JsSignatureProvider([])
       if (!this._rpc) {
         const { url, endpoint } = this.selectEndpoint()
+        this._activeEndpoint = endpoint
         const fetchWithOptions = this.configureFetchForEndpoint(this._chainSettings?.fetch || nodeFetch, endpoint)
         this._rpc = new JsonRpc(url, { fetch: fetchWithOptions })
       }
@@ -229,6 +231,21 @@ export class EosChainState {
   public async fetchContractTable(params: EOSGetTableRowsParams): Promise<any> {
     const results = await this.rpc.get_table_rows(params)
     return results
+  }
+
+  /** Get the token balance for an account from the chain */
+  public async fetchBalance(
+    account: EosEntityName,
+    symbol: EosSymbol,
+    tokenAddress: EosEntityName,
+  ): Promise<{ balance: string }> {
+    const response = (await this.rpc.get_currency_balance(tokenAddress, account, symbol)) || []
+    let [balance] = response
+    // convert balance response from 'nn.nnn sym' to just 'nn.nnn'
+    if (!isNullOrEmpty(balance) && isAString(balance)) {
+      ;[balance] = balance.split(' ')
+    }
+    return { balance: balance || '0.0000' }
   }
 
   /** Confirm that we've connected to the chain - throw if not */

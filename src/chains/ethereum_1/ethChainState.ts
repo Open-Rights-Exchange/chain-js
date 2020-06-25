@@ -1,9 +1,11 @@
 import Web3 from 'web3'
+import BN from 'bn.js'
+import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ConfirmType } from '../../models'
-import { trimTrailingChars } from '../../helpers'
+import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
   ChainFunctionCategory,
@@ -13,10 +15,13 @@ import {
   EthereumChainEndpoint,
   EthereumChainSettings,
   EthereumChainSettingsCommunicationSettings,
+  EthereumSymbol,
   EthereumTxResult,
   EthereumTxChainResponse,
 } from './models'
-import { ensureHexPrefix } from './helpers'
+import { ensureHexPrefix, bigNumberToString } from './helpers'
+import { erc20Abi } from './templates/abis/erc20Abi'
+import { NATIVE_CHAIN_SYMBOL } from './ethConstants'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -80,6 +85,7 @@ export class EthereumChainState {
     try {
       if (!this._web3) {
         const { url, endpoint } = this.selectEndpoint()
+        this._activeEndpoint = endpoint
         const httpProviderOptions = this.mapOptionsToWeb3HttpProviderOptions(endpoint)
         const web3HttpProvider = new Web3.providers.HttpProvider(url, httpProviderOptions)
         this._web3 = new Web3(web3HttpProvider)
@@ -178,6 +184,68 @@ export class EthereumChainState {
       const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
     }
+  }
+
+  /** Get the balance for an account from the chain
+   *  If tokenAddress is provided, returns balance for ERC20 token
+   *  If symbol = 'eth', returns Eth balance (in units of Ether)
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: EthereumAddress,
+    symbol: EthereumSymbol,
+    tokenAddress?: EthereumAddress,
+  ): Promise<{ balance: string }> {
+    // Get balance for Eth
+    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_SYMBOL.toLowerCase()) {
+      return { balance: await this.getEthBalance(account) }
+    }
+    if (isNullOrEmpty(tokenAddress)) {
+      throw Error('Must provide an ERC20 token contract address')
+    }
+    // Get balance for ERC20 token
+    const abi = erc20Abi
+    const erc20Contract = new this.web3.eth.Contract(abi, tokenAddress.toString())
+    if (isNullOrEmpty(erc20Contract)) {
+      throw Error(`Cannot find ERC20 token contract at tokenAddress: ${tokenAddress}`)
+    }
+
+    const { balance, tokenSymbol } = await this.getErc20TokenBalance(erc20Contract, account)
+
+    if ((symbol || '').toLowerCase() !== (tokenSymbol || '').toLowerCase()) {
+      throw Error(`Different token symbol found at: ${tokenAddress}. Found symbol:${tokenSymbol} instead of:${symbol}`)
+    }
+
+    return { balance }
+  }
+
+  /** Utilizes native web3 method to get ETH token balance for an account (in Ether) */
+  public async getEthBalance(address: EthereumAddress): Promise<string> {
+    const result = await this.web3.eth.getBalance(address.toString())
+    if (isNullOrEmpty(result)) {
+      throw Error(`Cannot find balance for account address ${address}`)
+    }
+
+    const balance = this.web3.utils.fromWei(result, 'ether')
+    return balance
+  }
+
+  /** Retrieve account balance and other info from ERC20 contract */
+  public async getErc20TokenBalance(
+    contract: Contract,
+    account: EthereumAddress,
+  ): Promise<{ balance: string; tokenName?: string; tokenSymbol?: string }> {
+    let balanceString = '0.0000'
+    const balance: BN = await contract?.methods?.balanceOf(account)?.call()
+    const decimals = await contract?.methods?.decimals()?.call()
+    const tokenName = await contract?.methods?.name()?.call()
+    const tokenSymbol = await contract?.methods?.symbol()?.call()
+
+    if (balance && decimals) {
+      balanceString = bigNumberToString(balance, decimals)
+    }
+
+    /** Returns 0.0000 if no balance found for token contract */
+    return { balance: balanceString, tokenName, tokenSymbol }
   }
 
   /** Check if a block includes a transaction */

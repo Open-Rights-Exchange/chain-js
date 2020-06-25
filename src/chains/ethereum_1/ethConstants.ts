@@ -20,3 +20,8 @@ export const ZERO_HEX = '0x00'
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const EMPTY_HEX = '0x'
 export const HEX_PREFIX = '0x'
+
+// token related
+export const NATIVE_CHAIN_SYMBOL = 'ETH'
+/** The chain address of the default token contract (if any) */
+export const DEFAULT_CHAIN_TOKEN_ADDRESS: any = null
