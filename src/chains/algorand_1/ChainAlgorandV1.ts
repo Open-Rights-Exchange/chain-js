@@ -228,7 +228,9 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Map error from chain into a well-known ChainError type */
-  public mapChainError = (): any => {}
+  public mapChainError = (): any => {
+    notImplemented()
+  }
 
   /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
