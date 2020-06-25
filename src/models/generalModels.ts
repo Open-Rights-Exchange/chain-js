@@ -38,6 +38,7 @@ export type ChainSymbol = string & ChainSymbolBrand
 export enum ChainType {
   EosV2 = 'eos',
   EthereumV1 = 'ethereum',
+  AlgorandV1 = 'algorand',
 }
 
 /** Chain urls and related details used to connect to chain */
