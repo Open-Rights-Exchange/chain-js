@@ -22,6 +22,7 @@ import {
   EthereumTransactionAction,
   EthereumChainActionType,
   EthereumDecomposeReturn,
+  EthereumSymbol,
 } from './models'
 import {
   isValidEthereumAsset,
@@ -35,8 +36,9 @@ import {
   toEthereumPublicKey,
   toEthereumPrivateKey,
   toEthereumSignature,
+  toEthereumSymbol,
 } from './helpers'
-import { notImplemented } from '../../helpers'
+import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './ethConstants'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -91,7 +93,27 @@ class ChainEthereumV1 implements Chain {
 
   // eslint-disable-next-line class-methods-use-this
   public get description(): string {
-    return 'Etereum 1.0 Chain'
+    return 'Ethereum 1.0 Chain'
+  }
+
+  /** Returns chain native token symbol and default token contract address */
+  public get nativeToken(): { symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
+    return {
+      symbol: toEthereumSymbol(NATIVE_CHAIN_SYMBOL),
+      tokenAddress: DEFAULT_CHAIN_TOKEN_ADDRESS,
+    }
+  }
+
+  /** Get the balance for an account from the chain
+   *  If tokenAddress is provided, returns balance for ERC20 token
+   *  If symbol = 'eth', returns Eth balance (in units of Ether)
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: EthereumAddress,
+    symbol: EthereumSymbol,
+    tokenAddress?: EthereumAddress,
+  ): Promise<{ balance: string }> {
+    return this._chainState.fetchBalance(account, symbol, tokenAddress)
   }
 
   /** Fetch data from an on-chain contract table */

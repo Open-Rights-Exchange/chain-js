@@ -7,11 +7,12 @@ import {
   ChainDate,
   ChainEntityName,
   ChainInfo,
+  ChainSymbol,
   ChainType,
+  EncryptedDataString,
   PublicKey,
   PrivateKey,
   Signature,
-  EncryptedDataString,
   TransactionOptions,
 } from '../models'
 
@@ -27,12 +28,18 @@ export interface Chain {
   chainType: ChainType
   /** Returns chain plug-in name */
   description: string
+  /** Returns the native (default) asset symbol for the chain and default token address (if any) */
+  nativeToken: { symbol: ChainSymbol; tokenAddress: any }
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   connect(): Promise<void>
   /** Compose an object for a chain contract action */
   composeAction(chainActionType: any, args: any): any
   /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
   decomposeAction(action: any): { chainActionType: any; args: any; partial?: boolean }[]
+  /** Fetch balance for token (or native chain asset)
+   * If no value is provided for contract, some chains use the default token contract
+   * Returns a string to allow for large numbers */
+  fetchBalance(account: ChainEntityName, symbol: ChainSymbol, tokenAddress?: any): Promise<{ balance: string }>
   /** Fetch data from an on-chain contract table */
   fetchContractData(
     contract: string,

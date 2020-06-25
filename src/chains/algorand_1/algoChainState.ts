@@ -7,10 +7,14 @@ import {
   AlgorandChainSettings,
   AlgorandChainSettingsCommunicationSettings,
   AlgorandHeader,
+  AlgorandUnit,
+  AlgorandSymbol,
 } from './models/generalModels'
 import { AlgorandTxResult } from './models/transactionModels'
 import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
-import { ALGORAND_POST_CONTENT_TYPE } from './algoConstants'
+import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
+import { AlgorandAddress } from './models/cryptoModels'
+import { toAlgo } from './helpers/generalHelpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -106,6 +110,41 @@ export class AlgorandChainState {
       // ALGO TODO: map chain error
       throw new Error()
     }
+  }
+
+  /** Get the balance for an account from the chain
+   *  If symbol = 'algo', returns Algo balance (in units of Algo)
+   *  Else returns the asset balance of the account for the provided symbol (asset symbol),  if the symbol is valid
+   *  Returns a string representation of the value to accomodate large numbers */
+  public async fetchBalance(
+    account: AlgorandAddress,
+    symbol: AlgorandSymbol,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tokenAddress?: AlgorandAddress,
+  ): Promise<{ balance: string }> {
+    // Get balance for Algo
+    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_SYMBOL.toLowerCase()) {
+      return { balance: await this.getAlgorandBalance(account) }
+    }
+
+    const balance = await this.getAssetBalance(account, symbol)
+    return { balance: balance || '0' }
+  }
+
+  /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
+  public async getAlgorandBalance(address: AlgorandAddress): Promise<string> {
+    const accountInfo = await this._algoClient.accountInformation(address)
+    const { amount } = accountInfo
+    return toAlgo(amount, AlgorandUnit.Microalgo).toString()
+  }
+
+  /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
+  public async getAssetBalance(address: AlgorandAddress, assetSymbol: string): Promise<string> {
+    const accountInfo = await this._algoClient.accountInformation(address)
+    const { assets } = accountInfo || {}
+    const assetInfo = assets[assetSymbol] || {}
+    const { amount = null } = assetInfo || {}
+    return amount
   }
 
   /** Confirm that we've connected to the chain - throw if not */
