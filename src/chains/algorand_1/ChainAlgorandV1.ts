@@ -16,6 +16,7 @@ import { decomposeAction } from './algoDecompose'
 import { AlgorandChainActionType } from './models/chainActionTypeModels'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
 import { toAlgorandSymbol } from './helpers/generalModelHelpers'
+import { isValidAlgorandPrivateKey, isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -120,13 +121,13 @@ class ChainAlgorandV1 implements Chain {
   toEncryptedDataString = algoCrypto.toEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
-  public isValidPrivateKey = (): any => {
-    notImplemented()
+  public isValidPrivateKey = (value: string): boolean => {
+    return !!isValidAlgorandPrivateKey(value)
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
-  public isValidPublicKey = (): any => {
-    notImplemented()
+  public isValidPublicKey = (value: string): boolean => {
+    return !!isValidAlgorandPublicKey(value)
   }
 
   /** Generate a signature given some data and a private key */
