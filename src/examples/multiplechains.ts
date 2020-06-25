@@ -4,8 +4,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ChainFactory, ChainType, Chain } from '../index'
-import { ChainActionType, ChainEndpoint, ConfirmType } from '../models'
+import { ChainFactory, Chain } from '../index'
+import { ChainActionType, ChainEndpoint, ConfirmType, ChainEntityNameBrand, ChainType } from '../models'
 import { EthereumChainForkType } from '../chains/ethereum_1/models'
 
 require('dotenv').config()
@@ -111,14 +111,18 @@ async function runFunctionsForMultipleChains() {
   // for each, we'll get the appropriate optiond for sending a token and then call the generic sendToken function
   await Promise.all(
     chains.map(async chain => {
-      const response = await sendToken(chain, chainSendTokenData[chain.chainType])
+      const {chainType} = chain
+      const tokenData = chainType === ChainType.EosV2 ? chainSendTokenData.eos : chainSendTokenData.ethereum
+      const response = await sendToken(chain, tokenData)
       console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
     }),
   )
 
   await Promise.all(
     chains.map(async chain => {
-      const response = await sendCurrency(chain, chainSendCurrencyData[chain.chainType])
+      const {chainType} = chain
+      const currencyData = chainType === ChainType.EosV2 ? chainSendCurrencyData.eos : chainSendCurrencyData.ethereum
+      const response = await sendCurrency(chain, currencyData)
       console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
     }),
   )
