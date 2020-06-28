@@ -60,6 +60,11 @@ Although you can do most common tasks using the unified ChainJs api, you can sti
    const eosChain = (mychain as ChainEosV2) // EOSIO node version 2.x
    eosChain.eosjs.api.transact({...})
 ```
+```javascript
+   /** Using Ethereum chain-specifc features - ex. web3 */
+   ...
+   ethChain.web3.api.getBalance(address)
+```
 
 More chain plug-ins will be coming soon. You can also build a plug-in to support your chain of choice. Feel free to open a PR to merge in your plug-in or to create an issue for a feature request or bug.
 
