@@ -6,6 +6,21 @@
 
 ChainJS is a low-level Javascript helper library that helps you write code that can work with multiple blockchains. ChainJs uses a plug-in model and a unified interface to do common blockchain functions like constructing, signing, and sending blockchain transactions.
 
+### Example code for sending a token
+
+```javascript
+  // get a chain object (for an Ethereum chain using Ropsten testnet)
+  const ethChain = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints),
+
+  // create a transaction - composeAction simplifies transaction composition
+  const sendTokenTx = await chain.new.Transaction()
+  sendTokenTx.actions = [ chain.composeAction(ChainActionType.TokenTransfer, { toAccountName: '0x27105...', amount: 10 }) ]
+  ...
+  // sign and send the transaction to the chain
+  await sendTokenTx.sign([privateKey])
+  await sendTokenTx.send(ConfirmType.None)
+```
+
 ### Example code for creating an account on-chain
 
 ```javascript
