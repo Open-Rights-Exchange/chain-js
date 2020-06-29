@@ -10,7 +10,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
 
 ```javascript
   // get a chain object (for an Ethereum chain using Ropsten testnet)
-  const ethChain = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints),
+  const ethChain = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints)
   // create a transaction object
   const sendTokenTx = await chain.new.Transaction()
   // set contract action(s) - composeAction simplifies transaction composition
