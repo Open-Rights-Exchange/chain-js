@@ -78,7 +78,7 @@ async function sendToken(chain: Chain, options: any) {
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
   await sendTokenTx.sign([options.privateKey])
-  const response = sendTokenTx.send(ConfirmType.None)
+  const response = await sendTokenTx.send(ConfirmType.None)
   return response
 }
 
@@ -100,15 +100,14 @@ async function runFunctionsForMultipleChains() {
     new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, { chainForkType: ropstenChainOptions }),
   ]
 
-  // after creating a chain, connect to it to make sure the endpoint is running (and get current block info)
-  // We'll use await Promise.all to wait for all connections to complete before continuing
+  // for each chain, connect to its network (to make sure the endpoint is available)
   await Promise.all(
     chains.map(async chain => {
       await chain.connect()
     }),
   )
 
-  // for each, we'll get the appropriate optiond for sending a token and then call the generic sendToken function
+  // Send Tokens - for each chain, we'll get token option and call the generic sendToken function
   await Promise.all(
     chains.map(async chain => {
       const {chainType} = chain
@@ -118,6 +117,7 @@ async function runFunctionsForMultipleChains() {
     }),
   )
 
+  // Send 'Currency' - for each chain, sends the native currency for the chain (e.g. 'eth' for Ethereum)
   await Promise.all(
     chains.map(async chain => {
       const {chainType} = chain
@@ -132,7 +132,6 @@ async function runFunctionsForMultipleChains() {
 ;(async () => {
   try {
     await runFunctionsForMultipleChains()
-    console.log('done')
   } catch (error) {
     console.log(error)
   }
