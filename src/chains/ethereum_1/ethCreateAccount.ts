@@ -116,7 +116,7 @@ export class EthereumCreateAccount implements CreateAccount {
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
     // get keys from options or generate
-    publicKey = this.getPublicKeysFromOptions()
+    publicKey = this?._options?.publicKey
     if (!publicKey) {
       await this.generateAccountKeys()
       publicKey = this._generatedKeys?.publicKey
@@ -132,16 +132,6 @@ export class EthereumCreateAccount implements CreateAccount {
     const { password, encryptionOptions } = newKeysOptions || {}
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, {}, encryptionOptions)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
-  }
-
-  /** extract keys from options
-   *  Returns publicKeys */
-  private getPublicKeysFromOptions(): EthereumPublicKey {
-    const { publicKey } = this._options || {}
-    if (!publicKey) {
-      return null
-    }
-    return publicKey
   }
 
   private assertValidOptionPublicKeys() {
