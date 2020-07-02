@@ -4,7 +4,7 @@ import { isNullOrEmpty, notSupported } from '../../helpers'
 import { AlgorandAddress, AlgorandPublicKey } from './models/cryptoModels'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandCreateAccountOptions, AlgorandNewAccountType } from './models/accountModels'
-import { AlgorandGeneratedKeys, AlgorandMultiSigOptions } from './models/generalModels'
+import { AlgorandGeneratedKeys } from './models/generalModels'
 import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 import {
   getAddressFromPublicKey,
@@ -115,14 +115,14 @@ export class AlgorandCreateAccount implements CreateAccount {
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
 
-    const multiSigOptions = this.getMultiSigOptionsFromOptions()
+    const multiSigOptions = this?._options?.multiSigOptions
     // if multisig options are given, then generate a multisig account using the passed in algorand addresses
     if (multiSigOptions) {
       await this.generateMultiSigAccountKeys()
       publicKey = this._generatedKeys?.publicKey
     } else {
       // get keys from options or generate
-      publicKey = this.getPublicKeysFromOptions()
+      publicKey = this?._options?.publicKey
       if (!publicKey) {
         await this.generateAccountKeys()
         publicKey = this._generatedKeys?.publicKey
@@ -142,28 +142,8 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   private async generateMultiSigAccountKeys(): Promise<void> {
-    const { multiSigOptions } = this._options?.newKeysOptions || {}
+    const { multiSigOptions } = this._options || {}
     this._generatedKeys = await generateMultiSigAddress(multiSigOptions)
-  }
-
-  /** extract keys from options
-   *  Returns publicKeys */
-  private getPublicKeysFromOptions(): AlgorandPublicKey {
-    const { publicKey } = this._options || {}
-    if (!publicKey) {
-      return null
-    }
-    return publicKey
-  }
-
-  /** extract multisig options from options
-   *  Returns multisig options including version, threshhold and addresses */
-  private getMultiSigOptionsFromOptions(): AlgorandMultiSigOptions {
-    const { multiSigOptions } = this._options?.newKeysOptions || {}
-    if (!multiSigOptions) {
-      return null
-    }
-    return multiSigOptions
   }
 
   private assertValidOptionPublicKeys() {
