@@ -6,7 +6,6 @@
 import { toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
-import { AlgorandMultiSigOptions } from '../models/generalModels'
 import { toAlgorandSymbol } from '../helpers/generalModelHelpers'
 
 require('dotenv').config()
