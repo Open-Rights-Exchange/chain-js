@@ -30,6 +30,7 @@ import {
   ethereumTrxArgIsNullOrEmpty,
   toEthereumPublicKey,
   toEthereumAddress,
+  isValidEthereumAddress,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -415,7 +416,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether action.from is a valid address (and not null or empty e.g. '0x00') */
   private isFromIsValidAddress(): boolean {
-    return !ethereumTrxArgIsNullOrEmpty(this?.action?.from)
+    return ethereumTrxArgIsNullOrEmpty(this?.action?.from) || isValidEthereumAddress(this?.action?.from)
   }
 
   /** Throws is from is not null or empty ethereum argument */
