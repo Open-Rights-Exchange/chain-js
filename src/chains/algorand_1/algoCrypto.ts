@@ -6,16 +6,17 @@ import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
   AlgorandAddress,
+  AlgorandGenerateAccountResponse,
   AlgorandKeyPair,
+  AlgorandMutliSigAccount,
+  AlgorandMultiSigOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandSignature,
-} from './models/cryptoModels'
+} from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
-import { concatArrays, genericHash } from './helpers/cryptoModelHelpers'
-import { AlgorandMutliSigAccount, AlgorandMultiSigOptions } from './models/generalModels'
-import { AlgorandGenerateAccountResponse } from './models/accountModels'
+import { concatArrays, genericHash } from './helpers'
 
 /** Converts a string to uint8 array */
 function toUint8Array(encodedString: string) {

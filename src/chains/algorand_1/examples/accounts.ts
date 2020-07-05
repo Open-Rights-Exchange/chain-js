@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
-import { AlgorandMultiSigOptions } from '../models/generalModels'
+import { AlgorandMultiSigOptions } from '../models'
 
 require('dotenv').config()
 

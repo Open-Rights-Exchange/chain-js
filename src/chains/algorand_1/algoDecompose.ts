@@ -1,5 +1,5 @@
 import { ActionDecomposeReturn } from '../../models'
-import { AlgorandTransactionAction } from './models/transactionModels'
+import { AlgorandTransactionAction } from './models'
 import { isNullOrEmpty } from '../../helpers'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 

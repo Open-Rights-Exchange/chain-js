@@ -1,4 +1,4 @@
-import { AlgorandUnit } from '../models/generalModels'
+import { AlgorandUnit } from '../models'
 
 /** Algorand supports only 2 units: algo and microalgo */
 export function toMicroAlgo(amount: number, type: AlgorandUnit) {
