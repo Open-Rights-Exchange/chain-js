@@ -1,4 +1,4 @@
-import { AlgorandUnit } from '../models/generalModels'
+import { AlgorandUnit } from '../models'
 
 /** Whether array is exactly length of 1 */
 export function isArrayLengthOne(array: any[]) {

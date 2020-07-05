@@ -1,4 +1,4 @@
-import { AlgorandUnit } from './models/generalModels'
+import { AlgorandUnit } from './models'
 
 export const ALGORAND_ADDRESS_BYTE_LENGTH = 36
 export const ALGORAND_ADDRESS_LENGTH = 58

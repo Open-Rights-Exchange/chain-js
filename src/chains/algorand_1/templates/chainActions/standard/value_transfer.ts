@@ -1,7 +1,6 @@
-import { AlgorandTransactionAction } from '../../../models/transactionModels'
-import { AlgorandUnit } from '../../../models/generalModels'
-import { toMicroAlgo } from '../../../helpers/transactionHelpers'
 import { ValueTransferParams, ActionDecomposeReturn, ChainActionType } from '../../../../../models'
+import { AlgorandTransactionAction, AlgorandUnit } from '../../../models'
+import { toMicroAlgo } from '../../../helpers'
 import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
 
 export const composeAction = ({

@@ -1,8 +1,7 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
-import { AlgorandChainActionType } from './models/chainActionTypeModels'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
-import { AlgorandTransactionAction } from './models/transactionModels'
+import { AlgorandChainActionType, AlgorandTransactionAction } from './models'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any) => any } = {
