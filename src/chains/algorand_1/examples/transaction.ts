@@ -8,9 +8,8 @@ import * as algosdk from 'algosdk'
 import { encodeBase64 } from 'tweetnacl-util'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
-import { AlgorandAddress, AlgorandPrivateKey } from '../models/cryptoModels'
-import { AlgorandUnit, AlgorandValue } from '../models/generalModels'
-import { toAlgorandPrivateKey } from '../helpers/cryptoModelHelpers'
+import { AlgorandAddress, AlgorandPrivateKey, AlgorandUnit, AlgorandValue } from '../models'
+import { toAlgorandPrivateKey } from '../helpers'
 
 require('dotenv').config()
 

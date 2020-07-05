@@ -1,11 +1,15 @@
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
 import { isNullOrEmpty, notSupported } from '../../helpers'
-import { AlgorandAddress, AlgorandPublicKey } from './models/cryptoModels'
+import {
+  AlgorandAddress,
+  AlgorandCreateAccountOptions,
+  AlgorandGeneratedKeys,
+  AlgorandNewAccountType,
+  AlgorandPublicKey,
+} from './models'
 import { AlgorandChainState } from './algoChainState'
-import { AlgorandCreateAccountOptions, AlgorandNewAccountType } from './models/accountModels'
-import { AlgorandGeneratedKeys } from './models/generalModels'
-import { isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
+import { isValidAlgorandPublicKey } from './helpers'
 import {
   getAddressFromPublicKey,
   generateMultiSigAddress,

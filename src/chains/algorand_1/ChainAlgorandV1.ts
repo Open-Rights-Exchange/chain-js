@@ -2,21 +2,24 @@ import { notImplemented } from '../../helpers'
 import { ChainEndpoint, ChainInfo, ChainType, ChainActionType, ActionDecomposeReturn } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
-import { AlgorandChainSettings, AlgorandSymbol } from './models/generalModels'
+import {
+  AlgorandAddress,
+  AlgorandChainActionType,
+  AlgorandChainSettings,
+  AlgorandCreateAccountOptions,
+  AlgorandSymbol,
+  AlgorandTransactionOptions,
+  AlgorandTransactionAction,
+} from './models'
 import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
 import { AlgorandCreateAccount } from './algoCreateAccount'
-import { AlgorandCreateAccountOptions } from './models/accountModels'
-import { AlgorandAddress } from './models/cryptoModels'
 import { AlgorandAccount } from './algoAccount'
 import { AlgorandTransaction } from './algoTransaction'
-import { AlgorandTransactionOptions, AlgorandTransactionAction } from './models/transactionModels'
 import { composeAction } from './algoCompose'
 import { decomposeAction } from './algoDecompose'
-import { AlgorandChainActionType } from './models/chainActionTypeModels'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
-import { toAlgorandSymbol } from './helpers/generalModelHelpers'
-import { isValidAlgorandPrivateKey, isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
+import { toAlgorandSymbol, isValidAlgorandPrivateKey, isValidAlgorandPublicKey } from './helpers'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]

@@ -2,19 +2,19 @@ import algosdk from 'algosdk'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
 import {
+  AlgorandAddress,
   AlgoClient,
   AlgorandChainEndpoint,
   AlgorandChainSettings,
   AlgorandChainSettingsCommunicationSettings,
   AlgorandHeader,
-  AlgorandUnit,
   AlgorandSymbol,
-} from './models/generalModels'
-import { AlgorandTxResult } from './models/transactionModels'
+  AlgorandTxResult,
+  AlgorandUnit,
+} from './models'
 import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
-import { AlgorandAddress } from './models/cryptoModels'
-import { toAlgo } from './helpers/generalHelpers'
+import { toAlgo } from './helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint

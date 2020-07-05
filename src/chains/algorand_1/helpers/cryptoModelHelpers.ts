@@ -1,7 +1,7 @@
 import { decodeBase64, decodeUTF8 } from 'tweetnacl-util'
 import * as sha512 from 'js-sha512'
 import { isNullOrEmpty } from '../../../helpers'
-import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandRawPrivateKey } from '../models/cryptoModels'
+import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandRawPrivateKey } from '../models'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
 
 export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {

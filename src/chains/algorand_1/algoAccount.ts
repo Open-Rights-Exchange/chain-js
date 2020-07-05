@@ -2,11 +2,10 @@
 import { notSupported, notImplemented } from '../../helpers'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
-import { AlgorandAddress, AlgorandPublicKey } from './models/cryptoModels'
+import { AlgorandAccountStruct, AlgorandAddress, AlgorandPublicKey } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers/cryptoModelHelpers'
 import { getAddressFromPublicKey } from './algoCrypto'
-import { AlgorandAccountStruct } from './models/algoStructures'
+import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers'
 
 export class AlgorandAccount implements Account {
   private _account: AlgorandAccountStruct
