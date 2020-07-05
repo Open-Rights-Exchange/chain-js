@@ -310,7 +310,7 @@ export class EthereumTransaction implements Transaction {
    * If a specific action.from is specifed, ensure that attached signature matches its address/public key */
   public get hasAllRequiredSignatures(): boolean {
     // If a specific action.from is specifed, ensure that a signature is attached that matches its address/public key
-    if (this.isFromIsValidAddress()) {
+    if (this.isFromAValidAddressOrEmpty()) {
       return this.requiredAuthorization === this._fromAddress
     }
     // if no specific action.from, just confirm any signature is attached
@@ -343,7 +343,7 @@ export class EthereumTransaction implements Transaction {
   /** private property for the one signature address required (by action.from) */
   private get requiredAuthorization(): EthereumAddress {
     this.assertIsValidated()
-    this.assertFromIsValidAddress()
+    this.assertFromIsValid()
     return this.action.from
   }
 
@@ -414,14 +414,15 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
-  /** Whether action.from is "null or empty ethereum argument" OR a "valid ethereum address" */
-  private isFromIsValidAddress(): boolean {
+  /** Whether action.from is either a valid ethereum address or not included
+   * (since a from addr is not required for an Eth transaction - as it can be inferred from the attached signature) */
+  private isFromAValidAddressOrEmpty(): boolean {
     return ethereumTrxArgIsNullOrEmpty(this?.action?.from) || isValidEthereumAddress(this?.action?.from)
   }
 
-  /** Throws is from is not "null or empty ethereum argument" OR "valid ethereum address" */
-  private assertFromIsValidAddress(): void {
-    if (!this.isFromIsValidAddress()) {
+  /** Throws if action.from address isn't valid */
+  private assertFromIsValid(): void {
+    if (!this.isFromAValidAddressOrEmpty()) {
       throwNewError('Transaction action[].from is not a valid address.')
     }
   }
