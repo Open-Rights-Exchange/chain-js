@@ -1,4 +1,3 @@
-import { isValidAddress } from 'algosdk'
 import { decodeBase64, decodeUTF8 } from 'tweetnacl-util'
 import * as sha512 from 'js-sha512'
 import { isNullOrEmpty } from '../../../helpers'
@@ -8,10 +7,6 @@ import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
 export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
   if (!value) return false
   return ed25519Crypto.isValidPublicKey(decodeBase64(value))
-}
-
-export function isValidAlgorandAddress(address: string): boolean {
-  return isValidAddress(address)
 }
 
 export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
