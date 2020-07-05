@@ -5,9 +5,8 @@ import * as aesCrypto from '../../crypto/aesCrypto'
 import { toBuffer, notImplemented } from '../../helpers'
 import { throwNewError } from '../../errors'
 import { EncryptionOptions, EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
-import { toEthBuffer } from './helpers/generalHelpers'
-// eslint-disable-next-line import/no-cycle
-import { toEthereumPublicKey, toEthereumSignature } from './helpers/cryptoModelHelpers'
+// eslint-disable-next-line
+import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { EncryptedDataString } from '../../models'
 
 // eslint-disable-next-line prefer-destructuring
