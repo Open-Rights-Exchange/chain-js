@@ -414,12 +414,12 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
-  /** Whether action.from is a valid address (and not null or empty e.g. '0x00') */
+  /** Whether action.from is "null or empty ethereum argument" OR a "valid ethereum address" */
   private isFromIsValidAddress(): boolean {
     return ethereumTrxArgIsNullOrEmpty(this?.action?.from) || isValidEthereumAddress(this?.action?.from)
   }
 
-  /** Throws is from is not null or empty ethereum argument */
+  /** Throws is from is not "null or empty ethereum argument" OR "valid ethereum address" */
   private assertFromIsValidAddress(): void {
     if (!this.isFromIsValidAddress()) {
       throwNewError('Transaction action[].from is not a valid address.')
