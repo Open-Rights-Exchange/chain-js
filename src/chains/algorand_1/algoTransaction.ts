@@ -330,14 +330,14 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Whether action.from is a valid address (and not null or empty e.g. '0x00') */
-  private isFromIsValidAddress(): boolean {
+  /** Whether action.from is a valid address (and not null or empty) */
+  private isFromAValidAddress(): boolean {
     return isValidAlgorandAddress(this?.action?.from)
   }
 
-  /** Throws is from is not null or empty algorand argument */
+  /** Throws if from is not null or empty algorand argument */
   private assertFromIsValidAddress(): void {
-    if (!this.isFromIsValidAddress()) {
+    if (!this.isFromAValidAddress()) {
       throwNewError('Transaction action[].from is not a valid address.')
     }
   }
