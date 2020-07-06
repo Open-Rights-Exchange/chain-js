@@ -112,10 +112,10 @@ export class EthereumTransaction implements Transaction {
     let { gasPrice = null, gasLimit = null } = this._options || {}
     const { to, value, data } = this._actionHelper.raw
     // 0.000000001 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
-    // Value returned from getGasPrice is in wei. It is then converted to gwei
+    // Convert gas price returned from getGasPrice to Gwei
     gasPrice = isNullOrEmpty(gasPrice) ? 0.000000001 * (await this._chainState.getGasPrice()) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit : gasLimit
-    // gasPrice and gasLimit in Gwei
+    // EthereumJsTx  expects gasPrice and gasLimit in Gwei
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
     this._raw = new EthereumJsTx(trxBody, trxOptions)
     this.setHeaderFromRaw()
