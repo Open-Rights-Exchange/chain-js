@@ -313,7 +313,7 @@ export class EthereumTransaction implements Transaction {
    * If a specific action.from is specifed, ensure that attached signature matches its address/public key */
   public get hasAllRequiredSignatures(): boolean {
     // If a specific action.from is specifed, ensure that a signature is attached that matches its address/public key
-    if (this.isFromAValidAddressOrEmpty()) {
+    if (!this.isFromEmptyOrNullAddress()) {
       return this.requiredAuthorization === this._fromAddress
     }
     // if no specific action.from, just confirm any signature is attached
@@ -420,7 +420,12 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from is either a valid ethereum address or not included
    * (since a from addr is not required for an Eth transaction - as it can be inferred from the attached signature) */
   private isFromAValidAddressOrEmpty(): boolean {
-    return ethereumTrxArgIsNullOrEmpty(this?.action?.from) || isValidEthereumAddress(this?.action?.from)
+    return this.isFromEmptyOrNullAddress() || isValidEthereumAddress(this?.action?.from)
+  }
+
+  /** Whether the from address is null or empty */
+  private isFromEmptyOrNullAddress(): boolean {
+    return ethereumTrxArgIsNullOrEmpty(this?.action?.from)
   }
 
   /** Throws if action.from address isn't valid */
