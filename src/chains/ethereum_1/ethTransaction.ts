@@ -31,6 +31,7 @@ import {
   toEthereumPublicKey,
   toEthereumAddress,
   isValidEthereumAddress,
+  toGweiFromWei,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -113,7 +114,7 @@ export class EthereumTransaction implements Transaction {
     const { to, value, data } = this._actionHelper.raw
     // 0.000000001 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
     // Convert gas price returned from getGasPrice to Gwei
-    gasPrice = isNullOrEmpty(gasPrice) ? 0.000000001 * (await this._chainState.getGasPrice()) : gasPrice
+    gasPrice = isNullOrEmpty(gasPrice) ? toGweiFromWei(await this._chainState.getGasPrice()) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit : gasLimit
     // EthereumJsTx  expects gasPrice and gasLimit in Gwei
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }

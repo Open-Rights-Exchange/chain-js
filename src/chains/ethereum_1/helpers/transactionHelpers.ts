@@ -30,6 +30,12 @@ export function toWei(amount: number | BN, type: EthUnit) {
   return web3.utils.toWei(new BN(amount), type)
 }
 
+/** Converts wei amount to Gwei
+ *  1 Gwei = 1000000000 wei */
+export function toGweiFromWei(amount: number | BN) {
+  return 0.000000001 * (amount as number)
+}
+
 /** Checks if nullOrEmpty and ethereum spesific hexadecimal and Buffer values that implies empty */
 export function ethereumTrxArgIsNullOrEmpty(obj: any) {
   if (
