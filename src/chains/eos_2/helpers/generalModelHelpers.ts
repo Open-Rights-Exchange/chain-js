@@ -11,11 +11,11 @@ export function isValidEosDate(str: string): str is EosDate {
 }
 
 // A string representation of an EOSIO symbol, composed of a float with a precision of 3-4
-// ... and a symbol composed of capital letters between 1-3 letters separated by a space
+// ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
   if (isNullOrEmpty(str)) return false
-  return str.match(/^\d{1,}\.\d{3,4} [A-Z]{3}$/) !== null
+  return str.match(/^\d{1,}\.?\d{0,4} [A-Z]{1,7}$/) !== null
 }
 
 /** Expects a string composed of up to 7 upper-case letters */
@@ -47,8 +47,8 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
 /** Construct a well-formatted EOS Asset string *
  *  e.g. '1.0000 EOS' */
 export function toEosAsset(amount: number, symbol: string): EosAsset {
-  if (symbol.length < 3 || symbol.length > 4) throw new Error('symbol must be 3 or 4 characters long')
-  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, useGrouping: false }).format(amount)
+  if (symbol.length < 3 || symbol.length > 7) throw new Error('symbol must be 3 or 4 characters long')
+  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, useGrouping: false }).format(amount)
   const asset = `${value} ${symbol.toUpperCase()}`
   // Note: the check below allows Typescript to confirm that asset can be of type EosAsset
   // If we dont call isValidEosAsset then Typescript shows an error
