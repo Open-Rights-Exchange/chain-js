@@ -36,7 +36,7 @@ export type AlgorandChainSettingsCommunicationSettings = any
 export type AlgorandMultiSigOptions = {
   version: Number
   threshold: Number
-  accounts: AlgorandAddress[]
+  addrs: AlgorandAddress[]
 }
 
 /**  Algorand multisig account is similar to a native algorand address */
