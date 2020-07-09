@@ -83,6 +83,11 @@ export class AlgorandTransaction implements Transaction {
     return !!this._raw
   }
 
+  /** Algorand provides the functionality to sign a transaction using multi-signature account */
+  get supportsMultisigTransaction(): boolean {
+    return true
+  }
+
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */

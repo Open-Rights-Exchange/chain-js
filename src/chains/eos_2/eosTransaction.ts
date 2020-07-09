@@ -92,6 +92,11 @@ export class EosTransaction implements Transaction {
     return this._sendReceipt
   }
 
+  /** Support for eos multi-sig transactions not yet implemented in chain-js */
+  get supportsMultisigTransaction(): boolean {
+    return false
+  }
+
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */

@@ -94,6 +94,11 @@ export class EthereumTransaction implements Transaction {
     return !!this._raw
   }
 
+  /** Ethereum doesn't have any native multi-sig functionality */
+  get supportsMultisigTransaction(): boolean {
+    return false
+  }
+
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
