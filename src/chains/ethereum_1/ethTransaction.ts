@@ -31,6 +31,7 @@ import {
   toEthereumPublicKey,
   toEthereumAddress,
   isValidEthereumAddress,
+  toGweiFromWei,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -111,9 +112,11 @@ export class EthereumTransaction implements Transaction {
     const { nonce = null } = this._options || {}
     let { gasPrice = null, gasLimit = null } = this._options || {}
     const { to, value, data } = this._actionHelper.raw
-    // 1 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
-    gasPrice = isNullOrEmpty(gasPrice) ? 1 * (await this._chainState.getGasPrice()) : gasPrice
+    // 0.000000001 * ... is the gasPrice multiplayer currently hardcoded, ready to be replaced by an optional parameter
+    // Convert gas price returned from getGasPrice to Gwei
+    gasPrice = isNullOrEmpty(gasPrice) ? toGweiFromWei(await this._chainState.getGasPrice()) : gasPrice
     gasLimit = isNullOrEmpty(gasLimit) ? (await this._chainState.getBlock(EthereumBlockType.Latest)).gasLimit : gasLimit
+    // EthereumJsTx  expects gasPrice and gasLimit in Gwei
     const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
     this._raw = new EthereumJsTx(trxBody, trxOptions)
     this.setHeaderFromRaw()
@@ -310,7 +313,7 @@ export class EthereumTransaction implements Transaction {
    * If a specific action.from is specifed, ensure that attached signature matches its address/public key */
   public get hasAllRequiredSignatures(): boolean {
     // If a specific action.from is specifed, ensure that a signature is attached that matches its address/public key
-    if (this.isFromAValidAddressOrEmpty()) {
+    if (!this.isFromEmptyOrNullAddress()) {
       return this.requiredAuthorization === this._fromAddress
     }
     // if no specific action.from, just confirm any signature is attached
@@ -417,7 +420,12 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from is either a valid ethereum address or not included
    * (since a from addr is not required for an Eth transaction - as it can be inferred from the attached signature) */
   private isFromAValidAddressOrEmpty(): boolean {
-    return ethereumTrxArgIsNullOrEmpty(this?.action?.from) || isValidEthereumAddress(this?.action?.from)
+    return this.isFromEmptyOrNullAddress() || isValidEthereumAddress(this?.action?.from)
+  }
+
+  /** Whether the from address is null or empty */
+  private isFromEmptyOrNullAddress(): boolean {
+    return ethereumTrxArgIsNullOrEmpty(this?.action?.from)
   }
 
   /** Throws if action.from address isn't valid */
