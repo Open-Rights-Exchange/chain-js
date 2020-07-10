@@ -1,27 +1,35 @@
-// import { toHex } from 'web3-utils'
 import {
   EthereumAddress,
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
-  EthereumValue,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toBigIntegerString } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
+import { ERC_DEFAULT_TOKEN_PRECISION } from '../../../ethConstants'
 
-interface Erc20TransferFromParams {
+export interface Erc20TransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
+  precision?: number
   transferFrom: EthereumAddress
   to: EthereumAddress
-  value: EthereumValue
+  value: string
 }
 
-export const composeAction = ({ contractAddress, from, transferFrom, to, value }: Erc20TransferFromParams) => {
+export const composeAction = ({
+  contractAddress,
+  from,
+  precision,
+  transferFrom,
+  to,
+  value,
+}: Erc20TransferFromParams) => {
+  const valueBigInt = toBigIntegerString(value, 10, precision || ERC_DEFAULT_TOKEN_PRECISION)
   const contract = {
     abi: erc20Abi,
-    parameters: [transferFrom, to, value],
+    parameters: [transferFrom, to, valueBigInt],
     method: 'transferFrom',
   }
   return {
@@ -39,7 +47,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       from,
       transferFrom: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 1) as string),
-      value: getArrayIndexOrNull(contract?.parameters, 2) as number,
+      value: getArrayIndexOrNull(contract?.parameters, 2) as string,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {

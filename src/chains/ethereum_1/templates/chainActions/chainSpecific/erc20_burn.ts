@@ -4,22 +4,24 @@ import {
   EthereumChainActionType,
   EthereumTransactionAction,
   EthereumDecomposeReturn,
-  EthereumValue,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
 import { getArrayIndexOrNull } from '../../../../../helpers'
-import { ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { ethereumTrxArgIsNullOrEmpty, toBigIntegerString } from '../../../helpers'
+import { ERC_DEFAULT_TOKEN_PRECISION } from '../../../ethConstants'
 
-interface Erc20BurnParams {
+export interface Erc20BurnParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
-  value: EthereumValue
+  precision?: number
+  value: string
 }
 
-export const composeAction = ({ contractAddress, from, value }: Erc20BurnParams) => {
+export const composeAction = ({ contractAddress, from, precision, value }: Erc20BurnParams) => {
+  const valueBigInt = toBigIntegerString(value, 10, precision || ERC_DEFAULT_TOKEN_PRECISION)
   const contract = {
     abi: erc20Abi,
-    parameters: [value],
+    parameters: [valueBigInt],
     method: 'burn',
   }
   return {
@@ -35,7 +37,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
     const returnData: Erc20BurnParams = {
       contractAddress: to,
       from,
-      value: getArrayIndexOrNull(contract?.parameters, 0) as number,
+      value: getArrayIndexOrNull(contract?.parameters, 0) as string,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {
