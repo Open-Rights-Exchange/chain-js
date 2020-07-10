@@ -23,7 +23,7 @@ export const HEX_PREFIX = '0x'
 
 // token related
 export const NATIVE_CHAIN_SYMBOL = 'ETH'
-export const ERC_DEFAULT_TOKEN_PRECISION = 0 // assumes a token has no digits of precision unless specified
+export const DEFAULT_TOKEN_PRECISION = 0 // assumes a token has no digits of precision unless specified
 export const ETH_TOKEN_PRECISION = 18
 
 /** The chain address of the default token contract (if any) */
