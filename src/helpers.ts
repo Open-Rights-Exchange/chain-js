@@ -174,3 +174,20 @@ export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, key: string)
   const header = headers.find((val: {}) => Object.keys(val).includes(key))
   return header
 }
+
+/** returns the number of decimal places in a number (expressed as a string) - supports exponential notiation
+ *  e.g. '.05' = 2, '25e-100'= 100. '2.5e-99' = 100 */
+export function getDecimalPlaces(num = '') {
+  const match = num.match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/)
+  if (!match) {
+    return 0
+  }
+
+  return Math.max(
+    0,
+    // Number of digits right of decimal point.
+    (match[1] ? match[1].length : 0) -
+      // Adjust for scientific notation.
+      (match[2] ? +match[2] : 0),
+  )
+}
