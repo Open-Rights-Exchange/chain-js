@@ -1,9 +1,13 @@
 import { AlgorandUnit } from '../models'
 
-/** Algorand supports only 2 units: algo and microalgo */
-export function toMicroAlgo(amount: number, type: AlgorandUnit) {
-  if (type === AlgorandUnit.Algo) {
-    return amount * 100000
+/** Convert amount from fromType to microAlgo */
+export function toMicroAlgo(amount: string, fromType: AlgorandUnit) {
+  const value = parseFloat(amount)
+  if (fromType === AlgorandUnit.Algo) {
+    return (value * 100000).toString()
   }
-  return amount
+  if (fromType === AlgorandUnit.Microalgo) {
+    return amount
+  }
+  throw new Error(`Not a supported Algorand type: ${fromType}`)
 }
