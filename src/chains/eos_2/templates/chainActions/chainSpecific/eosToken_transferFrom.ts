@@ -9,12 +9,12 @@ import {
 
 const actionName = 'transferFrom'
 
-interface TokenTransferFromParams {
+export interface TokenTransferFromParams {
   approvedAccountName: EosEntityName
   contractName: EosEntityName
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
-  amount: number
+  amount: string
   symbol: EosSymbol
   memo?: string
   permission: EosEntityName

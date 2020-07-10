@@ -9,11 +9,11 @@ import {
 
 const actionName = 'create'
 
-interface TokenCreateParams {
+export interface TokenCreateParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
   toAccountName: EosEntityName
-  amount: number
+  amount: string
   symbol: EosSymbol
   permission: EosEntityName
 }

@@ -20,5 +20,6 @@ export const DEFAULT_CREATEESCROW_APPNAME = 'free'
 
 // token related
 export const NATIVE_CHAIN_SYMBOL = 'EOS'
+
 /** The chain address of the default token contract (if any) */
 export const DEFAULT_CHAIN_TOKEN_ADDRESS = 'eosio.token'

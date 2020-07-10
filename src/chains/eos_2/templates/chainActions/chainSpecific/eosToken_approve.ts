@@ -9,12 +9,12 @@ import {
 
 const actionName = 'approve'
 
-interface TokenApproveParams {
+export interface TokenApproveParams {
   contractName: EosEntityName
   memo?: string
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
-  amount: number
+  amount: string
   symbol: EosSymbol
   permission: EosEntityName
 }
