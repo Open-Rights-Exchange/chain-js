@@ -34,7 +34,7 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
         approvedAccountName: from as string,
         fromAccountName: transferFrom as string,
         toAccountName: to as string,
-        amount: value as number,
+        amount: value,
       },
       chainActionType: ChainActionType.TokenTransferFrom,
     }
