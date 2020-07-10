@@ -7,7 +7,7 @@ import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toWei, toEthereumSymbol } from '../helpers'
+import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
@@ -79,17 +79,20 @@ const { env } = process
       contractName: toChainEntityName('0x04825941Ad80A6a869e85606b29c9D25144E91e6'),
       toAccountName: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
       symbol: toEthereumSymbol(EthUnit.Wei),
-      amount: '20',
+      // precision: 18, // precision should be provided if possible
+      amount: '20.000000000000000000', // if precision isn't specified, token precision is infered from the number of digits after the decimal place
     }
 
     const composeERC20TransferParams: Erc20TransferParams = {
       contractAddress: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
       to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      precision: 18, // precision should be provided if possible
       value: '20',
     }
 
     const composeERC20IssueParams: Erc20IssueParams = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18, // precision should be provided if possible
       value: '20',
     }
 
@@ -106,33 +109,36 @@ const { env } = process
     await ropsten.connect()
 
     // // ---> Sign and send ethereum transfer with compose Action
-    const transaction = await ropsten.new.Transaction()
-    transaction.actions = [ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
-    console.log(transaction.actions[0])
-    const decomposed = ropsten.decomposeAction(transaction.actions[0])
-    console.log(JSON.stringify(decomposed))
-    await transaction.prepareToBeSigned()
-    await transaction.validate()
-    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
-    console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('send response:', JSON.stringify(await transaction.send()))
-
-    // ---> Sign and send erc20 transfer Transaction
     // const transaction = await ropsten.new.Transaction()
-    // await transaction.addAction(sampleTransferTrx)
-    // transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    // transaction.actions = [ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     // console.log(transaction.actions[0])
     // const decomposed = ropsten.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
+    // console.log(JSON.stringify(decomposed))
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
+    // ---> Sign and send erc20 transfer Transaction
+    const transaction = await ropsten.new.Transaction()
+    transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    console.log(transaction.actions[0])
+    const decomposed = ropsten.decomposeAction(transaction.actions[0])
+
+    console.log(decomposed)
+    console.log(
+      'token value converted back using precision:',
+      fromTokenValueString(decomposed[0]?.args?.amount, 10, composeERC20TransferParams?.precision),
+    )
+    await transaction.prepareToBeSigned()
+    await transaction.validate()
+    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    console.log('missing signatures: ', transaction.missingSignatures)
+    console.log('send response:', JSON.stringify(await transaction.send()))
+
     // ---> Sign and send erc20 issue Transaction
     // const transaction = await ropsten.new.Transaction()
-    // // await transaction.addAction(sampleTransferTrx)
     // transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
     // console.log(transaction.actions[0])
     // const decomposed = ropsten.decomposeAction(transaction.actions[0])
@@ -145,7 +151,6 @@ const { env } = process
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const transaction = await ropsten.new.Transaction()
-    // // await transaction.addAction(sampleTransferTrx)
     // await transaction.setFromRaw(sampleSetFromRawTrx)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
