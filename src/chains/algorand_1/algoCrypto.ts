@@ -134,7 +134,7 @@ export function generateMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions
   const mSigOptions = {
     version: multiSigOptions.version,
     threshold: multiSigOptions.threshold,
-    addrs: multiSigOptions.accounts,
+    addrs: multiSigOptions.addrs,
   }
   const multisigAddress: AlgorandMutliSigAccount = algosdk.multisigAddress(mSigOptions)
   const publicKey = getAlgorandPublicKeyFromAddress(multisigAddress)
