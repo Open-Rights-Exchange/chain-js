@@ -9,6 +9,7 @@ import {
 export const composeAction = ({
   approvedAccountName,
   contractName,
+  precision,
   fromAccountName,
   toAccountName,
   amount,
@@ -16,6 +17,7 @@ export const composeAction = ({
   ...erc20TokenTransferFromComposeAction({
     contractAddress: contractName,
     from: approvedAccountName,
+    precision,
     transferFrom: fromAccountName,
     to: toAccountName,
     value: amount,
