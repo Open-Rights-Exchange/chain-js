@@ -9,10 +9,10 @@ import {
 
 const actionName = 'retire'
 
-interface TokenRetireParams {
+export interface TokenRetireParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
-  amount: number
+  amount: string
   symbol: EosSymbol
   memo?: string
   permission: EosEntityName

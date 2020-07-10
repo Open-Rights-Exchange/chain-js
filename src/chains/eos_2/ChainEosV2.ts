@@ -233,11 +233,6 @@ class ChainEosV2 implements Chain {
   /** Verifies that the value is a valid EOS entity name (e.g. an account name) */
   isValidEosEntityName = isValidEosEntityName
 
-  /** Verifies that the value is a valid chain asset string */
-  public isValidAsset = (value: string): boolean => {
-    return !!isValidEosAsset(value)
-  }
-
   /** Verifies that the value is a valid EOS asset string */
   isValidEosAsset = isValidEosAsset
 
@@ -248,11 +243,6 @@ class ChainEosV2 implements Chain {
 
   /** Verifies that the value is a valid EOS date */
   isValidEosDate = isValidEosDate
-
-  /** Ensures that the value comforms to a well-formed chain asset string */
-  public toAsset = (amount: number, symbol: string): ChainAsset => {
-    return toEosAsset(amount, symbol) as ChainAsset
-  }
 
   /** Ensures that the value comforms to a well-formed EOS asset string */
   toEosAsset = toEosAsset

@@ -20,7 +20,7 @@ export const composeAction = ({
     approvedAccountName,
     fromAccountName,
     toAccountName,
-    amount: amount as number,
+    amount,
     symbol,
     memo,
     permission,

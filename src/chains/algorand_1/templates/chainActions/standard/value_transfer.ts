@@ -12,7 +12,7 @@ export const composeAction = ({
 }: ValueTransferParams) => ({
   from: fromAccountName,
   to: toAccountName,
-  amount: toMicroAlgo(amount as number, symbol as AlgorandUnit),
+  amount: toMicroAlgo(amount, symbol as AlgorandUnit),
   note: memo,
 })
 

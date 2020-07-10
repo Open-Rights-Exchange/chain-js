@@ -4,9 +4,9 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'define'
 
-interface CreateEscrowDefineParams {
+export interface CreateEscrowDefineParams {
   accountName: EosEntityName
-  airdrop: createEscrowAirdropParams
+  airdrop: CreateEscrowAirdropParams
   appName: string
   contractName: EosEntityName
   cpu: string
@@ -14,17 +14,17 @@ interface CreateEscrowDefineParams {
   net: string
   pricekey: string
   ram: string
-  rex: createEscrowRexParams
+  rex: CreateEscrowRexParams
   useRex: boolean
 }
 
-interface createEscrowAirdropParams {
+export interface CreateEscrowAirdropParams {
   contract: EosEntityName
   tokens: string
   limit: string
 }
 
-interface createEscrowRexParams {
+export interface CreateEscrowRexParams {
   netLoanPayment: string
   netLoanFund: string
   cpuLoanPayment: string

@@ -4,7 +4,7 @@ import { toEosDate, toEosAsset, isValidEosEntityName, isValidEosPublicKey, toEos
 const eosDate = toEosDate(new Date())
 console.log(eosDate)
 
-const eosAsset = toEosAsset(1.1, 'eos')
+const eosAsset = toEosAsset('1.1000', 'eos')
 const eosPublicKey = toEosPublicKey('EOS7Rq5JcGyCGQXbRkmHLDpFTti1ZJFhcvU7HeX2m61wTkoHjJAMJ')
 console.log(eosAsset, eosPublicKey)
 

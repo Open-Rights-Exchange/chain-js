@@ -151,8 +151,8 @@ export const createAccountOptions_EosNative = {
   },
   resourcesOptions: {
     ramBytes: 4000,
-    stakeNetQuantity: toEosAsset(1, 'EOS'),
-    stakeCpuQuantity: toEosAsset(1, 'EOS'),
+    stakeNetQuantity: toEosAsset('1.0000', 'EOS'),
+    stakeCpuQuantity: toEosAsset('1.0000', 'EOS'),
     transfer: false,
   },
 }

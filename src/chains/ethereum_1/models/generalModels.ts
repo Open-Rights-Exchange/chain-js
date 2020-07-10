@@ -1,12 +1,6 @@
 import { BN } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
-import {
-  ChainAssetBrand,
-  ChainDateBrand,
-  ChainEntityNameBrand,
-  ChainSymbolBrand,
-  EncryptedDataString,
-} from '../../../models'
+import { ChainDateBrand, ChainEntityNameBrand, ChainSymbolBrand, EncryptedDataString } from '../../../models'
 import { EncryptionOptions, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
 
 /** Category of chain functions - useful in error mapping */
@@ -57,7 +51,6 @@ export type EthereumChainEndpoint = {
 /** For future use - add any settings needed to customize communication with API endpoint */
 export type EthereumChainSettingsCommunicationSettings = {}
 
-export type EthereumAsset = BN & ChainAssetBrand
 export type EthereumBlockNumber = string | number | BN | BigNumber | EthereumBlockType
 export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
 export type EthereumEntityName = string & ChainEntityNameBrand
@@ -81,30 +74,31 @@ export type EthereumString = {
 export type EthereumValue = string | number | Buffer | BN
 
 /** Ethereum value units */
+// See: https://www.languagesandnumbers.com/articles/en/ethereum-ether-units
 export enum EthUnit {
-  Noether = 'noether',
-  Wei = 'wei',
-  Kwei = 'kwei',
-  Babbage = 'babbage',
-  femtoether = 'femtoether',
-  Mwei = 'mwei',
-  Lovelace = 'lovelace',
-  Picoether = 'picoether',
-  Qwei = 'gwei',
-  Gwei = 'Gwei',
-  Shannon = 'shannon',
-  Nanoether = 'nanoether',
-  Nano = 'nano',
-  Szabo = 'szabo',
-  Microether = 'microether',
-  Micro = 'micro',
-  Finney = 'finney',
-  Milliether = 'milliether',
-  Milli = 'milli',
-  Ether = 'ether',
-  Kether = 'kether',
-  Grand = 'grand',
-  Mether = 'mether',
-  Gether = 'gether',
-  Thether = 'tether',
+  Noether = 'noether', // 0
+  Wei = 'wei', // 1 Wei
+  Kwei = 'kwei', // 1000 Wei
+  femtoether = 'femtoether', // 1000 Wei
+  Lovelace = 'lovelace', // 1,000 Wei
+  Mwei = 'mwei', // 1,000,000 Wei
+  Babbage = 'babbage', // 1,000,000 Wei
+  Picoether = 'picoether', // 1,000,000 Wei
+  Qwei = 'gwei', // 1,000,000,000 Wei
+  Gwei = 'Gwei', // 1,000,000,000 Wei
+  Shannon = 'shannon', // 1,000,000,000 Wei
+  Nanoether = 'nanoether', // 1,000,000,000 Wei
+  Nano = 'nano', // 1,000,000,000 Wei
+  Szabo = 'szabo', // 1,000,000,000,000 Wei
+  Microether = 'microether', // 1,000,000,000,000 Wei
+  Micro = 'micro', // 1,000,000,000,000 Wei
+  Finney = 'finney', // 1,000,000,000,000,000 Wei
+  Milliether = 'milliether', // 1,000,000,000,000,000 Wei
+  Milli = 'milli', // 1,000,000,000,000,000 Wei
+  Ether = 'ether', // 1,000,000,000,000,000,000 Wei
+  Kether = 'kether', // 1000 Eth
+  Grand = 'grand', // 1000 Eth
+  Mether = 'mether', // 1,000,000 Eth
+  Gether = 'gether', // 1,000,000,000 Eth
+  Thether = 'tether', // 1,000,000,000,000 Eth
 }

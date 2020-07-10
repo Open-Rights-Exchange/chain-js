@@ -9,7 +9,7 @@ import { erc721Abi } from '../../abis/erc721Abi'
 import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
 
-interface Erc721TransferFromParams {
+export interface Erc721TransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   transferFrom: EthereumAddress

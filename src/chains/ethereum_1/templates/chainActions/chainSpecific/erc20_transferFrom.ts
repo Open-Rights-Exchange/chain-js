@@ -1,27 +1,34 @@
-// import { toHex } from 'web3-utils'
 import {
   EthereumAddress,
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
-  EthereumValue,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
 
-interface Erc20TransferFromParams {
+export interface Erc20TransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
+  precision?: number
   transferFrom: EthereumAddress
   to: EthereumAddress
-  value: EthereumValue
+  value: string
 }
 
-export const composeAction = ({ contractAddress, from, transferFrom, to, value }: Erc20TransferFromParams) => {
+export const composeAction = ({
+  contractAddress,
+  from,
+  precision,
+  transferFrom,
+  to,
+  value,
+}: Erc20TransferFromParams) => {
+  const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
-    parameters: [transferFrom, to, value],
+    parameters: [transferFrom, to, valueString],
     method: 'transferFrom',
   }
   return {
@@ -39,7 +46,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       from,
       transferFrom: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 1) as string),
-      value: getArrayIndexOrNull(contract?.parameters, 2) as number,
+      value: getArrayIndexOrNull(contract?.parameters, 2) as string,
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {

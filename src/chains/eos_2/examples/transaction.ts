@@ -87,7 +87,7 @@ const { env } = process
     contractName: toEosEntityName('eosio.token'),
     fromAccountName: toEosEntityName('proppropprop'),
     toAccountName: toEosEntityName('oreidfunding'),
-    amount: 0.0001,
+    amount: '0.0001',
     symbol: toEosSymbol('EOS'),
     memo: 'memo',
     permission: toEosEntityName('active'),

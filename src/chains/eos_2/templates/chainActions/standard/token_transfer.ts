@@ -18,7 +18,7 @@ export const composeAction = ({
     contractName,
     fromAccountName,
     toAccountName,
-    amount: amount as number, // handle possible BN
+    amount,
     symbol,
     memo,
     permission,

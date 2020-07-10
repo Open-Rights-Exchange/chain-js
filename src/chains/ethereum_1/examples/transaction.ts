@@ -5,9 +5,10 @@
 /* eslint-disable no-console */
 import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
-import { ChainActionType, PrivateKey, ConfirmType } from '../../../models'
+import { ChainActionType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toWei, toEthUnit } from '../helpers'
+import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
   EthereumChainForkType,
@@ -18,6 +19,10 @@ import {
   EthereumAddress,
   EthereumChainEndpoint,
 } from '../models'
+import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
+import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
+import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecific/erc721_transferFrom'
+
 import { erc20Abi } from '../templates/abis/erc20Abi'
 import { erc721Abi } from '../templates/abis/erc721Abi'
 
@@ -64,59 +69,34 @@ const { env } = process
       //  gasLimit: '0x00',
     }
 
-    interface valueTransferParams {
-      fromAccountName?: EthereumAddress
-      toAccountName: EthereumAddress
-      tokenAmount: number | BN
-      tokenSymbol?: EthUnit
-    }
-    const composeValueTransferParams: valueTransferParams = {
-      toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      tokenAmount: 10,
+    const composeValueTransferParams: ValueTransferParams = {
+      toAccountName: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      amount: '0.000000000000000033',
+      symbol: toEthereumSymbol(EthUnit.Ether),
     }
 
-    interface tokenTransferParams {
-      fromAccountName?: EthereumAddress
-      toAccountName?: EthereumAddress
-      tokenAmount?: number
-      contractName?: EthereumAddress
-    }
-    const composeTokenTransferParams: tokenTransferParams = {
-      contractName: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
-      toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      tokenAmount: 20, // 0xD38ADf7D0204a6f5b7ddDe509378e43B1447CDb6
+    const composeTokenTransferParams: TokenTransferParams = {
+      contractName: toChainEntityName('0x04825941Ad80A6a869e85606b29c9D25144E91e6'),
+      toAccountName: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      symbol: toEthereumSymbol(EthUnit.Wei),
+      // precision: 18, // precision should be provided if possible
+      amount: '20.000000000000000000', // if precision isn't specified, token precision is infered from the number of digits after the decimal place
     }
 
-    interface erc20TransferParams {
-      contractAddress: EthereumAddress
-      from?: EthereumAddress
-      to: EthereumAddress
-      value: number
-    }
-    const composeERC20TransferParams: erc20TransferParams = {
+    const composeERC20TransferParams: Erc20TransferParams = {
       contractAddress: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
       to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      value: 20, // 0xD38ADf7D0204a6f5b7ddDe509378e43B1447CDb6
+      precision: 18, // precision should be provided if possible
+      value: '20',
     }
 
-    interface erc20IssueParams {
-      contractAddress: EthereumAddress
-      from?: EthereumAddress
-      value: number
-    }
-    const composeERC20IssueParams: erc20IssueParams = {
+    const composeERC20IssueParams: Erc20IssueParams = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      precision: 18, // precision should be provided if possible
+      value: '20',
     }
 
-    interface erc721TransferFromParams {
-      contractAddress: EthereumAddress
-      from?: EthereumAddress
-      transferFrom: EthereumAddress
-      to: EthereumAddress
-      tokenId: number
-    }
-    const composeERC721TransferFromParams: erc721TransferFromParams = {
+    const composeERC721TransferFromParams: Erc721TransferFromParams = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       transferFrom: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
       to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
@@ -133,17 +113,33 @@ const { env } = process
     // transaction.actions = [ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     // console.log(transaction.actions[0])
     // const decomposed = ropsten.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
+    // console.log(JSON.stringify(decomposed))
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
-    // // ---> Sign and send erc20 transfer Transaction
+    // ---> Sign and send erc20 transfer Transaction
+    const transaction = await ropsten.new.Transaction()
+    transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    console.log(transaction.actions[0])
+    const decomposed = ropsten.decomposeAction(transaction.actions[0])
+
+    console.log(decomposed)
+    console.log(
+      'token value converted back using precision:',
+      fromTokenValueString(decomposed[0]?.args?.amount, 10, composeERC20TransferParams?.precision),
+    )
+    await transaction.prepareToBeSigned()
+    await transaction.validate()
+    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    console.log('missing signatures: ', transaction.missingSignatures)
+    console.log('send response:', JSON.stringify(await transaction.send()))
+
+    // ---> Sign and send erc20 issue Transaction
     // const transaction = await ropsten.new.Transaction()
-    // await transaction.addAction(sampleTransferTrx)
-    // transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    // transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
     // console.log(transaction.actions[0])
     // const decomposed = ropsten.decomposeAction(transaction.actions[0])
     // console.log(decomposed)
@@ -153,22 +149,8 @@ const { env } = process
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
-    // ---> Sign and send erc20 issue Transaction
-    const transaction = await ropsten.new.Transaction()
-    // await transaction.addAction(sampleTransferTrx)
-    transaction.actions = [ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
-    console.log(transaction.actions[0])
-    const decomposed = ropsten.decomposeAction(transaction.actions[0])
-    console.log(decomposed)
-    await transaction.prepareToBeSigned()
-    await transaction.validate()
-    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
-    console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('send response:', JSON.stringify(await transaction.send()))
-
     // // ---> Sign and send ethereum transfer with setFromRaw()
     // const transaction = await ropsten.new.Transaction()
-    // // await transaction.addAction(sampleTransferTrx)
     // await transaction.setFromRaw(sampleSetFromRawTrx)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
