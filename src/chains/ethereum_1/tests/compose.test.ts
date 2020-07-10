@@ -38,6 +38,7 @@ describe('Compose Chain Actions', () => {
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       spender: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Approve, args)
@@ -50,6 +51,7 @@ describe('Compose Chain Actions', () => {
 
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Burn, args)
@@ -62,6 +64,7 @@ describe('Compose Chain Actions', () => {
 
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Issue, args)
@@ -75,6 +78,7 @@ describe('Compose Chain Actions', () => {
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Transfer, args)
@@ -89,6 +93,7 @@ describe('Compose Chain Actions', () => {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       transferFrom: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20TransferFrom, args)
@@ -102,6 +107,7 @@ describe('Compose Chain Actions', () => {
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      precision: 18,
       tokenId: 1,
     }
     const actAction = composeAction(EthereumChainActionType.ERC721Approve, args)
