@@ -19,12 +19,12 @@ describe('Compose Chain Actions', () => {
   it('creates eth transfer action object', async () => {
     const expAction = {
       to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      value: new BN(10),
+      value: new BN(10, 10), // number 10 (in decimal)
     }
 
     const args = {
       toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      amount: 10,
+      amount: '10',
     }
     const actAction = composeAction(ChainActionType.ValueTransfer, args)
 
@@ -38,7 +38,7 @@ describe('Compose Chain Actions', () => {
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       spender: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Approve, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
@@ -50,7 +50,7 @@ describe('Compose Chain Actions', () => {
 
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Burn, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
@@ -62,7 +62,7 @@ describe('Compose Chain Actions', () => {
 
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Issue, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
@@ -75,7 +75,7 @@ describe('Compose Chain Actions', () => {
     const args = {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20Transfer, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
@@ -89,7 +89,7 @@ describe('Compose Chain Actions', () => {
       contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       transferFrom: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      value: 20,
+      value: '20',
     }
     const actAction = composeAction(EthereumChainActionType.ERC20TransferFrom, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)

@@ -19,7 +19,7 @@ describe('Decompose Chain Actions', () => {
   const composedEthTransferAction: EthereumTransactionAction = {
     to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
     from: '0x0000000000000000000000000000000000000000',
-    value: new BN(10),
+    value: '10',
     data: toEthereumTxData('0x00'),
   }
 
@@ -30,7 +30,7 @@ describe('Decompose Chain Actions', () => {
         args: {
           toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
           fromAccountName: '0x0000000000000000000000000000000000000000',
-          amount: new BN(10),
+          amount: '10',
           symbol: 'wei',
         },
       },
@@ -48,7 +48,7 @@ describe('Decompose Chain Actions', () => {
           contractName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           fromAccountName: '0x0000000000000000000000000000000000000000',
           toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          amount: 20,
+          amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
@@ -57,7 +57,7 @@ describe('Decompose Chain Actions', () => {
           contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           from: '0x0000000000000000000000000000000000000000',
           spender: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          value: 20,
+          value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
     ]
@@ -73,7 +73,7 @@ describe('Decompose Chain Actions', () => {
         args: {
           contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           from: '0x0000000000000000000000000000000000000000',
-          value: 20,
+          value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
     ]
@@ -89,7 +89,7 @@ describe('Decompose Chain Actions', () => {
         args: {
           contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           from: '0x0000000000000000000000000000000000000000',
-          value: 20,
+          value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
     ]
@@ -106,7 +106,7 @@ describe('Decompose Chain Actions', () => {
           contractName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           fromAccountName: '0x0000000000000000000000000000000000000000',
           toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          amount: 20,
+          amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
@@ -115,7 +115,7 @@ describe('Decompose Chain Actions', () => {
           contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
           from: '0x0000000000000000000000000000000000000000',
           to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          value: 20,
+          value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
     ]
@@ -133,7 +133,7 @@ describe('Decompose Chain Actions', () => {
           approvedAccountName: '0x0000000000000000000000000000000000000000',
           fromAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
           toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          amount: 20,
+          amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
@@ -143,7 +143,7 @@ describe('Decompose Chain Actions', () => {
           from: '0x0000000000000000000000000000000000000000',
           transferFrom: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
           to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          value: 20,
+          value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
     ]
