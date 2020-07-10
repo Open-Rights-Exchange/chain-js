@@ -8,7 +8,7 @@ import {
 
 const actionName = 'createoreacc'
 
-interface OreCreateAccountParams {
+export interface OreCreateAccountParams {
   accountName: EosEntityName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName

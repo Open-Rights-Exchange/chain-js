@@ -25,12 +25,10 @@ import {
   EthereumSymbol,
 } from './models'
 import {
-  isValidEthereumAsset,
   isValidEthereumDateString,
   isValidEthereumEntityName,
   isValidEthereumPublicKey,
   isValidEthereumPrivateKey,
-  toEthereumAsset,
   toEthereumDate,
   toEthereumEntityName,
   toEthereumPublicKey,
@@ -207,14 +205,6 @@ class ChainEthereumV1 implements Chain {
   /** Verifies that the value is a valid Ethereum entity name (e.g. an account name) */
   isValidEthereumEntityName = isValidEthereumEntityName
 
-  /** Verifies that the value is a valid chain asset string */
-  public isValidAsset = (value: number | BN): boolean => {
-    return isValidEthereumAsset(value)
-  }
-
-  /** Verifies that the value is a valid Ethereum value */
-  isValidEthereumAsset = isValidEthereumAsset
-
   /** Verifies that the value is a valid chain date */
   public isValidDate = (value: string): boolean => {
     return isValidEthereumDateString(value)
@@ -222,14 +212,6 @@ class ChainEthereumV1 implements Chain {
 
   /** Verifies that the value is a valid Ethereum date */
   isValidEthereumDate = isValidEthereumDateString
-
-  /** Ensures that the value comforms to a well-formed ethereum value */
-  public toAsset = (amount: number, symbol: string): ChainAsset => {
-    return toEthereumAsset(amount, symbol) as ChainAsset
-  }
-
-  /** Ensures that the value comforms to a well-formed Ethereum value */
-  toEthereumAsset = toEthereumAsset
 
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
   public toEntityName = (value: string): ChainEntityName => {

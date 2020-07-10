@@ -1,4 +1,3 @@
-import BN from 'bn.js'
 import { ChainEntityName, ChainSymbol } from './generalModels'
 
 export enum ChainActionType {
@@ -25,7 +24,8 @@ export type TokenApproveParams = {
   contractName: ChainEntityName
   fromAccountName: ChainEntityName
   toAccountName: ChainEntityName
-  amount: number | BN
+  amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
@@ -35,7 +35,8 @@ export type TokenTransferParams = {
   contractName?: ChainEntityName
   fromAccountName?: ChainEntityName
   toAccountName?: ChainEntityName
-  amount: number | BN
+  amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
@@ -46,7 +47,8 @@ export type TokenTransferFromParams = {
   contractName: ChainEntityName
   fromAccountName: ChainEntityName
   toAccountName: ChainEntityName
-  amount: number | BN
+  amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
@@ -54,9 +56,9 @@ export type TokenTransferFromParams = {
 
 export type ValueTransferParams = {
   contractName?: ChainEntityName
-  fromAccountName: ChainEntityName
+  fromAccountName?: ChainEntityName
   toAccountName: ChainEntityName
-  amount: number | BN
+  amount: string
   symbol?: ChainSymbol | string
   memo?: string
   permission?: ChainEntityName

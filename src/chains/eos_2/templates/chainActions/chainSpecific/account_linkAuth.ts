@@ -5,7 +5,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'linkauth'
 
-interface LinkAuthParams {
+export interface LinkAuthParams {
   action: string
   authAccount: EosEntityName
   authPermission: EosEntityName

@@ -8,7 +8,7 @@ import {
 
 const actionName = 'create'
 
-interface CreateEscrowCreateParams {
+export interface CreateEscrowCreateParams {
   accountName: EosEntityName
   contractName: EosEntityName
   appName: string

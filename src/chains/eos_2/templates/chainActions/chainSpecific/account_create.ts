@@ -17,7 +17,7 @@ import {
 
 const actionName = 'newaccount'
 
-interface CreateAccountNativeParams {
+export interface CreateAccountNativeParams {
   accountName: EosEntityName
   creatorAccountName: EosEntityName
   creatorPermission: EosEntityName

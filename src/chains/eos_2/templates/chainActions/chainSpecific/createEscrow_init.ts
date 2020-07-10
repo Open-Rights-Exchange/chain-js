@@ -3,7 +3,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'init'
 
-interface CreateEscrowInitParams {
+export interface CreateEscrowInitParams {
   contractName: EosEntityName
   chainSymbol: string
   newAccountContract: EosEntityName

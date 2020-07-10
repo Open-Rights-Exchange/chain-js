@@ -9,6 +9,7 @@ import {
 export const composeAction = ({
   approvedAccountName,
   contractName,
+  precision,
   fromAccountName,
   toAccountName,
   amount,
@@ -16,6 +17,7 @@ export const composeAction = ({
   ...erc20TokenTransferFromComposeAction({
     contractAddress: contractName,
     from: approvedAccountName,
+    precision,
     transferFrom: fromAccountName,
     to: toAccountName,
     value: amount,
@@ -34,7 +36,7 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
         approvedAccountName: from as string,
         fromAccountName: transferFrom as string,
         toAccountName: to as string,
-        amount: value as number,
+        amount: value,
       },
       chainActionType: ChainActionType.TokenTransferFrom,
     }

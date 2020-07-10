@@ -9,11 +9,11 @@ import {
 import { DEFAULT_CHAIN_TOKEN_ADDRESS } from '../../../eosConstants'
 
 const actionName = 'transfer'
-interface TokenTransferParams {
+export interface TokenTransferParams {
   fromAccountName: EosEntityName
   toAccountName: EosEntityName
   contractName: EosEntityName
-  amount: number
+  amount: string
   symbol: EosSymbol
   memo?: string
   permission: EosEntityName

@@ -9,12 +9,11 @@ import {
 
 const actionName = 'issue'
 
-interface TokenIssueParams {
+export interface TokenIssueParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
   toAccountName: EosEntityName
-  // todo: change calling code to send amount and symbol
-  amount: number
+  amount: string
   symbol: EosSymbol
   memo?: string
   permission: EosEntityName

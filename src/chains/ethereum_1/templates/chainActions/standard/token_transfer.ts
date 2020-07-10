@@ -6,11 +6,18 @@ import {
 } from '../chainSpecific/erc20_transfer'
 
 /** Calls ERC20Transfer as default token template for Ethereum */
-export const composeAction = ({ fromAccountName, toAccountName, amount, contractName }: TokenTransferParams) => ({
+export const composeAction = ({
+  fromAccountName,
+  toAccountName,
+  amount,
+  contractName,
+  precision,
+}: TokenTransferParams) => ({
   ...erc20TokenTransferComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
     to: toAccountName,
+    precision,
     value: amount,
   }),
 })
@@ -26,7 +33,7 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
         contractName: contractAddress as string,
         fromAccountName: from as string,
         toAccountName: to as string,
-        amount: value as number,
+        amount: value,
       },
       chainActionType: ChainActionType.TokenTransfer,
     }

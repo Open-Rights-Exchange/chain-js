@@ -10,7 +10,7 @@ export const composedERC20ApproveAction: EthereumTransactionAction = {
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
     abi: erc20Abi,
-    parameters: ['0x27105356f6c1ede0e92020e6225e46dc1f496b81', 20],
+    parameters: ['0x27105356f6c1ede0e92020e6225e46dc1f496b81', '20000000000000000000'], // 20 with 18 decimals of precision
     method: 'approve',
   },
 }
@@ -22,7 +22,7 @@ export const composedERC20BurnAction: EthereumTransactionAction = {
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
     abi: erc20Abi,
-    parameters: [20],
+    parameters: ['20000000000000000000'], // 20 with 18 decimals of precision
     method: 'burn',
   },
 }
@@ -34,7 +34,7 @@ export const composedERC20IssueAction: EthereumTransactionAction = {
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
     abi: erc20Abi,
-    parameters: [20],
+    parameters: ['20000000000000000000'], // 20 with 18 decimals of precision
     method: 'issue',
   },
 }
@@ -46,7 +46,7 @@ export const composedERC20TransferAction: EthereumTransactionAction = {
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
     abi: erc20Abi,
-    parameters: ['0x27105356f6c1ede0e92020e6225e46dc1f496b81', 20],
+    parameters: ['0x27105356f6c1ede0e92020e6225e46dc1f496b81', '20000000000000000000'], // 20 with 18 decimals of precision
     method: 'transfer',
   },
 }
@@ -58,7 +58,11 @@ export const composedERC20TransferFromAction: EthereumTransactionAction = {
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
     abi: erc20Abi,
-    parameters: ['0x27105356f6c1ede0e92020e6225e46dc1f496b80', '0x27105356f6c1ede0e92020e6225e46dc1f496b81', 20],
+    parameters: [
+      '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
+      '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      '20000000000000000000', // 20 with 18 decimals of precision
+    ],
     method: 'transferFrom',
   },
 }
