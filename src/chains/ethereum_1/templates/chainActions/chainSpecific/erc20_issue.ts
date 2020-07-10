@@ -6,8 +6,7 @@ import {
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
 import { getArrayIndexOrNull } from '../../../../../helpers'
-import { ethereumTrxArgIsNullOrEmpty, toBigIntegerString } from '../../../helpers'
-import { ERC_DEFAULT_TOKEN_PRECISION } from '../../../ethConstants'
+import { ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
 
 export interface Erc20IssueParams {
   contractAddress: EthereumAddress
@@ -17,10 +16,10 @@ export interface Erc20IssueParams {
 }
 
 export const composeAction = ({ contractAddress, from, precision, value }: Erc20IssueParams) => {
-  const valueBigInt = toBigIntegerString(value, 10, precision || ERC_DEFAULT_TOKEN_PRECISION)
+  const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
-    parameters: [valueBigInt],
+    parameters: [valueString],
     method: 'issue',
   }
   return {

@@ -5,9 +5,8 @@ import {
   EthereumChainActionType,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toBigIntegerString } from '../../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
-import { ERC_DEFAULT_TOKEN_PRECISION } from '../../../ethConstants'
 
 export interface Erc20TransferFromParams {
   contractAddress: EthereumAddress
@@ -26,10 +25,10 @@ export const composeAction = ({
   to,
   value,
 }: Erc20TransferFromParams) => {
-  const valueBigInt = toBigIntegerString(value, 10, precision || ERC_DEFAULT_TOKEN_PRECISION)
+  const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
-    parameters: [transferFrom, to, valueBigInt],
+    parameters: [transferFrom, to, valueString],
     method: 'transferFrom',
   }
   return {

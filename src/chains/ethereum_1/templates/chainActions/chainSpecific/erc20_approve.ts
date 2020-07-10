@@ -6,9 +6,8 @@ import {
   EthereumDecomposeReturn,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toBigIntegerString } from '../../../helpers'
+import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
-import { ERC_DEFAULT_TOKEN_PRECISION } from '../../../ethConstants'
 
 export interface Erc20ApproveParams {
   contractAddress: EthereumAddress
@@ -19,10 +18,10 @@ export interface Erc20ApproveParams {
 }
 
 export const composeAction = ({ contractAddress, from, precision, spender, value }: Erc20ApproveParams) => {
-  const valueBigInt = toBigIntegerString(value, 10, precision || ERC_DEFAULT_TOKEN_PRECISION)
+  const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
-    parameters: [spender, valueBigInt],
+    parameters: [spender, valueString],
     method: 'approve',
   }
   return {
