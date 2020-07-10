@@ -25,6 +25,7 @@ export type TokenApproveParams = {
   fromAccountName: ChainEntityName
   toAccountName: ChainEntityName
   amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
@@ -35,6 +36,7 @@ export type TokenTransferParams = {
   fromAccountName?: ChainEntityName
   toAccountName?: ChainEntityName
   amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
@@ -46,6 +48,7 @@ export type TokenTransferFromParams = {
   fromAccountName: ChainEntityName
   toAccountName: ChainEntityName
   amount: string
+  precision?: number
   symbol: ChainSymbol
   memo?: string
   permission?: ChainEntityName
