@@ -38,7 +38,7 @@ export const CreateAccountOptions = {
 export const multiSigOptions: AlgorandMultiSigOptions = {
   version: 1,
   threshold: 2,
-  accounts: [
+  addrs: [
     '5NS7YTBXFPC4IQHDCS4RIKQXGYQJIQVNI2CLRXN7ZJ77BHJGQZNQHO4OBA',
     'N3TSCN6IFKL6MFHOQ4KTNYJWJHSSKBK3PDSVJJBKQSCLB4RCVF37BEVHFU',
     'YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4',
@@ -78,8 +78,8 @@ const composeValueTransferParams: valueTransferParams = {
   const { accountName: multiSigAccountName } = createMultiSigAccount
   console.log('mulitsig account: %o', multiSigAccountName)
 
-  const transaction = await algoTest.new.Transaction()
-  composeValueTransferParams.fromAccountName = 'XGNK5GE2E22JLKRF3FEFFRHX5FJLX4ACXYBOQUTNHUFZJD62CYDZADCF6E' // VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ
+  const transaction = await algoTest.new.Transaction({ multiSigOptions })
+  composeValueTransferParams.fromAccountName = 'U7KCCCPAGTHL3IQGEG2SUTIKCZR55RUZZ4H2VCHAWSJ6AYT25KHGDLUD7A'
   const action = algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
