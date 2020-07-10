@@ -48,6 +48,7 @@ const chainSendTokenData = {
     composeTokenTransferParams: {
       toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
       amount: '.0000000001',
+      precision: 18,
       symbol: 'eth',
     },
   },
