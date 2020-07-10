@@ -3,7 +3,7 @@ import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameO
 
 const actionName: string = 'whitelist'
 
-interface CreateEscrowWhitelistParams {
+export interface CreateEscrowWhitelistParams {
   accountName: EosEntityName
   appName: string
   contractName: EosEntityName

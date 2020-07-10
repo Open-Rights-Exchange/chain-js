@@ -3,7 +3,7 @@ import { getFirstAuthorizationIfOnlyOneExists, toEosEntityName, toEosEntityNameO
 
 const actionName: string = 'transfer'
 
-interface CreateEscrowTransferParams {
+export interface CreateEscrowTransferParams {
   accountName: EosEntityName
   amount: EosAsset
   contractName: EosEntityName

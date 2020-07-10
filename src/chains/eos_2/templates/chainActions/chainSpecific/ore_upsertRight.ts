@@ -3,7 +3,7 @@ import { toEosEntityName } from '../../../helpers'
 
 const actionName = 'upsertright'
 
-interface OreUpsertRightParams {
+export interface OreUpsertRightParams {
   contractName: EosEntityName
   issuerWhitelist: EosEntityName[]
   oreAccountName: EosEntityName
