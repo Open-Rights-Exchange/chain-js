@@ -153,18 +153,8 @@ class ChainAlgorandV1 implements Chain {
     notImplemented()
   }
 
-  /** Verifies that the value is a valid chain asset string */
-  public isValidAsset = (): any => {
-    notImplemented()
-  }
-
   /** Verifies that the value is a valid chain date */
   public isValidDate = (): any => {
-    notImplemented()
-  }
-
-  /** Ensures that the value comforms to a well-formed chain asset string */
-  public toAsset = (): any => {
     notImplemented()
   }
 
