@@ -317,8 +317,7 @@ export class AlgorandTransaction implements Transaction {
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
   }
 
-  /** Returns address specified by actions[].from property
-   * throws if actions[].from is not a valid address - needed to determine the required signature */
+  /** Returns the required addresses for a transaction/multisig transaction */
   public get requiredAuthorizations(): AlgorandAddress[] {
     return this.requiredAuthorization
   }
