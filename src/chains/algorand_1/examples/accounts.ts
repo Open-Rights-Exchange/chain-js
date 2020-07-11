@@ -9,6 +9,8 @@ import { AlgorandMultiSigOptions } from '../models'
 
 require('dotenv').config()
 
+const { env } = process
+
 const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps1'
 
 export const algoTestnetEndpoints: ChainEndpoint[] = [
@@ -34,9 +36,9 @@ export const multiSigOptions: AlgorandMultiSigOptions = {
   version: 1,
   threshold: 2,
   addrs: [
-    'LE6IM6NPZ7DPF3LTVQT62ARING2VSXO7KOYFHCUCNXKSQLVW4I3AKXUMPI',
-    'S4N2Q4H3ZDZHR7OL6C7FLXI76K7W5XTPFNOXHOSUPL7GPMXU4PT4XCHXLE',
-    'O24FOKUAML2OB3KLQXWIZ2S4VFTEMO6E2PZFYBDT6HX22C5O7DCRHUIUWU',
+    env.ALGOTESTNET_mulitsig_child_account1,
+    env.ALGOTESTNET_mulitsig_child_account2,
+    env.ALGOTESTNET_mulitsig_child_account3,
   ],
 }
 
@@ -52,7 +54,7 @@ export const CreateMultiSigAccountOptions = {
     console.log('Connected to %o', algoPureStakeTestnet)
   }
 
-  /** Create Algorand account */
+  // /** Create Algorand account */
   const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
