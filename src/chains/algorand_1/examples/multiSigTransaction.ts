@@ -6,9 +6,8 @@
 import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
+import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
-import { multiSigOptions } from './accounts'
 
 require('dotenv').config()
 
@@ -33,6 +32,16 @@ export const CreateAccountOptions = {
   newKeysOptions: {
     password: '2233',
   },
+}
+
+export const multiSigOptions: AlgorandMultiSigOptions = {
+  version: 1,
+  threshold: 2,
+  addrs: [
+    env.ALGOTESTNET_mulitsig_child_account1,
+    env.ALGOTESTNET_mulitsig_child_account2,
+    env.ALGOTESTNET_mulitsig_child_account3,
+  ],
 }
 
 export const CreateMultiSigAccountOptions = {
