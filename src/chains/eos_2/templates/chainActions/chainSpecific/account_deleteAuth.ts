@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'deleteauth'
 
-interface DeleteAuthParams {
+export interface DeleteAuthParams {
   account: EosEntityName
   authAccount: EosEntityName
   authPermission: EosEntityName

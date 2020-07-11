@@ -1,6 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
-import { BN } from 'ethereumjs-util'
 import { EthereumValue } from './generalModels'
 
 export type EthereumAbi = any[]

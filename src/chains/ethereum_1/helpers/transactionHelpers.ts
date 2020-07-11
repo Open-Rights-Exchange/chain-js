@@ -16,7 +16,13 @@ export function functionSignatureToHex(functionSignature: string): string {
  */
 export function abiToFunctionSignature(methodName: string, abi: any[]): string {
   let inputSignature = ''
+  if (isNullOrEmpty(methodName)) {
+    throw new Error('abiToFunctionSignature - methodName missing')
+  }
   const method = abi.find(m => m.name === methodName)
+  if (isNullOrEmpty(method)) {
+    throw new Error(`abiToFunctionSignature - method:${methodName} not found in abi`)
+  }
   method.inputs.forEach((input: { type: any }) => {
     inputSignature += `${input?.type},`
   })
@@ -25,9 +31,16 @@ export function abiToFunctionSignature(methodName: string, abi: any[]): string {
 }
 
 /** Uses web3-utils toWei conversion */
-export function toWei(amount: number | BN, type: EthUnit) {
+export function toWei(amount: BN | number, fromType: EthUnit) {
   const web3 = new Web3()
-  return web3.utils.toWei(new BN(amount), type)
+  return web3.utils.toWei(new BN(amount), fromType)
+}
+
+/** convert a decimal string from fromType to Wei units 
+ *  Returns a string */
+export function toWeiString(amount: string, fromType: EthUnit): string {
+  const web3 = new Web3()
+  return web3.utils.toWei(amount, fromType)
 }
 
 /** Converts wei amount to Gwei

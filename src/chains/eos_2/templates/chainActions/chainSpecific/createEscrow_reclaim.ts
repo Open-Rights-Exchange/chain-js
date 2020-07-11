@@ -3,7 +3,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'reclaim'
 
-interface CreateEscrowReclaimParams {
+export interface CreateEscrowReclaimParams {
   accountName: EosEntityName
   appName: string
   contractName: EosEntityName

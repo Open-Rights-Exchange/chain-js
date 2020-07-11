@@ -11,11 +11,11 @@ export function isValidEosDate(str: string): str is EosDate {
 }
 
 // A string representation of an EOSIO symbol, composed of a float with a precision of 3-4
-// ... and a symbol composed of capital letters between 1-3 letters separated by a space
+// ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
   if (isNullOrEmpty(str)) return false
-  return str.match(/^\d{1,}\.\d{3,4} [A-Z]{3}$/) !== null
+  return str.match(/^\d{1,}\.?\d{0,4} [A-Z]{1,7}$/) !== null
 }
 
 /** Expects a string composed of up to 7 upper-case letters */
@@ -41,21 +41,22 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
       return dateString
     }
   }
-  throw new Error(`Should not get here. (invalid toDateStr provided): ${date}`)
+  throw new Error(`Invalid toEosDate provided: ${date}`)
 }
 
-/** Construct a well-formatted EOS Asset string *
- *  e.g. '1.0000 EOS' */
-export function toEosAsset(amount: number, symbol: string): EosAsset {
-  if (symbol.length < 3 || symbol.length > 4) throw new Error('symbol must be 3 or 4 characters long')
-  const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, useGrouping: false }).format(amount)
-  const asset = `${value} ${symbol.toUpperCase()}`
+/** Construct a well-formatted EOS Asset string
+ *  amount is a string that must contain the number of precision digits that the token was created with
+ *  e.g. '1.0000 EOS' for EOS (4 digits of precision) or '1.00 MYSM' for a token created with 2 decimals of precision */
+export function toEosAsset(amount: string, symbol: string): EosAsset {
+  if (symbol.length < 1 || symbol.length > 7) throw new Error('symbol must be 1 or 7 characters long')
+  // const value = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, useGrouping: false }).format(amount)
+  const asset = `${amount} ${symbol.toUpperCase()}`
   // Note: the check below allows Typescript to confirm that asset can be of type EosAsset
   // If we dont call isValidEosAsset then Typescript shows an error
   if (isValidEosAsset(asset)) {
     return asset
   }
-  throw new Error(`Should not get here. toEosAsset amount:${amount} symbol:${symbol}`)
+  throw new Error(`toEosAsset failed - amount:${amount} symbol:${symbol}`)
 }
 
 /** Construct a valid EOS Symbol - e.g. 'EOS' */
@@ -99,13 +100,13 @@ export function toEosEntityNameOrEmptyString(name: string): EosEntityName | '' {
 /** Create or decompose an EosAsset
  *  Provide either qty and symbol OR a fully formed string (e.g. '1.000 EOS') */
 export class EosAssetHelper {
-  private _amount: number
+  private _amount: string
 
   private _symbol: EosSymbol
 
   private _asset: EosAsset
 
-  constructor(amount?: number, symbol?: string, assetString?: string) {
+  constructor(amount?: string, symbol?: string, assetString?: string) {
     if (assetString) {
       this._asset = this.toEosAssetFromString(assetString)
     } else {
@@ -135,8 +136,8 @@ export class EosAssetHelper {
   toEosAssetFromString(assetString: string = ''): EosAsset {
     const [amount, symbol] = assetString.split(' ')
     if (amount && symbol) {
-      this._asset = toEosAsset(parseFloat(amount), symbol)
-      this._amount = parseFloat(amount)
+      this._asset = toEosAsset(amount, symbol)
+      this._amount = amount
       this._symbol = toEosSymbol(symbol)
       return
     }

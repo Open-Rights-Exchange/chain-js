@@ -3,7 +3,6 @@ import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import {
-  ChainAsset,
   ChainDate,
   ChainEntityName,
   ChainInfo,
@@ -90,12 +89,8 @@ export interface Chain {
 
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   isValidEntityName(value: string): boolean
-  /** Verifies that the value is a valid chain asset string */
-  isValidAsset(value: any): boolean
   /** Verifies that the value is a valid chain date */
   isValidDate(value: string): boolean
-  /** Ensures that the value comforms to a well-formed chain asset string */
-  toAsset(amount: number, symbol: string): ChainAsset
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
   toEntityName(value: string): ChainEntityName
   /** Ensures that the value comforms to a well-formed chain date string */

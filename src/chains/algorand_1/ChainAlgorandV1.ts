@@ -1,5 +1,5 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainInfo, ChainType, ChainActionType, ActionDecomposeReturn } from '../../models'
+import { ChainEndpoint, ChainInfo, ChainType, ChainActionType, ActionDecomposeReturn, ChainEntityName } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -19,7 +19,7 @@ import { AlgorandTransaction } from './algoTransaction'
 import { composeAction } from './algoCompose'
 import { decomposeAction } from './algoDecompose'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
-import { toAlgorandSymbol, isValidAlgorandPrivateKey, isValidAlgorandPublicKey } from './helpers'
+import { toAlgorandSymbol, isValidAlgorandPrivateKey, isValidAlgorandPublicKey, toAlgorandAddress } from './helpers'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -153,24 +153,14 @@ class ChainAlgorandV1 implements Chain {
     notImplemented()
   }
 
-  /** Verifies that the value is a valid chain asset string */
-  public isValidAsset = (): any => {
-    notImplemented()
-  }
-
   /** Verifies that the value is a valid chain date */
   public isValidDate = (): any => {
     notImplemented()
   }
 
-  /** Ensures that the value comforms to a well-formed chain asset string */
-  public toAsset = (): any => {
-    notImplemented()
-  }
-
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
-  public toEntityName = (): any => {
-    notImplemented()
+  public toEntityName = (value: string): ChainEntityName => {
+    return toAlgorandAddress(value) as ChainEntityName
   }
 
   /** Ensures that the value comforms to a well-formed chain date string */

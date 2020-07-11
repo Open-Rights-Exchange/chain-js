@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'updateauth'
 
-interface UpdateAuthParams {
+export interface UpdateAuthParams {
   auth: EosAuthorizationStruct
   authAccount: EosEntityName
   authPermission: EosEntityName

@@ -4,7 +4,7 @@ import { toEosEntityName, getFirstAuthorizationIfOnlyOneExists, toEosEntityNameO
 
 const actionName = 'unlinkauth'
 
-interface UnlinkAuthParams {
+export interface UnlinkAuthParams {
   action: string
   authAccount: EosEntityName
   authPermission: EosEntityName

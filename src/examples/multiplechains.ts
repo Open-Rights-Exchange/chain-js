@@ -38,7 +38,7 @@ const chainSendTokenData = {
     composeTokenTransferParams: {
       fromAccountName: 'oreidfunding',
       toAccountName: 'proppropprop',
-      amount: 10,
+      amount: '0.1000',
       symbol: 'EOS',
       permission: 'active',
     },
@@ -47,7 +47,9 @@ const chainSendTokenData = {
     privateKey: env.ROPSTEN_erc20acc_PRIVATE_KEY,
     composeTokenTransferParams: {
       toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      amount: 10,
+      amount: '.0000000001',
+      precision: 18,
+      symbol: 'eth',
     },
   },
 }
@@ -59,21 +61,21 @@ const chainSendCurrencyData = {
     composeValueTransferParams: {
       fromAccountName: 'oreidfunding',
       toAccountName: 'proppropprop',
-      amount: 5,
+      amount: '0.0050',
     },
   },
   ethereum: {
     privateKey: env.ROPSTEN_erc20acc_PRIVATE_KEY,
     composeValueTransferParams: {
       toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      amount: 5,
+      amount: '15',
     },
   },
 }
 
 /** Transfer token between accounts (uses most popular token type for each chain - e.g. ERC20 on Ethereum) */
 async function sendToken(chain: Chain, options: any) {
-  const sendTokenTx = await chain.new.Transaction()
+  const sendTokenTx = chain.new.Transaction()
   sendTokenTx.actions = [chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
@@ -84,7 +86,7 @@ async function sendToken(chain: Chain, options: any) {
 
 /** Send 'cryptocurrency' (value) between accounts on the chain */
 async function sendCurrency(chain: Chain, options: any) {
-  const sendCurrencyTx = await chain.new.Transaction()
+  const sendCurrencyTx = chain.new.Transaction()
   sendCurrencyTx.actions = [chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()

@@ -6,10 +6,17 @@ import {
 } from '../chainSpecific/erc20_approve'
 
 /** Calls ERC20Approve as default token template for Ethereum */
-export const composeAction = ({ fromAccountName, toAccountName, amount, contractName }: TokenApproveParams) => ({
+export const composeAction = ({
+  fromAccountName,
+  toAccountName,
+  amount,
+  contractName,
+  precision,
+}: TokenApproveParams) => ({
   ...erc20TokenApproveComposeAction({
     contractAddress: contractName,
     from: fromAccountName,
+    precision,
     spender: toAccountName,
     value: amount,
   }),
