@@ -20,3 +20,6 @@ export type AlgorandRawPrivateKey = Uint8Array
 
 /** a signature string - formatted correcly for algorand */
 export type AlgorandSignature = Uint8Array & SignatureBrand
+
+/** a signature object for multisig transaction */
+export type AlgorandMultiSignature = { pk: Uint8Array; s?: Uint8Array }
