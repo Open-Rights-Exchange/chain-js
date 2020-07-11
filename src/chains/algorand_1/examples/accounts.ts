@@ -54,7 +54,7 @@ export const CreateMultiSigAccountOptions = {
     console.log('Connected to %o', algoPureStakeTestnet)
   }
 
-  // /** Create Algorand account */
+  /** Create Algorand account */
   const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
