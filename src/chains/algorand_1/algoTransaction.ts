@@ -212,9 +212,7 @@ export class AlgorandTransaction implements Transaction {
   /** Add signatures to raw transaction
    */
   addSignatures = (signatures: AlgorandSignature[]): void => {
-    signatures.forEach(signature => {
-      isValidAlgorandSignature(signature)
-    })
+    this.assertValidSignatures(signatures)
     this._signatures = [...this._signatures, ...signatures]
   }
 
