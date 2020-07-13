@@ -92,7 +92,7 @@ export class EosTransaction implements Transaction {
     return this._sendReceipt
   }
 
-  /** Support for eos multi-sig transactions not yet implemented in chain-js */
+  /** TODO: Implement support for eos multi-sig transactions */
   get supportsMultisigTransaction(): boolean {
     return false
   }
