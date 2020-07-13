@@ -9,6 +9,8 @@ import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
   AlgorandChainSettingsCommunicationSettings,
+  AlgorandMultiSignature,
+  AlgorandMultiSigOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransaction,
@@ -16,9 +18,6 @@ import {
   AlgorandTransactionAction,
   AlgorandTransactionHeader,
   AlgorandTransactionOptions,
-  AlgorandMultiSigOptions,
-  AlgorandMutliSigAccount,
-  AlgorandMultiSignature,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
