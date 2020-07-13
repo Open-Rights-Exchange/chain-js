@@ -286,9 +286,10 @@ export class AlgorandTransaction implements Transaction {
   /** Returns address, for which, a matching signature must be attached to transaction */
   public get missingSignatures(): AlgorandAddress[] {
     this.assertIsValidated()
-    const missingSignatures = this.requiredAuthorizations?.filter(
-      auth => !this.hasSignatureForPublicKey(getAlgorandPublicKeyFromAddress(auth)),
-    )
+    const missingSignatures =
+      this.requiredAuthorizations?.filter(
+        auth => !this.hasSignatureForPublicKey(getAlgorandPublicKeyFromAddress(auth)),
+      ) || []
 
     /** check if number of signatures present are greater then or equal to multisig threshold.
      * If so, set missing signatures to null */
