@@ -34,7 +34,7 @@ export class AlgorandTransaction implements Transaction {
   private _options: AlgorandTransactionOptions
 
   /** A set keeps only unique values */
-  private _signatures: AlgorandSignature[]
+  private _signatures: AlgorandSignature[] = []
 
   /** Address retrieved from attached signature */
   private _fromAddress: AlgorandAddress
@@ -212,7 +212,10 @@ export class AlgorandTransaction implements Transaction {
   /** Add signatures to raw transaction
    */
   addSignatures = (signatures: AlgorandSignature[]): void => {
-    this._signatures = signatures
+    signatures.forEach(signature => {
+      isValidAlgorandSignature(signature)
+    })
+    this._signatures = [...this._signatures, ...signatures]
   }
 
   /** Throws if signatures isn't properly formatted */
@@ -343,7 +346,7 @@ export class AlgorandTransaction implements Transaction {
       const privateKey = toRawAlgorandPrivateKey(privateKeys[0])
       signature = algosdk.signTransaction(this._raw, privateKey).blob
     }
-    this._signatures = [signature]
+    this.addSignatures([signature])
     this._fromAddress = this._raw.from
     this._fromPublicKey = getAlgorandPublicKeyFromAddress(this._raw.from)
   }
