@@ -291,8 +291,8 @@ export class AlgorandTransaction implements Transaction {
         auth => !this.hasSignatureForPublicKey(getAlgorandPublicKeyFromAddress(auth)),
       ) || []
 
-    /** check if number of signatures present are greater then or equal to multisig threshold.
-     * If so, set missing signatures to null */
+    // check if number of signatures present are greater then or equal to multisig threshold.
+    // If so, set missing signatures to null
     if (this.multiSigOptions) {
       return this.multiSigOptions.addrs.length - this.multiSigOptions.threshold <= missingSignatures.length
         ? null
@@ -307,20 +307,16 @@ export class AlgorandTransaction implements Transaction {
     return this.requiredAuthorization
   }
 
-  /** private property for the one signature address required (by action.from) */
+  /** Private property to get the required authorizations for the transaction
+   * Returns the from address from the action or addresses from multisig options for multisig transaction
+   */
   private get requiredAuthorization(): AlgorandAddress[] {
     this.assertIsValidated()
     this.assertFromIsValidAddress()
     if (this.multiSigOptions) {
-      return this.fetchRequiredAuthsForMultiSigTransaction()
+      return this?.multiSigOptions?.addrs || []
     }
     return this.action.from ? [this.action.from] : []
-  }
-
-  /** Multisig transactions have the required addresses defined in the options */
-  private fetchRequiredAuthsForMultiSigTransaction(): AlgorandAddress[] {
-    const { addrs } = this.multiSigOptions || {}
-    return addrs
   }
 
   /** Returns multisig transaction options */
@@ -352,6 +348,7 @@ export class AlgorandTransaction implements Transaction {
     this._fromPublicKey = getAlgorandPublicKeyFromAddress(this._raw.from)
   }
 
+  /** Createe and merge the signatures for all the private keys required to execute the multisig transaction */
   private async signMultiSigTransaction(privateKeys: AlgorandPrivateKey[]): Promise<AlgorandSignature> {
     const signatures: AlgorandSignature[] = []
     await privateKeys.forEach(key => {
