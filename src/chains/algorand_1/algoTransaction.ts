@@ -33,8 +33,6 @@ export class AlgorandTransaction implements Transaction {
 
   private _options: AlgorandTransactionOptions
 
-  private _multiSigOptions: AlgorandMultiSigOptions
-
   /** A set keeps only unique values */
   private _signatures: AlgorandSignature[]
 
@@ -52,7 +50,6 @@ export class AlgorandTransaction implements Transaction {
   constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this._options = options || {}
-    this._multiSigOptions = this._options?.multiSigOptions
   }
 
   /** Header that is included when the transaction is sent to the chain
@@ -327,10 +324,7 @@ export class AlgorandTransaction implements Transaction {
 
   /** Returns multisig transaction options */
   private get multiSigOptions(): AlgorandMultiSigOptions {
-    if (isNullOrEmpty(this._multiSigOptions)) {
-      return null
-    }
-    return this._multiSigOptions
+    return this._options?.multiSigOptions
   }
 
   public get signBuffer(): Buffer {
