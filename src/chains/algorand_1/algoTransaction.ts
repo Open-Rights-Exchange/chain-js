@@ -29,7 +29,7 @@ import {
   isValidAlgorandAddress,
 } from './helpers'
 import { getAlgorandPublicKeyFromAddress } from './algoCrypto'
-import { DEFAULT_ALGO_TRX_LAST_ROUND } from './algoConstants'
+import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -107,7 +107,7 @@ export class AlgorandTransaction implements Transaction {
       genesisID,
       genesisHash: genesishashb64,
       firstRound: lastRound,
-      lastRound: lastRound + DEFAULT_ALGO_TRX_LAST_ROUND,
+      lastRound: lastRound + ALGORAND_TRX_COMFIRMATION_ROUNDS,
       fee,
       flatFee,
     }
