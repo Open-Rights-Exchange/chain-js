@@ -34,8 +34,8 @@ export type AlgorandChainSettingsCommunicationSettings = any
 
 /**  Multisig options required to create a multisignature account for Algorand */
 export type AlgorandMultiSigOptions = {
-  version: Number
-  threshold: Number
+  version: number
+  threshold: number
   addrs: AlgorandAddress[]
 }
 
