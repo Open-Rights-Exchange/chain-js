@@ -313,7 +313,7 @@ export class AlgorandTransaction implements Transaction {
     if (this.multiSigOptions) {
       return this.fetchRequiredAuthsForMultiSigTransaction()
     }
-    return [this.action.from]
+    return this.action.from ? [this.action.from] : []
   }
 
   /** Multisig transactions have the required addresses defined in the options */
