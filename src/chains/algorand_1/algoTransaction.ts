@@ -293,7 +293,7 @@ export class AlgorandTransaction implements Transaction {
     /** check if number of signatures present are greater then or equal to multisig threshold.
      * If so, set missing signatures to null */
     if (this.multiSigOptions) {
-      return this.multiSigOptions.addrs.length - (this.multiSigOptions.threshold as number) <= missingSignatures.length
+      return this.multiSigOptions.addrs.length - this.multiSigOptions.threshold <= missingSignatures.length
         ? null
         : missingSignatures
     }
