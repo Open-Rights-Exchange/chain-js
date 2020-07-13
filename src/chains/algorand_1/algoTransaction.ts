@@ -29,6 +29,7 @@ import {
   isValidAlgorandAddress,
 } from './helpers'
 import { getAlgorandPublicKeyFromAddress } from './algoCrypto'
+import { DEFAULT_ALGO_TRX_LAST_ROUND } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -62,8 +63,6 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Header that is included when the transaction is sent to the chain
-   *  It is part of the transaction body (in the signBuffer) which is signed
-   *  The header changes every time prepareToBeSigned() is called since it includes gasPrice, gasLimit, etc.
    */
   get header() {
     return this._header
@@ -89,11 +88,6 @@ export class AlgorandTransaction implements Transaction {
     return !!this._raw
   }
 
-  /** Algorand provides the functionality to sign a transaction using multi-signature account */
-  get supportsMultisigTransaction(): boolean {
-    return true
-  }
-
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
@@ -113,7 +107,7 @@ export class AlgorandTransaction implements Transaction {
       genesisID,
       genesisHash: genesishashb64,
       firstRound: lastRound,
-      lastRound: lastRound + 1000,
+      lastRound: lastRound + DEFAULT_ALGO_TRX_LAST_ROUND,
       fee,
       flatFee,
     }
@@ -348,6 +342,11 @@ export class AlgorandTransaction implements Transaction {
 
   public get signBuffer(): Buffer {
     return notImplemented()
+  }
+
+  /** Algorand provides the functionality to sign a transaction using multi-signature account */
+  public get supportsMultisigTransaction(): boolean {
+    return true
   }
 
   /** Sign the transaction body with private key and add to attached signatures */
