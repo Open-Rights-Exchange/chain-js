@@ -247,11 +247,12 @@ export class AlgorandTransaction implements Transaction {
 
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey(publicKey: AlgorandPublicKey): boolean {
+    const decodedPublicKey = decodeBase64(publicKey).toString()
     const sigsToLoop = this.signatures || []
     if (this.multiSigOptions) {
       return sigsToLoop.some(signature => {
         const pks = this.getPublicKeysFromMultiSignature(signature)
-        return pks.find(key => key.toString() === decodeBase64(publicKey).toString())
+        return pks.find(key => key.toString() === decodedPublicKey)
       })
     }
     return this?._fromPublicKey === publicKey
