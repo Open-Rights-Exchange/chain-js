@@ -14,7 +14,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   // create a transaction object
   const sendTokenTx = await chain.new.Transaction()
   // set contract action(s) - composeAction simplifies transaction composition
-  sendTokenTx.actions = [ chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', value: 10 }) ]
+  sendTokenTx.actions = [ chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', amount: '10.00' }) ]
   ...
   // sign and send the transaction to the chain
   await sendTokenTx.sign([privateKey])
