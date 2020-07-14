@@ -361,6 +361,11 @@ export class EthereumTransaction implements Transaction {
     return this._signBuffer
   }
 
+  /** Multisig transactions are not supported by ethereum */
+  public get isMultiSig(): boolean {
+    return false
+  }
+
   /** Sign the transaction body with private key and add to attached signatures */
   public async sign(privateKeys: EthereumPrivateKey[]): Promise<void> {
     this.assertIsValidated()

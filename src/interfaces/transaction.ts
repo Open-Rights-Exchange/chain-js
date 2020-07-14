@@ -32,6 +32,10 @@ export interface Transaction {
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
   signBuffer: any
+  /** Whether the chain supports signing a transactions using a multi-signature account */
+  supportsMultisigTransaction: boolean
+  /** Whether the transaction is a multi-signature transaction */
+  isMultiSig: boolean
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */
@@ -54,8 +58,6 @@ export interface Transaction {
   send(waitForConfirm?: ConfirmType, communicationSettings?: any): Promise<TransactionResult>
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>
-  /** Whether the chain supports signing a transactions using a multi-signature account */
-  supportsMultisigTransaction: boolean
   /** JSON representation of transaction data */
   toJson(): ConfirmType.None
   /** Verifies that all accounts and permisison for actions exist on chain.

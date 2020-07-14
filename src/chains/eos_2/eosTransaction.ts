@@ -330,6 +330,11 @@ export class EosTransaction implements Transaction {
     return this._signBuffer
   }
 
+  /** TODO: Implement support for eos multi-sig transactions */
+  public get isMultiSig(): boolean {
+    return false
+  }
+
   /** Sign the transaction body with private key(s) and add to attached signatures */
   public sign(privateKeys: EosPrivateKey[]): Promise<void> {
     this.assertIsValidated()

@@ -249,7 +249,7 @@ export class AlgorandTransaction implements Transaction {
   public hasSignatureForPublicKey(publicKey: AlgorandPublicKey): boolean {
     const decodedPublicKey = decodeBase64(publicKey).toString()
     const sigsToLoop = this.signatures || []
-    if (this.multiSigOptions) {
+    if (this.isMultiSig) {
       return sigsToLoop.some(signature => {
         const pks = this.getPublicKeysFromMultiSignature(signature)
         return pks.find(key => key.toString() === decodedPublicKey)
@@ -298,7 +298,7 @@ export class AlgorandTransaction implements Transaction {
 
     // check if number of signatures present are greater then or equal to multisig threshold.
     // If so, set missing signatures to null
-    if (this.multiSigOptions) {
+    if (this.isMultiSig) {
       return this.multiSigOptions.addrs.length - this.multiSigOptions.threshold <= missingSignatures.length
         ? null
         : missingSignatures
@@ -313,7 +313,7 @@ export class AlgorandTransaction implements Transaction {
   public get requiredAuthorizations(): AlgorandAddress[] {
     this.assertIsValidated()
     this.assertFromIsValidAddress()
-    if (this.multiSigOptions) {
+    if (this.isMultiSig) {
       return this?.multiSigOptions?.addrs || []
     }
     return this.action.from ? [this.action.from] : []
@@ -333,11 +333,16 @@ export class AlgorandTransaction implements Transaction {
     return true
   }
 
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultiSig(): boolean {
+    return !isNullOrEmpty(this.multiSigOptions)
+  }
+
   /** Sign the transaction body with private key and add to attached signatures */
   public async sign(privateKeys: AlgorandPrivateKey[]): Promise<void> {
     let signature
     this.assertIsValidated()
-    if (this.multiSigOptions) {
+    if (this.isMultiSig) {
       signature = await this.signMultiSigTransaction(privateKeys)
     } else {
       const privateKey = toRawAlgorandPrivateKey(privateKeys[0])
