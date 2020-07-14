@@ -1,4 +1,4 @@
-import { AlgorandValue } from './generalModels'
+import { AlgorandValue, AlgorandMultiSigOptions } from './generalModels'
 import { AlgorandAddress } from './cryptoModels'
 
 /**
@@ -47,6 +47,7 @@ export type AlgorandTransactionHeader = {
 export type AlgorandTransactionOptions = {
   fee?: AlgorandValue
   flatFee?: boolean
+  multiSigOptions?: AlgorandMultiSigOptions
 }
 
 /** Raw transaction ready to be signed */

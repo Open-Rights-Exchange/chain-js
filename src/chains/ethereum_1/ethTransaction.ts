@@ -94,6 +94,11 @@ export class EthereumTransaction implements Transaction {
     return !!this._raw
   }
 
+  /** Ethereum doesn't have any native multi-sig functionality */
+  get supportsMultisigTransaction(): boolean {
+    return false
+  }
+
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
@@ -354,6 +359,11 @@ export class EthereumTransaction implements Transaction {
     this.assertIsValidated()
     this.assertHasSignature()
     return this._signBuffer
+  }
+
+  /** Multisig transactions are not supported by ethereum */
+  public get isMultiSig(): boolean {
+    return false
   }
 
   /** Sign the transaction body with private key and add to attached signatures */

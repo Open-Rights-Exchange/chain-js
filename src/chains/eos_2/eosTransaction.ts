@@ -92,6 +92,11 @@ export class EosTransaction implements Transaction {
     return this._sendReceipt
   }
 
+  /** TODO: Implement support for eos multi-sig transactions */
+  get supportsMultisigTransaction(): boolean {
+    return false
+  }
+
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
@@ -323,6 +328,11 @@ export class EosTransaction implements Transaction {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
     return this._signBuffer
+  }
+
+  /** TODO: Implement support for eos multi-sig transactions */
+  public get isMultiSig(): boolean {
+    return false
   }
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
