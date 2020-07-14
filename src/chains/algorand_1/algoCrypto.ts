@@ -8,7 +8,7 @@ import {
   AlgorandAddress,
   AlgorandGenerateAccountResponse,
   AlgorandKeyPair,
-  AlgorandMutliSigAccount,
+  AlgorandMultiSigAccount,
   AlgorandMultiSigOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
@@ -136,7 +136,7 @@ export function generateMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions
     threshold: multiSigOptions.threshold,
     addrs: multiSigOptions.addrs,
   }
-  const multisigAddress: AlgorandMutliSigAccount = algosdk.multisigAddress(mSigOptions)
+  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
   const publicKey = getAlgorandPublicKeyFromAddress(multisigAddress)
   return { multisigAddress, publicKey }
 }
