@@ -307,15 +307,10 @@ export class AlgorandTransaction implements Transaction {
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
   }
 
-  /** Returns the required addresses for a transaction/multisig transaction */
-  public get requiredAuthorizations(): AlgorandAddress[] {
-    return this.requiredAuthorization
-  }
-
-  /** Private property to get the required authorizations for the transaction
-   * Returns the from address from the action or addresses from multisig options for multisig transaction
+  /** Returns the required addresses for a transaction/multisig transaction
+   *  Returns the from address in the action or addresses from multisig options for multisig transaction
    */
-  private get requiredAuthorization(): AlgorandAddress[] {
+  public get requiredAuthorizations(): AlgorandAddress[] {
     this.assertIsValidated()
     this.assertFromIsValidAddress()
     if (this.multiSigOptions) {
