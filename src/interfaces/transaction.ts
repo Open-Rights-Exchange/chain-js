@@ -19,6 +19,8 @@ export interface Transaction {
   hasAnySignatures: boolean
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
+  /** Whether the transaction is a multi-signature transaction */
+  isMultiSig: boolean
   // ** Whether transaction has been validated - via vaidate() */
   isValidated: boolean
   /** An array of authorizations (e.g. account/permission) that do not have an attached signature
@@ -32,6 +34,8 @@ export interface Transaction {
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
   signBuffer: any
+  /** Whether the chain supports signing a transactions using a multi-signature account */
+  supportsMultisigTransaction: boolean
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */

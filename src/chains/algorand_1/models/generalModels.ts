@@ -34,13 +34,13 @@ export type AlgorandChainSettingsCommunicationSettings = any
 
 /**  Multisig options required to create a multisignature account for Algorand */
 export type AlgorandMultiSigOptions = {
-  version: Number
-  threshold: Number
+  version: number
+  threshold: number
   addrs: AlgorandAddress[]
 }
 
 /**  Algorand multisig account is similar to a native algorand address */
-export type AlgorandMutliSigAccount = AlgorandAddress
+export type AlgorandMultiSigAccount = AlgorandAddress
 
 /**  Algorand generated keys  after an account is created */
 export type AlgorandGeneratedKeys = {

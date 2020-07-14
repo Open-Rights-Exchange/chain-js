@@ -12,7 +12,7 @@ import { AlgorandChainState } from './algoChainState'
 import { isValidAlgorandPublicKey } from './helpers'
 import {
   getAddressFromPublicKey,
-  generateMultiSigAddress,
+  calculateMultiSigAddress,
   generateNewAccountKeysAndEncryptPrivateKeys,
 } from './algoCrypto'
 
@@ -35,6 +35,11 @@ export class AlgorandCreateAccount implements CreateAccount {
   constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
     this._options = options
+    const multiSigOptions = this?._options?.multiSigOptions
+    // if multisig options are given, then compute a multisig account address using the passed in algorand addresses in multisig options
+    if (multiSigOptions) {
+      this._accountName = calculateMultiSigAddress(multiSigOptions)
+    }
   }
 
   // ---- Interface implementation
@@ -120,19 +125,16 @@ export class AlgorandCreateAccount implements CreateAccount {
     this.assertValidOptionNewKeys()
 
     const multiSigOptions = this?._options?.multiSigOptions
-    // if multisig options are given, then generate a multisig account using the passed in algorand addresses
-    if (multiSigOptions) {
-      await this.generateMultiSigAccountKeys()
-      publicKey = this._generatedKeys?.publicKey
-    } else {
+    // No new key pair is generated for multisig account
+    if (!multiSigOptions) {
       // get keys from options or generate
       publicKey = this?._options?.publicKey
       if (!publicKey) {
         await this.generateAccountKeys()
         publicKey = this._generatedKeys?.publicKey
       }
+      this._accountName = await getAddressFromPublicKey(publicKey)
     }
-    this._accountName = await getAddressFromPublicKey(publicKey)
     this._accountType = AlgorandNewAccountType.Native
   }
 
@@ -143,11 +145,6 @@ export class AlgorandCreateAccount implements CreateAccount {
     const { password } = newKeysOptions || {}
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
-  }
-
-  private async generateMultiSigAccountKeys(): Promise<void> {
-    const { multiSigOptions } = this._options || {}
-    this._generatedKeys = await generateMultiSigAddress(multiSigOptions)
   }
 
   private assertValidOptionPublicKeys() {
