@@ -34,7 +34,7 @@ export class AlgorandTransaction implements Transaction {
   private _options: AlgorandTransactionOptions
 
   /** A set keeps only unique values */
-  private _signatures: AlgorandSignature[] = []
+  private _signatures: Set<AlgorandSignature>
 
   /** Address retrieved from attached signature */
   private _fromAddress: AlgorandAddress
@@ -200,20 +200,26 @@ export class AlgorandTransaction implements Transaction {
   /** Signatures attached to transaction */
   get signatures(): AlgorandSignature[] {
     if (isNullOrEmpty(this._signatures)) return null
-    return this._signatures
+    return [...this._signatures]
   }
 
   /** Sets the Set of signatures */
   set signatures(signatures: AlgorandSignature[]) {
     this.assertValidSignatures(signatures)
-    this._signatures = signatures
+    this._signatures = new Set<AlgorandSignature>(signatures)
   }
 
   /** Add signatures to raw transaction
    */
   addSignatures = (signatures: AlgorandSignature[]): void => {
     this.assertValidSignatures(signatures)
-    this._signatures = [...this._signatures, ...signatures]
+    const newSignatures = new Set<AlgorandSignature>()
+    signatures.forEach(signature => {
+      newSignatures.add(signature)
+    })
+    // add to existing collection of signatures
+    this._signatures = new Set<AlgorandSignature>([...(this._signatures || []), ...newSignatures])
+    this._signatures = new Set<AlgorandSignature>([...this._signatures, ...signatures])
   }
 
   /** Throws if signatures isn't properly formatted */
@@ -373,7 +379,7 @@ export class AlgorandTransaction implements Transaction {
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    const signature = this._signatures[0]
+    const [signature] = this.signatures
     return this._chainState.sendTransaction(signature, waitForConfirm, communicationSettings)
   }
 
