@@ -36,7 +36,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
     const multiSigOptions = this?._options?.multiSigOptions
-    // if multisig options are given, then compute a multisig account address using the passed in algorand addresses
+    // if multisig options are given, then compute a multisig account address using the passed in algorand addresses in multisig options
     if (multiSigOptions) {
       this._accountName = calculateMultiSigAddress(multiSigOptions)
     }
