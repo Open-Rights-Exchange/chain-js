@@ -262,12 +262,8 @@ export class AlgorandTransaction implements Transaction {
   private getPublicKeysFromMultiSignature(signature: AlgorandSignature): Uint8Array[] {
     const { msig } = algosdk.decodeObj(signature)
     const multiSigs = msig?.subsig?.filter((sig: AlgorandMultiSignature) => {
-      const { s } = sig
       // only return the keys from which signatures are present
-      if (s) {
-        return true
-      }
-      return false
+      return !!sig?.s
     })
     return multiSigs?.map((sig: AlgorandMultiSignature) => sig.pk)
   }
