@@ -4,8 +4,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
-import * as algosdk from 'algosdk'
-import { encodeBase64 } from 'tweetnacl-util'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
 import { AlgorandAddress, AlgorandPrivateKey, AlgorandUnit, AlgorandValue } from '../models'
