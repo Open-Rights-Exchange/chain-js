@@ -6,21 +6,31 @@ import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
 
 export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
   if (!value) return false
-  return ed25519Crypto.isValidPublicKey(decodeBase64(value))
+  return ed25519Crypto.isValidPublicKey(ed25519Crypto.hexStringToByteArray(value))
 }
 
 export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
-  return ed25519Crypto.isValidPrivateKey(decodeBase64(value))
+  return ed25519Crypto.isValidPrivateKey(ed25519Crypto.hexStringToByteArray(value))
 }
 
 /** Accepts hex string checks if a valid algorand private key
- *  Returns AlgorandPrivatekey (base64 encoded)
+ *  Returns AlgorandPrivatekey
  */
 export function toAlgorandPrivateKey(value: string): AlgorandPrivateKey {
   if (isValidAlgorandPrivateKey(value)) {
     return value as AlgorandPrivateKey
   }
   throw new Error(`Not a valid algorand private key:${value}.`)
+}
+
+/** Accepts hex string checks if a valid algorand public key
+ *  Returns AlgorandPublicKey
+ */
+export function toAlgorandPublicKey(value: string): AlgorandPublicKey {
+  if (isValidAlgorandPublicKey(value)) {
+    return value as AlgorandPublicKey
+  }
+  throw new Error(`Not a valid algorand public key:${value}.`)
 }
 
 export function toRawAlgorandPrivateKey(value: AlgorandPrivateKey): AlgorandRawPrivateKey {
