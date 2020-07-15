@@ -9,12 +9,12 @@ import {
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { isValidAlgorandPublicKey } from './helpers'
 import {
   getAddressFromPublicKey,
   calculateMultiSigAddress,
   generateNewAccountKeysAndEncryptPrivateKeys,
 } from './algoCrypto'
+import { isValidAlgorandPublicKey } from './helpers'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -142,8 +142,8 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password } = newKeysOptions || {}
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password)
+    const { password, salt } = newKeysOptions || {}
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
