@@ -1,4 +1,4 @@
-import { PrivateKeyBrand, PublicKeyBrand, SignatureBrand } from '../../../models'
+import { PrivateKeyBrand, PublicKeyBrand, SignatureBrand, EncryptedDataString } from '../../../models'
 
 /** an address string - formatted correctly for algorand */
 export type AlgorandAddress = string
@@ -6,7 +6,7 @@ export type AlgorandAddress = string
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
-  privateKey: AlgorandPrivateKey
+  privateKey: AlgorandPrivateKey | EncryptedDataString
 }
 
 /** a private key string - formatted correctly for algorand */
