@@ -54,7 +54,9 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
   return ed25519Crypto.toEncryptedDataString(value)
 }
 
-/** Encrypts a string using a password and a nonce */
+/** Encrypts a string using a password and a nonce
+ *  Nacl requires password to be in a 32 byte array format. Hence we derive a key from the password string using the provided salt
+ */
 export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
   const passwordKey = calculatePasswordByteArray(password, salt)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
