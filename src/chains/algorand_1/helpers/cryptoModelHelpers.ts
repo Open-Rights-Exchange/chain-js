@@ -75,8 +75,3 @@ export function toAlgorandSignature(value: string): AlgorandSignature {
   }
   throw new Error(`Not a valid algorand signature:${value}.`)
 }
-
-/** Converts a string to an Uint8 array */
-export function toUint8Array(encodedString: string) {
-  return decodeUTF8(encodedString)
-}
