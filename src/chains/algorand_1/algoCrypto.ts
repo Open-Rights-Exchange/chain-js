@@ -1,7 +1,8 @@
 import * as algosdk from 'algosdk'
-import * as nacl from 'tweetnacl'
 import * as base32 from 'hi-base32'
-import { decodeBase64, decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util'
+import scrypt from 'scrypt-async'
+import * as nacl from 'tweetnacl'
+import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util'
 import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
@@ -15,8 +16,13 @@ import {
   AlgorandSignature,
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
-import { concatArrays, genericHash } from './helpers'
+import {
+  ALGORAND_ADDRESS_BYTE_LENGTH,
+  ALGORAND_ADDRESS_LENGTH,
+  ALGORAND_CHECKSUM_BYTE_LENGTH,
+  ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS,
+} from './algoConstants'
+import { concatArrays, genericHash, toAlgorandPrivateKey, toAlgorandPublicKey } from './helpers'
 
 /** Converts a string to uint8 array */
 function toUint8Array(encodedString: string) {
@@ -25,6 +31,17 @@ function toUint8Array(encodedString: string) {
 
 function toStringFromUnit8Array(array: Uint8Array) {
   return encodeUTF8(array)
+}
+
+/** Converts a password string using salt to a key(32 byte array)
+ * Derives a key from password and salt and calls callback with the derived key as the only argument.
+ */
+function calculatePasswordByteArray(password: string, salt: string): Uint8Array {
+  let passwordArray
+  scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, function(derivedKey: any) {
+    passwordArray = derivedKey
+  })
+  return passwordArray
 }
 
 /** Verifies that the value is a valid encrypted string */
@@ -38,18 +55,19 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 }
 
 /** Encrypts a string using a password and a nonce */
-export function encrypt(unencrypted: string, password: string): EncryptedDataString {
-  const encrypted = ed25519Crypto.encrypt(unencrypted, password)
-  const base64EncryptedMessage = encodeBase64(encrypted)
-  return base64EncryptedMessage as EncryptedDataString
+export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
+  const passwordKey = calculatePasswordByteArray(password, salt)
+  const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
+  return ed25519Crypto.byteArrayToHexString(encrypted) as EncryptedDataString
 }
 
-/** Decrypts the encrypted value using a password, ausing nacl
- * The encrypted value is a base64 encoded decrypted string */
-export function decrypt(encrypted: EncryptedDataString | any, password: string): string {
-  const decrypted = ed25519Crypto.decrypt(encrypted, password)
-  const base64DecryptedMessage = encodeBase64(decrypted)
-  return base64DecryptedMessage
+/** Decrypts the encrypted value using nacl
+ * Nacl requires password to be in a 32 byte array format
+ */
+export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
+  const passwordKey = calculatePasswordByteArray(password, salt)
+  const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
+  return ed25519Crypto.byteArrayToHexString(decrypted)
 }
 
 /** Signs a string with a private key */
@@ -69,48 +87,46 @@ export function verifySignedWithPublicKey(
 
 /** Replaces unencrypted privateKey in keys object
  *  Encrypts key using password */
-function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string) {
+function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, salt: string) {
   const { privateKey, publicKey } = keys
   const encryptedKeys = {
-    privateKey: ed25519Crypto.isEncryptedDataString(privateKey)
-      ? privateKey
-      : encodeBase64(ed25519Crypto.encrypt(privateKey, password)),
+    privateKey: encrypt(privateKey, password, salt),
     publicKey,
   }
   return encryptedKeys as AlgorandKeyPair
 }
 
 /** Gets the algorand public key from the given private key in the account
- * Returns base64 encoded public key and private key
+ * Returns hex public key and private key
  */
 export function getAlgorandKeyPairFromAccount(account: AlgorandGenerateAccountResponse): AlgorandKeyPair {
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
   return {
-    publicKey: encodeBase64(publicKey) as AlgorandPublicKey,
-    privateKey: encodeBase64(secretKey) as AlgorandPrivateKey,
+    publicKey: toAlgorandPublicKey(ed25519Crypto.byteArrayToHexString(publicKey)),
+    privateKey: toAlgorandPrivateKey(ed25519Crypto.byteArrayToHexString(secretKey)),
   }
 }
 
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(password: string) {
+export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string) {
   const newAccount = algosdk.generateAccount()
   const keys = getAlgorandKeyPairFromAccount(newAccount)
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password)
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt)
   return encryptedKeys
 }
 
 /** Computes algorand address from the algorand public key */
 export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
-  const decodedPublicKey = decodeBase64(publicKey)
+  const rawPublicKey = ed25519Crypto.hexStringToByteArray(publicKey)
   // compute checksum
-  const checksum = genericHash(decodedPublicKey).slice(
+  const checksum = genericHash(rawPublicKey).slice(
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
     nacl.sign.publicKeyLength,
   )
-  const address = base32.encode(concatArrays(decodedPublicKey, checksum))
+  const address = base32.encode(concatArrays(rawPublicKey, checksum))
   return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
 }
 
@@ -126,7 +142,7 @@ export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): Algor
   if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
 
   const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
-  return encodeBase64(publicKey) as AlgorandPublicKey
+  return ed25519Crypto.byteArrayToHexString(publicKey) as AlgorandPublicKey
 }
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
