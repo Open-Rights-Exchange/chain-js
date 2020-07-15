@@ -61,7 +61,7 @@ const composeValueTransferParams: valueTransferParams = {
   toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   amount: 1000000,
   symbol: AlgorandUnit.Microalgo,
-  memo: algosdk.encodeObj('Hello World'),
+  memo: 'Hello World',
 }
 ;(async () => {
   /** Create Algorand chain instance */
