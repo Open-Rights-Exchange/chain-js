@@ -1,8 +1,7 @@
 import * as algosdk from 'algosdk'
 import * as base32 from 'hi-base32'
-import scrypt from 'scrypt-async'
+
 import * as nacl from 'tweetnacl'
-import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util'
 import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
@@ -16,33 +15,15 @@ import {
   AlgorandSignature,
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
+import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
 import {
-  ALGORAND_ADDRESS_BYTE_LENGTH,
-  ALGORAND_ADDRESS_LENGTH,
-  ALGORAND_CHECKSUM_BYTE_LENGTH,
-  ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS,
-} from './algoConstants'
-import { concatArrays, genericHash, toAlgorandPrivateKey, toAlgorandPublicKey } from './helpers'
-
-/** Converts a string to uint8 array */
-function toUint8Array(encodedString: string) {
-  return decodeUTF8(encodedString)
-}
-
-function toStringFromUnit8Array(array: Uint8Array) {
-  return encodeUTF8(array)
-}
-
-/** Converts a password string using salt to a key(32 byte array)
- * Derives a key from password and salt and calls callback with the derived key as the only argument.
- */
-function calculatePasswordByteArray(password: string, salt: string): Uint8Array {
-  let passwordArray
-  scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, function(derivedKey: any) {
-    passwordArray = derivedKey
-  })
-  return passwordArray
-}
+  calculatePasswordByteArray,
+  concatArrays,
+  genericHash,
+  toAlgorandPrivateKey,
+  toAlgorandPublicKey,
+  toAlgorandSignature,
+} from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -74,8 +55,11 @@ export function decrypt(encrypted: EncryptedDataString | any, password: string, 
 
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = ed25519Crypto.sign(toUint8Array(data), toUint8Array(privateKey))
-  return toStringFromUnit8Array(signature) as AlgorandSignature
+  const signature = ed25519Crypto.sign(
+    ed25519Crypto.hexStringToByteArray(data),
+    ed25519Crypto.hexStringToByteArray(privateKey),
+  )
+  return toAlgorandSignature(ed25519Crypto.byteArrayToHexString(signature))
 }
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
@@ -84,7 +68,11 @@ export function verifySignedWithPublicKey(
   publicKey: AlgorandPublicKey,
   signature: AlgorandSignature,
 ): boolean {
-  return ed25519Crypto.verify(toUint8Array(data), toUint8Array(publicKey), toUint8Array(signature))
+  return ed25519Crypto.verify(
+    ed25519Crypto.hexStringToByteArray(data),
+    ed25519Crypto.hexStringToByteArray(publicKey),
+    ed25519Crypto.hexStringToByteArray(signature),
+  )
 }
 
 /** Replaces unencrypted privateKey in keys object
