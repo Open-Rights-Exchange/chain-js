@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
