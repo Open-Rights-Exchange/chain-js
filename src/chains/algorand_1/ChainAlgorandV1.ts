@@ -33,6 +33,7 @@ import {
   toAlgorandAddress,
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
+  toAlgorandSignature,
 } from './helpers'
 
 class ChainAlgorandV1 implements Chain {
@@ -189,9 +190,7 @@ class ChainAlgorandV1 implements Chain {
   public toPrivateKey = toAlgorandPrivateKey
 
   /** Ensures that the value comforms to a well-formed EOS signature */
-  public toSignature = (): any => {
-    notImplemented()
-  }
+  public toSignature = toAlgorandSignature
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this
