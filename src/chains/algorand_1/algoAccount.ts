@@ -4,7 +4,7 @@ import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { AlgorandAccountStruct, AlgorandAddress, AlgorandPublicKey } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { getAddressFromPublicKey } from './algoCrypto'
+import { calculateAddressFromPublicKey } from './algoCrypto'
 import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers'
 
 export class AlgorandAccount implements Account {
@@ -55,7 +55,7 @@ export class AlgorandAccount implements Account {
   setPublicKey = async (publicKey: AlgorandPublicKey) => {
     this.assertValidAlgorandPublickey(publicKey)
     this._publicKey = publicKey
-    const address = getAddressFromPublicKey(publicKey)
+    const address = calculateAddressFromPublicKey(publicKey)
     this._account = await this._chainState.algoClient.accountInformation(address)
   }
 
