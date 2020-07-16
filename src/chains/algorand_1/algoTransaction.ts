@@ -3,7 +3,7 @@ import * as algosdk from 'algosdk'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
 import { throwNewError } from '../../errors'
-import { isNullOrEmpty, notImplemented } from '../../helpers'
+import { byteArrayToHexString, hexStringToByteArray, isNullOrEmpty, notImplemented } from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
@@ -20,15 +20,13 @@ import {
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
-  byteArrayToHexString,
-  hexStringToByteArray,
   isArrayLengthOne,
   isValidAlgorandAddress,
   isValidAlgorandSignature,
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
-import { calculatePublicKeyFromAddress } from './algoCrypto'
+import { toPublicKeyFromAddress } from './algoCrypto'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
@@ -298,9 +296,7 @@ export class AlgorandTransaction implements Transaction {
   public get missingSignatures(): AlgorandAddress[] {
     this.assertIsValidated()
     const missingSignatures =
-      this.requiredAuthorizations?.filter(
-        auth => !this.hasSignatureForPublicKey(calculatePublicKeyFromAddress(auth)),
-      ) || []
+      this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
 
     // check if number of signatures present are greater then or equal to multisig threshold.
     // If so, set missing signatures to null
@@ -356,7 +352,7 @@ export class AlgorandTransaction implements Transaction {
     }
     this.addSignatures([signature])
     this._fromAddress = this._raw.from
-    this._fromPublicKey = calculatePublicKeyFromAddress(this._raw.from)
+    this._fromPublicKey = toPublicKeyFromAddress(this._raw.from)
   }
 
   /** Createe and merge the signatures for all the private keys required to execute the multisig transaction */
