@@ -1,3 +1,4 @@
+import * as algosdk from 'algosdk'
 import { ValueTransferParams, ActionDecomposeReturn, ChainActionType } from '../../../../../models'
 import { AlgorandTransactionAction, AlgorandUnit } from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
@@ -13,7 +14,7 @@ export const composeAction = ({
   from: fromAccountName,
   to: toAccountName,
   amount: toMicroAlgo(amount, symbol as AlgorandUnit),
-  note: memo,
+  note: algosdk.encodeObj(memo),
 })
 
 export const decomposeAction = (action: AlgorandTransactionAction): ActionDecomposeReturn => {
@@ -23,7 +24,7 @@ export const decomposeAction = (action: AlgorandTransactionAction): ActionDecomp
     fromAccountName: from,
     amount,
     symbol: AlgorandUnit.Microalgo,
-    memo: note,
+    memo: algosdk.decodeObj(note),
   }
   return {
     chainActionType: ChainActionType.ValueTransfer,

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { notSupported, notImplemented } from '../../helpers'
+import { notImplemented } from '../../helpers'
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { AlgorandAccountStruct, AlgorandAddress, AlgorandPublicKey } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { getAddressFromPublicKey } from './algoCrypto'
+import { toAddressFromPublicKey } from './algoCrypto'
 import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers'
 
 export class AlgorandAccount implements Account {
@@ -55,7 +55,7 @@ export class AlgorandAccount implements Account {
   setPublicKey = async (publicKey: AlgorandPublicKey) => {
     this.assertValidAlgorandPublickey(publicKey)
     this._publicKey = publicKey
-    const address = getAddressFromPublicKey(publicKey)
+    const address = toAddressFromPublicKey(publicKey)
     this._account = await this._chainState.algoClient.accountInformation(address)
   }
 

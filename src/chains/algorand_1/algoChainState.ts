@@ -12,7 +12,7 @@ import {
   AlgorandTxResult,
   AlgorandUnit,
 } from './models'
-import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
+import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
 import { toAlgo } from './helpers'
 
@@ -157,9 +157,11 @@ export class AlgorandChainState {
   /** Submits the transaction to the chain and waits only until it gets a transaction id
    * Does not wait for the transaction to be finalized on the chain
    */
-  async sendTransactionWithoutWaitingForConfirm(signedTransaction: Uint8Array) {
+  async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
     try {
-      const { txId: transactionId } = await this._algoClientWithTxHeader.sendRawTransaction(signedTransaction)
+      const { txId: transactionId } = await this._algoClientWithTxHeader.sendRawTransaction(
+        hexStringToByteArray(signedTransaction),
+      )
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
@@ -189,7 +191,7 @@ export class AlgorandChainState {
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
   */
   async sendTransaction(
-    signedTransaction: Uint8Array,
+    signedTransaction: string,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: AlgorandChainSettingsCommunicationSettings,
@@ -209,7 +211,9 @@ export class AlgorandChainState {
       }
       // returns transactionReceipt after submitting transaction AND waiting for a confirmation
       if (waitForConfirm === ConfirmType.After001) {
-        const transactionId = await this._algoClientWithTxHeader.sendRawTransaction(signedTransaction)
+        const transactionId = await this._algoClientWithTxHeader.sendRawTransaction(
+          hexStringToByteArray(signedTransaction),
+        )
         await this.waitForTransactionConfirmation(transactionId)
         sendResult.transactionId = transactionId
         sendResult.chainResponse = await this._algoClient.transactionById(transactionId)

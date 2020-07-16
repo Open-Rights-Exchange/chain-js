@@ -1,5 +1,12 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainInfo, ChainType, ChainActionType, ActionDecomposeReturn, ChainEntityName } from '../../models'
+import {
+  ChainEndpoint,
+  ChainInfo,
+  ChainType,
+  ChainActionType,
+  ActionDecomposeReturn,
+  ChainEntityName,
+} from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -19,7 +26,15 @@ import { AlgorandTransaction } from './algoTransaction'
 import { composeAction } from './algoCompose'
 import { decomposeAction } from './algoDecompose'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
-import { toAlgorandSymbol, isValidAlgorandPrivateKey, isValidAlgorandPublicKey, toAlgorandAddress } from './helpers'
+import {
+  toAlgorandSymbol,
+  isValidAlgorandPrivateKey,
+  isValidAlgorandPublicKey,
+  toAlgorandAddress,
+  toAlgorandPrivateKey,
+  toAlgorandPublicKey,
+  toAlgorandSignature,
+} from './helpers'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: ChainEndpoint[]
@@ -169,19 +184,13 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
-  public toPublicKey = (): any => {
-    notImplemented()
-  }
+  public toPublicKey = toAlgorandPublicKey
 
   /** Ensures that the value comforms to a well-formed private Key */
-  public toPrivateKey = (): any => {
-    notImplemented()
-  }
+  public toPrivateKey = toAlgorandPrivateKey
 
   /** Ensures that the value comforms to a well-formed EOS signature */
-  public toSignature = (): any => {
-    notImplemented()
-  }
+  public toSignature = toAlgorandSignature
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this

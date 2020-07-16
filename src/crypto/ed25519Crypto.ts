@@ -1,7 +1,6 @@
 import * as nacl from 'tweetnacl'
-import { decodeBase64, decodeUTF8 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../models'
-import { isAString, isNullOrEmpty } from '../helpers'
+import { isAString, isNullOrEmpty, hexStringToByteArray } from '../helpers'
 
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
@@ -34,11 +33,10 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 /** Encrypts a string using a password and a nonce
  *  Password is a base64 encoded string
  */
-export function encrypt(unencrypted: string, password: string): Uint8Array {
-  const passwordUint8Array = decodeBase64(password)
+export function encrypt(unencrypted: string, password: Uint8Array): Uint8Array {
   const nonce = newNonce()
-  const messageUint8 = decodeUTF8(unencrypted)
-  const box = nacl.secretbox(messageUint8, nonce, passwordUint8Array)
+  const messageUint8 = hexStringToByteArray(unencrypted)
+  const box = nacl.secretbox(messageUint8, nonce, password)
 
   const fullMessage = new Uint8Array(nonce.length + box.length)
   fullMessage.set(nonce)
@@ -50,14 +48,12 @@ export function encrypt(unencrypted: string, password: string): Uint8Array {
 /** Decrypts the encrypted value using a password
  * Password is a base64 encoded string
  */
-export function decrypt(encrypted: EncryptedDataString | any, password: string): Uint8Array {
-  const keyUint8Array = decodeBase64(password)
-  const messageWithNonceAsUint8Array = decodeBase64(encrypted)
+export function decrypt(encrypted: EncryptedDataString | any, password: Uint8Array): Uint8Array {
+  const messageWithNonceAsUint8Array = hexStringToByteArray(encrypted)
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength)
   const message = messageWithNonceAsUint8Array.slice(nacl.secretbox.nonceLength, encrypted.length)
 
-  const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array)
-
+  const decrypted = nacl.secretbox.open(message, nonce, password)
   if (!decrypted) {
     throw new Error('Could not decrypt message')
   }

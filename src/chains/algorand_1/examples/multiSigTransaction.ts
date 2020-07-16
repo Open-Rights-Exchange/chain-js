@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
@@ -61,7 +60,7 @@ const composeValueTransferParams: valueTransferParams = {
   toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   amount: 1000000,
   symbol: AlgorandUnit.Microalgo,
-  memo: algosdk.encodeObj('Hello World'),
+  memo: 'Hello World',
 }
 ;(async () => {
   /** Create Algorand chain instance */
