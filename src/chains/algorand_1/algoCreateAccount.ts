@@ -114,7 +114,10 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** Checks create options - if publicKeys are missing,
-   *  autogenerate the public and private key pair and add them to options */
+   *  autogenerate the public and private key pair and add them to options
+   *  Algorand keys are represented as hex strings in chainjs.
+   *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
+   */
   async generateKeysIfNeeded() {
     let publicKey: AlgorandPublicKey
     this.assertValidOptionPublicKeys()
@@ -135,7 +138,6 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   // ---- Private functions
-
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
     const { password, salt } = newKeysOptions || {}
