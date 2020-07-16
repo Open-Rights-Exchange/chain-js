@@ -45,3 +45,12 @@ export type AlgorandAccountStruct = {
   status?: string
   thisassettotal?: Map<string, AlgorandAssetParamsStruct>
 }
+
+/** a signature object for multisig transaction */
+export type AlgorandMultiSignatureStruct = { pk: Uint8Array; s?: Uint8Array }
+
+/** Account object generated - in the format returned from algosdk */
+export type AlgorandGeneratedAccountStruct = {
+  addr: Uint8Array
+  sk: Uint8Array
+}

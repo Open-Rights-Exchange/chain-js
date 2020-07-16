@@ -9,12 +9,8 @@ import {
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
+import { toAddressFromPublicKey, toMultiSigAddress, generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey } from './helpers'
-import {
-  getAddressFromPublicKey,
-  calculateMultiSigAddress,
-  generateNewAccountKeysAndEncryptPrivateKeys,
-} from './algoCrypto'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -38,7 +34,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     const multiSigOptions = this?._options?.multiSigOptions
     // if multisig options are given, then compute a multisig account address using the passed in algorand addresses in multisig options
     if (multiSigOptions) {
-      this._accountName = calculateMultiSigAddress(multiSigOptions)
+      this._accountName = toMultiSigAddress(multiSigOptions)
     }
   }
 
@@ -118,7 +114,10 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** Checks create options - if publicKeys are missing,
-   *  autogenerate the public and private key pair and add them to options */
+   *  autogenerate the public and private key pair and add them to options
+   *  Algorand keys are represented as hex strings in chainjs.
+   *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
+   */
   async generateKeysIfNeeded() {
     let publicKey: AlgorandPublicKey
     this.assertValidOptionPublicKeys()
@@ -133,17 +132,16 @@ export class AlgorandCreateAccount implements CreateAccount {
         await this.generateAccountKeys()
         publicKey = this._generatedKeys?.publicKey
       }
-      this._accountName = await getAddressFromPublicKey(publicKey)
+      this._accountName = await toAddressFromPublicKey(publicKey)
     }
     this._accountType = AlgorandNewAccountType.Native
   }
 
   // ---- Private functions
-
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password } = newKeysOptions || {}
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password)
+    const { password, salt } = newKeysOptions || {}
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 

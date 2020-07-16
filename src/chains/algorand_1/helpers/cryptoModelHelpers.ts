@@ -1,40 +1,20 @@
-import { decodeBase64, decodeUTF8 } from 'tweetnacl-util'
+import scrypt from 'scrypt-async'
 import * as sha512 from 'js-sha512'
-import { isNullOrEmpty } from '../../../helpers'
-import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandRawPrivateKey } from '../models'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
+import { hexStringToByteArray, isNullOrEmpty } from '../../../helpers'
+import { ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS } from '../algoConstants'
+import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../models'
 
-export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
-  if (!value) return false
-  return ed25519Crypto.isValidPublicKey(decodeBase64(value))
-}
-
-export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
-  return ed25519Crypto.isValidPrivateKey(decodeBase64(value))
-}
-
-/** Accepts hex string checks if a valid algorand private key
- *  Returns AlgorandPrivatekey (base64 encoded)
+/** Converts a password string using salt to a key(32 byte array)
+ * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
+ * It can then be used as a key for symmetric block ciphers and private keys
  */
-export function toAlgorandPrivateKey(value: string): AlgorandPrivateKey {
-  if (isValidAlgorandPrivateKey(value)) {
-    return value as AlgorandPrivateKey
-  }
-  throw new Error(`Not a valid algorand private key:${value}.`)
-}
-
-export function toRawAlgorandPrivateKey(value: AlgorandPrivateKey): AlgorandRawPrivateKey {
-  return decodeBase64(value)
-}
-
-/** Converts a string to an Uint8 array */
-export function toUint8Array(encodedString: string) {
-  return decodeUTF8(encodedString)
-}
-
-/** Return sha512 hash of an array */
-export function genericHash(arr: Uint8Array) {
-  return sha512.sha512_256.array(arr)
+export function calculatePasswordByteArray(password: string, salt: string = ''): Uint8Array {
+  let passwordArray
+  scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, function(derivedKey: any) {
+    passwordArray = derivedKey
+  })
+  return passwordArray
 }
 
 /**
@@ -47,10 +27,51 @@ export function concatArrays(a: any, b: any): Uint8Array {
   return c
 }
 
+/** Return sha512 hash of an array */
+export function genericHash(arr: Uint8Array) {
+  return sha512.sha512_256.array(arr)
+}
+
+export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
+  if (!value) return false
+  return ed25519Crypto.isValidPublicKey(hexStringToByteArray(value))
+}
+
+export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
+  return ed25519Crypto.isValidPrivateKey(hexStringToByteArray(value))
+}
+
 // ALGO TODO: add validation rule for signature
-export function isValidAlgorandSignature(signature: AlgorandSignature): boolean {
+export function isValidAlgorandSignature(signature: string): boolean {
   if (!isNullOrEmpty(signature)) {
     return true
   }
   return false
+}
+
+/** Accepts hex string checks if a valid algorand private key
+ *  Returns AlgorandPrivatekey
+ */
+export function toAlgorandPrivateKey(value: string): AlgorandPrivateKey {
+  if (isValidAlgorandPrivateKey(value)) {
+    return value as AlgorandPrivateKey
+  }
+  throw new Error(`Not a valid algorand private key:${value}.`)
+}
+
+/** Accepts hex string checks if a valid algorand public key
+ *  Returns AlgorandPublicKey
+ */
+export function toAlgorandPublicKey(value: string): AlgorandPublicKey {
+  if (isValidAlgorandPublicKey(value)) {
+    return value as AlgorandPublicKey
+  }
+  throw new Error(`Not a valid algorand public key:${value}.`)
+}
+
+export function toAlgorandSignature(value: string): AlgorandSignature {
+  if (isValidAlgorandSignature(value)) {
+    return value as AlgorandSignature
+  }
+  throw new Error(`Not a valid algorand signature:${value}.`)
 }
