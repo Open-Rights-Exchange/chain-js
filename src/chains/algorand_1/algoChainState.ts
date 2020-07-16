@@ -12,9 +12,9 @@ import {
   AlgorandTxResult,
   AlgorandUnit,
 } from './models'
-import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
+import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
-import { hexStringToByteArray, toAlgo } from './helpers'
+import { toAlgo } from './helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint

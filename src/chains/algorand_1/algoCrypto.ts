@@ -2,7 +2,7 @@ import * as algosdk from 'algosdk'
 import * as base32 from 'hi-base32'
 
 import * as nacl from 'tweetnacl'
-import { isAString } from '../../helpers'
+import { byteArrayToHexString, hexStringToByteArray, isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
   AlgorandAddress,
@@ -17,11 +17,9 @@ import {
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
 import {
-  byteArrayToHexString,
   calculatePasswordByteArray,
   concatArrays,
   genericHash,
-  hexStringToByteArray,
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
   toAlgorandSignature,
@@ -108,7 +106,7 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, sa
 }
 
 /** Computes algorand address from the algorand public key */
-export function calculateAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
+export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
   const rawPublicKey = hexStringToByteArray(publicKey)
   // compute checksum
   const checksum = genericHash(rawPublicKey).slice(
@@ -120,7 +118,7 @@ export function calculateAddressFromPublicKey(publicKey: AlgorandPublicKey): Alg
 }
 
 /** Computes algorand public key from the algorand address */
-export function calculatePublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
+export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
   if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
 
@@ -135,7 +133,7 @@ export function calculatePublicKeyFromAddress(address: AlgorandAddress): Algoran
 }
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
-export function calculateMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
+export function toMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
   const mSigOptions = {
     version: multiSigOptions.version,
     threshold: multiSigOptions.threshold,

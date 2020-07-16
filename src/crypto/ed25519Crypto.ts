@@ -1,6 +1,6 @@
 import * as nacl from 'tweetnacl'
 import { EncryptedDataString } from '../models'
-import { isAString, isNullOrEmpty } from '../helpers'
+import { isAString, isNullOrEmpty, hexStringToByteArray } from '../helpers'
 
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
@@ -13,16 +13,6 @@ export type ed25519PublicKey = Uint8Array
 export type ed25519KeyPair = {
   publicKey: ed25519PublicKey
   secretKey: ed25519PrivateKey
-}
-
-/** Converts a hex string to a unit8 byte array */
-export function hexStringToByteArray(value: string): Uint8Array {
-  return Uint8Array.from(Buffer.from(value, 'hex'))
-}
-
-/** Convert a byte array to hex string */
-export function byteArrayToHexString(value: Uint8Array): string {
-  return Buffer.from(value).toString('hex')
 }
 
 /** Verifies that the value is a valid, stringified encrypted object */

@@ -191,3 +191,13 @@ export function getDecimalPlaces(num = '') {
       (match[2] ? +match[2] : 0),
   )
 }
+
+/** Converts a hex string to a unit8 byte array */
+export function hexStringToByteArray(value: string): Uint8Array {
+  return Uint8Array.from(Buffer.from(value, 'hex'))
+}
+
+/** Convert a byte array to hex string */
+export function byteArrayToHexString(value: Uint8Array): string {
+  return Buffer.from(value).toString('hex')
+}
