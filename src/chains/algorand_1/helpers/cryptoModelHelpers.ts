@@ -1,10 +1,14 @@
 import scrypt from 'scrypt-async'
-import { decodeUTF8 } from 'tweetnacl-util'
 import * as sha512 from 'js-sha512'
-import { isNullOrEmpty } from '../../../helpers'
-import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../models'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
+import { isNullOrEmpty } from '../../../helpers'
 import { ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS } from '../algoConstants'
+import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../models'
+
+/** Converts byte array to hex  */
+export function byteArrayToHexString(value: Uint8Array): string {
+  return ed25519Crypto.byteArrayToHexString(value)
+}
 
 /** Converts a password string using salt to a key(32 byte array)
  * Derives a key from password and salt and calls callback with the derived key as the only argument.
@@ -32,13 +36,18 @@ export function genericHash(arr: Uint8Array) {
   return sha512.sha512_256.array(arr)
 }
 
+/** Converts hex string to byte array */
+export function hexStringToByteArray(value: string): Uint8Array {
+  return ed25519Crypto.hexStringToByteArray(value)
+}
+
 export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
   if (!value) return false
-  return ed25519Crypto.isValidPublicKey(ed25519Crypto.hexStringToByteArray(value))
+  return ed25519Crypto.isValidPublicKey(hexStringToByteArray(value))
 }
 
 export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
-  return ed25519Crypto.isValidPrivateKey(ed25519Crypto.hexStringToByteArray(value))
+  return ed25519Crypto.isValidPrivateKey(hexStringToByteArray(value))
 }
 
 // ALGO TODO: add validation rule for signature
