@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
-import { decodeBase64 } from 'tweetnacl-util'
+import { hexStringToByteArray, byteArrayToHexString } from '../../crypto/ed25519Crypto'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
 import { throwNewError } from '../../errors'
@@ -9,8 +9,8 @@ import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
   AlgorandChainSettingsCommunicationSettings,
-  AlgorandMultiSignature,
   AlgorandMultiSigOptions,
+  AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransaction,
@@ -20,7 +20,13 @@ import {
   AlgorandTransactionOptions,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
-import { isArrayLengthOne, isValidAlgorandAddress, isValidAlgorandSignature, toRawAlgorandPrivateKey } from './helpers'
+import {
+  isArrayLengthOne,
+  isValidAlgorandAddress,
+  isValidAlgorandSignature,
+  toAlgorandPublicKey,
+  toAlgorandSignature,
+} from './helpers'
 import { getAlgorandPublicKeyFromAddress } from './algoCrypto'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
@@ -247,26 +253,25 @@ export class AlgorandTransaction implements Transaction {
 
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey(publicKey: AlgorandPublicKey): boolean {
-    const decodedPublicKey = decodeBase64(publicKey).toString()
     const sigsToLoop = this.signatures || []
     if (this.isMultiSig) {
       return sigsToLoop.some(signature => {
         const pks = this.getPublicKeysFromMultiSignature(signature)
-        return pks.find(key => key.toString() === decodedPublicKey)
+        return pks.find(key => key.toString() === publicKey.toString())
       })
     }
     return this?._fromPublicKey === publicKey
   }
 
   /** Returns public keys for which a signature is present in the multisignature object */
-  private getPublicKeysFromMultiSignature(signature: AlgorandSignature): Uint8Array[] {
-    const { msig } = algosdk.decodeObj(signature)
+  private getPublicKeysFromMultiSignature(signature: AlgorandSignature): AlgorandPublicKey[] {
+    const { msig } = algosdk.decodeObj(hexStringToByteArray(signature))
     const multiSigs =
-      msig?.subsig?.filter((sig: AlgorandMultiSignature) => {
+      msig?.subsig?.filter((sig: AlgorandMultiSignatureStruct) => {
         // only return the keys from which signatures are present
         return !!sig?.s
       }) || []
-    return multiSigs?.map((sig: AlgorandMultiSignature) => sig.pk)
+    return multiSigs?.map((sig: AlgorandMultiSignatureStruct) => toAlgorandPublicKey(byteArrayToHexString(sig.pk)))
   }
 
   /** Whether there is an attached signature for the publicKey of the address */
@@ -345,8 +350,8 @@ export class AlgorandTransaction implements Transaction {
     if (this.isMultiSig) {
       signature = await this.signMultiSigTransaction(privateKeys)
     } else {
-      const privateKey = toRawAlgorandPrivateKey(privateKeys[0])
-      signature = algosdk.signTransaction(this._raw, privateKey).blob
+      const privateKey = hexStringToByteArray(privateKeys[0])
+      signature = toAlgorandSignature(byteArrayToHexString(algosdk.signTransaction(this._raw, privateKey).blob))
     }
     this.addSignatures([signature])
     this._fromAddress = this._raw.from
@@ -357,14 +362,14 @@ export class AlgorandTransaction implements Transaction {
   private async signMultiSigTransaction(privateKeys: AlgorandPrivateKey[]): Promise<AlgorandSignature> {
     const signatures: AlgorandSignature[] = []
     await privateKeys.forEach(key => {
-      const privateKey = toRawAlgorandPrivateKey(key)
+      const privateKey = hexStringToByteArray(key)
       const sig = algosdk.signMultisigTransaction(this._raw, this.multiSigOptions, privateKey)
       signatures.push(sig.blob)
     })
     if (signatures.length === 1) {
       return signatures[0]
     }
-    return algosdk.mergeMultisigTransactions(signatures)
+    return toAlgorandSignature(byteArrayToHexString(algosdk.mergeMultisigTransactions(signatures)))
   }
 
   // send
