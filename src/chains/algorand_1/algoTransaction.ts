@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
-import { hexStringToByteArray, byteArrayToHexString } from '../../crypto/ed25519Crypto'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
 import { throwNewError } from '../../errors'
@@ -21,13 +20,15 @@ import {
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
+  byteArrayToHexString,
+  hexStringToByteArray,
   isArrayLengthOne,
   isValidAlgorandAddress,
   isValidAlgorandSignature,
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
-import { getAlgorandPublicKeyFromAddress } from './algoCrypto'
+import { calculatePublicKeyFromAddress } from './algoCrypto'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
@@ -298,7 +299,7 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsValidated()
     const missingSignatures =
       this.requiredAuthorizations?.filter(
-        auth => !this.hasSignatureForPublicKey(getAlgorandPublicKeyFromAddress(auth)),
+        auth => !this.hasSignatureForPublicKey(calculatePublicKeyFromAddress(auth)),
       ) || []
 
     // check if number of signatures present are greater then or equal to multisig threshold.
@@ -355,7 +356,7 @@ export class AlgorandTransaction implements Transaction {
     }
     this.addSignatures([signature])
     this._fromAddress = this._raw.from
-    this._fromPublicKey = getAlgorandPublicKeyFromAddress(this._raw.from)
+    this._fromPublicKey = calculatePublicKeyFromAddress(this._raw.from)
   }
 
   /** Createe and merge the signatures for all the private keys required to execute the multisig transaction */

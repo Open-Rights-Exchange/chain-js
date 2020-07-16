@@ -10,7 +10,7 @@ import {
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import {
-  getAddressFromPublicKey,
+  calculateAddressFromPublicKey,
   calculateMultiSigAddress,
   generateNewAccountKeysAndEncryptPrivateKeys,
 } from './algoCrypto'
@@ -133,7 +133,7 @@ export class AlgorandCreateAccount implements CreateAccount {
         await this.generateAccountKeys()
         publicKey = this._generatedKeys?.publicKey
       }
-      this._accountName = await getAddressFromPublicKey(publicKey)
+      this._accountName = await calculateAddressFromPublicKey(publicKey)
     }
     this._accountType = AlgorandNewAccountType.Native
   }

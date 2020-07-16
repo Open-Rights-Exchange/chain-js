@@ -17,9 +17,11 @@ import {
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
 import {
+  byteArrayToHexString,
   calculatePasswordByteArray,
   concatArrays,
   genericHash,
+  hexStringToByteArray,
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
   toAlgorandSignature,
@@ -41,7 +43,7 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
   const passwordKey = calculatePasswordByteArray(password, salt)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
-  return ed25519Crypto.byteArrayToHexString(encrypted) as EncryptedDataString
+  return byteArrayToHexString(encrypted) as EncryptedDataString
 }
 
 /** Decrypts the encrypted value using nacl
@@ -50,16 +52,13 @@ export function encrypt(unencrypted: string, password: string, salt: string): En
 export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
   const passwordKey = calculatePasswordByteArray(password, salt)
   const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
-  return ed25519Crypto.byteArrayToHexString(decrypted)
+  return byteArrayToHexString(decrypted)
 }
 
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = ed25519Crypto.sign(
-    ed25519Crypto.hexStringToByteArray(data),
-    ed25519Crypto.hexStringToByteArray(privateKey),
-  )
-  return toAlgorandSignature(ed25519Crypto.byteArrayToHexString(signature))
+  const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
+  return toAlgorandSignature(byteArrayToHexString(signature))
 }
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
@@ -69,9 +68,9 @@ export function verifySignedWithPublicKey(
   signature: AlgorandSignature,
 ): boolean {
   return ed25519Crypto.verify(
-    ed25519Crypto.hexStringToByteArray(data),
-    ed25519Crypto.hexStringToByteArray(publicKey),
-    ed25519Crypto.hexStringToByteArray(signature),
+    hexStringToByteArray(data),
+    hexStringToByteArray(publicKey),
+    hexStringToByteArray(signature),
   )
 }
 
@@ -93,8 +92,8 @@ export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountS
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
   return {
-    publicKey: toAlgorandPublicKey(ed25519Crypto.byteArrayToHexString(publicKey)),
-    privateKey: toAlgorandPrivateKey(ed25519Crypto.byteArrayToHexString(secretKey)),
+    publicKey: toAlgorandPublicKey(byteArrayToHexString(publicKey)),
+    privateKey: toAlgorandPrivateKey(byteArrayToHexString(secretKey)),
   }
 }
 
@@ -109,8 +108,8 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, sa
 }
 
 /** Computes algorand address from the algorand public key */
-export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
-  const rawPublicKey = ed25519Crypto.hexStringToByteArray(publicKey)
+export function calculateAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
+  const rawPublicKey = hexStringToByteArray(publicKey)
   // compute checksum
   const checksum = genericHash(rawPublicKey).slice(
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
@@ -121,7 +120,7 @@ export function getAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandA
 }
 
 /** Computes algorand public key from the algorand address */
-export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
+export function calculatePublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
   if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
 
@@ -132,7 +131,7 @@ export function getAlgorandPublicKeyFromAddress(address: AlgorandAddress): Algor
   if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
 
   const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
-  return ed25519Crypto.byteArrayToHexString(publicKey) as AlgorandPublicKey
+  return byteArrayToHexString(publicKey) as AlgorandPublicKey
 }
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */

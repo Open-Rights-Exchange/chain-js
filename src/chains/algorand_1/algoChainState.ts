@@ -14,8 +14,7 @@ import {
 } from './models'
 import { isNullOrEmpty, trimTrailingChars, getHeaderValueFromEndpoint } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
-import { toAlgo } from './helpers'
-import { hexStringToByteArray } from '../../crypto/ed25519Crypto'
+import { hexStringToByteArray, toAlgo } from './helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
