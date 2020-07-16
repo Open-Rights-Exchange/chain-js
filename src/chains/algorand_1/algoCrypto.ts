@@ -6,7 +6,7 @@ import { isAString } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
   AlgorandAddress,
-  AlgorandGenerateAccountResponse,
+  AlgorandGeneratedAccountStruct,
   AlgorandKeyPair,
   AlgorandMultiSigAccount,
   AlgorandMultiSigOptions,
@@ -89,7 +89,7 @@ function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: stri
 /** Gets the algorand public key from the given private key in the account
  * Returns hex public key and private key
  */
-export function getAlgorandKeyPairFromAccount(account: AlgorandGenerateAccountResponse): AlgorandKeyPair {
+export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountStruct): AlgorandKeyPair {
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
   return {

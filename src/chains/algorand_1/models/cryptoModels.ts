@@ -16,7 +16,4 @@ export type AlgorandPrivateKey = string & PrivateKeyBrand
 export type AlgorandPublicKey = string & PublicKeyBrand
 
 /** a signature string - formatted correcly for algorand */
-export type AlgorandSignature = Uint8Array & SignatureBrand
-
-/** a signature object for multisig transaction */
-export type AlgorandMultiSignature = { pk: Uint8Array; s?: Uint8Array }
+export type AlgorandSignature = string & SignatureBrand
