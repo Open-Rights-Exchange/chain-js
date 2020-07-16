@@ -6,7 +6,8 @@ import { ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS } from '../algoConstants'
 import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../models'
 
 /** Converts a password string using salt to a key(32 byte array)
- * Derives a key from password and salt and calls callback with the derived key as the only argument.
+ * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
+ * It can then be used as a key for symmetric block ciphers and private keys
  */
 export function calculatePasswordByteArray(password: string, salt: string = ''): Uint8Array {
   let passwordArray
