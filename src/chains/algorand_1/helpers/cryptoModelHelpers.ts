@@ -13,7 +13,7 @@ export function byteArrayToHexString(value: Uint8Array): string {
 /** Converts a password string using salt to a key(32 byte array)
  * Derives a key from password and salt and calls callback with the derived key as the only argument.
  */
-export function calculatePasswordByteArray(password: string, salt: string): Uint8Array {
+export function calculatePasswordByteArray(password: string, salt: string = ''): Uint8Array {
   let passwordArray
   scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, function(derivedKey: any) {
     passwordArray = derivedKey

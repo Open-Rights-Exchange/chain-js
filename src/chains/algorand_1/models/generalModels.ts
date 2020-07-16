@@ -51,7 +51,7 @@ export type AlgorandGeneratedKeys = {
 /**  Algorand new keys options including password and optional multisig parameters */
 export type AlgorandNewKeysOptions = {
   password: string
-  salt: string
+  salt?: string
 }
 
 /** Algorand value units */
