@@ -256,7 +256,7 @@ export class AlgorandTransaction implements Transaction {
     if (this.isMultiSig) {
       return sigsToLoop.some(signature => {
         const pks = this.getPublicKeysFromMultiSignature(signature)
-        return pks.find(key => key.toString() === publicKey.toString())
+        return pks.find(key => key === publicKey)
       })
     }
     return this?._fromPublicKey === publicKey
