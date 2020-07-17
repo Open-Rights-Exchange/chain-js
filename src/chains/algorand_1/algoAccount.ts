@@ -4,7 +4,7 @@ import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { AlgorandAccountStruct, AlgorandAddress, AlgorandPublicKey } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { toAddressFromPublicKey } from './algoCrypto'
+import { toAddressFromPublicKey } from './helpers/cryptoModelHelpers'
 import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers'
 
 export class AlgorandAccount implements Account {
