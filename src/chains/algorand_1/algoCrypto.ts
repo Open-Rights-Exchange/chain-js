@@ -1,29 +1,15 @@
 import * as algosdk from 'algosdk'
-import * as base32 from 'hi-base32'
-
-import * as nacl from 'tweetnacl'
-import { byteArrayToHexString, hexStringToByteArray, isAString } from '../../helpers'
+import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
-  AlgorandAddress,
   AlgorandGeneratedAccountStruct,
   AlgorandKeyPair,
-  AlgorandMultiSigAccount,
-  AlgorandMultiSigOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandSignature,
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import { ALGORAND_ADDRESS_BYTE_LENGTH, ALGORAND_ADDRESS_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH } from './algoConstants'
-import {
-  calculatePasswordByteArray,
-  concatArrays,
-  genericHash,
-  toAlgorandPrivateKey,
-  toAlgorandPublicKey,
-  toAlgorandSignature,
-} from './helpers'
+import { calculatePasswordByteArray, toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignature } from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -103,42 +89,4 @@ export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, sa
   const keys = getAlgorandKeyPairFromAccount(newAccount)
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt)
   return encryptedKeys
-}
-
-/** Computes algorand address from the algorand public key */
-export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
-  const rawPublicKey = hexStringToByteArray(publicKey)
-  // compute checksum
-  const checksum = genericHash(rawPublicKey).slice(
-    nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
-    nacl.sign.publicKeyLength,
-  )
-  const address = base32.encode(concatArrays(rawPublicKey, checksum))
-  return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
-}
-
-/** Computes algorand public key from the algorand address */
-export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
-  const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
-  if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
-
-  // try to decode
-  const decoded = base32.decode.asBytes(address)
-
-  // Sanity check
-  if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
-
-  const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
-  return byteArrayToHexString(publicKey) as AlgorandPublicKey
-}
-
-/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
-export function toMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
-  const mSigOptions = {
-    version: multiSigOptions.version,
-    threshold: multiSigOptions.threshold,
-    addrs: multiSigOptions.addrs,
-  }
-  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
-  return multisigAddress
 }

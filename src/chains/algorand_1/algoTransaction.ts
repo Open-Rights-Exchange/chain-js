@@ -26,7 +26,7 @@ import {
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
-import { toPublicKeyFromAddress } from './algoCrypto'
+import { toPublicKeyFromAddress } from './helpers/cryptoModelHelpers'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {

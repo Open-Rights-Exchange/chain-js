@@ -1,9 +1,24 @@
 import scrypt from 'scrypt-async'
+import * as base32 from 'hi-base32'
+import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
+import * as algosdk from 'algosdk'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
-import { hexStringToByteArray, isNullOrEmpty } from '../../../helpers'
-import { ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS } from '../algoConstants'
-import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../models'
+import { hexStringToByteArray, isNullOrEmpty, byteArrayToHexString, isAString } from '../../../helpers'
+import {
+  ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS,
+  ALGORAND_ADDRESS_BYTE_LENGTH,
+  ALGORAND_CHECKSUM_BYTE_LENGTH,
+  ALGORAND_ADDRESS_LENGTH,
+} from '../algoConstants'
+import {
+  AlgorandPublicKey,
+  AlgorandSignature,
+  AlgorandPrivateKey,
+  AlgorandMultiSigAccount,
+  AlgorandMultiSigOptions,
+  AlgorandAddress,
+} from '../models'
 
 /** Converts a password string using salt to a key(32 byte array)
  * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
@@ -11,7 +26,7 @@ import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey } from '../mod
  */
 export function calculatePasswordByteArray(password: string, salt: string = ''): Uint8Array {
   let passwordArray
-  scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, function(derivedKey: any) {
+  scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, (derivedKey: any) => {
     passwordArray = derivedKey
   })
   return passwordArray
@@ -74,4 +89,42 @@ export function toAlgorandSignature(value: string): AlgorandSignature {
     return value as AlgorandSignature
   }
   throw new Error(`Not a valid algorand signature:${value}.`)
+}
+
+/** Computes algorand address from the algorand public key */
+export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
+  const rawPublicKey = hexStringToByteArray(publicKey)
+  // compute checksum
+  const checksum = genericHash(rawPublicKey).slice(
+    nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
+    nacl.sign.publicKeyLength,
+  )
+  const address = base32.encode(concatArrays(rawPublicKey, checksum))
+  return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
+}
+
+/** Computes algorand public key from the algorand address */
+export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
+  const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
+  if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
+
+  // try to decode
+  const decoded = base32.decode.asBytes(address)
+
+  // Sanity check
+  if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
+
+  const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
+  return byteArrayToHexString(publicKey) as AlgorandPublicKey
+}
+
+/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
+export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
+  const mSigOptions = {
+    version: multiSigOptions.version,
+    threshold: multiSigOptions.threshold,
+    addrs: multiSigOptions.addrs,
+  }
+  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
+  return multisigAddress
 }
