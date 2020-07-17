@@ -9,7 +9,8 @@ import {
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
-import { toAddressFromPublicKey, toMultiSigAddress, generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
+import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
+import { toAddressFromPublicKey, determineMultiSigAddress } from './helpers/cryptoModelHelpers'
 import { isValidAlgorandPublicKey } from './helpers'
 
 /** Helper class to compose a transction for creating a new chain account
@@ -34,7 +35,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     const multiSigOptions = this?._options?.multiSigOptions
     // if multisig options are given, then compute a multisig account address using the passed in algorand addresses in multisig options
     if (multiSigOptions) {
-      this._accountName = toMultiSigAddress(multiSigOptions)
+      this._accountName = determineMultiSigAddress(multiSigOptions)
     }
   }
 
