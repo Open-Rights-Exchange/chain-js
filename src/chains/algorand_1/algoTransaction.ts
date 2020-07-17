@@ -281,7 +281,7 @@ export class AlgorandTransaction implements Transaction {
   /** Whether signature is attached to transaction (and/or whether the signature is correct) */
   public get hasAllRequiredSignatures(): boolean {
     this.assertIsValidated()
-    return this.missingSignatures === null
+    return isNullOrEmpty(this.missingSignatures)
   }
 
   /** Throws if transaction is missing any signatures */
