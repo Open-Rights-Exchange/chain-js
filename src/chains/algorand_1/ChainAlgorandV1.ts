@@ -72,11 +72,8 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (
-    actionType: ChainActionType | AlgorandChainActionType,
-    args: any,
-  ): AlgorandTransactionAction => {
-    return composeAction(actionType, args)
+  public composeAction = (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
+    return composeAction(this._chainState, actionType, args)
   }
 
   /** Decompose an action and return the action type (if any) and its data */
