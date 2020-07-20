@@ -4,16 +4,15 @@ import { AlgorandValue } from './generalModels'
 import { AlgorandTransactionHeader } from './transactionModels'
 import { AlgorandAddress } from './cryptoModels'
 
-// ALGO TODO: finish implementing this enum
 export enum AlgorandChainActionType {
-  AlgorandTokenCreate = 'AlgorandTokenCreate',
+  AssetTransfer = 'AssetTransfer',
 }
 
 export type AlgorandValueTransferParams = AlgorandTransactionHeader & ValueTransferParams
 
 export type AlgorandAssetCreateParams = AlgorandTransactionHeader & {
-  fromAccountName: AlgorandAddress
-  memo: AlgorandValue
+  fromAccountName: AlgorandAddress // Algorand address of sender
+  memo: AlgorandValue // arbitrary data for sender to store
   totalIssuance: number // total number of this asset in circulation
   defaultFrozen: boolean // whether user accounts will need to be unfrozen before transacting
   decimals: number // hint that the units of this asset are whole-integer amounts
@@ -28,7 +27,10 @@ export type AlgorandAssetCreateParams = AlgorandTransactionHeader & {
 }
 
 export type AlgorandAssetTransferParams = AlgorandTransactionHeader & {
-  fromAccountName: AlgorandAddress
-  toAccountName: AlgorandAddress
-  memo: AlgorandValue
+  fromAccountName: AlgorandAddress // Algorand address of sender
+  toAccountName: AlgorandAddress // Algorand address of asset recipient
+  memo: AlgorandValue // arbitrary data for sender to store
+  amount: number // integer amount of assets to send
+  revocationTarget?: AlgorandAddress // - optional - if provided, and if "fromAccountName" is the asset's revocation manager, then deduct from "revocationTarget" rather than "fromAccountName"
+  assetIndex: number // int asset index uniquely specifying the asset
 }
