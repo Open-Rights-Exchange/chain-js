@@ -4,7 +4,17 @@ import { AlgorandAddress } from './models/cryptoModels'
 import { AlgorandValue } from './models/generalModels'
 import { AlgorandTransactionAction } from './models/transactionModels'
 
-/** Helper class to ensure transaction actions properties are set correctly */
+/** Helper class to ensure transaction actions properties are set correctly
+ * Algorand supports these actions:
+ * 1) Payment,
+ * 2) Key Registration,
+ * 3) Asset Configuration, // Asset creation also comes under this category
+ * 4) Asset Freeze,
+ * 5) Asset Transfer.
+ * Helper class has the same variables initialised as the Algorand Transaction Builder Class
+ * All the transaction types listed above have relevant variables initialised from the Algorand Transaction Builder Class
+ * https://github.com/algorand/js-algorand-sdk/blob/develop/src/transaction.js
+ */
 export class AlgorandActionHelper {
   private _to: AlgorandAddress
 
@@ -189,7 +199,7 @@ export class AlgorandActionHelper {
       note: this._note,
       name: this._name,
       tag: this._tag,
-      lease: this._lease.length === 0 ? undefined : this._lease,
+      lease: this?._lease?.length === 0 ? undefined : this._lease,
       closeRemainderTo: this._closeRemainderTo,
       voteKey: this._voteKey,
       selectionKey: this._selectionKey,
