@@ -97,6 +97,9 @@ export class AlgorandTransaction implements Transaction {
       this._raw.firstRound = lastRoundFromChain
       this._raw.lastRound += ALGORAND_TRX_COMFIRMATION_ROUNDS
     }
+    if (!firstRound || !lastRound) {
+      throw new Error('First round and last round values should either be undefined or exist together')
+    }
     if (!fee) {
       const { minFee } = transactionParams
       this._raw.fee = minFee
