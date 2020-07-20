@@ -61,5 +61,5 @@ export enum AlgorandUnit {
 }
 
 /** Algorand general value type */
-export type AlgorandValue = string | number | Buffer
+export type AlgorandValue = string | number | Buffer | Uint8Array
 export type AlgorandSymbol = string & ChainSymbolBrand
