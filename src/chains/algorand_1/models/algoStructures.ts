@@ -1,4 +1,6 @@
+import { ChainActionType } from '../../../models'
 import { AlgorandAddress } from './cryptoModels'
+import { AlgorandChainActionType } from './chainActionTypeModels'
 
 /** Block producer participation information stored within the account if the account is eligible to produce blocks */
 export type AlgorandProducerParticipationStruct = {
@@ -53,4 +55,10 @@ export type AlgorandMultiSignatureStruct = { pk: Uint8Array; s?: Uint8Array }
 export type AlgorandGeneratedAccountStruct = {
   addr: Uint8Array
   sk: Uint8Array
+}
+
+export type AlgorandDecomposeReturn = {
+  chainActionType: ChainActionType | AlgorandChainActionType
+  args: any
+  partial?: boolean
 }
