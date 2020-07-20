@@ -1,6 +1,7 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+import { composeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
 import { AlgorandChainActionType, AlgorandTransactionAction } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
@@ -9,6 +10,8 @@ import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 const ComposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
   ValueTransfer: ValueTransferTemplate,
+  // Algorand actions
+  AssetTransfer: AssetTransferTemplate,
 }
 
 /** Compose an object for a chain contract action */
