@@ -128,7 +128,7 @@ export class AlgorandActionHelper {
       lastRound,
       fee,
       flatFee,
-    } = actionInput
+    } = actionInput || {}
 
     this._to = to
     this._from = from
