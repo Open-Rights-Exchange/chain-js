@@ -53,7 +53,7 @@ const composeValueTransferParams: valueTransferParams = {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
   composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
-  const action = algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = algoTest.decomposeAction(transaction.actions[0])
