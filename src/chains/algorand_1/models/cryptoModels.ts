@@ -17,3 +17,10 @@ export type AlgorandPublicKey = string & PublicKeyBrand
 
 /** a signature string - formatted correcly for algorand */
 export type AlgorandSignature = string & SignatureBrand
+
+export type AlgoEncryptionOptions = {
+  salt?: string
+}
+
+/** Additional parameters for encryption/decryption - for SHA256 algorithm */
+export type EncryptionOptions = AlgoEncryptionOptions

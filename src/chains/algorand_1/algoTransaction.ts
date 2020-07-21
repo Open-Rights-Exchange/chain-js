@@ -26,7 +26,11 @@ import {
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
-import { toPublicKeyFromAddress } from './helpers/cryptoModelHelpers'
+import {
+  toPublicKeyFromAddress,
+  toAlgorandSignatureFromRaw,
+  toRawSignatureFromAlgoSig,
+} from './helpers/cryptoModelHelpers'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
@@ -218,13 +222,23 @@ export class AlgorandTransaction implements Transaction {
    */
   addSignatures = (signatures: AlgorandSignature[]): void => {
     this.assertValidSignatures(signatures)
-    const newSignatures = new Set<AlgorandSignature>()
-    signatures.forEach(signature => {
-      newSignatures.add(signature)
-    })
-    // add to existing collection of signatures
-    this._signatures = new Set<AlgorandSignature>([...(this._signatures || []), ...newSignatures])
-    this._signatures = new Set<AlgorandSignature>([...this._signatures, ...signatures])
+    if (this.isMultiSig && this.hasAnySignatures) {
+      // use the merge function to merge multisignatures together
+      const rawSigsToMerge = [
+        ...this.signatures.map(toRawSignatureFromAlgoSig),
+        ...signatures.map(toRawSignatureFromAlgoSig),
+      ]
+      this._signatures = new Set<AlgorandSignature>([
+        toAlgorandSignatureFromRaw(algosdk.mergeMultisigTransactions(rawSigsToMerge)),
+      ])
+    } else {
+      const newSignatures = new Set<AlgorandSignature>()
+      signatures.forEach(signature => {
+        newSignatures.add(signature)
+      })
+      // add to existing collection of signatures
+      this._signatures = new Set<AlgorandSignature>([...(this._signatures || []), ...newSignatures])
+    }
   }
 
   /** Throws if signatures isn't properly formatted */
@@ -264,7 +278,7 @@ export class AlgorandTransaction implements Transaction {
 
   /** Returns public keys for which a signature is present in the multisignature object */
   private getPublicKeysFromMultiSignature(signature: AlgorandSignature): AlgorandPublicKey[] {
-    const { msig } = algosdk.decodeObj(hexStringToByteArray(signature))
+    const { msig } = algosdk.decodeObj(toRawSignatureFromAlgoSig(signature))
     const multiSigs =
       msig?.subsig?.filter((sig: AlgorandMultiSignatureStruct) => {
         // only return the keys from which signatures are present
@@ -281,7 +295,7 @@ export class AlgorandTransaction implements Transaction {
   /** Whether signature is attached to transaction (and/or whether the signature is correct) */
   public get hasAllRequiredSignatures(): boolean {
     this.assertIsValidated()
-    return this.missingSignatures === null
+    return isNullOrEmpty(this.missingSignatures)
   }
 
   /** Throws if transaction is missing any signatures */
@@ -297,13 +311,12 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsValidated()
     const missingSignatures =
       this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
+    const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
 
-    // check if number of signatures present are greater then or equal to multisig threshold.
-    // If so, set missing signatures to null
+    // check if number of signatures present are greater then or equal to multisig threshold
+    // If threshold reached, return null for missing signatures
     if (this.isMultiSig) {
-      return this.multiSigOptions.addrs.length - this.multiSigOptions.threshold <= missingSignatures.length
-        ? null
-        : missingSignatures
+      return signaturesAttachedCount >= this.multiSigOptions.threshold ? null : missingSignatures
     }
 
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
@@ -342,13 +355,13 @@ export class AlgorandTransaction implements Transaction {
 
   /** Sign the transaction body with private key and add to attached signatures */
   public async sign(privateKeys: AlgorandPrivateKey[]): Promise<void> {
-    let signature
+    let signature: AlgorandSignature
     this.assertIsValidated()
     if (this.isMultiSig) {
-      signature = await this.signMultiSigTransaction(privateKeys)
+      signature = this.signMultiSigTransaction(privateKeys)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
-      signature = toAlgorandSignature(byteArrayToHexString(algosdk.signTransaction(this._raw, privateKey).blob))
+      signature = toAlgorandSignatureFromRaw(algosdk.signTransaction(this._raw, privateKey).blob)
     }
     this.addSignatures([signature])
     this._fromAddress = this._raw.from
@@ -356,20 +369,18 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Createe and merge the signatures for all the private keys required to execute the multisig transaction */
-  private async signMultiSigTransaction(privateKeys: AlgorandPrivateKey[]): Promise<AlgorandSignature> {
-    const signatures: AlgorandSignature[] = []
-    await privateKeys.forEach(key => {
+  private signMultiSigTransaction(privateKeys: AlgorandPrivateKey[]): AlgorandSignature {
+    const rawSignatures: Uint8Array[] = []
+    privateKeys.forEach(key => {
       const privateKey = hexStringToByteArray(key)
-      const sig = algosdk.signMultisigTransaction(this._raw, this.multiSigOptions, privateKey)
-      signatures.push(sig.blob)
+      const sig = algosdk.signMultisigTransaction(this._raw, this.multiSigOptions, privateKey).blob
+      rawSignatures.push(sig)
     })
-    if (signatures.length === 1) {
-      return signatures[0]
+    if (rawSignatures.length > 1) {
+      return toAlgorandSignatureFromRaw(algosdk.mergeMultisigTransactions(rawSignatures))
     }
-    return toAlgorandSignature(byteArrayToHexString(algosdk.mergeMultisigTransactions(signatures)))
+    return toAlgorandSignatureFromRaw(rawSignatures[0])
   }
-
-  // send
 
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
