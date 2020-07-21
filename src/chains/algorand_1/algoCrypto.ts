@@ -2,8 +2,10 @@ import * as algosdk from 'algosdk'
 import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
+  AlgoEncryptionOptions,
   AlgorandGeneratedAccountStruct,
   AlgorandKeyPair,
+  AlgorandNewKeysOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandSignature,
@@ -24,7 +26,8 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 /** Encrypts a string using a password and a nonce
  *  Nacl requires password to be in a 32 byte array format. Hence we derive a key from the password string using the provided salt
  */
-export function encrypt(unencrypted: string, password: string, salt: string): EncryptedDataString {
+export function encrypt(unencrypted: string, password: string, options: AlgoEncryptionOptions): EncryptedDataString {
+  const { salt } = options
   const passwordKey = calculatePasswordByteArray(password, salt)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
   return byteArrayToHexString(encrypted) as EncryptedDataString
@@ -33,7 +36,12 @@ export function encrypt(unencrypted: string, password: string, salt: string): En
 /** Decrypts the encrypted value using nacl
  * Nacl requires password to be in a 32 byte array format
  */
-export function decrypt(encrypted: EncryptedDataString | any, password: string, salt: string): string {
+export function decrypt(
+  encrypted: EncryptedDataString | any,
+  password: string,
+  options: AlgoEncryptionOptions,
+): string {
+  const { salt } = options
   const passwordKey = calculatePasswordByteArray(password, salt)
   const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
   return byteArrayToHexString(decrypted)
@@ -60,10 +68,10 @@ export function verifySignedWithPublicKey(
 
 /** Replaces unencrypted privateKey in keys object
  *  Encrypts key using password */
-function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, salt: string) {
+function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, options: AlgoEncryptionOptions) {
   const { privateKey, publicKey } = keys
   const encryptedKeys = {
-    privateKey: encrypt(privateKey, password, salt),
+    privateKey: encrypt(privateKey, password, options),
     publicKey,
   }
   return encryptedKeys as AlgorandKeyPair
@@ -84,9 +92,9 @@ export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountS
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, salt: string) {
+export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
   const newAccount = algosdk.generateAccount()
   const keys = getAlgorandKeyPairFromAccount(newAccount)
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, salt)
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, { salt: options?.salt })
   return encryptedKeys
 }
