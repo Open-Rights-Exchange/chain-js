@@ -128,3 +128,13 @@ export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOption
   const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
   return multisigAddress
 }
+
+// convert a native Uint8Array signature to Hexstring
+export function toAlgorandSignatureFromRaw(rawSignature: Uint8Array): AlgorandSignature {
+  return toAlgorandSignature(byteArrayToHexString(rawSignature))
+}
+
+// convert a native Uint8Array signature to Hexstring
+export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Array {
+  return hexStringToByteArray(signature)
+}

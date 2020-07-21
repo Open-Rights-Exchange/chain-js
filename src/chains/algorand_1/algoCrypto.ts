@@ -11,7 +11,12 @@ import {
   AlgorandSignature,
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import { calculatePasswordByteArray, toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignature } from './helpers'
+import {
+  calculatePasswordByteArray,
+  toAlgorandPrivateKey,
+  toAlgorandPublicKey,
+  toAlgorandSignatureFromRaw,
+} from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -50,7 +55,7 @@ export function decrypt(
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
   const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
-  return toAlgorandSignature(byteArrayToHexString(signature))
+  return toAlgorandSignatureFromRaw(signature)
 }
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
