@@ -26,7 +26,7 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
   },
 ]
 
-export const CreateAccountOptions = {
+export const createAccountOptions = {
   newKeysOptions: {
     password: '2233',
     salt: 'salt',
@@ -43,8 +43,8 @@ export const multiSigOptions: AlgorandMultiSigOptions = {
   ],
 }
 
-export const CreateMultiSigAccountOptions = {
-  ...CreateAccountOptions,
+export const createMultiSigAccountOptions = {
+  ...createAccountOptions,
   multiSigOptions,
 }
 ;(async () => {
@@ -56,7 +56,7 @@ export const CreateMultiSigAccountOptions = {
   }
 
   /** Create Algorand account */
-  const createAccount = algoTest.new.CreateAccount(CreateAccountOptions)
+  const createAccount = algoTest.new.CreateAccount(createAccountOptions)
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
   console.log('generatedKeys: %o', generatedKeys)
@@ -64,9 +64,9 @@ export const CreateMultiSigAccountOptions = {
   const account = await algoTest.new.Account(accountName)
   console.log('account: %o', account.name)
 
-  /** Create Algorand multisig account */
-  const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
-  await createMultiSigAccount.generateKeysIfNeeded()
-  const { accountName: multiSigAccountName } = createMultiSigAccount
-  console.log('mulitsig account: %o', multiSigAccountName)
+  // /** Create Algorand multisig account */
+  // const createMultiSigAccount = algoTest.new.CreateAccount(createMultiSigAccountOptions)
+  // await createMultiSigAccount.generateKeysIfNeeded()
+  // const { accountName: multiSigAccountName } = createMultiSigAccount
+  // console.log('mulitsig account: %o', multiSigAccountName)
 })()

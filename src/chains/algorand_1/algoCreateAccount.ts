@@ -141,8 +141,8 @@ export class AlgorandCreateAccount implements CreateAccount {
   // ---- Private functions
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password, salt } = newKeysOptions || {}
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, salt)
+    const { password } = newKeysOptions || {}
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, newKeysOptions)
     this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 

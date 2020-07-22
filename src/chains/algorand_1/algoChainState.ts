@@ -94,6 +94,7 @@ export class AlgorandChainState {
 
   /** Retrieve lastest chain info including head block number and time */
   public async getChainInfo(): Promise<ChainInfo> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const nodeInfo = await this._algoClient.status()
       const { lastRound, lastConsensusVersion } = nodeInfo
@@ -108,7 +109,7 @@ export class AlgorandChainState {
       return this._chainInfo
     } catch (error) {
       // ALGO TODO: map chain error
-      throw new Error()
+      throw error
     }
   }
 
@@ -158,6 +159,7 @@ export class AlgorandChainState {
    * Does not wait for the transaction to be finalized on the chain
    */
   async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
+    // eslint-disable-next-line no-useless-catch
     try {
       const { txId: transactionId } = await this._algoClientWithTxHeader.sendRawTransaction(
         hexStringToByteArray(signedTransaction),
@@ -165,7 +167,7 @@ export class AlgorandChainState {
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
-      throw new Error()
+      throw error
     }
   }
 
@@ -202,6 +204,7 @@ export class AlgorandChainState {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
 
+    // eslint-disable-next-line no-useless-catch
     try {
       // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
       if (waitForConfirm === ConfirmType.None) {
@@ -220,7 +223,7 @@ export class AlgorandChainState {
       }
     } catch (error) {
       // ALGO TODO: map chain error
-      throw new Error()
+      throw error
     }
 
     return sendResult as AlgorandTxResult
