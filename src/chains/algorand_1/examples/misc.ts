@@ -7,6 +7,7 @@ import { toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandSymbol } from '../helpers'
+import { decrypt, encrypt } from '../algoCrypto'
 
 require('dotenv').config()
 
@@ -48,6 +49,13 @@ async function run() {
       toAlgorandSymbol('10029482'),
     ),
   )
+
+  /** Encrypt and decrypt value using algo crypto function */
+  const encrypted = await encrypt('somevalue', 'mypassword', { salt: 'mysalt' })
+  console.log('encrypted:', encrypted)
+
+  const decrypted = await decrypt('somevalue', 'mypassword', { salt: 'mysalt' })
+  console.log('decrypted:', decrypted)
 }
 
 ;(async () => {
