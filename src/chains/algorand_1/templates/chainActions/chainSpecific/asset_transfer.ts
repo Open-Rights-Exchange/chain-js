@@ -1,38 +1,42 @@
 import * as algosdk from 'algosdk'
+import { toAddressFromPublicKey, toAlgorandPublicKey } from '../../../helpers'
+import { AlgorandDecomposeReturn, AlgorandAssetTransferParams, AlgorandChainActionType } from '../../../models'
 import { isNullOrEmpty, byteArrayToHexString } from '../../../../../helpers'
-import { ActionDecomposeReturn, ChainActionType } from '../../../../../models'
-import { AlgorandTransactionAction, AlgorandUnit, AlgorandValueTransferParams } from '../../../models'
-import { toMicroAlgo, toAddressFromPublicKey, toAlgorandPublicKey } from '../../../helpers'
-import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
 
-export const composeAction = (args: AlgorandValueTransferParams): any => {
+/**
+ * Composes asset transfer action
+ * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
+export const composeAction = (args: AlgorandAssetTransferParams) => {
   const {
     fromAccountName: from,
     toAccountName: to,
-    fee,
-    amount: inputAmount,
-    symbol = DEFAULT_ALGO_SYMBOL,
+    amount,
     memo,
+    fee,
+    assetIndex,
+    revocationTarget,
     closeRemainderTo: closingAccount,
     firstRound,
     lastRound,
     genesisHash,
     genesisID,
   } = args
-  const amount = toMicroAlgo(inputAmount, symbol as AlgorandUnit)
+
   const note = algosdk.encodeObj(memo)
   const closeRemainderTo = isNullOrEmpty(closingAccount) ? undefined : closingAccount
-  const composedAction = algosdk.makePaymentTxn(
+  const composedAction = algosdk.makeAssetTransferTxn(
     from,
     to,
+    closeRemainderTo,
+    revocationTarget,
     fee,
     amount,
-    closeRemainderTo,
     firstRound,
     lastRound,
     note,
     genesisHash,
     genesisID,
+    assetIndex,
   )
   return {
     ...composedAction,
@@ -44,20 +48,22 @@ export const composeAction = (args: AlgorandValueTransferParams): any => {
   }
 }
 
-export const decomposeAction = (action: AlgorandTransactionAction): ActionDecomposeReturn => {
-  const { amount, from, name, note, tag, to, type } = action
+/**
+ * Decomposes asset transfer action */
+export const decomposeAction = (action: any): AlgorandDecomposeReturn => {
+  const { amount, from, name, note, tag, to, type, assetIndex } = action
   const returnData = {
     toAccountName: to,
     fromAccountName: from,
     amount,
-    symbol: AlgorandUnit.Microalgo,
+    assetIndex,
     memo: algosdk.decodeObj(note),
     type,
     name,
     tag,
   }
   return {
-    chainActionType: ChainActionType.ValueTransfer,
+    chainActionType: AlgorandChainActionType.AssetTransfer,
     args: returnData,
   }
 }

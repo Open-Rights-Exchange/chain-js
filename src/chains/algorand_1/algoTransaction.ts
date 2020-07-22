@@ -93,22 +93,20 @@ export class AlgorandTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    const { fee: fixedFee = null, flatFee = false } = this._options
     const transactionParams = await this._chainState.algoClient.getTransactionParams()
-    const { genesisID, genesishashb64, lastRound, fee: suggestedFeePerByte, minFee } = transactionParams
-    const fee = flatFee ? fixedFee : minFee
-    const { from, to, amount, note } = this._actionHelper.raw
-    this._raw = {
-      from,
-      to,
-      amount,
-      note,
-      genesisID,
-      genesisHash: genesishashb64,
-      firstRound: lastRound,
-      lastRound: lastRound + ALGORAND_TRX_COMFIRMATION_ROUNDS,
-      fee,
-      flatFee,
+    this._raw = this._actionHelper.raw
+    const { firstRound, lastRound, fee } = this._raw || {}
+    if (!firstRound && !lastRound) {
+      const { lastRound: lastRoundFromChain } = transactionParams
+      this._raw.firstRound = lastRoundFromChain
+      this._raw.lastRound += ALGORAND_TRX_COMFIRMATION_ROUNDS
+    }
+    if (!firstRound || !lastRound) {
+      throw new Error('First round and last round values should either be undefined or exist together')
+    }
+    if (!fee) {
+      const { minFee } = transactionParams
+      this._raw.fee = minFee
     }
     this.setHeaderFromRaw()
   }

@@ -35,12 +35,13 @@ export type AlgorandTxResult = {
 
 /** Transaction properties that contain the genesis information and fee required to construct a transaction */
 export type AlgorandTransactionHeader = {
-  genesisID: AlgorandValue
-  genesisHash: AlgorandValue
-  firstRound: number
-  lastRound: number
-  fee: AlgorandValue
-  flatFee: boolean
+  genesisID?: AlgorandValue // like genesisHash this is used to specify network to be used
+  genesisHash?: AlgorandValue // hash of the genesis block of the network to be used
+  firstRound?: number // first Algorand round on which this transaction is valid
+  lastRound?: number // last Algorand round on which this transaction is valid
+  fee?: AlgorandValue // the number of microAlgos per byte to pay as a transaction fee
+  flatFee?: boolean // Use a flat fee instead of the fees suggested by the chain
+  closeRemainderTo?: AlgorandValue // Make an account inactive by transferring all the remaining fund to this account
 }
 
 /** Transaction 'header' options set to chain along with the content type */
@@ -51,18 +52,7 @@ export type AlgorandTransactionOptions = {
 }
 
 /** Raw transaction ready to be signed */
-export type AlgorandRawTransaction = {
-  from: AlgorandAddress
-  to: AlgorandAddress
-  amount: AlgorandValue
-  note: AlgorandValue
-  genesisID: AlgorandValue
-  genesisHash: AlgorandValue
-  firstRound: number
-  lastRound: number
-  fee: AlgorandValue
-  flatFee: boolean
-}
+export type AlgorandRawTransaction = AlgorandTransactionAction
 
 /** Properties of an Algorand transaction action
  *  Can be used to create or compose a new Algorand action
@@ -73,4 +63,30 @@ export type AlgorandTransactionAction = {
   from: AlgorandAddress
   amount?: AlgorandValue
   note?: AlgorandValue
-}
+  name?: string
+  tag?: Buffer
+  lease?: Uint8Array[]
+  closeRemainderTo?: AlgorandValue
+  voteKey?: AlgorandValue
+  selectionKey?: AlgorandValue
+  voteFirst?: AlgorandValue
+  voteLast?: AlgorandValue
+  voteKeyDilution?: AlgorandValue
+  assetIndex?: AlgorandValue
+  assetTotal?: AlgorandValue
+  assetDecimals?: AlgorandValue
+  assetDefaultFrozen?: AlgorandValue
+  assetManager?: AlgorandValue
+  assetReserve?: AlgorandValue
+  assetFreeze?: AlgorandValue
+  assetClawback?: AlgorandValue
+  assetUnitName?: AlgorandValue
+  assetName?: AlgorandValue
+  assetURL?: AlgorandValue
+  assetMetadataHash?: AlgorandValue
+  freezeAccount?: AlgorandValue
+  freezeState?: AlgorandValue
+  assetRevocationTarget?: AlgorandValue
+  type?: AlgorandValue
+  group?: AlgorandValue
+} & AlgorandTransactionHeader

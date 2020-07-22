@@ -5,8 +5,8 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType } from '../../../models'
-import { AlgorandAddress, AlgorandPrivateKey, AlgorandUnit, AlgorandValue } from '../models'
+import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
+import { AlgorandAssetTransferParams, AlgorandChainActionType } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 
 require('dotenv').config()
@@ -28,19 +28,12 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
   },
 ]
 
-interface valueTransferParams {
-  fromAccountName?: AlgorandAddress
-  toAccountName: AlgorandAddress
-  amount: number
-  symbol?: AlgorandUnit
-  memo: AlgorandValue
-}
-
-const composeValueTransferParams: valueTransferParams = {
-  toAccountName: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-  amount: 1000000,
-  symbol: AlgorandUnit.Microalgo,
-  memo: 'Hello World',
+const composeTokenTransferParams: AlgorandAssetTransferParams = {
+  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  toAccountName: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  memo: 'hello world',
+  amount: 1,
+  assetIndex: 10820019,
 }
 ;(async () => {
   /** Create Algorand chain instance */
@@ -52,8 +45,7 @@ const composeValueTransferParams: valueTransferParams = {
 
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
-  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = algoTest.decomposeAction(transaction.actions[0])

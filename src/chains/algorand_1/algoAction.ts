@@ -4,7 +4,17 @@ import { AlgorandAddress } from './models/cryptoModels'
 import { AlgorandValue } from './models/generalModels'
 import { AlgorandTransactionAction } from './models/transactionModels'
 
-/** Helper class to ensure transaction actions properties are set correctly */
+/** Helper class to ensure transaction actions properties are set correctly
+ * Algorand supports these actions:
+ * 1) Payment,
+ * 2) Key Registration,
+ * 3) Asset Configuration, // Asset creation also comes under this category
+ * 4) Asset Freeze,
+ * 5) Asset Transfer.
+ * Helper class has the same variables initialised as the Algorand Transaction Builder Class
+ * All the transaction types listed above have relevant variables initialised from the Algorand Transaction Builder Class
+ * https://github.com/algorand/js-algorand-sdk/blob/develop/src/transaction.js
+ */
 export class AlgorandActionHelper {
   private _to: AlgorandAddress
 
@@ -13,6 +23,70 @@ export class AlgorandActionHelper {
   private _from: AlgorandAddress
 
   private _note: AlgorandValue
+
+  private _name: string
+
+  private _tag: Buffer
+
+  private _lease: Uint8Array[]
+
+  private _closeRemainderTo: AlgorandValue
+
+  private _voteKey: AlgorandValue
+
+  private _selectionKey: AlgorandValue
+
+  private _voteFirst: AlgorandValue
+
+  private _voteLast: AlgorandValue
+
+  private _voteKeyDilution: AlgorandValue
+
+  private _assetIndex: AlgorandValue
+
+  private _assetTotal: AlgorandValue
+
+  private _assetDecimals: AlgorandValue
+
+  private _assetDefaultFrozen: AlgorandValue
+
+  private _assetManager: AlgorandValue
+
+  private _assetReserve: AlgorandValue
+
+  private _assetFreeze: AlgorandValue
+
+  private _assetClawback: AlgorandValue
+
+  private _assetUnitName: AlgorandValue
+
+  private _assetName: AlgorandValue
+
+  private _assetURL: AlgorandValue
+
+  private _assetMetadataHash: AlgorandValue
+
+  private _assetRevocationTarget: AlgorandValue
+
+  private _freezeAccount: AlgorandValue
+
+  private _freezeState: AlgorandValue
+
+  private _type: AlgorandValue
+
+  private _group: AlgorandValue
+
+  private _genesisID: AlgorandValue
+
+  private _genesisHash: AlgorandValue
+
+  private _firstRound: number
+
+  private _lastRound: number
+
+  private _fee: AlgorandValue
+
+  private _flatFee: boolean
 
   /** Creates a new Action from 'human-readable' transfer or contact info
    *  OR from 'raw' data property
@@ -27,11 +101,83 @@ export class AlgorandActionHelper {
     if (isNullOrEmpty(actionInput)) {
       throwNewError('Missing action')
     }
-    const { to, from, amount, note } = actionInput
+    const {
+      to,
+      from,
+      amount,
+      note,
+      name,
+      tag,
+      lease,
+      closeRemainderTo,
+      voteKey,
+      selectionKey,
+      voteFirst,
+      voteLast,
+      voteKeyDilution,
+      assetIndex,
+      assetManager,
+      assetTotal,
+      assetDecimals,
+      assetDefaultFrozen,
+      assetMetadataHash,
+      assetReserve,
+      assetFreeze,
+      assetClawback,
+      assetUnitName,
+      assetName,
+      assetURL,
+      freezeAccount,
+      freezeState,
+      assetRevocationTarget,
+      type,
+      group,
+      genesisID,
+      genesisHash,
+      firstRound,
+      lastRound,
+      fee,
+      flatFee,
+    } = actionInput || {}
+
     this._to = to
     this._from = from
     this._amount = amount
     this._note = note
+    this._name = name
+    this._tag = tag
+    this._lease = lease
+    this._closeRemainderTo = closeRemainderTo
+    this._voteKey = voteKey
+    this._selectionKey = selectionKey
+    this._voteFirst = voteFirst
+    this._voteLast = voteLast
+    this._voteKeyDilution = voteKeyDilution
+    this._assetIndex = assetIndex
+    this._assetTotal = assetTotal
+    this._assetDecimals = assetDecimals
+    this._assetDefaultFrozen = assetDefaultFrozen
+    this._assetManager = assetManager
+    this._assetReserve = assetReserve
+    this._assetFreeze = assetFreeze
+    this._assetClawback = assetClawback
+    this._assetUnitName = assetUnitName
+    this._assetName = assetName
+    this._assetURL = assetURL
+    this._assetMetadataHash = assetMetadataHash
+    this._freezeAccount = freezeAccount
+    this._freezeState = freezeState
+    this._assetRevocationTarget = assetRevocationTarget
+    this._type = type
+    this._group = group
+
+    this._genesisID = genesisID
+    this._genesisHash = genesisHash
+    this._firstRound = firstRound
+    this._lastRound = lastRound
+
+    this._fee = fee
+    this._flatFee = flatFee
   }
 
   /** Returns 'hex or binary' data */
@@ -51,6 +197,38 @@ export class AlgorandActionHelper {
       from: this._from,
       amount: this._amount,
       note: this._note,
+      name: this._name,
+      tag: this._tag,
+      lease: this?._lease?.length === 0 ? undefined : this._lease,
+      closeRemainderTo: this._closeRemainderTo,
+      voteKey: this._voteKey,
+      selectionKey: this._selectionKey,
+      voteFirst: this._voteFirst,
+      voteLast: this._voteLast,
+      voteKeyDilution: this._voteKeyDilution,
+      assetIndex: this._assetIndex,
+      assetManager: this._assetManager,
+      assetTotal: this._assetTotal,
+      assetDecimals: this._assetDecimals,
+      assetDefaultFrozen: this._assetDefaultFrozen,
+      assetMetadataHash: this._assetMetadataHash,
+      assetReserve: this._assetReserve,
+      assetFreeze: this._assetFreeze,
+      assetClawback: this._assetClawback,
+      assetUnitName: this._assetUnitName,
+      assetName: this._assetName,
+      assetURL: this._assetURL,
+      freezeAccount: this._freezeAccount,
+      freezeState: this._freezeState,
+      assetRevocationTarget: this._assetRevocationTarget,
+      type: this._type,
+      group: this._group,
+      genesisID: this._genesisID,
+      genesisHash: this._genesisHash,
+      firstRound: this._firstRound,
+      lastRound: this._lastRound,
+      fee: this._fee,
+      flatFee: this._flatFee,
     }
   }
 

@@ -78,7 +78,7 @@ const composeValueTransferParams: valueTransferParams = {
 
   const transaction = await algoTest.new.Transaction({ multiSigOptions })
   composeValueTransferParams.fromAccountName = multiSigAccountName
-  const action = algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = algoTest.decomposeAction(transaction.actions[0])
