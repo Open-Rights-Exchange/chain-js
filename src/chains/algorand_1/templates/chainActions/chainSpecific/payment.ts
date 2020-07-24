@@ -24,18 +24,13 @@ export const composeAction = (args: AlgorandActionPaymentParams, suggestedParams
   return actionHelper.action // convert raw action to use hex strings
 }
 
-/** Decompose action */
 export const decomposeAction = (action: any): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
-  const { amount, from, note, to, closeRemainderTo, type } = actionHelper.action
+  const actionParams = actionHelper.paramsOnly
   // Identify chainActionType using type
-  if (type === AlgorandTransactionTypeCode.Payment) {
+  if (actionParams?.type === AlgorandTransactionTypeCode.Payment) {
     const returnData = {
-      from,
-      to,
-      amount,
-      closeRemainderTo,
-      note,
+      ...actionParams,
     }
     return {
       chainActionType: AlgorandChainActionType.Payment,

@@ -6,7 +6,9 @@ import {
   AlgorandSuggestedParams,
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
+  AlgorandTxActionRaw,
 } from '../../../models'
+import { AlgorandActionHelper } from '../../../algoAction'
 
 /**
  * Composes asset transfer action
@@ -27,13 +29,13 @@ export const composeAction = (args: AlgorandActionAssetTransferParams, suggested
   return { ...composedAction }
 }
 
-/**
- * Decomposes asset transfer action */
-export const decomposeAction = (action: AlgorandTxAction): AlgorandDecomposeReturn => {
-  const { type } = action
-  if (type === AlgorandTransactionTypeCode.AssetTransfer) {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
+  const actionHelper = new AlgorandActionHelper(action)
+  const actionParams = actionHelper.paramsOnly
+  // Identify chainActionType using type
+  if (actionParams?.type === AlgorandTransactionTypeCode.AssetTransfer) {
     const returnData = {
-      ...action,
+      ...actionParams,
     }
     return {
       chainActionType: AlgorandChainActionType.AssetTransfer,
