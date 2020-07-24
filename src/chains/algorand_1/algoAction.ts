@@ -1,8 +1,10 @@
-import { isNullOrEmpty, notImplemented } from '../../helpers'
+import * as algosdk from 'algosdk'
+import { isNullOrEmpty, toBuffer, bufferToString } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { AlgorandAddress } from './models/cryptoModels'
-import { AlgorandValue } from './models/generalModels'
-import { AlgorandTransactionAction } from './models/transactionModels'
+import { AlgorandTxAction, AlgorandTxActionRaw } from './models/transactionModels'
+import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
+import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
+import { isAlgorandTxActionRaw, toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
  * Algorand supports these actions:
@@ -16,224 +18,135 @@ import { AlgorandTransactionAction } from './models/transactionModels'
  * https://github.com/algorand/js-algorand-sdk/blob/develop/src/transaction.js
  */
 export class AlgorandActionHelper {
-  private _to: AlgorandAddress
+  private _rawAction: AlgorandTxActionRaw
 
-  private _amount: AlgorandValue
-
-  private _from: AlgorandAddress
-
-  private _note: AlgorandValue
-
-  private _name: string
-
-  private _tag: Buffer
-
-  private _lease: Uint8Array[]
-
-  private _closeRemainderTo: AlgorandValue
-
-  private _voteKey: AlgorandValue
-
-  private _selectionKey: AlgorandValue
-
-  private _voteFirst: AlgorandValue
-
-  private _voteLast: AlgorandValue
-
-  private _voteKeyDilution: AlgorandValue
-
-  private _assetIndex: AlgorandValue
-
-  private _assetTotal: AlgorandValue
-
-  private _assetDecimals: AlgorandValue
-
-  private _assetDefaultFrozen: AlgorandValue
-
-  private _assetManager: AlgorandValue
-
-  private _assetReserve: AlgorandValue
-
-  private _assetFreeze: AlgorandValue
-
-  private _assetClawback: AlgorandValue
-
-  private _assetUnitName: AlgorandValue
-
-  private _assetName: AlgorandValue
-
-  private _assetURL: AlgorandValue
-
-  private _assetMetadataHash: AlgorandValue
-
-  private _assetRevocationTarget: AlgorandValue
-
-  private _freezeAccount: AlgorandValue
-
-  private _freezeState: AlgorandValue
-
-  private _type: AlgorandValue
-
-  private _group: AlgorandValue
-
-  private _genesisID: AlgorandValue
-
-  private _genesisHash: AlgorandValue
-
-  private _firstRound: number
-
-  private _lastRound: number
-
-  private _fee: AlgorandValue
-
-  private _flatFee: boolean
-
-  /** Creates a new Action from 'human-readable' transfer or contact info
-   *  OR from 'raw' data property
-   *  Allows access to human-readable properties (method, parameters) or raw data (hex) */
-  constructor(actionInput: AlgorandTransactionAction) {
-    this.assertAndValidateAlgorandActionInput(actionInput)
+  /** Creates a new Action from a raw action (or Algrorand action replacing hexstrings for Uint8Arrays)
+   *  .action property returns action with Uint8Arrays converted to hexstrings
+   *  .raw property returns action which includes Uint8Arrays (used by chain) */
+  constructor(params: AlgorandTxAction | AlgorandTxActionRaw) {
+    this.validateAndApplyParams(params)
   }
 
-  /** apply rules for imput params, set class private properties, throw if violation */
-  // ALGO TODO: add more validators to the function
-  private assertAndValidateAlgorandActionInput(actionInput: AlgorandTransactionAction) {
-    if (isNullOrEmpty(actionInput)) {
+  /** applies rules for input params, converts to raw values if needed */
+  private validateAndApplyParams(action: AlgorandTxAction | AlgorandTxActionRaw) {
+    if (isNullOrEmpty(action)) {
       throwNewError('Missing action')
     }
-    const {
-      to,
-      from,
-      amount,
-      note,
-      name,
-      tag,
-      lease,
-      closeRemainderTo,
-      voteKey,
-      selectionKey,
-      voteFirst,
-      voteLast,
-      voteKeyDilution,
-      assetIndex,
-      assetManager,
-      assetTotal,
-      assetDecimals,
-      assetDefaultFrozen,
-      assetMetadataHash,
-      assetReserve,
-      assetFreeze,
-      assetClawback,
-      assetUnitName,
-      assetName,
-      assetURL,
-      freezeAccount,
-      freezeState,
-      assetRevocationTarget,
-      type,
-      group,
-      genesisID,
-      genesisHash,
-      firstRound,
-      lastRound,
-      fee,
-      flatFee,
-    } = actionInput || {}
-
-    this._to = to
-    this._from = from
-    this._amount = amount
-    this._note = note
-    this._name = name
-    this._tag = tag
-    this._lease = lease
-    this._closeRemainderTo = closeRemainderTo
-    this._voteKey = voteKey
-    this._selectionKey = selectionKey
-    this._voteFirst = voteFirst
-    this._voteLast = voteLast
-    this._voteKeyDilution = voteKeyDilution
-    this._assetIndex = assetIndex
-    this._assetTotal = assetTotal
-    this._assetDecimals = assetDecimals
-    this._assetDefaultFrozen = assetDefaultFrozen
-    this._assetManager = assetManager
-    this._assetReserve = assetReserve
-    this._assetFreeze = assetFreeze
-    this._assetClawback = assetClawback
-    this._assetUnitName = assetUnitName
-    this._assetName = assetName
-    this._assetURL = assetURL
-    this._assetMetadataHash = assetMetadataHash
-    this._freezeAccount = freezeAccount
-    this._freezeState = freezeState
-    this._assetRevocationTarget = assetRevocationTarget
-    this._type = type
-    this._group = group
-
-    this._genesisID = genesisID
-    this._genesisHash = genesisHash
-    this._firstRound = firstRound
-    this._lastRound = lastRound
-
-    this._fee = fee
-    this._flatFee = flatFee
-  }
-
-  /** Returns 'hex or binary' data */
-  get data() {
-    return notImplemented()
-  }
-
-  /** Checks is data value is empty or implying 0 */
-  get hasData(): boolean {
-    return notImplemented()
-  }
-
-  /** Action properties including raw data */
-  public get raw(): AlgorandTransactionAction {
-    return {
-      to: this._to,
-      from: this._from,
-      amount: this._amount,
-      note: this._note,
-      name: this._name,
-      tag: this._tag,
-      lease: this?._lease?.length === 0 ? undefined : this._lease,
-      closeRemainderTo: this._closeRemainderTo,
-      voteKey: this._voteKey,
-      selectionKey: this._selectionKey,
-      voteFirst: this._voteFirst,
-      voteLast: this._voteLast,
-      voteKeyDilution: this._voteKeyDilution,
-      assetIndex: this._assetIndex,
-      assetManager: this._assetManager,
-      assetTotal: this._assetTotal,
-      assetDecimals: this._assetDecimals,
-      assetDefaultFrozen: this._assetDefaultFrozen,
-      assetMetadataHash: this._assetMetadataHash,
-      assetReserve: this._assetReserve,
-      assetFreeze: this._assetFreeze,
-      assetClawback: this._assetClawback,
-      assetUnitName: this._assetUnitName,
-      assetName: this._assetName,
-      assetURL: this._assetURL,
-      freezeAccount: this._freezeAccount,
-      freezeState: this._freezeState,
-      assetRevocationTarget: this._assetRevocationTarget,
-      type: this._type,
-      group: this._group,
-      genesisID: this._genesisID,
-      genesisHash: this._genesisHash,
-      firstRound: this._firstRound,
-      lastRound: this._lastRound,
-      fee: this._fee,
-      flatFee: this._flatFee,
+    if (isNullOrEmpty(action.from)) {
+      throwNewError('Action requires a from value')
+    }
+    if (isAlgorandTxActionRaw(action)) {
+      this._rawAction = action as AlgorandTxActionRaw
+    } else {
+      this._rawAction = this.actionToRaw(action as AlgorandTxAction)
     }
   }
 
   /** Action properties including raw data */
-  public get contract(): any {
-    return notImplemented()
+  public get raw(): AlgorandTxActionRaw {
+    const rawParams = this._rawAction
+    this.deleteEmptyFields(rawParams)
+    return rawParams
+  }
+
+  /** Action properties with addresses converted to hexstrings (from Uint8Arrays) */
+  public get action(): AlgorandTxAction {
+    const returnVal = {
+      ...this.raw,
+      to: toAlgorandAddressFromRaw(this.raw.to),
+      from: toAlgorandAddressFromRaw(this.raw.from),
+      closeRemainderTo: toAlgorandAddressFromRaw(this.raw.closeRemainderTo),
+      assetManager: toAlgorandAddressFromRaw(this.raw.assetManager),
+      assetReserve: toAlgorandAddressFromRaw(this.raw.assetReserve),
+      assetFreeze: toAlgorandAddressFromRaw(this.raw.assetFreeze),
+      assetClawback: toAlgorandAddressFromRaw(this.raw.assetClawback),
+      freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
+      assetRevocationTarget: toAlgorandAddressFromRaw(this.raw.assetRevocationTarget),
+      note: algosdk.decodeObj(this.raw.note),
+      tag: bufferToString(this.raw.tag),
+    }
+    this.deleteEmptyFields(returnVal)
+    return returnVal
+  }
+
+  /** Action properties formatted to send to algosdk - includes hexstring addresses and UInt8Array note */
+  public get actionForChain(): AlgorandTxAction {
+    const returnVal = this.action
+    // encode for transaction siging
+    if (this.action.note) {
+      returnVal.note = algosdk.encodeObj(this.action.note)
+    }
+    return returnVal
+  }
+
+  /** Action properties with all UInt8Array fields converted to hex strings */
+  private actionToRaw(action: AlgorandTxAction) {
+    const raw: AlgorandTxActionRaw = {
+      ...action,
+      to: toRawAddressFromAlgoAddr(action.to) || undefined,
+      from: toRawAddressFromAlgoAddr(action.from) || undefined,
+      closeRemainderTo: toRawAddressFromAlgoAddr(action.closeRemainderTo) || undefined,
+      assetManager: toRawAddressFromAlgoAddr(action.assetManager) || undefined,
+      assetReserve: toRawAddressFromAlgoAddr(action.assetReserve) || undefined,
+      assetFreeze: toRawAddressFromAlgoAddr(action.assetFreeze) || undefined,
+      assetClawback: toRawAddressFromAlgoAddr(action.assetClawback) || undefined,
+      freezeAccount: toRawAddressFromAlgoAddr(action.freezeAccount) || undefined,
+      assetRevocationTarget: toRawAddressFromAlgoAddr(action.assetRevocationTarget) || undefined,
+      note: algosdk.encodeObj(action.note),
+      tag: toBuffer(action.tag),
+    }
+    return raw
+  }
+
+  /** Always returns 'none' for Algorand chain */
+  public get contract(): string {
+    return ALGORAND_EMPTY_CONTRACT_NAME
+  }
+
+  /** Transaction-specific properties - required for sending action to the chain */
+  public get transactionHeaderParams(): AlgorandTxHeaderParams {
+    return {
+      genesisID: this.raw.genesisID,
+      genesisHash: this.raw.genesisHash,
+      firstRound: this.raw.firstRound,
+      lastRound: this.raw.lastRound,
+      fee: this.raw.fee,
+      flatFee: this.raw.flatFee,
+    }
+  }
+
+  /** Action properties - excludes 'suggestedParams' fields (e.g. genesisID) */
+  public get paramsOnly() {
+    const {
+      fee: a,
+      flatFee: b,
+      firstRound: c,
+      lastRound: d,
+      genesisID: e,
+      genesisHash: f,
+      ...actionParams
+    } = this.action
+    // remove params that have empty values (undefined or null)
+    this.deleteEmptyFields(actionParams)
+    return actionParams
+  }
+
+  /** Adds the latest transaction header fields (firstRound, etc.) from chain
+   *  Applies any that are not already provided in the action */
+  applyCurrentTxHeaderParamsWhereNeeded(chainTxParams: AlgorandChainTransactionParamsStruct) {
+    const rawAction = this.raw
+    rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
+    rawAction.genesisHash = rawAction.genesisHash || chainTxParams.genesishashb64
+    rawAction.firstRound = rawAction.firstRound || chainTxParams.lastRound // start with the most recent chain round (chainTxParams.lastRound)
+    rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
+    rawAction.fee = rawAction.flatFee === true ? rawAction.fee || chainTxParams.minFee : chainTxParams.minFee
+    rawAction.flatFee = rawAction.flatFee || false
+  }
+
+  /** Remove fields from object that are undefined, null, or empty */
+  deleteEmptyFields(paramsIn: { [key: string]: any }) {
+    const params = paramsIn
+    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    if (params.lease && (params.lease as Uint8Array).length === 0) delete params.lease
   }
 }
