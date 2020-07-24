@@ -3,33 +3,41 @@ import * as algosdk from 'algosdk'
 import { Transaction } from '../../interfaces'
 import { ConfirmType } from '../../models'
 import { throwNewError } from '../../errors'
-import { byteArrayToHexString, hexStringToByteArray, isNullOrEmpty, notImplemented } from '../../helpers'
+import {
+  byteArrayToHexString,
+  hexStringToByteArray,
+  isArrayLengthOne,
+  isNullOrEmpty,
+  notImplemented,
+} from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
   AlgorandChainSettingsCommunicationSettings,
+  AlgorandChainTransactionParamsStruct,
   AlgorandMultiSigOptions,
   AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
   AlgorandPublicKey,
-  AlgorandRawTransaction,
   AlgorandSignature,
-  AlgorandTransactionAction,
-  AlgorandTransactionHeader,
   AlgorandTransactionOptions,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+  AlgorandTxHeaderParams,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
-  isArrayLengthOne,
   isValidAlgorandAddress,
   isValidAlgorandSignature,
   toAlgorandPublicKey,
   toAlgorandSignature,
+  toAlgorandAddressFromRaw,
 } from './helpers'
 import {
+  toAlgorandSignatureFromRawSig,
   toPublicKeyFromAddress,
-  toAlgorandSignatureFromRaw,
   toRawSignatureFromAlgoSig,
+  concatUint8Arrays,
 } from './helpers/cryptoModelHelpers'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS } from './algoConstants'
 
@@ -38,7 +46,7 @@ export class AlgorandTransaction implements Transaction {
 
   private _chainState: AlgorandChainState
 
-  private _header: AlgorandTransactionHeader
+  private _header: AlgorandTxHeaderParams
 
   private _options: AlgorandTransactionOptions
 
@@ -50,9 +58,6 @@ export class AlgorandTransaction implements Transaction {
 
   /** Public Key retrieved from attached signature */
   private _fromPublicKey: AlgorandPublicKey
-
-  /** Transaction prepared for signing (raw transaction) */
-  private _raw: AlgorandRawTransaction
 
   private _isValidated: boolean
 
@@ -73,18 +78,18 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Raw tranasction body (prepared for signing) */
-  get raw(): AlgorandRawTransaction {
+  get raw(): AlgorandTxActionRaw {
     if (!this.hasRaw) {
       throwNewError(
         'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
-    return this._raw
+    return this._actionHelper.raw
   }
 
   /** Whether the raw transaction body has been set or prepared */
   get hasRaw(): boolean {
-    return !!this._raw
+    return !!this._actionHelper.raw
   }
 
   /** Generate the raw transaction body using the actions attached
@@ -93,47 +98,33 @@ export class AlgorandTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    const transactionParams = await this._chainState.algoClient.getTransactionParams()
-    this._raw = this._actionHelper.raw
-    const { firstRound, lastRound, fee } = this._raw || {}
-    if (!firstRound && !lastRound) {
-      const { lastRound: lastRoundFromChain } = transactionParams
-      this._raw.firstRound = lastRoundFromChain
-      this._raw.lastRound += ALGORAND_TRX_COMFIRMATION_ROUNDS
-    }
-    if (!firstRound || !lastRound) {
-      throw new Error('First round and last round values should either be undefined or exist together')
-    }
-    if (!fee) {
-      const { minFee } = transactionParams
-      this._raw.fee = minFee
-    }
+    this.assertHasAction()
+    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = await this._chainState.algoClient.getTransactionParams()
+    this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
     this.setHeaderFromRaw()
   }
 
   /** Extract header from raw transaction body */
   private setHeaderFromRaw(): void {
     this.assertHasRaw()
-    const { genesisHash, genesisID, fee, flatFee, firstRound, lastRound } = this._raw
+    const { genesisHash, genesisID, fee, flatFee, firstRound, lastRound } = this.raw
     this._header = { genesisHash, genesisID, fee, flatFee, firstRound, lastRound }
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
-  async setFromRaw(raw: AlgorandRawTransaction): Promise<void> {
+  async setFromRaw(raw: AlgorandTxActionRaw): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
-      this._raw = raw
-      const { to, from, amount, note, genesisHash, genesisID, fee, flatFee, firstRound, lastRound } = this._raw
-      this._header = { genesisHash, genesisID, fee, flatFee, firstRound, lastRound }
-      this._actionHelper = new AlgorandActionHelper({ to, from, amount, note })
+      this._actionHelper = new AlgorandActionHelper(raw)
+      this.setHeaderFromRaw()
       this._isValidated = false
     }
   }
 
   /** Algorand transaction action (transfer & asset related functions)
    */
-  public get actions(): AlgorandTransactionAction[] {
+  public get actions(): AlgorandTxAction[] {
     const { action } = this
     if (!action) {
       return null
@@ -142,16 +133,15 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Private property for the Algorand action - uses _actionHelper */
-  private get action(): AlgorandTransactionAction {
-    if (!this?._actionHelper?.raw) return null
-    const action = { ...this._actionHelper?.raw }
-    return action
+  private get action(): AlgorandTxAction {
+    if (!this.hasRaw) return null
+    return { ...this._actionHelper?.action }
   }
 
   /** Sets actions array
    * Array length has to be exactly 1 because algorand doesn't support multiple actions
    */
-  public set actions(actions: AlgorandTransactionAction[]) {
+  public set actions(actions: AlgorandTxAction[]) {
     this.assertNoSignatures()
     if (!isArrayLengthOne(actions)) {
       throwNewError('Algorand transaction.actions only accepts an array of exactly 1 action')
@@ -164,15 +154,14 @@ export class AlgorandTransaction implements Transaction {
   /** Add action to the transaction body
    *  throws if transaction.actions already has a value
    *  Ignores asFirstAction parameter since only one action is supported in algorand */
-  public addAction(action: AlgorandTransactionAction, asFirstAction?: boolean): void {
+  public addAction(action: AlgorandTxAction, asFirstAction?: boolean): void {
     this.assertNoSignatures()
     if (!isNullOrEmpty(this._actionHelper)) {
       throwNewError(
-        'addAction failed. Transaction already has an action. Use transaction.actions to replace existing action.',
+        'addAction failed. Transaction already has an action and can only have one. You can use transaction.actions to replace existing action.',
       )
     }
-    this._actionHelper = new AlgorandActionHelper(action)
-    this._isValidated = false
+    this.actions = [action]
   }
 
   // validation
@@ -180,11 +169,8 @@ export class AlgorandTransaction implements Transaction {
   /** Verifies that raw trx exists
    *  Throws if any problems */
   public async validate(): Promise<void> {
-    if (!this.hasRaw) {
-      throwNewError(
-        'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
-      )
-    }
+    this.assertHasAction()
+    this.assertHasRaw()
     this._isValidated = true
   }
 
@@ -227,7 +213,7 @@ export class AlgorandTransaction implements Transaction {
         ...signatures.map(toRawSignatureFromAlgoSig),
       ]
       this._signatures = new Set<AlgorandSignature>([
-        toAlgorandSignatureFromRaw(algosdk.mergeMultisigTransactions(rawSigsToMerge)),
+        toAlgorandSignatureFromRawSig(algosdk.mergeMultisigTransactions(rawSigsToMerge)),
       ])
     } else {
       const newSignatures = new Set<AlgorandSignature>()
@@ -259,6 +245,13 @@ export class AlgorandTransaction implements Transaction {
       throwNewError(
         'You cant modify the body of the transaction without invalidating the existing signatures. Remove the signatures first.',
       )
+    }
+  }
+
+  /** Throws if an action isn't attached to this transaction */
+  private assertHasAction() {
+    if (isNullOrEmpty(this._actionHelper)) {
+      throwNewError('Transaction has no action. You can set the action using transaction.actions.')
     }
   }
 
@@ -359,11 +352,15 @@ export class AlgorandTransaction implements Transaction {
       signature = this.signMultiSigTransaction(privateKeys)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
-      signature = toAlgorandSignatureFromRaw(algosdk.signTransaction(this._raw, privateKey).blob)
+      const { blob: signatureBlob, txID: transactionId } = algosdk.signTransaction(
+        this._actionHelper.actionForChain,
+        privateKey,
+      )
+      signature = toAlgorandSignatureFromRawSig(signatureBlob)
     }
     this.addSignatures([signature])
-    this._fromAddress = this._raw.from
-    this._fromPublicKey = toPublicKeyFromAddress(this._raw.from)
+    this._fromAddress = this.action.from
+    this._fromPublicKey = toPublicKeyFromAddress(this.action.from)
   }
 
   /** Createe and merge the signatures for all the private keys required to execute the multisig transaction */
@@ -371,13 +368,13 @@ export class AlgorandTransaction implements Transaction {
     const rawSignatures: Uint8Array[] = []
     privateKeys.forEach(key => {
       const privateKey = hexStringToByteArray(key)
-      const sig = algosdk.signMultisigTransaction(this._raw, this.multiSigOptions, privateKey).blob
+      const sig = algosdk.signMultisigTransaction(this.raw, this.multiSigOptions, privateKey).blob
       rawSignatures.push(sig)
     })
     if (rawSignatures.length > 1) {
-      return toAlgorandSignatureFromRaw(algosdk.mergeMultisigTransactions(rawSignatures))
+      return toAlgorandSignatureFromRawSig(algosdk.mergeMultisigTransactions(rawSignatures))
     }
-    return toAlgorandSignatureFromRaw(rawSignatures[0])
+    return toAlgorandSignatureFromRawSig(rawSignatures[0])
   }
 
   /** Broadcast a signed transaction to the chain
