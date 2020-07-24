@@ -1,13 +1,13 @@
-import { AlgorandUnit } from '../models'
+import * as algosdk from 'algosdk'
+import { AlgorandMultiSigAccount, AlgorandMultiSigOptions } from '../models'
 
-/** Convert amount from fromType to microAlgo */
-export function toMicroAlgo(amount: string, fromType: AlgorandUnit) {
-  const value = parseFloat(amount)
-  if (fromType === AlgorandUnit.Algo) {
-    return (value * 100000).toString()
+/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
+export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
+  const mSigOptions = {
+    version: multiSigOptions.version,
+    threshold: multiSigOptions.threshold,
+    addrs: multiSigOptions.addrs,
   }
-  if (fromType === AlgorandUnit.Microalgo) {
-    return amount
-  }
-  throw new Error(`Not a supported Algorand type: ${fromType}`)
+  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
+  return multisigAddress
 }
