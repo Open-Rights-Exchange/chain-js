@@ -88,11 +88,11 @@ export function isANumber(value: any) {
 }
 
 export function isAnObject(obj: any) {
-  return obj !== null && typeof obj === 'object'
+  return !isNullOrEmpty(obj) && typeof obj === 'object'
 }
 
 export function isAUint8Array(obj: any) {
-  return obj !== null && obj.constructor === Uint8Array
+  return !isNullOrEmpty(obj) && obj.constructor === Uint8Array
 }
 
 /** Typescript Typeguard to verify that the value is in the enumType specified  */
