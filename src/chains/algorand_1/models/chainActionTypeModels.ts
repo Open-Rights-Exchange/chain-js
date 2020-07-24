@@ -1,18 +1,28 @@
-import { ValueTransferParams } from '../../../models'
 import { AlgorandValue } from './generalModels'
 // eslint-disable-next-line import/no-cycle
-import { AlgorandTransactionHeader } from './transactionModels'
 import { AlgorandAddress } from './cryptoModels'
+import { ChainActionType } from '../../../models'
 
+/** ChainJS action type names */
 export enum AlgorandChainActionType {
+  AssetCreate = 'AssetCreate',
+  AssetConfig = 'AssetConfig',
+  AssetDestroy = 'AssetDestroy',
+  AssetFreeze = 'AssetFreeze',
   AssetTransfer = 'AssetTransfer',
+  KeyRegistration = 'KeyRegistration',
+  Payment = 'Payment',
 }
 
-export type AlgorandValueTransferParams = AlgorandTransactionHeader & ValueTransferParams
+export type AlgorandDecomposeReturn = {
+  chainActionType: ChainActionType | AlgorandChainActionType
+  args: any
+  partial?: boolean
+}
 
-export type AlgorandAssetCreateParams = AlgorandTransactionHeader & {
+export type AlgorandActionAssetCreateParams = {
   fromAccountName: AlgorandAddress // Algorand address of sender
-  memo: AlgorandValue // arbitrary data for sender to store
+  memo: Uint8Array // arbitrary data for sender to store
   totalIssuance: number // total number of this asset in circulation
   defaultFrozen: boolean // whether user accounts will need to be unfrozen before transacting
   decimals: number // hint that the units of this asset are whole-integer amounts
@@ -26,11 +36,20 @@ export type AlgorandAssetCreateParams = AlgorandTransactionHeader & {
   assetMetadataHash?: string // optional hash commitment of some sort relating to the asset. 32 character length.
 }
 
-export type AlgorandAssetTransferParams = AlgorandTransactionHeader & {
-  fromAccountName: AlgorandAddress // Algorand address of sender
-  toAccountName: AlgorandAddress // Algorand address of asset recipient
-  memo: AlgorandValue // arbitrary data for sender to store
-  amount: number // integer amount of assets to send
-  revocationTarget?: AlgorandAddress // - optional - if provided, and if "fromAccountName" is the asset's revocation manager, then deduct from "revocationTarget" rather than "fromAccountName"
-  assetIndex: number // int asset index uniquely specifying the asset
+export type AlgorandActionAssetTransferParams = {
+  from: AlgorandAddress
+  to: AlgorandAddress
+  closeRemainderTo?: AlgorandAddress
+  revocationTarget?: AlgorandAddress
+  amount: number
+  note: AlgorandValue
+  assetIndex: number
+}
+
+export type AlgorandActionPaymentParams = {
+  from: AlgorandAddress
+  to: AlgorandAddress
+  amount: number
+  closeRemainderTo?: AlgorandAddress
+  note: AlgorandValue
 }
