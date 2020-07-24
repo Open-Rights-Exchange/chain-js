@@ -1,6 +1,4 @@
-import { ChainActionType } from '../../../models'
 import { AlgorandAddress } from './cryptoModels'
-import { AlgorandChainActionType } from './chainActionTypeModels'
 
 /** Block producer participation information stored within the account if the account is eligible to produce blocks */
 export type AlgorandProducerParticipationStruct = {
@@ -48,6 +46,15 @@ export type AlgorandAccountStruct = {
   thisassettotal?: Map<string, AlgorandAssetParamsStruct>
 }
 
+/** Latest chain state - from calling {chain}/transactions/params - useful for adding 'header' fields to a transaction */
+export type AlgorandChainTransactionParamsStruct = {
+  genesishashb64: string
+  genesisID: string
+  lastRound: number
+  consensusVersion: number
+  minFee: number
+}
+
 /** a signature object for multisig transaction */
 export type AlgorandMultiSignatureStruct = { pk: Uint8Array; s?: Uint8Array }
 
@@ -57,8 +64,57 @@ export type AlgorandGeneratedAccountStruct = {
   sk: Uint8Array
 }
 
-export type AlgorandDecomposeReturn = {
-  chainActionType: ChainActionType | AlgorandChainActionType
-  args: any
-  partial?: boolean
+/** Algorand's on-chain transaction type codes */
+export enum AlgorandTransactionTypeCode {
+  AssetConfig = 'acfg',
+  AssetFreeze = 'afrz',
+  AssetTransfer = 'axfer',
+  KeyRegistration = 'keyreg',
+  Payment = 'pay',
+}
+
+export type AlgorandAddressStruct = {
+  publicKey: Uint8Array
+  checksum: Uint8Array
+}
+
+/** All possible fields in an Algorand transction */
+export type AlgorandTxActionStruct = {
+  to?: AlgorandAddressStruct
+  from?: AlgorandAddressStruct
+  amount?: number // integer
+  note?: Uint8Array
+  name?: string
+  tag?: Buffer
+  lease?: Uint8Array
+  closeRemainderTo?: AlgorandAddressStruct
+  voteKey?: string
+  selectionKey?: string
+  voteFirst?: number // integer
+  voteLast?: number // integer
+  voteKeyDilution?: number // integer
+  assetIndex?: number // integer
+  assetTotal?: number // integer
+  assetDecimals?: number
+  assetDefaultFrozen?: boolean
+  assetManager?: AlgorandAddressStruct
+  assetReserve?: AlgorandAddressStruct
+  assetFreeze?: AlgorandAddressStruct
+  assetClawback?: AlgorandAddressStruct
+  assetUnitName?: string
+  assetName?: string
+  assetURL?: string
+  assetMetadataHash?: string
+  freezeAccount?: AlgorandAddressStruct
+  freezeState?: boolean
+  assetRevocationTarget?: AlgorandAddressStruct
+  type?: AlgorandTransactionTypeCode
+  group?: number // integer
+  decimals?: number
+  genesisID?: string
+  genesisHash?: string
+  firstRound?: number
+  lastRound?: number
+  fee?: number
+  flatFee?: boolean
 }
