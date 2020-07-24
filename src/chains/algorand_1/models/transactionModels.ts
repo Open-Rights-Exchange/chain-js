@@ -1,5 +1,6 @@
 import { AlgorandValue, AlgorandMultiSigOptions } from './generalModels'
 import { AlgorandAddress } from './cryptoModels'
+import { AlgorandTxActionStruct, AlgorandTransactionTypeCode } from './algoStructures'
 
 /**
  * Chain response type after a transaction is confirmed on the chain
@@ -34,14 +35,23 @@ export type AlgorandTxResult = {
 }
 
 /** Transaction properties that contain the genesis information and fee required to construct a transaction */
-export type AlgorandTransactionHeader = {
-  genesisID?: AlgorandValue // like genesisHash this is used to specify network to be used
-  genesisHash?: AlgorandValue // hash of the genesis block of the network to be used
+export type AlgorandTxHeaderParams = {
+  genesisID?: string // like genesisHash this is used to specify network to be used
+  genesisHash?: string // hash of the genesis block of the network to be used
   firstRound?: number // first Algorand round on which this transaction is valid
   lastRound?: number // last Algorand round on which this transaction is valid
-  fee?: AlgorandValue // the number of microAlgos per byte to pay as a transaction fee
+  fee?: number // the number of microAlgos per byte to pay as a transaction fee
   flatFee?: boolean // Use a flat fee instead of the fees suggested by the chain
-  closeRemainderTo?: AlgorandValue // Make an account inactive by transferring all the remaining fund to this account
+}
+
+/** A type passed to algorand SDK that includes transaction params common to use with make...TxnWithSuggestedParams functions */
+export type AlgorandSuggestedParams = {
+  genesisID: string
+  genesisHash: string
+  firstRound: number
+  lastRound: number
+  fee: number
+  flatFee?: boolean
 }
 
 /** Transaction 'header' options set to chain along with the content type */
@@ -52,41 +62,42 @@ export type AlgorandTransactionOptions = {
 }
 
 /** Raw transaction ready to be signed */
-export type AlgorandRawTransaction = AlgorandTransactionAction
+export type AlgorandTxActionRaw = AlgorandTxActionStruct
 
-/** Properties of an Algorand transaction action
+/** All possible properties of an Algorand transaction action
  *  Can be used to create or compose a new Algorand action
- *  from - must be present
+ *  Note: from - must be present
  */
-export type AlgorandTransactionAction = {
+export type AlgorandTxAction = AlgorandTxHeaderParams & {
   to?: AlgorandAddress
-  from: AlgorandAddress
-  amount?: AlgorandValue
-  note?: AlgorandValue
+  from?: AlgorandAddress
+  amount?: number // integer
+  note?: string
   name?: string
-  tag?: Buffer
-  lease?: Uint8Array[]
-  closeRemainderTo?: AlgorandValue
-  voteKey?: AlgorandValue
-  selectionKey?: AlgorandValue
-  voteFirst?: AlgorandValue
-  voteLast?: AlgorandValue
-  voteKeyDilution?: AlgorandValue
-  assetIndex?: AlgorandValue
-  assetTotal?: AlgorandValue
-  assetDecimals?: AlgorandValue
-  assetDefaultFrozen?: AlgorandValue
-  assetManager?: AlgorandValue
-  assetReserve?: AlgorandValue
-  assetFreeze?: AlgorandValue
-  assetClawback?: AlgorandValue
-  assetUnitName?: AlgorandValue
-  assetName?: AlgorandValue
-  assetURL?: AlgorandValue
-  assetMetadataHash?: AlgorandValue
-  freezeAccount?: AlgorandValue
-  freezeState?: AlgorandValue
-  assetRevocationTarget?: AlgorandValue
-  type?: AlgorandValue
-  group?: AlgorandValue
-} & AlgorandTransactionHeader
+  tag?: string
+  lease?: Uint8Array
+  closeRemainderTo?: AlgorandAddress
+  voteKey?: string
+  selectionKey?: string
+  voteFirst?: number // integer
+  voteLast?: number // integer
+  voteKeyDilution?: number // integer
+  assetIndex?: number // integer
+  assetTotal?: number // integer
+  assetDecimals?: number // integer
+  assetDefaultFrozen?: boolean
+  assetManager?: AlgorandAddress
+  assetReserve?: AlgorandAddress
+  assetFreeze?: AlgorandAddress
+  assetClawback?: AlgorandAddress
+  assetUnitName?: string
+  assetName?: string
+  assetURL?: string
+  assetMetadataHash?: string
+  freezeAccount?: AlgorandAddress
+  freezeState?: boolean
+  assetRevocationTarget?: AlgorandAddress
+  type?: AlgorandTransactionTypeCode
+  group?: number // integer
+  decimals?: number
+}
