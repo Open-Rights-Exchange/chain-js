@@ -39,9 +39,16 @@ export function parseSafe(string: string): any {
   return parse(string)
 }
 
-// it converts the input data with the optionalspecified encoding  into a buffer object
+// convert data into buffer object (optional encoding)
 export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCODING) {
+  if (!data) return null
   return Buffer.from(data, encoding)
+}
+
+// convert buffer into a string
+export function bufferToString(buffer: Buffer) {
+  if (!buffer) return null
+  return buffer.toString()
 }
 
 /** filter values in array down to an array of a single, uniques value
@@ -82,6 +89,10 @@ export function isANumber(value: any) {
 
 export function isAnObject(obj: any) {
   return obj !== null && typeof obj === 'object'
+}
+
+export function isAUint8Array(obj: any) {
+  return obj !== null && obj.constructor === Uint8Array
 }
 
 /** Typescript Typeguard to verify that the value is in the enumType specified  */
@@ -200,4 +211,10 @@ export function hexStringToByteArray(value: string): Uint8Array {
 /** Convert a byte array to hex string */
 export function byteArrayToHexString(value: Uint8Array): string {
   return Buffer.from(value).toString('hex')
+}
+
+/** Whether array is exactly length of 1 */
+export function isArrayLengthOne(array: any[]) {
+  if (!array) return false
+  return array.length === 1
 }

@@ -15,7 +15,7 @@ import {
   calculatePasswordByteArray,
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
-  toAlgorandSignatureFromRaw,
+  toAlgorandSignatureFromRawSig,
 } from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
@@ -55,7 +55,7 @@ export function decrypt(
 /** Signs a string with a private key */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
   const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
-  return toAlgorandSignatureFromRaw(signature)
+  return toAlgorandSignatureFromRawSig(signature)
 }
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */

@@ -1,33 +1,35 @@
-import * as algosdk from 'algosdk'
-import { ValueTransferParams, ActionDecomposeReturn, ChainActionType } from '../../../../../models'
-import { AlgorandTransactionAction, AlgorandUnit } from '../../../models'
+import { ActionDecomposeReturn, ChainActionType, ValueTransferParams } from '../../../../../models'
+import { AlgorandActionPaymentParams, AlgorandUnit, AlgorandSuggestedParams } from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
 import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
+import {
+  composeAction as algoPaymentComposeAction,
+  decomposeAction as algoPaymentDecomposeAction,
+} from '../chainSpecific/payment'
 
-export const composeAction = ({
-  fromAccountName,
-  toAccountName,
-  amount,
-  symbol = DEFAULT_ALGO_SYMBOL,
-  memo,
-}: ValueTransferParams) => ({
-  from: fromAccountName,
-  to: toAccountName,
-  amount: toMicroAlgo(amount, symbol as AlgorandUnit),
-  note: algosdk.encodeObj(memo),
-})
+export const composeAction = (params: ValueTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
+  const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
+  const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
 
-export const decomposeAction = (action: AlgorandTransactionAction): ActionDecomposeReturn => {
-  const { to, from, amount, note } = action
-  const returnData = {
-    toAccountName: to,
-    fromAccountName: from,
-    amount,
-    symbol: AlgorandUnit.Microalgo,
-    memo: algosdk.decodeObj(note),
+  return algoPaymentComposeAction(
+    {
+      from: params.fromAccountName,
+      to: params.toAccountName,
+      amount,
+      note: params.memo,
+      symbol,
+    } as AlgorandActionPaymentParams,
+    suggestedParams,
+  )
+}
+
+export const decomposeAction = (action: any): ActionDecomposeReturn => {
+  const decomposed = algoPaymentDecomposeAction(action)
+  if (decomposed) {
+    return {
+      ...decomposed,
+      chainActionType: ChainActionType.ValueTransfer,
+    }
   }
-  return {
-    chainActionType: ChainActionType.ValueTransfer,
-    args: returnData,
-  }
+  return null
 }

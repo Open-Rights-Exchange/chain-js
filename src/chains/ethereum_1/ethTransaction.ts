@@ -18,10 +18,9 @@ import {
   EthereumChainSettingsCommunicationSettings,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isNullOrEmpty } from '../../helpers'
+import { isArrayLengthOne, isNullOrEmpty } from '../../helpers'
 import {
   isValidEthereumSignature,
-  isArrayLengthOne,
   toEthereumSignature,
   toEthBuffer,
   ensureHexPrefix,
