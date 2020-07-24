@@ -353,7 +353,7 @@ export class AlgorandTransaction implements Transaction {
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const { blob: signatureBlob, txID: transactionId } = algosdk.signTransaction(
-        this._actionHelper.actionForChain,
+        this._actionHelper.actionEncodedForSdk,
         privateKey,
       )
       signature = toAlgorandSignatureFromRawSig(signatureBlob)
