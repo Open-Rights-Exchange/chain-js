@@ -5,19 +5,20 @@ import {
   AlgorandChainActionType,
   AlgorandSuggestedParams,
   AlgorandTransactionTypeCode,
+  AlgorandTxAction,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 
 /** Compose action */
 export const composeAction = (args: AlgorandActionPaymentParams, suggestedParams: AlgorandSuggestedParams) => {
-  const { from, to, amount, note, closeRemainderTo } = args
-  const noteEncoded = algosdk.encodeObj(note)
+  const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  const { from, to, amount, note, closeRemainderTo } = argsEncodedForSdk
   const composedAction = algosdk.makePaymentTxnWithSuggestedParams(
     from,
     to,
     amount,
     closeRemainderTo || undefined,
-    noteEncoded,
+    note,
     suggestedParams,
   )
   const actionHelper = new AlgorandActionHelper(composedAction)

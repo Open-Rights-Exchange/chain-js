@@ -40,9 +40,9 @@ export type AlgorandActionAssetTransferParams = {
   from: AlgorandAddress
   to: AlgorandAddress
   closeRemainderTo?: AlgorandAddress
-  revocationTarget?: AlgorandAddress
+  assetRevocationTarget?: AlgorandAddress
   amount: number
-  note: AlgorandValue
+  note: string
   assetIndex: number
 }
 
@@ -51,5 +51,5 @@ export type AlgorandActionPaymentParams = {
   to: AlgorandAddress
   amount: number
   closeRemainderTo?: AlgorandAddress
-  note: AlgorandValue
+  note: string
 }

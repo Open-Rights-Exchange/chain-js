@@ -23,7 +23,7 @@ export class AlgorandActionHelper {
   /** Creates a new Action from a raw action (or Algrorand action replacing hexstrings for Uint8Arrays)
    *  .action property returns action with Uint8Arrays converted to hexstrings
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
-  constructor(params: AlgorandTxAction | AlgorandTxActionRaw) {
+  constructor(params: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded) {
     this.validateAndApplyParams(params)
   }
 
@@ -32,9 +32,11 @@ export class AlgorandActionHelper {
     if (isNullOrEmpty(action)) {
       throwNewError('Missing action')
     }
-    if (isNullOrEmpty(action.from)) {
-      throwNewError('Action requires a from value')
-    }
+    // TODO Algo - consider if any validation here is needed - should probably check .from when getting action
+    // We cant check for .from here since we want to use action helper to add header values to a partial action
+    // if (isNullOrEmpty(action.from)) {
+    //   throwNewError('Action requires a from value')
+    // }
     if (this.isAlgorandTxActionEncodedForSdk(action)) {
       this._rawAction = this.actionEncodedForSdkToRaw(action as AlgorandTxActionSdkEncoded)
     } else if (this.isAlgorandTxActionRaw(action)) {
@@ -64,7 +66,7 @@ export class AlgorandActionHelper {
       assetClawback: toAlgorandAddressFromRaw(this.raw.assetClawback),
       freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
       assetRevocationTarget: toAlgorandAddressFromRaw(this.raw.assetRevocationTarget),
-      note: this.raw.note ? algosdk.decodeObj(this.raw.note) : undefined,
+      note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,
       tag: this.raw.tag ? bufferToString(this.raw.tag) : undefined,
     }
     this.deleteEmptyFields(returnVal)
@@ -74,13 +76,9 @@ export class AlgorandActionHelper {
   /** Action properties formatted to send to algosdk - includes hexstring addresses and UInt8Array note */
   public get actionEncodedForSdk(): AlgorandTxActionSdkEncoded {
     let convertedParams: AlgorandTxActionSdkEncoded = {}
-    const { note, tag, ...otherParams } = this.action
     // encode fields as required by SDK
-    convertedParams = this.encodeFieldsForSdk(convertedParams)
-    return {
-      ...otherParams,
-      ...convertedParams,
-    }
+    convertedParams = this.encodeFieldsForSdk(this.action)
+    return convertedParams
   }
 
   /** Action properties with all UInt8Array fields converted to hex strings */
@@ -155,9 +153,9 @@ export class AlgorandActionHelper {
   /** Encode selected fields required by algo sdk */
   private encodeFieldsForSdk(paramsIn: any) {
     const { note, tag } = paramsIn
-    const params: any = paramsIn
-    if (note && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
-    if (tag && !Buffer.isBuffer(note)) params.tag = toBuffer(tag)
+    const params: any = { ...paramsIn }
+    if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
+    if (!isNullOrEmpty(tag) && !Buffer.isBuffer(note)) params.tag = toBuffer(tag)
     return params
   }
 

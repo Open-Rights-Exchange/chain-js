@@ -2,6 +2,10 @@ import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
+export function isAUint8Array(obj: any) {
+  return obj !== undefined && obj !== null && obj.constructor === Uint8Array
+}
+
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
     return true
@@ -9,6 +13,11 @@ export function isNullOrEmpty(obj: any): boolean {
   if (obj === null) {
     return true
   }
+
+  if (isAUint8Array(obj)) {
+    return obj.length === 0
+  }
+
   // Check for an empty array too
   // eslint-disable-next-line no-prototype-builtins
   if (obj.hasOwnProperty('length')) {
@@ -89,10 +98,6 @@ export function isANumber(value: any) {
 
 export function isAnObject(obj: any) {
   return !isNullOrEmpty(obj) && typeof obj === 'object'
-}
-
-export function isAUint8Array(obj: any) {
-  return !isNullOrEmpty(obj) && obj.constructor === Uint8Array
 }
 
 /** Typescript Typeguard to verify that the value is in the enumType specified  */

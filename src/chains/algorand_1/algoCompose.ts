@@ -5,8 +5,7 @@ import { composeAction as AssetTransferTemplate } from './templates/chainActions
 import {
   AlgorandChainActionType,
   AlgorandChainTransactionParamsStruct,
-  AlgorandTxAction,
-  AlgorandTxActionRaw,
+  AlgorandTxActionSdkEncoded,
   AlgorandTxHeaderParams,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
@@ -25,7 +24,7 @@ export async function composeAction(
   chainState: AlgorandChainState,
   chainActionType: ChainActionType | AlgorandChainActionType,
   args: any,
-): Promise<AlgorandTxAction> {
+): Promise<AlgorandTxActionSdkEncoded> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
     notSupported()
@@ -35,11 +34,11 @@ export async function composeAction(
   const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = await chainState.algoClient.getTransactionParams()
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
   // seperate-out the action param values (required by compose functions) from the suggestedParams (headers)
-  const rawAction: AlgorandTxActionRaw = composerFunction(actionHelper.paramsOnly, actionHelper.transactionHeaderParams)
+  const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = composerFunction(
+    actionHelper.paramsOnly,
+    actionHelper.transactionHeaderParams,
+  )
   // use AlgorandActionHelper to drop empty fields
-  actionHelper = new AlgorandActionHelper(rawAction)
-  return {
-    ...actionHelper.transactionHeaderParams,
-    ...actionHelper.paramsOnly,
-  }
+  actionHelper = new AlgorandActionHelper(sdkEncodedActionParams as AlgorandTxActionSdkEncoded)
+  return sdkEncodedActionParams
 }

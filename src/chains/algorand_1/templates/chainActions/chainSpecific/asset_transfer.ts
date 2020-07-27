@@ -14,15 +14,15 @@ import { AlgorandActionHelper } from '../../../algoAction'
  * Composes asset transfer action
  * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
 export const composeAction = (args: AlgorandActionAssetTransferParams, suggestedParams: AlgorandSuggestedParams) => {
-  const { from, to, amount, note, assetIndex, revocationTarget, closeRemainderTo } = args
-  const noteEncoded = algosdk.encodeObj(note)
+  const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  const { from, to, amount, note, assetIndex, assetRevocationTarget, closeRemainderTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetTransferTxnWithSuggestedParams(
     from,
     to,
     closeRemainderTo || undefined,
-    revocationTarget || undefined,
+    assetRevocationTarget || undefined,
     amount,
-    noteEncoded,
+    note,
     assetIndex,
     suggestedParams,
   )
