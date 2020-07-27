@@ -27,8 +27,15 @@ export const composeAction = (params: TokenTransferParams, suggestedParams: Algo
 export const decomposeAction = (action: any): ActionDecomposeReturn => {
   const decomposed = algoAssetTransferDecomposeAction(action)
   if (decomposed) {
+    const decomposedArgs = decomposed.args
     return {
-      ...decomposed,
+      args: {
+        ...decomposedArgs,
+        fromAccountName: decomposedArgs.from,
+        toAccountName: decomposedArgs.to,
+        memo: decomposedArgs.note,
+        contractName: decomposedArgs.assetIndex,
+      },
       chainActionType: ChainActionType.TokenTransfer,
     }
   }

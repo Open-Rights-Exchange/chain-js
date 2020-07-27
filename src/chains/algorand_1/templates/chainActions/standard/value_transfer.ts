@@ -10,7 +10,6 @@ import {
 export const composeAction = (params: ValueTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
   const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
-
   return algoPaymentComposeAction(
     {
       from: params.fromAccountName,
@@ -26,8 +25,14 @@ export const composeAction = (params: ValueTransferParams, suggestedParams: Algo
 export const decomposeAction = (action: any): ActionDecomposeReturn => {
   const decomposed = algoPaymentDecomposeAction(action)
   if (decomposed) {
+    const decomposedArgs = decomposed.args
     return {
-      ...decomposed,
+      args: {
+        ...decomposedArgs,
+        fromAccountName: decomposedArgs.from,
+        toAccountName: decomposedArgs.to,
+        memo: decomposedArgs.note,
+      },
       chainActionType: ChainActionType.ValueTransfer,
     }
   }
