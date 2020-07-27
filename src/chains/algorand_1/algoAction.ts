@@ -76,13 +76,9 @@ export class AlgorandActionHelper {
   /** Action properties formatted to send to algosdk - includes hexstring addresses and UInt8Array note */
   public get actionEncodedForSdk(): AlgorandTxActionSdkEncoded {
     let convertedParams: AlgorandTxActionSdkEncoded = {}
-    const { note, tag, ...otherParams } = this.action
     // encode fields as required by SDK
-    convertedParams = this.encodeFieldsForSdk(otherParams)
-    return {
-      ...otherParams,
-      ...convertedParams,
-    }
+    convertedParams = this.encodeFieldsForSdk(this.action)
+    return convertedParams
   }
 
   /** Action properties with all UInt8Array fields converted to hex strings */
@@ -159,7 +155,7 @@ export class AlgorandActionHelper {
     const { note, tag } = paramsIn
     const params: any = { ...paramsIn }
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
-    if (tag && !Buffer.isBuffer(note)) params.tag = toBuffer(tag)
+    if (!isNullOrEmpty(tag) && !Buffer.isBuffer(note)) params.tag = toBuffer(tag)
     return params
   }
 
