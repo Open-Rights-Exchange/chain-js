@@ -66,15 +66,28 @@ export type AlgorandTxActionRaw = AlgorandTxActionStruct
 
 /** All possible properties of an Algorand transaction action
  *  Can be used to create or compose a new Algorand action
- *  Note: from - must be present
  */
-export type AlgorandTxAction = AlgorandTxHeaderParams & {
+export type AlgorandTxAction = AlgorandTxActionSharedFields & {
+  note?: string
+  tag?: string
+}
+
+/** All possible properties of an Algorand transaction action
+ *  Encodes several fields (e.g. note) as expected by the algoSDK */
+export type AlgorandTxActionSdkEncoded = AlgorandTxActionSharedFields & {
+  note?: Uint8Array // encoded for SDK
+  tag?: Buffer // encoded for SDK
+}
+
+/** Algorand Tx Fields for both SdkEncoded and non-encoded types
+ *  All possible properties of an Algorand transaction action
+ *  Can be used to create or compose a new Algorand action
+ */
+type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   to?: AlgorandAddress
   from?: AlgorandAddress
   amount?: number // integer
-  note?: string
   name?: string
-  tag?: string
   lease?: Uint8Array
   closeRemainderTo?: AlgorandAddress
   voteKey?: string

@@ -5,37 +5,33 @@ import {
   AlgorandChainActionType,
   AlgorandSuggestedParams,
   AlgorandTransactionTypeCode,
+  AlgorandTxAction,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 
 /** Compose action */
 export const composeAction = (args: AlgorandActionPaymentParams, suggestedParams: AlgorandSuggestedParams) => {
-  const { from, to, amount, note, closeRemainderTo } = args
-  const noteEncoded = algosdk.encodeObj(note)
+  const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  const { from, to, amount, note, closeRemainderTo } = argsEncodedForSdk
   const composedAction = algosdk.makePaymentTxnWithSuggestedParams(
     from,
     to,
     amount,
     closeRemainderTo || undefined,
-    noteEncoded,
+    note,
     suggestedParams,
   )
   const actionHelper = new AlgorandActionHelper(composedAction)
   return actionHelper.action // convert raw action to use hex strings
 }
 
-/** Decompose action */
 export const decomposeAction = (action: any): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
-  const { amount, from, note, to, closeRemainderTo, type } = actionHelper.action
+  const actionParams = actionHelper.paramsOnly
   // Identify chainActionType using type
-  if (type === AlgorandTransactionTypeCode.Payment) {
+  if (actionParams?.type === AlgorandTransactionTypeCode.Payment) {
     const returnData = {
-      from,
-      to,
-      amount,
-      closeRemainderTo,
-      note,
+      ...actionParams,
     }
     return {
       chainActionType: AlgorandChainActionType.Payment,

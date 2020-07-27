@@ -6,34 +6,36 @@ import {
   AlgorandSuggestedParams,
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
+  AlgorandTxActionRaw,
 } from '../../../models'
+import { AlgorandActionHelper } from '../../../algoAction'
 
 /**
  * Composes asset transfer action
  * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
 export const composeAction = (args: AlgorandActionAssetTransferParams, suggestedParams: AlgorandSuggestedParams) => {
-  const { from, to, amount, note, assetIndex, revocationTarget, closeRemainderTo } = args
-  const noteEncoded = algosdk.encodeObj(note)
+  const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  const { from, to, amount, note, assetIndex, assetRevocationTarget, closeRemainderTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetTransferTxnWithSuggestedParams(
     from,
     to,
     closeRemainderTo || undefined,
-    revocationTarget || undefined,
+    assetRevocationTarget || undefined,
     amount,
-    noteEncoded,
+    note,
     assetIndex,
     suggestedParams,
   )
   return { ...composedAction }
 }
 
-/**
- * Decomposes asset transfer action */
-export const decomposeAction = (action: AlgorandTxAction): AlgorandDecomposeReturn => {
-  const { type } = action
-  if (type === AlgorandTransactionTypeCode.AssetTransfer) {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
+  const actionHelper = new AlgorandActionHelper(action)
+  const actionParams = actionHelper.paramsOnly
+  // Identify chainActionType using type
+  if (actionParams?.type === AlgorandTransactionTypeCode.AssetTransfer) {
     const returnData = {
-      ...action,
+      ...actionParams,
     }
     return {
       chainActionType: AlgorandChainActionType.AssetTransfer,

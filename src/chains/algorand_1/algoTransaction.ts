@@ -353,7 +353,7 @@ export class AlgorandTransaction implements Transaction {
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const { blob: signatureBlob, txID: transactionId } = algosdk.signTransaction(
-        this._actionHelper.actionForChain,
+        this._actionHelper.actionEncodedForSdk,
         privateKey,
       )
       signature = toAlgorandSignatureFromRawSig(signatureBlob)
@@ -368,7 +368,8 @@ export class AlgorandTransaction implements Transaction {
     const rawSignatures: Uint8Array[] = []
     privateKeys.forEach(key => {
       const privateKey = hexStringToByteArray(key)
-      const sig = algosdk.signMultisigTransaction(this.raw, this.multiSigOptions, privateKey).blob
+      const action = this._actionHelper.actionEncodedForSdk
+      const sig = algosdk.signMultisigTransaction(action, this.multiSigOptions, privateKey).blob
       rawSignatures.push(sig)
     })
     if (rawSignatures.length > 1) {

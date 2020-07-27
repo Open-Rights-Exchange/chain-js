@@ -1,13 +1,7 @@
 import { isValidAddress } from 'algosdk'
 import * as base32 from 'hi-base32'
-import { isNullOrEmpty, byteArrayToHexString, isAUint8Array, isAString } from '../../../helpers'
-import {
-  AlgorandAddress,
-  AlgorandSymbol,
-  AlgorandTxAction,
-  AlgorandTxActionRaw,
-  AlgorandAddressStruct,
-} from '../models'
+import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
+import { AlgorandAddress, AlgorandSymbol, AlgorandAddressStruct } from '../models'
 import { toAddressFromPublicKey, toAlgorandPublicKey } from './cryptoModelHelpers'
 import { ALGORAND_ADDRESS_BYTES_ONLY_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH, PUBLIC_KEY_LENGTH } from '../algoConstants'
 
@@ -38,18 +32,6 @@ export function toAlgorandAddress(value: string): AlgorandAddress {
     return null
   }
   throw new Error(`Not a valid Algorand Account:${value}.`)
-}
-
-/** whether action is the native chain 'raw' format */
-export function isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
-  return isAString(action.from)
-}
-
-/** whether action is the native chain 'raw' format */
-export function isAlgorandTxActionRaw(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
-  const rawAction = action as AlgorandTxActionRaw
-  const hasPublicKey = rawAction.from?.publicKey
-  return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
 }
 
 // converts an address (encoded as a hex string) to a Uint8Array array (needed by the chain)
