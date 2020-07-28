@@ -26,13 +26,7 @@ import {
   AlgorandTxHeaderParams,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
-import {
-  isValidAlgorandAddress,
-  isValidAlgorandSignature,
-  toAlgorandPublicKey,
-  toAlgorandSignature,
-  toAlgorandAddressFromRaw,
-} from './helpers'
+import { isValidAlgorandAddress, isValidAlgorandSignature, toAlgorandPublicKey } from './helpers'
 import {
   toAlgorandSignatureFromRawSig,
   toPublicKeyFromAddress,
@@ -313,7 +307,7 @@ export class AlgorandTransaction implements Transaction {
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
   }
 
-  /** Returns the required addresses for a transaction/multisig transaction
+  /** Returns array of the required addresses for a transaction/multisig transaction
    *  Returns the from address in the action or addresses from multisig options for multisig transaction
    */
   public get requiredAuthorizations(): AlgorandAddress[] {
