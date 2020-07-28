@@ -36,7 +36,7 @@ export function toAlgorandAddress(value: string): AlgorandAddress {
 
 // converts an address (encoded as a hex string) to a Uint8Array array (needed by the chain)
 export function toAlgorandAddressFromRaw(rawAddress: AlgorandAddressStruct): AlgorandAddress {
-  if (isNullOrEmpty(rawAddress)) return null
+  if (isNullOrEmpty(rawAddress)) return undefined
   return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey)))
 }
 
