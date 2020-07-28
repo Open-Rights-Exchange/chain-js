@@ -1,7 +1,12 @@
 import * as algosdk from 'algosdk'
-import { isNullOrEmpty, toBuffer, bufferToString, isAUint8Array, isAString } from '../../helpers'
+import { isNullOrEmpty, toBuffer, bufferToString, isAUint8Array, isAString, isAUint8ArrayArray } from '../../helpers'
 import { throwNewError } from '../../errors'
-import { AlgorandTxAction, AlgorandTxActionRaw, AlgorandTxActionSdkEncoded } from './models/transactionModels'
+import {
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+  AlgorandTxActionSdkEncoded,
+  AlgorandTxActionSdkEncodedFields,
+} from './models/transactionModels'
 import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
 import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
@@ -64,10 +69,25 @@ export class AlgorandActionHelper {
       assetReserve: toAlgorandAddressFromRaw(this.raw.assetReserve),
       assetFreeze: toAlgorandAddressFromRaw(this.raw.assetFreeze),
       assetClawback: toAlgorandAddressFromRaw(this.raw.assetClawback),
-      freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
       assetRevocationTarget: toAlgorandAddressFromRaw(this.raw.assetRevocationTarget),
+      freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
+      reKeyTo: toAlgorandAddressFromRaw(this.raw.reKeyTo),
+      appAccounts: !isNullOrEmpty(this.raw.appAccounts)
+        ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
+        : undefined,
+      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
+        ? algosdk.decodeObj(this.raw.appApprovalProgram)
+        : undefined,
+      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram)
+        ? algosdk.decodeObj(this.raw.appClearProgram)
+        : undefined,
+      appArgs: !isNullOrEmpty(this.raw.appArgs) ? (this.raw.appArgs.map(algosdk.decodeObj) as string[]) : undefined,
+      group: this.raw.group ? bufferToString(this.raw.group) : undefined,
+      lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
       note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,
+      selectionKey: this.raw.selectionKey ? bufferToString(this.raw.selectionKey) : undefined,
       tag: this.raw.tag ? bufferToString(this.raw.tag) : undefined,
+      voteKey: this.raw.voteKey ? bufferToString(this.raw.voteKey) : undefined,
     }
     this.deleteEmptyFields(returnVal)
     return returnVal
@@ -93,20 +113,39 @@ export class AlgorandActionHelper {
       assetReserve: toRawAddressFromAlgoAddr(action.assetReserve) || undefined,
       assetFreeze: toRawAddressFromAlgoAddr(action.assetFreeze) || undefined,
       assetClawback: toRawAddressFromAlgoAddr(action.assetClawback) || undefined,
-      freezeAccount: toRawAddressFromAlgoAddr(action.freezeAccount) || undefined,
       assetRevocationTarget: toRawAddressFromAlgoAddr(action.assetRevocationTarget) || undefined,
+      freezeAccount: toRawAddressFromAlgoAddr(action.freezeAccount) || undefined,
+      appAccounts: !isNullOrEmpty(action.appAccounts) ? action.appAccounts.map(toRawAddressFromAlgoAddr) : undefined,
+      reKeyTo: toRawAddressFromAlgoAddr(action.reKeyTo) || undefined,
     }
-    // also encode note, tag, etc.
     return raw
   }
 
   /** Convert Action encoded for algo sdk to raw - */
   private actionEncodedForSdkToRaw(action: AlgorandTxActionSdkEncoded) {
-    const { note, tag, ...otherParams }: { note?: Uint8Array; tag?: Buffer; otherParams?: any } = action
+    const {
+      appApprovalProgram,
+      appArgs,
+      appClearProgram,
+      group,
+      lease,
+      note,
+      selectionKey,
+      tag,
+      voteKey,
+      ...otherParams
+    }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction) as AlgorandTxActionRaw
     // these fields are already encoded as needed for raw - so we dont want them encoded again
+    raw.appApprovalProgram = appApprovalProgram
+    raw.appArgs = appArgs
+    raw.appClearProgram = appClearProgram
+    raw.group = group
+    raw.lease = lease
     raw.note = note
+    raw.selectionKey = selectionKey
     raw.tag = tag
+    raw.voteKey = voteKey
     return raw
   }
 
@@ -152,10 +191,20 @@ export class AlgorandActionHelper {
 
   /** Encode selected fields required by algo sdk */
   private encodeFieldsForSdk(paramsIn: any) {
-    const { note, tag } = paramsIn
+    const { appApprovalProgram, appClearProgram, appArgs, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
+    if (!isNullOrEmpty(appApprovalProgram) && !isAUint8Array(appApprovalProgram))
+      params.appApprovalProgram = algosdk.encodeObj(appApprovalProgram)
+    if (!isNullOrEmpty(appClearProgram) && !isAUint8Array(appClearProgram))
+      params.appClearProgram = algosdk.encodeObj(appClearProgram)
+    if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
+      params.appArgs = appArgs.map(algosdk.encodeObj(appArgs)) as Uint8Array[] // Array of UInt8Array
+    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
+    if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
-    if (!isNullOrEmpty(tag) && !Buffer.isBuffer(note)) params.tag = toBuffer(tag)
+    if (!isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey)) params.selectionKey = toBuffer(selectionKey)
+    if (!isNullOrEmpty(tag) && !Buffer.isBuffer(tag)) params.tag = toBuffer(tag)
+    if (!isNullOrEmpty(voteKey) && !Buffer.isBuffer(voteKey)) params.voteKey = toBuffer(voteKey)
     return params
   }
 
@@ -175,7 +224,7 @@ export class AlgorandActionHelper {
   deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
     Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
-    if (params.lease && (params.lease as Uint8Array).length === 0) delete params.lease
+    if (isAUint8ArrayArray(params.appArgs) && (params.appArgs as Uint8Array[]).length === 0) delete params.appArgs
   }
 
   /** whether action is the native chain 'raw' format */
@@ -194,6 +243,17 @@ export class AlgorandActionHelper {
   isAlgorandTxActionEncodedForSdk(
     action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
   ): boolean {
-    return isAString(action.from) && (isAUint8Array(action.note) || Buffer.isBuffer(action.tag))
+    return (
+      (isAString(action.from) || isNullOrEmpty(action.from)) &&
+      (isAUint8Array(action.appApprovalProgram) ||
+        isAUint8Array(action.appClearProgram) ||
+        isAUint8ArrayArray(action.appArgs) ||
+        isAUint8Array(action.note) ||
+        isAUint8Array(action.lease) ||
+        Buffer.isBuffer(action.group) ||
+        Buffer.isBuffer(action.selectionKey) ||
+        Buffer.isBuffer(action.tag) ||
+        Buffer.isBuffer(action.voteKey))
+    )
   }
 }

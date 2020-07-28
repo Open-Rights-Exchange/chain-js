@@ -88,8 +88,8 @@ export type AlgorandTxActionStruct = {
   tag?: Buffer
   lease?: Uint8Array
   closeRemainderTo?: AlgorandAddressStruct
-  voteKey?: string
-  selectionKey?: string
+  voteKey?: Buffer
+  selectionKey?: Buffer
   voteFirst?: number // integer
   voteLast?: number // integer
   voteKeyDilution?: number // integer
@@ -109,8 +109,20 @@ export type AlgorandTxActionStruct = {
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddressStruct
   type?: AlgorandTransactionTypeCode
-  group?: number // integer
+  group?: Buffer
   decimals?: number
+  appIndex?: number
+  appOnComplete?: number
+  appLocalInts?: number
+  appLocalByteSlices?: number
+  appGlobalInts?: number
+  appGlobalByteSlices?: number
+  appApprovalProgram?: Uint8Array
+  appClearProgram?: Uint8Array
+  appArgs?: Uint8Array[]
+  appAccounts?: AlgorandAddressStruct[]
+  appForeignApps?: number[]
+  reKeyTo?: AlgorandAddressStruct
   genesisID?: string
   genesisHash?: string
   firstRound?: number

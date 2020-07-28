@@ -65,18 +65,37 @@ export type AlgorandTransactionOptions = {
 export type AlgorandTxActionRaw = AlgorandTxActionStruct
 
 /** All possible properties of an Algorand transaction action
- *  Can be used to create or compose a new Algorand action
- */
-export type AlgorandTxAction = AlgorandTxActionSharedFields & {
-  note?: string
-  tag?: string
-}
+ *  Can be used to create or compose a new Algorand action */
+export type AlgorandTxAction = AlgorandTxActionUnencodeFields & AlgorandTxActionSharedFields
 
 /** All possible properties of an Algorand transaction action
  *  Encodes several fields (e.g. note) as expected by the algoSDK */
-export type AlgorandTxActionSdkEncoded = AlgorandTxActionSharedFields & {
-  note?: Uint8Array // encoded for SDK
-  tag?: Buffer // encoded for SDK
+export type AlgorandTxActionSdkEncoded = AlgorandTxActionSdkEncodedFields & AlgorandTxActionSharedFields
+
+/** action fields in an unencoded state (these will be encoded for the algorand SDK) */
+export type AlgorandTxActionUnencodeFields = {
+  appApprovalProgram?: string
+  appClearProgram?: string
+  appArgs?: string[]
+  group?: string
+  lease?: string
+  note?: string
+  selectionKey?: string
+  tag?: string
+  voteKey?: string
+}
+
+/** action fields as they should be encoded for the algorand SDK */
+export type AlgorandTxActionSdkEncodedFields = {
+  appApprovalProgram?: Uint8Array
+  appClearProgram?: Uint8Array
+  appArgs?: Uint8Array[]
+  group?: Buffer
+  lease?: Uint8Array
+  note?: Uint8Array
+  selectionKey?: Buffer
+  tag?: Buffer
+  voteKey?: Buffer
 }
 
 /** Algorand Tx Fields for both SdkEncoded and non-encoded types
@@ -88,7 +107,7 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   from?: AlgorandAddress
   amount?: number // integer
   name?: string
-  lease?: Uint8Array
+  lease?: string
   closeRemainderTo?: AlgorandAddress
   voteKey?: string
   selectionKey?: string
@@ -111,6 +130,18 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddress
   type?: AlgorandTransactionTypeCode
-  group?: number // integer
+  group?: string
   decimals?: number
+  appIndex?: number
+  appOnComplete?: number
+  appLocalInts?: number
+  appLocalByteSlices?: number
+  appGlobalInts?: number
+  appGlobalByteSlices?: number
+  appApprovalProgram?: string
+  appClearProgram?: string
+  appArgs?: string[]
+  appAccounts?: AlgorandAddress[]
+  appForeignApps?: number[]
+  reKeyTo?: AlgorandAddress
 }
