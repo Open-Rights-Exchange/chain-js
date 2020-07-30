@@ -67,6 +67,12 @@ export function bufferToString(buffer: Buffer) {
   return buffer.toString()
 }
 
+// convert buffer into a Uint8Array
+export function bufferToUint8Array(buffer: Buffer) {
+  if (!buffer) return null
+  return new Uint8Array(buffer.buffer)
+}
+
 /** filter values in array down to an array of a single, uniques value
  * e.g. if array = [{value:'A', other}, {value:'B'}, {value:'A', other}]
  * distinct(array, uniqueKey:'value') => ['A','B']
