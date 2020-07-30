@@ -3,7 +3,14 @@ import * as base32 from 'hi-base32'
 import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
-import { hexStringToByteArray, isNullOrEmpty, byteArrayToHexString, isAString } from '../../../helpers'
+import {
+  byteArrayToHexString,
+  bufferToUint8Array,
+  hexStringToByteArray,
+  isAString,
+  isAUint8Array,
+  isNullOrEmpty,
+} from '../../../helpers'
 import {
   ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS,
   ALGORAND_ADDRESS_BYTES_ONLY_LENGTH,
@@ -48,12 +55,10 @@ export function isValidAlgorandPrivateKey(value: string): value is AlgorandPriva
   return ed25519Crypto.isValidPrivateKey(hexStringToByteArray(value))
 }
 
-// ALGO TODO: add validation rule for signature
+// TODO: Improve validation rule for signature - check byte length of signature?
 export function isValidAlgorandSignature(signature: string): boolean {
-  if (!isNullOrEmpty(signature)) {
-    return true
-  }
-  return false
+  if (isNullOrEmpty(signature)) return false
+  return isAUint8Array(hexStringToByteArray(signature))
 }
 
 /** Accepts hex string checks if a valid algorand private key
@@ -83,6 +88,8 @@ export function toAlgorandSignature(value: string): AlgorandSignature {
   throw new Error(`Not a valid algorand signature:${value}.`)
 }
 
+// todo algo - use sdk's address.encode and .decode functions instead of copying
+
 /** Computes algorand address from the algorand public key */
 export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
   const rawPublicKey = hexStringToByteArray(publicKey)
@@ -111,9 +118,14 @@ export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublic
   return byteArrayToHexString(publicKey) as AlgorandPublicKey
 }
 
-// convert a native Uint8Array signature to Hexstring
-export function toAlgorandSignatureFromRawSig(rawSignature: Uint8Array): AlgorandSignature {
-  return toAlgorandSignature(byteArrayToHexString(rawSignature))
+// convert a native signature (Uint8Array OR Buffer of Uint8Array) to Hexstring
+export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array): AlgorandSignature {
+  if (isNullOrEmpty(rawSignature)) return null
+  let sigUint8 = rawSignature
+  if (Buffer.isBuffer(rawSignature)) {
+    sigUint8 = bufferToUint8Array(rawSignature as Buffer)
+  }
+  return toAlgorandSignature(byteArrayToHexString(sigUint8))
 }
 
 // convert a native Uint8Array signature to Hexstring
