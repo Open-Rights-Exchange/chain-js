@@ -12,8 +12,7 @@ import {
 import { AlgorandActionHelper } from '../../../algoAction'
 
 /**
- * Composes asset transfer action
- * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
+ * Composes asset create action */
 export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
@@ -31,7 +30,7 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
     assetURL,
     assetMetadataHash,
   } = argsEncodedForSdk
-  const composedAction = algosdk.makeAssetCreateTxnWithsSuggestedParams(
+  const composedAction = algosdk.makeAssetCreateTxnWithSuggestedParams(
     from,
     note,
     assetTotal,

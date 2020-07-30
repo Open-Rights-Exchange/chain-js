@@ -12,12 +12,11 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
- * Composes asset transfer action
- * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
+ * Composes asset config action */
 export const composeAction = (args: AlgorandActionAssetConfigParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, note, assetIndex, assetManager, assetReserve, assetFreeze, assetClawback } = argsEncodedForSdk
-  const composedAction = algosdk.makeAssetTransferTxnWithSuggestedParams(
+  const composedAction = algosdk.makeAssetConfigTxnWithSuggestedParams(
     from,
     note,
     assetIndex,
