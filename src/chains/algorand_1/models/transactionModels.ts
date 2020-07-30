@@ -1,5 +1,5 @@
 import { AlgorandValue, AlgorandMultiSigOptions } from './generalModels'
-import { AlgorandAddress } from './cryptoModels'
+import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
 import { AlgorandTxActionStruct, AlgorandTransactionTypeCode } from './algoStructures'
 
 /**
@@ -59,6 +59,9 @@ export type AlgorandTransactionOptions = {
   fee?: AlgorandValue
   flatFee?: boolean
   multiSigOptions?: AlgorandMultiSigOptions
+  /** (optional) The publicKey used to sign the transaction - if an account has been rekeyed, use the signing key here
+   * if not provided, defaults to 'from' address's publicKey */
+  signerPublicKey?: AlgorandPublicKey
 }
 
 /** Raw transaction ready to be signed */
