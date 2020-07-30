@@ -1,7 +1,13 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+import { composeAction as AssetConfigTemplate } from './templates/chainActions/chainSpecific/asset_config'
+import { composeAction as AssetCreateTemplate } from './templates/chainActions/chainSpecific/asset_create'
+import { composeAction as AssetDestroyTemplate } from './templates/chainActions/chainSpecific/asset_destroy'
+import { composeAction as AssetFreezeTemplate } from './templates/chainActions/chainSpecific/asset_freeze'
 import { composeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
+import { composeAction as KeyRegistrationTemplate } from './templates/chainActions/chainSpecific/key_registration'
+
 import {
   AlgorandChainActionType,
   AlgorandChainTransactionParamsStruct,
@@ -16,7 +22,12 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   // Standard actions
   ValueTransfer: ValueTransferTemplate,
   // Algorand actions
+  AssetConfig: AssetConfigTemplate,
+  AssetCreate: AssetCreateTemplate,
+  AssetDestroy: AssetDestroyTemplate,
+  AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
+  KeyRegistration: KeyRegistrationTemplate,
 }
 
 /** Compose an object for a chain contract action */
