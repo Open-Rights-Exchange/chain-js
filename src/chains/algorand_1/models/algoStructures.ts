@@ -21,12 +21,12 @@ export type AlgorandAssetParamsStruct = {
   assetname: string
   clawbackaddr: AlgorandAddress
   creator: AlgorandAddress
-  decimals: number
-  defaultfrozen: boolean
-  freezeaddr: AlgorandAddress
-  managerkey: AlgorandAddress
-  metadatahash?: string
-  reserveaddr: AlgorandAddress
+  assetDecimals: number
+  assetDefaultFrozen: boolean
+  assetFreeze: AlgorandAddress
+  assetManager: AlgorandAddress
+  assetMetadataHash?: string
+  assetReserve: AlgorandAddress
   total: number
   unitname: string
   url: URL
@@ -54,9 +54,6 @@ export type AlgorandChainTransactionParamsStruct = {
   consensusVersion: number
   minFee: number
 }
-
-/** a signature object for multisig transaction */
-export type AlgorandMultiSignatureStruct = { pk: Uint8Array; s?: Uint8Array }
 
 /** Account object generated - in the format returned from algosdk */
 export type AlgorandGeneratedAccountStruct = {
@@ -110,7 +107,6 @@ export type AlgorandTxActionStruct = {
   assetRevocationTarget?: AlgorandAddressStruct
   type?: AlgorandTransactionTypeCode
   group?: Buffer
-  decimals?: number
   appIndex?: number
   appOnComplete?: number
   appLocalInts?: number
@@ -129,4 +125,98 @@ export type AlgorandTxActionStruct = {
   lastRound?: number
   fee?: number
   flatFee?: boolean
+}
+
+/** Algorand transaction encoded and 'minified' ready to send to chain */
+export type AlgorandTxEncodedForChain = {
+  rcv?: Buffer // Buffer.from(to.publicKey)
+  name?: string
+  tag?: Buffer // Buffer.from(...)
+  amt?: number // integer
+  note?: Buffer // Buffer.from(note)
+  snd?: Buffer // Buffer.from(from.publicKey)
+  type?: AlgorandTransactionTypeCode // type
+  fv?: number // firstRound
+  lv?: number // lastRound
+  fee?: number // fee
+  gen?: string // genesisID
+  gn?: string // genesisHash - Buffer.from(genesisHash, 'base64')
+  lx?: Buffer // Buffer.from(lease),
+  grp?: Buffer // group
+  voteKey?: Buffer // voteKey
+  selkey?: Buffer // selectionKey
+  votefst?: number // voteFirst
+  votelst?: number // voteLast
+  votekd?: number // voteKeyDilution
+  caid?: number // assetIndex
+  apar?: {
+    t?: number // assetTotal
+    df?: boolean // assetDefaultFrozen
+    dc?: number // assetDecimals
+    m?: Buffer // Buffer.from(assetManager.publicKey)
+    r?: Buffer // Buffer.from(assetReserve.publicKey)
+    f?: Buffer // Buffer.from(assetFreeze.publicKey)
+    c?: Buffer // Buffer.from(assetClawback.publicKey)
+    an?: string // assetName
+    un?: string // assetUnitName
+    au?: string // assetURL
+    am?: string // Buffer.from(assetMetadataHash)
+  }
+  apid?: number // appIndex,
+  apan?: number // appOnComplete
+  apls?: {
+    nui?: number // appLocalInts
+    nbs?: number // appLocalByteSlices
+  }
+  apgs?: {
+    nui?: number // appGlobalInts,
+    nbs?: number // appGlobalByteSlices
+  }
+  apfa?: number[] // appForeignApps,
+  apap?: Buffer // Buffer.from(appApprovalProgram)
+  apsu?: Buffer // Buffer.from(appClearProgram)
+  apaa?: Buffer[] // appArgs.forEach((arg) => { txn.apaa.push(Buffer.from(arg))
+  apat?: Buffer[] // appAccounts.forEach((decodedAddress) => { txn.apat.push(Buffer.from(decodedAddress.publicKey))
+  aclose?: Buffer // Buffer.from(closeRemainderTo.publicKey)
+  asnd?: Buffer // Buffer.from(assetRevocationTarget.publicKey)
+  fadd?: Buffer // Buffer.from(freezeAccount.publicKey)
+  afrz?: boolean // freezeState
+  reKeyTo?: Buffer // Buffer.from(reKeyTo.publicKey)
+}
+
+/** a signature object for multisig transaction */
+export type AlgorandMultiSignatureStruct = {
+  /** Public key - Buffer encoded string */
+  pk: Uint8Array
+  /** Signature - Buffer encoded Uint8Array */
+  s?: Uint8Array
+}
+
+/** the object that can be encoded as a Uint8Array and sent to the chain */
+export type AlgorandRawTransactionMultisigStruct = {
+  /** JSON object */
+  txn: AlgorandTxEncodedForChain
+  msig: {
+    /** multisig version */
+    v: number
+    /** multisig threshold */
+    thr: number
+    subsig: AlgorandMultiSignatureStruct[]
+  }
+}
+
+/** the object that can be encoded as a Uint8Array and sent to the chain */
+export type AlgorandRawTransactionStruct = {
+  /** JSON object */
+  txn: AlgorandTxEncodedForChain
+  /** Signature - Buffer encoded Uint8Array */
+  sig: Buffer
+  /** Public key - Buffer encoded string - for signing key (only populated if different then the from address) */
+  sgnr?: Buffer
+}
+
+/** Results from calling an Algo SDK sign function */
+export type AlgorandTxSignResults = {
+  txID: string
+  blob: Uint8Array
 }
