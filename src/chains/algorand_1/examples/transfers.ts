@@ -52,7 +52,7 @@ const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
+  console.log('required signatures (before signing): ', transaction.missingSignatures)
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
-  console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 })()
