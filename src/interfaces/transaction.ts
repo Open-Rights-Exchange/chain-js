@@ -23,11 +23,10 @@ export interface Transaction {
   isMultiSig: boolean
   // ** Whether transaction has been validated - via vaidate() */
   isValidated: boolean
-  /** An array of authorizations (e.g. account/permission) that do not have an attached signature
+  /** An array of authorizations (chain-specific result type) that do not have an attached signature
    *  Retuns null if no signatures are missing */
   missingSignatures: any[]
-  /** An array of the unique set of account/permission/publicKey for all actions in transaction
-   *  Also fetches the related accounts from the chain (to get public keys) */
+  /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: any[]
   /** Signatures attached to transaction */
   signatures: string[]

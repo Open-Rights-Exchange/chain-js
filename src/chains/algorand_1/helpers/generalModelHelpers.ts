@@ -1,7 +1,7 @@
 import { isValidAddress } from 'algosdk'
 import * as base32 from 'hi-base32'
 import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
-import { AlgorandAddress, AlgorandSymbol, AlgorandAddressStruct } from '../models'
+import { AlgorandAddress, AlgorandAddressStruct, AlgorandPublicKey, AlgorandSymbol } from '../models'
 import { toAddressFromPublicKey, toAlgorandPublicKey } from './cryptoModelHelpers'
 import { ALGORAND_ADDRESS_BYTES_ONLY_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH, PUBLIC_KEY_LENGTH } from '../algoConstants'
 
@@ -36,7 +36,7 @@ export function toAlgorandAddress(value: string): AlgorandAddress {
 
 // converts an address (encoded as a hex string) to a Uint8Array array (needed by the chain)
 export function toAlgorandAddressFromRaw(rawAddress: AlgorandAddressStruct): AlgorandAddress {
-  if (isNullOrEmpty(rawAddress)) return null
+  if (isNullOrEmpty(rawAddress)) return undefined
   return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey)))
 }
 
@@ -53,4 +53,10 @@ export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddr
     publicKey,
     checksum,
   }
+}
+
+/** Returns publicKey for associated address */
+export function getPublicKeyForAddress(address: AlgorandAddress): AlgorandPublicKey {
+  const rawAddress = toRawAddressFromAlgoAddr(address)
+  return toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey))
 }

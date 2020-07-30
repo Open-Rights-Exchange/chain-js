@@ -6,7 +6,7 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
-import { toAlgorandPrivateKey, determineMultiSigAddress } from '../helpers'
+import { toAlgorandPrivateKey, determineMultiSigAddress, toAlgorandSignature } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 
 require('dotenv').config()
@@ -56,7 +56,6 @@ const composeValueTransferParams: ValueTransferParams = {
   symbol: AlgorandUnit.Microalgo,
   memo: 'Hello World',
 }
-
 ;(async () => {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -80,10 +79,15 @@ const composeValueTransferParams: ValueTransferParams = {
   console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  await transaction.sign([
-    toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
-    toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
-  ])
+  // add signatures seperately
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
+  // OR add them as a group
+  // await transaction.sign([
+  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
+  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
+  // ])
+  console.log('signatures: ', transaction.signatures)
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 })()

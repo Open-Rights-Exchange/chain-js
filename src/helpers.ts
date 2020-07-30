@@ -6,6 +6,13 @@ export function isAUint8Array(obj: any) {
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
 }
 
+export function isAUint8ArrayArray(obj: any) {
+  if (obj === undefined || obj === null || !Array.isArray(obj)) {
+    return false
+  }
+  return (obj as Array<any>).every(isAUint8Array)
+}
+
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
     return true
@@ -58,6 +65,12 @@ export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCOD
 export function bufferToString(buffer: Buffer) {
   if (!buffer) return null
   return buffer.toString()
+}
+
+// convert buffer into a Uint8Array
+export function bufferToUint8Array(buffer: Buffer) {
+  if (!buffer) return null
+  return new Uint8Array(buffer.buffer)
 }
 
 /** filter values in array down to an array of a single, uniques value

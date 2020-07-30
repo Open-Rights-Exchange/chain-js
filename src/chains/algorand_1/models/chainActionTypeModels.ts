@@ -30,9 +30,9 @@ export type AlgorandKeyRegistrationParams = {
 }
 
 export type AlgorandActionAssetCreateParams = {
-  from: AlgorandAddress // Algorand address of sender
-  note: string // arbitrary data for sender to store
-  assetTotal: number // total number of this asset in circulation
+  fromAccountName: AlgorandAddress // Algorand address of sender
+  memo: Uint8Array // arbitrary data for sender to store
+  totalIssuance: number // total number of this asset in circulation
   assetDefaultFrozen: boolean // whether user accounts will need to be unfrozen before transacting
   assetDecimals: number // hint that the units of this asset are whole-integer amounts
   assetReserve: AlgorandAddress // specified address is considered the asset reserve (it has no special privileges, this is only informational)
