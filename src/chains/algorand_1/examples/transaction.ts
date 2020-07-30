@@ -67,9 +67,9 @@ const composeAssetConfigParams: AlgorandActionAssetConfigParams = {
 }
 
 const composeAssetCreateParams: AlgorandActionAssetCreateParams = {
-  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  note: 'example',
-  assetTotal: 1000,
+  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  note: 'create',
+  totalIssuance: 1000,
   assetDefaultFrozen: false,
   assetDecimals: 0,
   assetReserve: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
