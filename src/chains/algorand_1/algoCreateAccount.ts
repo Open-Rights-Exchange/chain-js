@@ -10,8 +10,7 @@ import {
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
-import { toAddressFromPublicKey, determineMultiSigAddress } from './helpers/cryptoModelHelpers'
-import { isValidAlgorandPublicKey } from './helpers'
+import { isValidAlgorandPublicKey, determineMultiSigAddress, toAddressFromPublicKey } from './helpers'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts

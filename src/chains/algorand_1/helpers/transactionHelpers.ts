@@ -1,13 +1,32 @@
-import { AlgorandUnit } from '../models'
+import * as algosdk from 'algosdk'
+import {
+  AlgorandMultiSigAccount,
+  AlgorandMultiSigOptions,
+  AlgorandRawTransactionMultisigStruct,
+  AlgorandRawTransactionStruct,
+  AlgorandTxSignResults,
+} from '../models'
 
-/** Convert amount from fromType to microAlgo */
-export function toMicroAlgo(amount: string, fromType: AlgorandUnit) {
-  const value = parseFloat(amount)
-  if (fromType === AlgorandUnit.Algo) {
-    return (value * 100000).toString()
+/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
+export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
+  const mSigOptions = {
+    version: multiSigOptions.version,
+    threshold: multiSigOptions.threshold,
+    addrs: multiSigOptions.addrs,
   }
-  if (fromType === AlgorandUnit.Microalgo) {
-    return amount
+  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
+  return multisigAddress
+}
+
+/** Decode blob from SDK's sign transaction */
+export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResults) {
+  let returnTx
+  const { txID, blob } = signResult
+  const transaction = algosdk.decodeObj(blob)
+  if (transaction?.msig) {
+    returnTx = transaction as AlgorandRawTransactionMultisigStruct
+  } else {
+    returnTx = transaction as AlgorandRawTransactionStruct
   }
-  throw new Error(`Not a supported Algorand type: ${fromType}`)
+  return { transactionId: txID, transaction: returnTx }
 }

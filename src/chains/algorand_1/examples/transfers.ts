@@ -6,7 +6,7 @@
 
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
-import { AlgorandAssetTransferParams, AlgorandChainActionType } from '../models'
+import { AlgorandActionAssetTransferParams, AlgorandChainActionType } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 
 require('dotenv').config()
@@ -28,10 +28,10 @@ export const algoTestnetEndpoints: ChainEndpoint[] = [
   },
 ]
 
-const composeTokenTransferParams: AlgorandAssetTransferParams = {
-  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  toAccountName: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
-  memo: 'hello world',
+const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  note: 'hello world',
   amount: 1,
   assetIndex: 10820019,
 }
@@ -46,13 +46,13 @@ const composeTokenTransferParams: AlgorandAssetTransferParams = {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
   const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
+  console.log('action:', action)
   transaction.actions = [action]
-  console.log('transaction actions: ', transaction.actions[0])
   const decomposed = algoTest.decomposeAction(transaction.actions[0])
-  console.log('decomposed actions: ', decomposed)
+  console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
+  console.log('required signatures (before signing): ', transaction.missingSignatures)
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
-  console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 })()

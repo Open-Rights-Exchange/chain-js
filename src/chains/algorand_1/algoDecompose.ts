@@ -1,16 +1,19 @@
 import { ActionDecomposeReturn } from '../../models'
-import { AlgorandTransactionAction } from './models'
+import { AlgorandTxAction } from './models'
 import { isNullOrEmpty } from '../../helpers'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+import { decomposeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
 
 // map a key name to a function that returns an object
 const DecomposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
   ValueTransfer: ValueTransferTemplate,
+  // Algorand - specific action
+  AssetTransfer: AssetTransferTemplate,
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: AlgorandTransactionAction): ActionDecomposeReturn[] {
+export function decomposeAction(action: AlgorandTxAction): ActionDecomposeReturn[] {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const decomposedActions: ActionDecomposeReturn[] = []
 

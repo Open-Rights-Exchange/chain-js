@@ -2,6 +2,17 @@ import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
+export function isAUint8Array(obj: any) {
+  return obj !== undefined && obj !== null && obj.constructor === Uint8Array
+}
+
+export function isAUint8ArrayArray(obj: any) {
+  if (obj === undefined || obj === null || !Array.isArray(obj)) {
+    return false
+  }
+  return (obj as Array<any>).every(isAUint8Array)
+}
+
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
     return true
@@ -9,6 +20,11 @@ export function isNullOrEmpty(obj: any): boolean {
   if (obj === null) {
     return true
   }
+
+  if (isAUint8Array(obj)) {
+    return obj.length === 0
+  }
+
   // Check for an empty array too
   // eslint-disable-next-line no-prototype-builtins
   if (obj.hasOwnProperty('length')) {
@@ -39,9 +55,22 @@ export function parseSafe(string: string): any {
   return parse(string)
 }
 
-// it converts the input data with the optionalspecified encoding  into a buffer object
+// convert data into buffer object (optional encoding)
 export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCODING) {
+  if (!data) return null
   return Buffer.from(data, encoding)
+}
+
+// convert buffer into a string
+export function bufferToString(buffer: Buffer) {
+  if (!buffer) return null
+  return buffer.toString()
+}
+
+// convert buffer into a Uint8Array
+export function bufferToUint8Array(buffer: Buffer) {
+  if (!buffer) return null
+  return new Uint8Array(buffer.buffer)
 }
 
 /** filter values in array down to an array of a single, uniques value
@@ -81,7 +110,7 @@ export function isANumber(value: any) {
 }
 
 export function isAnObject(obj: any) {
-  return obj !== null && typeof obj === 'object'
+  return !isNullOrEmpty(obj) && typeof obj === 'object'
 }
 
 /** Typescript Typeguard to verify that the value is in the enumType specified  */
@@ -200,4 +229,10 @@ export function hexStringToByteArray(value: string): Uint8Array {
 /** Convert a byte array to hex string */
 export function byteArrayToHexString(value: Uint8Array): string {
   return Buffer.from(value).toString('hex')
+}
+
+/** Whether array is exactly length of 1 */
+export function isArrayLengthOne(array: any[]) {
+  if (!array) return false
+  return array.length === 1
 }

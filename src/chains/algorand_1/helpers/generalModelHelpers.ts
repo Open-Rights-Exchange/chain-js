@@ -1,6 +1,9 @@
 import { isValidAddress } from 'algosdk'
-import { isNullOrEmpty } from '../../../helpers'
-import { AlgorandAddress, AlgorandSymbol } from '../models'
+import * as base32 from 'hi-base32'
+import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
+import { AlgorandAddress, AlgorandAddressStruct, AlgorandPublicKey, AlgorandSymbol } from '../models'
+import { toAddressFromPublicKey, toAlgorandPublicKey } from './cryptoModelHelpers'
+import { ALGORAND_ADDRESS_BYTES_ONLY_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH, PUBLIC_KEY_LENGTH } from '../algoConstants'
 
 /** A string - assumption is that it follows Algorand asset symbol convention */
 export function isValidAlgorandSymbol(str: AlgorandSymbol | string): str is AlgorandSymbol {
@@ -29,4 +32,31 @@ export function toAlgorandAddress(value: string): AlgorandAddress {
     return null
   }
   throw new Error(`Not a valid Algorand Account:${value}.`)
+}
+
+// converts an address (encoded as a hex string) to a Uint8Array array (needed by the chain)
+export function toAlgorandAddressFromRaw(rawAddress: AlgorandAddressStruct): AlgorandAddress {
+  if (isNullOrEmpty(rawAddress)) return undefined
+  return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey)))
+}
+
+/** converts an address (encoded as a Uint8Array array) to a hex string  */
+// NOTE: copied most of this code from algosdk - address.decode
+export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddressStruct {
+  if (isNullOrEmpty(address)) return null
+  const decoded = base32.decode.asBytes(address)
+  const publicKey: Uint8Array = new Uint8Array(
+    decoded.slice(0, ALGORAND_ADDRESS_BYTES_ONLY_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH),
+  )
+  const checksum: Uint8Array = new Uint8Array(decoded.slice(PUBLIC_KEY_LENGTH, ALGORAND_ADDRESS_BYTES_ONLY_LENGTH))
+  return {
+    publicKey,
+    checksum,
+  }
+}
+
+/** Returns publicKey for associated address */
+export function getPublicKeyForAddress(address: AlgorandAddress): AlgorandPublicKey {
+  const rawAddress = toRawAddressFromAlgoAddr(address)
+  return toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey))
 }

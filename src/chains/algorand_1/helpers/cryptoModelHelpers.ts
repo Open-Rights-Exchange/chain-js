@@ -2,23 +2,22 @@ import scrypt from 'scrypt-async'
 import * as base32 from 'hi-base32'
 import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
-import * as algosdk from 'algosdk'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
-import { hexStringToByteArray, isNullOrEmpty, byteArrayToHexString, isAString } from '../../../helpers'
+import {
+  byteArrayToHexString,
+  bufferToUint8Array,
+  hexStringToByteArray,
+  isAString,
+  isAUint8Array,
+  isNullOrEmpty,
+} from '../../../helpers'
 import {
   ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS,
-  ALGORAND_ADDRESS_BYTE_LENGTH,
+  ALGORAND_ADDRESS_BYTES_ONLY_LENGTH,
   ALGORAND_CHECKSUM_BYTE_LENGTH,
   ALGORAND_ADDRESS_LENGTH,
 } from '../algoConstants'
-import {
-  AlgorandPublicKey,
-  AlgorandSignature,
-  AlgorandPrivateKey,
-  AlgorandMultiSigAccount,
-  AlgorandMultiSigOptions,
-  AlgorandAddress,
-} from '../models'
+import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandAddress } from '../models'
 
 /** Converts a password string using salt to a key(32 byte array)
  * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
@@ -35,7 +34,7 @@ export function calculatePasswordByteArray(password: string, salt: string = ''):
 /**
  * ConcatArrays takes two array and returns a joint Uint8 array of both
  */
-export function concatArrays(a: any, b: any): Uint8Array {
+export function concatUint8Arrays(a: any, b: any): Uint8Array {
   const c = new Uint8Array(a.length + b.length)
   c.set(a)
   c.set(b, a.length)
@@ -56,12 +55,10 @@ export function isValidAlgorandPrivateKey(value: string): value is AlgorandPriva
   return ed25519Crypto.isValidPrivateKey(hexStringToByteArray(value))
 }
 
-// ALGO TODO: add validation rule for signature
+// TODO: Improve validation rule for signature - check byte length of signature?
 export function isValidAlgorandSignature(signature: string): boolean {
-  if (!isNullOrEmpty(signature)) {
-    return true
-  }
-  return false
+  if (isNullOrEmpty(signature)) return false
+  return isAUint8Array(hexStringToByteArray(signature))
 }
 
 /** Accepts hex string checks if a valid algorand private key
@@ -91,6 +88,8 @@ export function toAlgorandSignature(value: string): AlgorandSignature {
   throw new Error(`Not a valid algorand signature:${value}.`)
 }
 
+// todo algo - use sdk's address.encode and .decode functions instead of copying
+
 /** Computes algorand address from the algorand public key */
 export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
   const rawPublicKey = hexStringToByteArray(publicKey)
@@ -99,11 +98,12 @@ export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAd
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
     nacl.sign.publicKeyLength,
   )
-  const address = base32.encode(concatArrays(rawPublicKey, checksum))
+  const address = base32.encode(concatUint8Arrays(rawPublicKey, checksum))
   return address.toString().slice(0, ALGORAND_ADDRESS_LENGTH) // removing the extra '===='
 }
 
 /** Computes algorand public key from the algorand address */
+// note: copied from algosdk address.decode
 export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
   if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
@@ -112,26 +112,20 @@ export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublic
   const decoded = base32.decode.asBytes(address)
 
   // Sanity check
-  if (decoded.length !== ALGORAND_ADDRESS_BYTE_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
+  if (decoded.length !== ALGORAND_ADDRESS_BYTES_ONLY_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
 
-  const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTE_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
+  const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTES_ONLY_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
   return byteArrayToHexString(publicKey) as AlgorandPublicKey
 }
 
-/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
-export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
-  const mSigOptions = {
-    version: multiSigOptions.version,
-    threshold: multiSigOptions.threshold,
-    addrs: multiSigOptions.addrs,
+// convert a native signature (Uint8Array OR Buffer of Uint8Array) to Hexstring
+export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array): AlgorandSignature {
+  if (isNullOrEmpty(rawSignature)) return null
+  let sigUint8 = rawSignature
+  if (Buffer.isBuffer(rawSignature)) {
+    sigUint8 = bufferToUint8Array(rawSignature as Buffer)
   }
-  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
-  return multisigAddress
-}
-
-// convert a native Uint8Array signature to Hexstring
-export function toAlgorandSignatureFromRaw(rawSignature: Uint8Array): AlgorandSignature {
-  return toAlgorandSignature(byteArrayToHexString(rawSignature))
+  return toAlgorandSignature(byteArrayToHexString(sigUint8))
 }
 
 // convert a native Uint8Array signature to Hexstring

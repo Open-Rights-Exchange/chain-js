@@ -15,7 +15,7 @@ import {
   calculatePasswordByteArray,
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
-  toAlgorandSignatureFromRaw,
+  toAlgorandSignatureFromRawSig,
 } from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
@@ -52,10 +52,11 @@ export function decrypt(
   return decrypted
 }
 
-/** Signs a string with a private key */
+/** Signs a string with a private key
+ *  Returns signature as a Buffer from a UInt8Array */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
-  return toAlgorandSignatureFromRaw(signature)
+  const signature = Buffer.from(ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey)))
+  return toAlgorandSignatureFromRawSig(signature)
 }
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
@@ -82,9 +83,7 @@ function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: stri
   return encryptedKeys as AlgorandKeyPair
 }
 
-/** Gets the algorand public key from the given private key in the account
- * Returns hex public key and private key
- */
+/** Gets the algorand keypair (public and private keys) for the account */
 export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountStruct): AlgorandKeyPair {
   const { sk: privateKey } = account
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
@@ -92,6 +91,21 @@ export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountS
     publicKey: toAlgorandPublicKey(byteArrayToHexString(publicKey)),
     privateKey: toAlgorandPrivateKey(byteArrayToHexString(secretKey)),
   }
+}
+
+/** Gets the algorand keypair (public and private keys) for the privateKey */
+export function getAlgorandKeyPairFromPrivateKey(privateKey: AlgorandPrivateKey): AlgorandKeyPair {
+  const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(hexStringToByteArray(privateKey))
+  return {
+    publicKey: toAlgorandPublicKey(byteArrayToHexString(publicKey)),
+    privateKey: toAlgorandPrivateKey(byteArrayToHexString(secretKey)),
+  }
+}
+
+/** Gets the algorand keypair (public and private keys) for the privateKey */
+export function getAlgorandPublicKeyFromPrivateKey(privateKey: AlgorandPrivateKey): AlgorandPublicKey {
+  const { publicKey } = getAlgorandKeyPairFromPrivateKey(privateKey)
+  return publicKey
 }
 
 /** Generates new public and private key pair

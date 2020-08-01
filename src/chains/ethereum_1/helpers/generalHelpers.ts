@@ -13,12 +13,6 @@ export function isABN(value: any) {
   return BN.isBN(value)
 }
 
-/** Whether array is exactly length of 1 */
-export function isArrayLengthOne(array: any[]) {
-  if (!array) return false
-  return array.length === 1
-}
-
 /** Checks that string starts with 0x - appends if not */
 export function ensureHexPrefix(key: string) {
   return key.startsWith(HEX_PREFIX) ? key : `${HEX_PREFIX}${key}`

@@ -4,9 +4,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType } from '../../../models'
+import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
-import { toAlgorandPrivateKey } from '../helpers'
+import { toAlgorandPrivateKey, determineMultiSigAddress, toAlgorandSignature } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 
 require('dotenv').config()
 
@@ -48,17 +49,10 @@ export const CreateMultiSigAccountOptions = {
   multiSigOptions,
 }
 
-interface valueTransferParams {
-  fromAccountName?: AlgorandAddress
-  toAccountName: AlgorandAddress
-  amount: number
-  symbol?: AlgorandUnit
-  memo: AlgorandValue
-}
-
-const composeValueTransferParams: valueTransferParams = {
-  toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  amount: 1000000,
+const composeValueTransferParams: ValueTransferParams = {
+  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  amount: '1000000',
   symbol: AlgorandUnit.Microalgo,
   memo: 'Hello World',
 }
@@ -83,14 +77,17 @@ const composeValueTransferParams: valueTransferParams = {
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
-
   await transaction.prepareToBeSigned()
   await transaction.validate()
-
-  await transaction.sign([
-    toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
-    toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
-  ])
+  // add signatures seperately
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
+  // OR add them as a group
+  // await transaction.sign([
+  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
+  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
+  // ])
+  console.log('signatures: ', transaction.signatures)
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 })()

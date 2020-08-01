@@ -1,69 +1,46 @@
 import * as algosdk from 'algosdk'
-import { toAddressFromPublicKey, toAlgorandPublicKey } from '../../../helpers'
-import { AlgorandDecomposeReturn, AlgorandAssetTransferParams, AlgorandChainActionType } from '../../../models'
-import { isNullOrEmpty, byteArrayToHexString } from '../../../../../helpers'
+import {
+  AlgorandDecomposeReturn,
+  AlgorandActionAssetTransferParams,
+  AlgorandChainActionType,
+  AlgorandSuggestedParams,
+  AlgorandTransactionTypeCode,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+} from '../../../models'
+import { AlgorandActionHelper } from '../../../algoAction'
 
 /**
  * Composes asset transfer action
  * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
-export const composeAction = (args: AlgorandAssetTransferParams) => {
-  const {
-    fromAccountName: from,
-    toAccountName: to,
-    amount,
-    memo,
-    fee,
-    assetIndex,
-    revocationTarget,
-    closeRemainderTo: closingAccount,
-    firstRound,
-    lastRound,
-    genesisHash,
-    genesisID,
-  } = args
-
-  const note = algosdk.encodeObj(memo)
-  const closeRemainderTo = isNullOrEmpty(closingAccount) ? undefined : closingAccount
-  const composedAction = algosdk.makeAssetTransferTxn(
+export const composeAction = (args: AlgorandActionAssetTransferParams, suggestedParams: AlgorandSuggestedParams) => {
+  const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  const { from, to, amount, note, assetIndex, assetRevocationTarget, closeRemainderTo } = argsEncodedForSdk
+  const composedAction = algosdk.makeAssetTransferTxnWithSuggestedParams(
     from,
     to,
-    closeRemainderTo,
-    revocationTarget,
-    fee,
+    closeRemainderTo || undefined,
+    assetRevocationTarget || undefined,
     amount,
-    firstRound,
-    lastRound,
     note,
-    genesisHash,
-    genesisID,
     assetIndex,
+    suggestedParams,
   )
-  return {
-    ...composedAction,
-    from: toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(composedAction.from.publicKey))),
-    to: toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(composedAction.to.publicKey))),
-    closeRemainderTo: isNullOrEmpty(closingAccount)
-      ? undefined
-      : toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(composedAction.closeRemainderTo.publicKey))),
-  }
+  return { ...composedAction }
 }
 
-/**
- * Decomposes asset transfer action */
-export const decomposeAction = (action: any): AlgorandDecomposeReturn => {
-  const { amount, from, name, note, tag, to, type, assetIndex } = action
-  const returnData = {
-    toAccountName: to,
-    fromAccountName: from,
-    amount,
-    assetIndex,
-    memo: algosdk.decodeObj(note),
-    type,
-    name,
-    tag,
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
+  const actionHelper = new AlgorandActionHelper(action)
+  const actionParams = actionHelper.paramsOnly
+  // Identify chainActionType using type
+  if (actionParams?.type === AlgorandTransactionTypeCode.AssetTransfer) {
+    const returnData = {
+      ...actionParams,
+    }
+    return {
+      chainActionType: AlgorandChainActionType.AssetTransfer,
+      args: returnData,
+    }
   }
-  return {
-    chainActionType: AlgorandChainActionType.AssetTransfer,
-    args: returnData,
-  }
+  return null
 }
