@@ -1,5 +1,6 @@
 import { EncryptedDataString, ChainSymbolBrand } from '../../../models'
 import { AlgorandAddress, AlgorandPublicKey, AlgorandPrivateKey } from './cryptoModels'
+import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
 export type AlgoClient = any
 
@@ -22,6 +23,16 @@ export type AlgorandChainEndpoint = {
  */
 export type AlgorandHeader = {
   'X-API-Key': string
+}
+
+/** Chain information including head block number and time and software version */
+export type AlgorandChainInfo = {
+  headBlockNumber: number
+  headBlockTime: Date
+  version: string
+  nativeInfo: {
+    transactionHeaderParams: AlgorandChainTransactionParamsStruct
+  }
 }
 
 /** Currently nothing is needed in algorand chain settings.
