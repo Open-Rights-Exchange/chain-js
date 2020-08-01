@@ -1,4 +1,5 @@
-import * as nacl from 'tweetnacl'
+import nacl from 'tweetnacl'
+import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../models'
 import { isAString, isNullOrEmpty, hexStringToByteArray } from '../helpers'
 
@@ -33,32 +34,34 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 /** Encrypts a string using a password and a nonce
  *  Password is a base64 encoded string
  */
-export function encrypt(unencrypted: string, password: Uint8Array): Uint8Array {
+export function encrypt(unencrypted: string, passwordKey: string): string {
+  const keyUint8Array = hexStringToByteArray(passwordKey)
   const nonce = newNonce()
-  const messageUint8 = hexStringToByteArray(unencrypted)
-  const box = nacl.secretbox(messageUint8, nonce, password)
+  const messageUint8 = decodeUTF8(unencrypted)
+  const box = nacl.secretbox(messageUint8, nonce, keyUint8Array)
 
   const fullMessage = new Uint8Array(nonce.length + box.length)
   fullMessage.set(nonce)
   fullMessage.set(box, nonce.length)
 
-  return fullMessage
+  return encodeBase64(fullMessage)
 }
 
 /** Decrypts the encrypted value using a password
  * Password is a base64 encoded string
  */
-export function decrypt(encrypted: EncryptedDataString | any, password: Uint8Array): Uint8Array {
-  const messageWithNonceAsUint8Array = hexStringToByteArray(encrypted)
+export function decrypt(encrypted: EncryptedDataString | any, passwordKey: string): string {
+  const keyUint8Array = hexStringToByteArray(passwordKey)
+  const messageWithNonceAsUint8Array = decodeBase64(encrypted)
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength)
-  const message = messageWithNonceAsUint8Array.slice(nacl.secretbox.nonceLength, encrypted.length)
+  const message = messageWithNonceAsUint8Array.slice(nacl.secretbox.nonceLength, messageWithNonceAsUint8Array.length)
 
-  const decrypted = nacl.secretbox.open(message, nonce, password)
+  const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array)
   if (!decrypted) {
     throw new Error('Could not decrypt message')
   }
 
-  return decrypted
+  return encodeUTF8(decrypted)
 }
 
 export function getKeyPairFromPrivateKey(privateKey: ed25519PrivateKey): ed25519KeyPair {

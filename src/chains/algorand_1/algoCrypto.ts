@@ -35,7 +35,7 @@ export function encrypt(unencrypted: string, password: string, options: AlgoEncr
   const { salt } = options
   const passwordKey = calculatePasswordByteArray(password, salt)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
-  return byteArrayToHexString(encrypted) as EncryptedDataString
+  return toEncryptedDataString(encrypted)
 }
 
 /** Decrypts the encrypted value using nacl
@@ -49,7 +49,7 @@ export function decrypt(
   const { salt } = options
   const passwordKey = calculatePasswordByteArray(password, salt)
   const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
-  return byteArrayToHexString(decrypted)
+  return decrypted
 }
 
 /** Signs a string with a private key */
