@@ -236,3 +236,7 @@ export function isArrayLengthOne(array: any[]) {
   if (!array) return false
   return array.length === 1
 }
+
+export function objectHasProperty(obj: object, propertyName: string) {
+  return Object.keys(obj).some(key => key === propertyName)
+}

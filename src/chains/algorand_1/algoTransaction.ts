@@ -108,7 +108,8 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     this.assertHasAction()
-    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = await this._chainState.algoClient.getTransactionParams()
+    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
+      ?.nativeInfo?.transactionHeaderParams
     this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
     // get a chain-ready minified transaction
     const rawTx = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk).get_obj_for_encoding()
