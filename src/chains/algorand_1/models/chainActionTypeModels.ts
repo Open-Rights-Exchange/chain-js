@@ -30,7 +30,7 @@ export type AlgorandKeyRegistrationParams = {
 }
 
 export type AlgorandActionAssetCreateParams = {
-  fromAccountName: AlgorandAddress // Algorand address of sender
+  from: AlgorandAddress // Algorand address of sender
   note: string // arbitrary data for sender to store
   totalIssuance: number // total number of this asset in circulation
   assetDefaultFrozen: boolean // whether user accounts will need to be unfrozen before transacting
