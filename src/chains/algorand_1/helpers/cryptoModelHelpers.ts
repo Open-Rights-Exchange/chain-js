@@ -23,12 +23,12 @@ import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandAddre
  * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
  * It can then be used as a key for symmetric block ciphers and private keys
  */
-export function calculatePasswordByteArray(password: string, salt: string = ''): Uint8Array {
+export function calculatePasswordByteArray(password: string, salt: string = ''): string {
   let passwordArray
   scrypt(password, salt, ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS, (derivedKey: any) => {
     passwordArray = derivedKey
   })
-  return passwordArray
+  return byteArrayToHexString(passwordArray)
 }
 
 /**
