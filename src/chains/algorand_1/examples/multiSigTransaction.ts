@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/camelcase */
@@ -13,20 +14,19 @@ require('dotenv').config()
 
 const { env } = process
 
-const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps1'
-
-export const algoTestnetEndpoints: ChainEndpoint[] = [
-  {
-    url: new URL(algoPureStakeTestnet),
-    options: {
-      headers: [
-        {
-          'X-API-Key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
-        },
-      ],
-    },
-  },
-]
+const algoApiKey = env.AGLORAND_API_KEY
+const algoMainnetEndpoints = [{ 
+  url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
+const algoTestnetEndpoints = [{ 
+  url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
+const algoBetanetEndpoints = [{ 
+  url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
 
 export const CreateAccountOptions = {
   newKeysOptions: {
@@ -61,7 +61,7 @@ const composeValueTransferParams: ValueTransferParams = {
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
-    console.log('Connected to %o', algoPureStakeTestnet)
+    console.log('Connected to %o', algoTest.chainId)
   }
 
   /** Create Algorand multisig account */
@@ -82,12 +82,20 @@ const composeValueTransferParams: ValueTransferParams = {
   // add signatures seperately
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
+  console.log('signatures: ', transaction.signatures)
+  const sig1 = transaction.signatures[0]
+  const sig2 = transaction.signatures[1]
+  // transaction.signatures = null
+  // transaction.addSignatures([toAlgorandSignature(sig1)])
+  // console.log('signatures: ', transaction.signatures)
+  transaction.addSignatures([toAlgorandSignature(sig2)])
+  // console.log('signatures: ', transaction.signatures)
   // OR add them as a group
   // await transaction.sign([
   //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
   //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
   // ])
-  console.log('signatures: ', transaction.signatures)
+
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 })()
