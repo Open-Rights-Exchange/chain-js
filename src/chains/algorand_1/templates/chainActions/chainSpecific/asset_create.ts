@@ -53,7 +53,7 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
 export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
   const actionParams = actionHelper.paramsOnly
-  // Identify chainActionType using type
+  // Cant identify using only type (more than one action uses AssetConfig type) - must check params too
   if (actionParams?.type === AlgorandTransactionTypeCode.AssetConfig && !isNullOrEmpty(actionParams?.assetName)) {
     const returnData = {
       ...actionParams,
