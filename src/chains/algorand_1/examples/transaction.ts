@@ -7,7 +7,7 @@
 
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType } from '../../../models'
-import { AlgorandAddress, AlgorandPrivateKey, AlgorandUnit, AlgorandValue } from '../models'
+import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 
 require('dotenv').config()
@@ -62,5 +62,9 @@ const composeValueTransferParams: valueTransferParams = {
   await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
-  console.log('send response: %o', JSON.stringify(await transaction.send()))
+  try {
+    console.log('send response: %o', JSON.stringify(await transaction.send()))
+  } catch (err) {
+    console.log(err)
+  }
 })()
