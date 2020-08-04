@@ -5,21 +5,29 @@ import {
   AlgorandAddress,
   AlgoClient,
   AlgorandChainEndpoint,
+  AlgorandChainInfo,
   AlgorandChainSettings,
   AlgorandChainSettingsCommunicationSettings,
+  AlgorandChainTransactionParamsStruct,
   AlgorandHeader,
   AlgorandSymbol,
   AlgorandTxResult,
   AlgorandUnit,
 } from './models'
-import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import {
+  getHeaderValueFromEndpoint,
+  hexStringToByteArray,
+  isNullOrEmpty,
+  objectHasProperty,
+  trimTrailingChars,
+} from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
 import { toAlgo } from './helpers'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
 
-  private _chainInfo: ChainInfo
+  private _chainInfo: AlgorandChainInfo
 
   private _chainSettings: AlgorandChainSettings
 
@@ -44,11 +52,11 @@ export class AlgorandChainState {
   /** * Return chain ID */
   public get chainId(): string {
     this.assertIsConnected()
-    return this._chainInfo?.nativeInfo?.chain_id
+    return this._chainInfo?.nativeInfo?.transactionHeaderParams?.genesisID
   }
 
   /** Return chain info - e.g. head block number */
-  public get chainInfo(): ChainInfo {
+  public get chainInfo(): AlgorandChainInfo {
     this.assertIsConnected()
     return this._chainInfo
   }
@@ -96,15 +104,15 @@ export class AlgorandChainState {
   public async getChainInfo(): Promise<ChainInfo> {
     // eslint-disable-next-line no-useless-catch
     try {
-      const nodeInfo = await this._algoClient.status()
-      const { lastRound, lastConsensusVersion } = nodeInfo
+      const transactionHeaderParams: AlgorandChainTransactionParamsStruct = await this._algoClient.getTransactionParams()
+      const { lastRound, consensusVersion } = transactionHeaderParams
       const { timestamp } = await this._algoClient.block(lastRound)
       this._chainInfo = {
         headBlockNumber: lastRound,
         headBlockTime: new Date(timestamp),
         // version example: 'https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f'
-        version: lastConsensusVersion,
-        nativeInfo: nodeInfo,
+        version: consensusVersion.toString(),
+        nativeInfo: { transactionHeaderParams },
       }
       return this._chainInfo
     } catch (error) {
@@ -135,17 +143,17 @@ export class AlgorandChainState {
   /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
   public async getAlgorandBalance(address: AlgorandAddress): Promise<string> {
     const accountInfo = await this._algoClient.accountInformation(address)
-    const { amount } = accountInfo
-    return toAlgo(amount, AlgorandUnit.Microalgo).toString()
+    return toAlgo(accountInfo?.amount, AlgorandUnit.Microalgo).toString()
   }
 
   /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
   public async getAssetBalance(address: AlgorandAddress, assetSymbol: string): Promise<string> {
     const accountInfo = await this._algoClient.accountInformation(address)
     const { assets } = accountInfo || {}
-    const assetInfo = assets[assetSymbol] || {}
-    const { amount = null } = assetInfo || {}
-    return amount
+    if (!isNullOrEmpty(assets) && objectHasProperty(assets, assetSymbol)) {
+      return assets[assetSymbol]?.amount
+    }
+    return null
   }
 
   /** Confirm that we've connected to the chain - throw if not */
