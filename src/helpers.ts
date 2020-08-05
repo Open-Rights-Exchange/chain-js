@@ -73,6 +73,10 @@ export function bufferToUint8Array(buffer: Buffer) {
   return new Uint8Array(buffer.buffer)
 }
 
+export function uint8ArraysAreEqual(array1: Uint8Array, array2: Uint8Array) {
+  return Buffer.compare(array1, array2) === 0
+}
+
 /** filter values in array down to an array of a single, uniques value
  * e.g. if array = [{value:'A', other}, {value:'B'}, {value:'A', other}]
  * distinct(array, uniqueKey:'value') => ['A','B']
