@@ -113,7 +113,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Not supported */
   generateAccountNameString = (): any => {
     // TODO Algo
-    notSupported('CreateAccount.generateAccountName')
+    notSupported('CreateAccount.generateAccountNameString')
   }
 
   /** Checks create options - if publicKeys are missing,
