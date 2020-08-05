@@ -7,6 +7,7 @@ import { composeAction as AssetDestroyTemplate } from './templates/chainActions/
 import { composeAction as AssetFreezeTemplate } from './templates/chainActions/chainSpecific/asset_freeze'
 import { composeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
 import { composeAction as KeyRegistrationTemplate } from './templates/chainActions/chainSpecific/key_registration'
+import { composeAction as PaymentTemplate } from './templates/chainActions/chainSpecific/payment'
 
 import {
   AlgorandChainActionType,
@@ -27,6 +28,7 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
+  Payment: PaymentTemplate,
   KeyRegistration: KeyRegistrationTemplate,
 }
 
@@ -38,7 +40,7 @@ export async function composeAction(
 ): Promise<AlgorandTxActionSdkEncoded> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported()
+    notSupported(`ComposeAction:${chainActionType}`)
   }
 
   let actionHelper = new AlgorandActionHelper(args)
