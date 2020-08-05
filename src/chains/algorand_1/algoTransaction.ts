@@ -10,6 +10,7 @@ import {
   isArrayLengthOne,
   isNullOrEmpty,
   notImplemented,
+  uint8ArraysAreEqual,
 } from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
@@ -52,6 +53,9 @@ import {
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
 
+  /** Instance of Algorand SDK's Algorand Transaction Class */
+  private _algoSdkTransaction: any
+
   private _chainState: AlgorandChainState
 
   private _options: AlgorandTransactionOptions
@@ -61,9 +65,6 @@ export class AlgorandTransaction implements Transaction {
 
   /** Raw multisig transaction object including signature(s) (if any) */
   private _rawTransactionMultisig: AlgorandRawTransactionMultisigStruct
-
-  /** the hash of txn + tag (if any) - returned when signing a transaction */
-  private _transactionId: string
 
   /** Public Key used to sign transaction - set by sign() */
   private _signedByPublicKey: AlgorandPublicKey
@@ -111,8 +112,9 @@ export class AlgorandTransaction implements Transaction {
     const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
       ?.nativeInfo?.transactionHeaderParams
     this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
-    // get a chain-ready minified transaction
-    const rawTx = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk).get_obj_for_encoding()
+    this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
+    // get a chain-ready minified transaction - uses Algo SDK Transaction class
+    const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
     if (this.isMultiSig) {
       this._rawTransactionMultisig = {
         txn: rawTx,
@@ -141,17 +143,16 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Set the transaction by using the results of an Algo SDK sign function - i.e. {txID, blob} */
-  async setFromRaw(signResults: AlgorandTxSignResults): Promise<void> {
+  /** Set the transaction by using the blob from the results of an Algo SDK sign function */
+  async setFromRaw(blob: Uint8Array): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    const { blob } = signResults
     const decodedTx = algosdk.decodeObj(blob)?.txn
     if (!decodedTx) throwNewError('Cant decode blob into transaction')
     // convert packed transaction blob into AlgorandTxActionSdkEncoded using Algo SDK
     const action: AlgorandTxActionSdkEncoded = AlgoTransactionClass.from_obj_for_encoding(decodedTx)
     this.actions = [action]
-    this.setRawTransactionFromSignResults(signResults)
+    this.setRawTransactionFromSignResults({ txID: null, blob })
     this._isValidated = false
   }
 
@@ -172,6 +173,16 @@ export class AlgorandTransaction implements Transaction {
     return { ...this._actionHelper?.action }
   }
 
+  /** update the private instance of AlgorandTransaction object using action info */
+  public setAlgoSdkTransactionFromAction() {
+    const { actionEncodedForSdk } = this._actionHelper
+    if (isNullOrEmpty(actionEncodedForSdk)) {
+      this._algoSdkTransaction = null
+    } else {
+      this._algoSdkTransaction = new AlgoTransactionClass(actionEncodedForSdk)
+    }
+  }
+
   /** Sets actions array
    * Array length has to be exactly 1 because algorand doesn't support multiple actions
    */
@@ -179,6 +190,7 @@ export class AlgorandTransaction implements Transaction {
     this.assertNoSignatures()
     if (isNullOrEmpty(actions)) {
       this._actionHelper = null
+      this._algoSdkTransaction = null
       this._isValidated = false
       return
     }
@@ -187,6 +199,7 @@ export class AlgorandTransaction implements Transaction {
     }
     const action = actions[0]
     this._actionHelper = new AlgorandActionHelper(action)
+    this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
   }
 
@@ -280,20 +293,20 @@ export class AlgorandTransaction implements Transaction {
     } else {
       // Handle multisig transaction
       if (isNullOrEmpty(signatures) && this?._rawTransactionMultisig?.msig) {
-        this._rawTransactionMultisig.msig.subsig = []
+        // wipe out all the signatures in the subsig array (just set the public key)
+        this._rawTransactionMultisig.msig.subsig = this._rawTransactionMultisig.msig.subsig.map(ss => ({ pk: ss.pk }))
       }
-      const signatureAndPk: AlgorandMultiSignatureStruct[] = []
       // For every signature provided...
       signatures.forEach(sig => {
         // look for a match with any of the publicKeys in the multiSigOptions
-        const validSigForAddress = this.multiSigOptions.addrs.find(addr =>
+        const addressForSig = this.multiSigOptions.addrs.find(addr =>
           this.isValidTxSignatureForPublicKey(sig, getPublicKeyForAddress(addr)),
         )
-        if (validSigForAddress) {
-          signatureAndPk.push({
-            pk: hexStringToByteArray(getPublicKeyForAddress(validSigForAddress)),
-            s: hexStringToByteArray(sig),
-          })
+        if (addressForSig) {
+          const newPubKey = hexStringToByteArray(getPublicKeyForAddress(addressForSig))
+          const newSig = hexStringToByteArray(sig)
+          // set signature for publickey in subsig array
+          this._rawTransactionMultisig.msig.subsig.find(ss => uint8ArraysAreEqual(ss.pk, newPubKey)).s = newSig
         } else {
           errorMsg = `The signature: ${sig} isnt valid for this transaction using any of publicKeys specified in multiSigOptions: ${JSON.stringify(
             this.multiSigOptions,
@@ -301,7 +314,6 @@ export class AlgorandTransaction implements Transaction {
           throwNewError(errorMsg)
         }
       })
-      this._rawTransactionMultisig.msig.subsig.push(...signatureAndPk)
     }
 
     if (errorMsg) {
@@ -446,8 +458,9 @@ export class AlgorandTransaction implements Transaction {
     return true
   }
 
+  /** Hexstring encoded hash of txn + tag (if any) - generated by Algo SDK Transaction object */
   public get transactionId(): string {
-    return this._transactionId
+    return this._algoSdkTransaction?.txID().toString()
   }
 
   /** Sign the transaction body with private key and add to attached signatures */
@@ -478,7 +491,7 @@ export class AlgorandTransaction implements Transaction {
     // start with existing multiSig transaction/signatures (if any)
     if (!isNullOrEmpty(this._rawTransactionMultisig)) {
       signedTransactionResults.push({
-        txID: this._transactionId,
+        txID: this.transactionId,
         blob: algosdk.encodeObj(this._rawTransactionMultisig),
       })
     }
@@ -566,19 +579,18 @@ export class AlgorandTransaction implements Transaction {
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
   private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
     if (!this.rawTransaction) return false
-    const transactionBytesToSign = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk).bytesToSign()
+    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
     return verifySignatureForDataAndPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
 
   /** Set the raw trasaction properties from the packed results from using Algo SDK to sign tx */
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
-    const { transactionId, transaction } = toRawTransactionFromSignResults(signResults)
+    const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
       this._rawTransactionMultisig = transaction as AlgorandRawTransactionMultisigStruct
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
-    this._transactionId = transactionId
   }
 
   /** JSON representation of transaction data */

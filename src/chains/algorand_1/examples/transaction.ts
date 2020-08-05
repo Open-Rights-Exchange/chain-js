@@ -42,7 +42,8 @@ const composeValueTransferParams: valueTransferParams = {
   symbol: AlgorandUnit.Microalgo,
   memo: 'Hello World',
 }
-;(async () => {
+
+async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
@@ -67,4 +68,13 @@ const composeValueTransferParams: valueTransferParams = {
   } catch (err) {
     console.log(err)
   }
+}
+
+;(async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
+  }
+  process.exit()
 })()

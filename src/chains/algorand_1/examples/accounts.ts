@@ -47,7 +47,8 @@ export const createMultiSigAccountOptions = {
   ...createAccountOptions,
   multiSigOptions,
 }
-;(async () => {
+
+async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
@@ -69,4 +70,13 @@ export const createMultiSigAccountOptions = {
   // await createMultiSigAccount.generateKeysIfNeeded()
   // const { accountName: multiSigAccountName } = createMultiSigAccount
   // console.log('mulitsig account: %o', multiSigAccountName)
+}
+
+;(async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
+  }
+  process.exit()
 })()
