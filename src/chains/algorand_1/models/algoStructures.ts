@@ -105,7 +105,7 @@ export type AlgorandTxActionStruct = {
   freezeAccount?: AlgorandAddressStruct
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddressStruct
-  type?: AlgorandTransactionTypeCode
+  type?: string
   group?: Buffer
   appIndex?: number
   appOnComplete?: number

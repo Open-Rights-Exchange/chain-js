@@ -112,6 +112,7 @@ const composeKeyRegistrationParams: AlgorandKeyRegistrationParams = {
   // const action = await algoTest.composeAction(AlgorandChainActionType.KeyRegistration, composeKeyRegistrationParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
+  console.log(transaction.actions)
   const decomposed = algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
