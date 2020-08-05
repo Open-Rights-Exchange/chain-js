@@ -141,8 +141,8 @@ export const notImplemented = () => {
   throw new Error('Not Implemented')
 }
 
-export const notSupported = () => {
-  throw new Error('Not Supported')
+export const notSupported = (description: string) => {
+  throw new Error(`Not Supported ${description}`)
 }
 
 /**

@@ -93,24 +93,27 @@ export class AlgorandCreateAccount implements CreateAccount {
    * Algorand does not require a create account transaction to be sent to the chain
    */
   async composeTransaction(): Promise<void> {
-    notSupported()
+    notSupported('CreateAccount.composeTransaction')
   }
 
   /** Determine if desired account name is usable for a new account.
    */
   async determineNewAccountName(): Promise<any> {
-    notSupported()
+    // TODO Algo
+    notSupported('CreateAccount.determineNewAccountName')
   }
 
   /* Not supported for Algorand */
   async generateAccountName(): Promise<any> {
-    notSupported()
+    // TODO Algo
+    notSupported('CreateAccount.generateAccountName')
     return null
   }
 
   /** Not supported */
   generateAccountNameString = (): any => {
-    notSupported()
+    // TODO Algo
+    notSupported('CreateAccount.generateAccountName')
   }
 
   /** Checks create options - if publicKeys are missing,
