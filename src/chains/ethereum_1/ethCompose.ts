@@ -47,7 +47,7 @@ export function composeAction(
 ): EthereumTransactionAction {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported()
+    notSupported(`ComposeAction:${chainActionType}`)
   }
   return composerFunction(args)
 }
