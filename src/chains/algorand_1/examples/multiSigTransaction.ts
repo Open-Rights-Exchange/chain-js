@@ -56,7 +56,8 @@ const composeValueTransferParams: ValueTransferParams = {
   symbol: AlgorandUnit.Microalgo,
   memo: 'Hello World',
 }
-;(async () => {
+
+async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
@@ -82,14 +83,6 @@ const composeValueTransferParams: ValueTransferParams = {
   // add signatures seperately
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
-  console.log('signatures: ', transaction.signatures)
-  const sig1 = transaction.signatures[0]
-  const sig2 = transaction.signatures[1]
-  // transaction.signatures = null
-  // transaction.addSignatures([toAlgorandSignature(sig1)])
-  // console.log('signatures: ', transaction.signatures)
-  transaction.addSignatures([toAlgorandSignature(sig2)])
-  // console.log('signatures: ', transaction.signatures)
   // OR add them as a group
   // await transaction.sign([
   //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
@@ -98,4 +91,13 @@ const composeValueTransferParams: ValueTransferParams = {
 
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
+}
+
+;(async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
+  }
+  process.exit()
 })()
