@@ -71,9 +71,11 @@ async function run() {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
 
-  // const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
-  const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
-  
+  // Compose an action from basic parameters using composeAction function
+  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
+  // OR, set an action using params directly - values depend on the SDK requirements
+  // const action = composeAlgoPaymentParams
   transaction.actions = [action]
   // // Alternatively, set action using raw transaction
   // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))

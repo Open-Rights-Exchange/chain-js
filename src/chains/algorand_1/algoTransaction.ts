@@ -111,7 +111,6 @@ export class AlgorandTransaction implements Transaction {
     this.assertHasAction()
     const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
       ?.nativeInfo?.transactionHeaderParams
-    this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
@@ -175,11 +174,12 @@ export class AlgorandTransaction implements Transaction {
 
   /** update the private instance of AlgorandTransaction object using action info */
   public setAlgoSdkTransactionFromAction() {
-    const { actionEncodedForSdk } = this._actionHelper
-    if (isNullOrEmpty(actionEncodedForSdk)) {
+    if (isNullOrEmpty(this._actionHelper?.actionEncodedForSdk)) {
       this._algoSdkTransaction = null
     } else {
-      this._algoSdkTransaction = new AlgoTransactionClass(actionEncodedForSdk)
+      const chainTxHeaderParams = this._chainState.chainInfo.nativeInfo.transactionHeaderParams
+      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
+      this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk)
     }
   }
 
