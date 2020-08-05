@@ -1,4 +1,4 @@
-import { ChainEndpoint } from 'src/models'
+import { ChainEndpoint } from '../../../../models'
 
 import { AlgorandChainState } from '../../algoChainState'
 
