@@ -52,6 +52,9 @@ import {
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
 
+  /** Instance of Algorand SDK's Algorand Transaction Class */
+  private _algoSdkTransaction: any
+
   private _chainState: AlgorandChainState
 
   private _options: AlgorandTransactionOptions
@@ -111,8 +114,9 @@ export class AlgorandTransaction implements Transaction {
     const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
       ?.nativeInfo?.transactionHeaderParams
     this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
-    // get a chain-ready minified transaction
-    const rawTx = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk).get_obj_for_encoding()
+    this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
+    // get a chain-ready minified transaction - uses Algo SDK Transaction class
+    const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
     if (this.isMultiSig) {
       this._rawTransactionMultisig = {
         txn: rawTx,
@@ -141,17 +145,16 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Set the transaction by using the results of an Algo SDK sign function - i.e. {txID, blob} */
-  async setFromRaw(signResults: AlgorandTxSignResults): Promise<void> {
+  /** Set the transaction by using the blob from the results of an Algo SDK sign function */
+  async setFromRaw(blob: Uint8Array): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    const { blob } = signResults
     const decodedTx = algosdk.decodeObj(blob)?.txn
     if (!decodedTx) throwNewError('Cant decode blob into transaction')
     // convert packed transaction blob into AlgorandTxActionSdkEncoded using Algo SDK
     const action: AlgorandTxActionSdkEncoded = AlgoTransactionClass.from_obj_for_encoding(decodedTx)
     this.actions = [action]
-    this.setRawTransactionFromSignResults(signResults)
+    this.setRawTransactionFromSignResults({ txID: null, blob })
     this._isValidated = false
   }
 
@@ -172,6 +175,16 @@ export class AlgorandTransaction implements Transaction {
     return { ...this._actionHelper?.action }
   }
 
+  /** update the private instance of AlgorandTransaction object using action info */
+  public setAlgoSdkTransactionFromAction() {
+    const { actionEncodedForSdk } = this._actionHelper
+    if (isNullOrEmpty(actionEncodedForSdk)) {
+      this._algoSdkTransaction = null
+    } else {
+      this._algoSdkTransaction = new AlgoTransactionClass(actionEncodedForSdk)
+    }
+  }
+
   /** Sets actions array
    * Array length has to be exactly 1 because algorand doesn't support multiple actions
    */
@@ -179,6 +192,7 @@ export class AlgorandTransaction implements Transaction {
     this.assertNoSignatures()
     if (isNullOrEmpty(actions)) {
       this._actionHelper = null
+      this._algoSdkTransaction = null
       this._isValidated = false
       return
     }
@@ -187,6 +201,7 @@ export class AlgorandTransaction implements Transaction {
     }
     const action = actions[0]
     this._actionHelper = new AlgorandActionHelper(action)
+    this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
   }
 
@@ -446,8 +461,10 @@ export class AlgorandTransaction implements Transaction {
     return true
   }
 
+  /** Hexstring encoded hash of txn + tag (if any) - returned when signing a transaction */
   public get transactionId(): string {
-    return this._transactionId
+    // return this._transactionId
+    return this._algoSdkTransaction?.txID().toString()
   }
 
   /** Sign the transaction body with private key and add to attached signatures */
@@ -566,19 +583,19 @@ export class AlgorandTransaction implements Transaction {
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
   private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
     if (!this.rawTransaction) return false
-    const transactionBytesToSign = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk).bytesToSign()
+    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
     return verifySignatureForDataAndPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
 
   /** Set the raw trasaction properties from the packed results from using Algo SDK to sign tx */
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
-    const { transactionId, transaction } = toRawTransactionFromSignResults(signResults)
+    const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
       this._rawTransactionMultisig = transaction as AlgorandRawTransactionMultisigStruct
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
-    this._transactionId = transactionId
+    // this._transactionId = transactionId - We don't need to set the transactionId - is is calculated using the Algo SDK Transaction object
   }
 
   /** JSON representation of transaction data */
