@@ -6,6 +6,7 @@ import {
   AlgorandSuggestedParams,
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
+  AlgorandTxActionRaw,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 
@@ -25,7 +26,7 @@ export const composeAction = (args: AlgorandActionPaymentParams, suggestedParams
   return actionHelper.action // convert raw action to use hex strings
 }
 
-export const decomposeAction = (action: any): AlgorandDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
   const actionParams = actionHelper.paramsOnly
   // Identify chainActionType using type
