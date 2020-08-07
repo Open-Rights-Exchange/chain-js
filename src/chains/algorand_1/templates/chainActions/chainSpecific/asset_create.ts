@@ -8,6 +8,7 @@ import {
   AlgorandTxAction,
   AlgorandTxActionRaw,
   AlgorandActionAssetCreateParams,
+  AlgorandTxActionSdkEncoded,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 
@@ -50,10 +51,10 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
   return { ...composedAction }
 }
 
-export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
-  console.log('ACTION1 ')
+export const decomposeAction = (
+  action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
+): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
-  console.log('ACTIOn2')
   const actionParams = actionHelper.paramsOnly
 
   // Identify chainActionType using type
