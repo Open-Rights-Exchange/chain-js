@@ -39,7 +39,9 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
     (!isNullOrEmpty(actionParams?.assetManager) ||
       !isNullOrEmpty(actionParams?.assetReserve) ||
       !isNullOrEmpty(actionParams?.assetFreeze) ||
-      !isNullOrEmpty(actionParams?.assetClawback))
+      !isNullOrEmpty(actionParams?.assetClawback)) &&
+    isNullOrEmpty(actionParams?.assetName) &&
+    isNullOrEmpty(actionParams?.assetUnitName)
   ) {
     const returnData = {
       ...actionParams,
