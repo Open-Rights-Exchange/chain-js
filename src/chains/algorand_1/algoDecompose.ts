@@ -1,5 +1,5 @@
 import { ActionDecomposeReturn } from '../../models'
-import { AlgorandTxAction, AlgorandTxActionRaw } from './models'
+import { AlgorandTxAction, AlgorandTxActionRaw, AlgorandTxActionSdkEncoded } from './models'
 import { isNullOrEmpty } from '../../helpers'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { decomposeAction as AssetConfigTemplate } from './templates/chainActions/chainSpecific/asset_config'
@@ -23,7 +23,9 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn[] {
+export function decomposeAction(
+  action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
+): ActionDecomposeReturn[] {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const decomposedActions: ActionDecomposeReturn[] = []
 
@@ -31,12 +33,11 @@ export function decomposeAction(action: AlgorandTxAction | AlgorandTxActionRaw):
   decomposeActionFuncs.forEach((decomposeFunc: any) => {
     try {
       const { chainActionType, args } = decomposeFunc(action) || {}
-      console.log('actionype: ', chainActionType)
       if (chainActionType) {
         decomposedActions.push({ chainActionType, args })
       }
     } catch (err) {
-      // console.log('problem in decomposeAction:', err)
+      console.log('problem in decomposeAction:', err)
     }
   })
 
