@@ -1,6 +1,6 @@
 /* eslint-disable quotes */
 import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions } from '../aesCrypto'
-
+import { timed } from './utils'
 // import { rejects } from 'assert';
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
@@ -53,6 +53,50 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       })
       it('returns an encrypted string with different options', () => {
         expect(encrypted2).toEqual(expect.not.stringContaining(privateKey))
+      })
+
+      describe('Iterations', () => {
+        it('Does One Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 1000 }))()
+          console.log(' One Thousand iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does Ten Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 10000 }))()
+          console.log('Ten Thousand iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does Sixty Five Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 650000 }))()
+          console.log('Sixty Five iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does One Hundred Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 100000 }))()
+          console.log('One Hundred iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does Five Hundred Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 500000 }))()
+          console.log('Five Hundred iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does One Million iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 1000000 }))()
+          console.log('One Million iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
+
+        it('Does Five Million iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 5000000 }))()
+          console.log('Five Million iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
       })
     })
 
