@@ -6,14 +6,6 @@ export const ALGORAND_ADDRESS_BYTES_ONLY_LENGTH = 36
 export const ALGORAND_CHECKSUM_BYTE_LENGTH = 4
 export const PUBLIC_KEY_LENGTH = nacl.sign.publicKeyLength
 export const ALGORAND_EMPTY_CONTRACT_NAME = 'none'
-/** Options required by scrypt library to derive a key from password and salt */
-export const ALGORAND_PASSWORD_ENCRYPTION_CONSTANTS = {
-  N: 16384,
-  r: 8,
-  p: 1,
-  dkLen: 32,
-  encoding: 'binary',
-}
 export const ALGORAND_POST_CONTENT_TYPE = { 'content-type': 'application/x-binary' }
 /** Number of rounds to wait after the first round for the transaction confirmation */
 export const ALGORAND_TRX_COMFIRMATION_ROUNDS = 1000

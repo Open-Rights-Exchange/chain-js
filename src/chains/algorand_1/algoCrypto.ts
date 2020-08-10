@@ -11,12 +11,7 @@ import {
   AlgorandSignature,
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
-import {
-  calculatePasswordByteArray,
-  toAlgorandPrivateKey,
-  toAlgorandPublicKey,
-  toAlgorandSignatureFromRawSig,
-} from './helpers'
+import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -32,8 +27,7 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
  *  Nacl requires password to be in a 32 byte array format. Hence we derive a key from the password string using the provided salt
  */
 export function encrypt(unencrypted: string, password: string, options: AlgoEncryptionOptions): EncryptedDataString {
-  const { salt } = options
-  const passwordKey = calculatePasswordByteArray(password, salt)
+  const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
   return toEncryptedDataString(encrypted)
 }
@@ -46,8 +40,7 @@ export function decrypt(
   password: string,
   options: AlgoEncryptionOptions,
 ): string {
-  const { salt } = options
-  const passwordKey = calculatePasswordByteArray(password, salt)
+  const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
   const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
   return decrypted
 }
