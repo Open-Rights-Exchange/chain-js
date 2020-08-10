@@ -56,33 +56,33 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       })
 
       describe('Iterations', () => {
-        it('Does One Thousand iterations', async () => {
+        it('One Thousand iterations', async () => {
           const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 1000 }))()
           console.log(' One Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
 
-        it('Does Ten Thousand iterations', async () => {
+        it('Ten Thousand iterations', async () => {
           const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 10000 }))()
           console.log('Ten Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
 
-        it('Does Sixty Five Thousand iterations', async () => {
-          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 650000 }))()
-          console.log('Sixty Five iterations', time.timeElapsed)
+        it('Sixty Five Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 65000 }))()
+          console.log('Sixty Five Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
 
         it('Does One Hundred Thousand iterations', async () => {
           const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 100000 }))()
-          console.log('One Hundred iterations', time.timeElapsed)
+          console.log('One Hundred Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
 
         it('Does Five Hundred Thousand iterations', async () => {
           const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 500000 }))()
-          console.log('Five Hundred iterations', time.timeElapsed)
+          console.log('Five Hundred Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
 
