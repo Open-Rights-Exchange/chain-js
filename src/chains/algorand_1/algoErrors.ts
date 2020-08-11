@@ -13,7 +13,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   AuthInvalid:
     '(Sig or Msig|mystery sig|LogicSig not enabled|LogicSig.Logic too|LogicSig.Logic version|LogicSig.Logic bad|one of sig or msig)', // the permission isnt valid (or permission already exists in an account)
   AuthUnsatisfied: '(signature validation|multisig validation|signed and not a Logic-only)', // all permission or keys needed for transaction weren't provided
-  AuthMissing: '(no sig|LogicSig.Logic empty|)', // missing permission or key
+  AuthMissing: '(no sig|LogicSig.Logic empty)', // missing permission or key
   BlockDoesNotExist: '(no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
   DataReadFailedKeyDoesNotExist: 'key does not exist',
   TokenBalanceTooLow: 'overflowed account balance',
