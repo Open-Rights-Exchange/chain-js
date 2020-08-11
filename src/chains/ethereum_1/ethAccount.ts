@@ -22,7 +22,7 @@ export class EthereumAccount implements Account {
 
   /** Whether the account is currently unused and can be reused - not supported in Ethereum */
   get canBeRecycled(): boolean {
-    return notSupported()
+    return notSupported('EthereumAccount.canBeRecycled')
   }
 
   /** Ethereum address */

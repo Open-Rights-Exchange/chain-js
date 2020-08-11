@@ -73,6 +73,10 @@ export function bufferToUint8Array(buffer: Buffer) {
   return new Uint8Array(buffer.buffer)
 }
 
+export function uint8ArraysAreEqual(array1: Uint8Array, array2: Uint8Array) {
+  return Buffer.compare(array1, array2) === 0
+}
+
 /** filter values in array down to an array of a single, uniques value
  * e.g. if array = [{value:'A', other}, {value:'B'}, {value:'A', other}]
  * distinct(array, uniqueKey:'value') => ['A','B']
@@ -141,8 +145,8 @@ export const notImplemented = () => {
   throw new Error('Not Implemented')
 }
 
-export const notSupported = () => {
-  throw new Error('Not Supported')
+export const notSupported = (description: string) => {
+  throw new Error(`Not Supported ${description}`)
 }
 
 /**
@@ -235,4 +239,8 @@ export function byteArrayToHexString(value: Uint8Array): string {
 export function isArrayLengthOne(array: any[]) {
   if (!array) return false
   return array.length === 1
+}
+
+export function objectHasProperty(obj: object, propertyName: string) {
+  return Object.keys(obj).some(key => key === propertyName)
 }

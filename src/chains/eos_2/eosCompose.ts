@@ -61,7 +61,7 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
 export function composeAction(chainActionType: ChainActionType | EosChainActionType, args: any): EosActionStruct {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported()
+    notSupported(`ComposeAction:${chainActionType}`)
   }
   return composerFunction(args)
 }
