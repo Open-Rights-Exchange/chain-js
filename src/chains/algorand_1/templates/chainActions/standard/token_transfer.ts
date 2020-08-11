@@ -1,5 +1,11 @@
 import { ActionDecomposeReturn, ChainActionType, TokenTransferParams } from '../../../../../models'
-import { AlgorandUnit, AlgorandSuggestedParams, AlgorandActionAssetTransferParams } from '../../../models'
+import {
+  AlgorandUnit,
+  AlgorandSuggestedParams,
+  AlgorandActionAssetTransferParams,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+} from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
 import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
 import {
@@ -24,7 +30,7 @@ export const composeAction = (params: TokenTransferParams, suggestedParams: Algo
   )
 }
 
-export const decomposeAction = (action: any): ActionDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn => {
   const decomposed = algoAssetTransferDecomposeAction(action)
   if (decomposed) {
     const decomposedArgs = decomposed.args

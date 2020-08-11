@@ -1,19 +1,39 @@
 import nacl from 'tweetnacl'
+import scrypt from 'scrypt-async'
 import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../models'
-import { isAString, isNullOrEmpty, hexStringToByteArray } from '../helpers'
+import { isAString, isNullOrEmpty, hexStringToByteArray, byteArrayToHexString } from '../helpers'
 
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
-export type ed25519PrivateKey = Uint8Array
+export type Ed25519PrivateKey = Uint8Array
 
-export type ed25519Signature = Uint8Array
+export type Ed25519Signature = Uint8Array
 
-export type ed25519PublicKey = Uint8Array
+export type Ed25519PublicKey = Uint8Array
 
-export type ed25519KeyPair = {
-  publicKey: ed25519PublicKey
-  secretKey: ed25519PrivateKey
+export type Ed25519KeyPair = {
+  publicKey: Ed25519PublicKey
+  secretKey: Ed25519PrivateKey
+}
+
+export type Ed25519PasswordEncryptionOptions = {
+  salt?: string
+  N?: number
+  r?: number
+  p?: number
+  dkLen?: number
+  encoding?: string
+}
+
+/** Options used by scrypt library to derive a key from password and salt */
+export const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
+  salt: '',
+  N: 16384,
+  r: 8,
+  p: 1,
+  dkLen: 32,
+  encoding: 'binary',
 }
 
 /** Verifies that the value is a valid, stringified encrypted object */
@@ -29,6 +49,27 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
     return value
   }
   throw new Error(`Not valid encrypted data string:${value}`)
+}
+
+/** Converts a password string using salt to a key(32 byte array)
+ * The scrypt password-base key derivation function (pbkdf) is an algorithm converts human readable passwords into fixed length arrays of bytes.
+ * It can then be used as a key for symmetric block ciphers and private keys
+ */
+export function calculatePasswordByteArray(password: string, options: Ed25519PasswordEncryptionOptions): string {
+  let passwordArray
+  const { salt } = options
+  // Use defaults for options not provided
+  const encryptionOptions = {
+    N: options?.N || passwordEncryptionDefaults.N,
+    r: options?.r || passwordEncryptionDefaults.r,
+    p: options?.p || passwordEncryptionDefaults.p,
+    dkLen: options?.dkLen || passwordEncryptionDefaults.dkLen,
+    encoding: options?.encoding || passwordEncryptionDefaults.encoding,
+  }
+  scrypt(password, salt, encryptionOptions, (derivedKey: any) => {
+    passwordArray = derivedKey
+  })
+  return byteArrayToHexString(passwordArray)
 }
 
 /** Encrypts a string using a password and a nonce
@@ -64,17 +105,17 @@ export function decrypt(encrypted: EncryptedDataString | any, passwordKey: strin
   return encodeUTF8(decrypted)
 }
 
-export function getKeyPairFromPrivateKey(privateKey: ed25519PrivateKey): ed25519KeyPair {
+export function getKeyPairFromPrivateKey(privateKey: Ed25519PrivateKey): Ed25519KeyPair {
   return nacl.sign.keyPair.fromSecretKey(privateKey)
 }
 
 /** Signs the message using the private key and returns a signature. */
-export function sign(value: Uint8Array, privateKey: ed25519PrivateKey): ed25519Signature {
+export function sign(value: Uint8Array, privateKey: Ed25519PrivateKey): Ed25519Signature {
   return nacl.sign.detached(value, privateKey)
 }
 
 /** Verifies the signature for the message and returns true if verification succeeded or false if it failed. */
-export function verify(value: Uint8Array, publicKey: ed25519PublicKey, signature: ed25519Signature): boolean {
+export function verify(value: Uint8Array, publicKey: Ed25519PublicKey, signature: Ed25519Signature): boolean {
   return nacl.sign.detached.verify(value, signature, publicKey)
 }
 

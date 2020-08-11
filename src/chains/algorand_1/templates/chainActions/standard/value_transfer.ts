@@ -1,5 +1,11 @@
 import { ActionDecomposeReturn, ChainActionType, ValueTransferParams } from '../../../../../models'
-import { AlgorandActionPaymentParams, AlgorandUnit, AlgorandSuggestedParams } from '../../../models'
+import {
+  AlgorandActionPaymentParams,
+  AlgorandUnit,
+  AlgorandSuggestedParams,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+} from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
 import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
 import {
@@ -22,7 +28,7 @@ export const composeAction = (params: ValueTransferParams, suggestedParams: Algo
   )
 }
 
-export const decomposeAction = (action: any): ActionDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn => {
   const decomposed = algoPaymentDecomposeAction(action)
   if (decomposed) {
     const decomposedArgs = decomposed.args

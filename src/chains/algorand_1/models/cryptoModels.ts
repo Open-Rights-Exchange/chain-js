@@ -1,3 +1,4 @@
+import { Ed25519PasswordEncryptionOptions } from '../../../crypto/ed25519Crypto'
 import { PrivateKeyBrand, PublicKeyBrand, SignatureBrand, EncryptedDataString } from '../../../models'
 
 /** an address string - formatted correctly for algorand */
@@ -18,9 +19,8 @@ export type AlgorandPublicKey = string & PublicKeyBrand
 /** a signature string - formatted correcly for algorand */
 export type AlgorandSignature = string & SignatureBrand
 
-export type AlgoEncryptionOptions = {
-  salt?: string
-}
+/** options used to convert a password and salt into a passowrd key */
+export type AlgoEncryptionOptions = Ed25519PasswordEncryptionOptions
 
 /** Additional parameters for encryption/decryption - for SHA256 algorithm */
 export type EncryptionOptions = AlgoEncryptionOptions
