@@ -44,7 +44,7 @@ export function toEosDate(date: string | Date | moment.Moment | EosDate): EosDat
   throw new Error(`Invalid toEosDate provided: ${date}`)
 }
 
-// ** pads an amount string with decimal places (specified by precision) as needed by EOS chain
+/** pads an amount string with decimal places (specified by precision) as needed by EOS chain
 /*   e.g. amount:'1', precision:4 = '1.0000'  */
 export function toEosAssetPaddedAmount(amount: string, precision?: number): string {
   let amountWithPadding = amount
