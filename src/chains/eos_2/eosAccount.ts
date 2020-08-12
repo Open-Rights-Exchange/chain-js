@@ -169,7 +169,7 @@ export class EosAccount implements Account {
     // generate new keys for each new permission if needed
     const { generatedKeys, permissionsToAdd: usePermissionsToAdd } =
       (await PermissionsHelper.generateMissingKeysForPermissionsToAdd(usePermissionsToUpdate, newKeysOptions)) || {}
-    const actions = this._permHelper.composeAddPermissionActions(
+    const actions = await this._permHelper.composeAddPermissionActions(
       this.name,
       authPermission,
       usePermissionsToAdd,
@@ -188,7 +188,7 @@ export class EosAccount implements Account {
     const deletePermissions = permissionsToUpdate
       .filter(pu => this.permissions.some(p => p.name === pu.permissionName))
       .map(p => ({ accountName: this.name, permissionName: p.permissionName }))
-    const actions = this._permHelper.composeDeletePermissionActions(this.name, authPermission, deletePermissions)
+    const actions = await this._permHelper.composeDeletePermissionActions(this.name, authPermission, deletePermissions)
     return actions
   }
 
@@ -208,7 +208,11 @@ export class EosAccount implements Account {
     authPermission: EosEntityName,
     permissionsToUpdate: UnlinkPermissionsParams[],
   ): Promise<EosActionStruct[]> {
-    const actions = this._permHelper.composeUnlinkPermissionActions(this.name, authPermission, permissionsToUpdate)
+    const actions = await this._permHelper.composeUnlinkPermissionActions(
+      this.name,
+      authPermission,
+      permissionsToUpdate,
+    )
     return actions
   }
 

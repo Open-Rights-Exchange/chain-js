@@ -25,7 +25,9 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn[] {
+export async function decomposeAction(
+  action: AlgorandTxAction | AlgorandTxActionRaw,
+): Promise<ActionDecomposeReturn[]> {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const decomposedActions: ActionDecomposeReturn[] = []
 

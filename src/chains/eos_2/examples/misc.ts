@@ -53,7 +53,7 @@ async function run() {
   // console.log('create bridge balances:', await kylin.fetchContractData('createbridge', 'balances', 'createbridge'))
 
   // compose
-  // const deleteAuthAction = kylin.composeAction(ChainActionType.AccountDeleteAuth, {
+  // const deleteAuthAction = await kylin.composeAction(ChainActionType.AccountDeleteAuth, {
   //   authAccount: 'accountName',
   //   authPermission: 'authPermission',
   //   permission: 'permission',
@@ -61,10 +61,10 @@ async function run() {
   // console.log('deleteAuthAction action:', deleteAuthAction)
 
   // crypto
-  // const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
-  // console.log('encrypted text:', encrypted)
-  // const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
-  // console.log('decrypted text:', decrypted)
+  const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
+  console.log('encrypted text:', encrypted)
+  const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
+  console.log('decrypted text:', decrypted)
 
   // get token balance
   console.log('get token balance:', await kylin.fetchBalance(toEosEntityName('oreoreoreore'), toEosSymbol('EOS')))

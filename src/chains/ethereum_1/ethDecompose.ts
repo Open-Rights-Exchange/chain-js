@@ -40,7 +40,7 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: EthereumTransactionAction): EthereumDecomposeReturn[] {
+export async function decomposeAction(action: EthereumTransactionAction): Promise<EthereumDecomposeReturn[]> {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const decomposedActions: EthereumDecomposeReturn[] = []
 
