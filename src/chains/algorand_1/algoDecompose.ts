@@ -1,5 +1,5 @@
 import { ActionDecomposeReturn } from '../../models'
-import { AlgorandTxAction } from './models'
+import { AlgorandTxAction, AlgorandTxActionRaw } from './models'
 import { isNullOrEmpty } from '../../helpers'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { decomposeAction as AssetConfigTemplate } from './templates/chainActions/chainSpecific/asset_config'
@@ -8,6 +8,7 @@ import { decomposeAction as AssetDestroyTemplate } from './templates/chainAction
 import { decomposeAction as AssetFreezeTemplate } from './templates/chainActions/chainSpecific/asset_freeze'
 import { decomposeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
 import { decomposeAction as KeyRegistrationTemplate } from './templates/chainActions/chainSpecific/key_registration'
+import { decomposeAction as PaymentTemplate } from './templates/chainActions/chainSpecific/payment'
 
 // map a key name to a function that returns an object
 const DecomposeAction: { [key: string]: (args: any) => any } = {
@@ -20,10 +21,11 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
   KeyRegistration: KeyRegistrationTemplate,
+  Payment: PaymentTemplate,
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-export function decomposeAction(action: AlgorandTxAction): ActionDecomposeReturn[] {
+export function decomposeAction(action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn[] {
   const decomposeActionFuncs = Object.values(DecomposeAction)
   const decomposedActions: ActionDecomposeReturn[] = []
 
