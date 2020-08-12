@@ -88,6 +88,8 @@ const { env } = process
     fromAccountName: toEosEntityName('proppropprop'),
     toAccountName: toEosEntityName('oreidfunding'),
     amount: '0.0001',
+    // amount: '1.1',  // OR use precision param
+    // precision: 4,
     symbol: toEosSymbol('EOS'),
     memo: 'memo',
     permission: toEosEntityName('active'),
