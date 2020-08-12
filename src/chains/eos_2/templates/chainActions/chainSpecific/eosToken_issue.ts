@@ -9,7 +9,7 @@ import {
 
 const actionName = 'issue'
 
-export interface TokenIssueParams {
+export interface EosTokenIssueParams {
   contractName: EosEntityName
   ownerAccountName: EosEntityName
   toAccountName: EosEntityName
@@ -27,7 +27,7 @@ export const composeAction = ({
   symbol,
   memo,
   permission,
-}: TokenIssueParams): EosActionStruct => ({
+}: EosTokenIssueParams): EosActionStruct => ({
   account: contractName,
   name: actionName,
   authorization: [
@@ -50,7 +50,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
     // If there's more than 1 authorization, we can't be sure which one is correct so we return null
     const auth = getFirstAuthorizationIfOnlyOneExists(authorization)
     const quantityAsset = new EosAssetHelper(null, null, data.quantity)
-    const returnData: TokenIssueParams = {
+    const returnData: EosTokenIssueParams = {
       contractName: toEosEntityName(account),
       ownerAccountName: toEosEntityNameOrNull(auth?.actor),
       toAccountName: data.to,
