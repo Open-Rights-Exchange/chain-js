@@ -76,7 +76,7 @@ const chainSendCurrencyData = {
 /** Transfer token between accounts (uses most popular token type for each chain - e.g. ERC20 on Ethereum) */
 async function sendToken(chain: Chain, options: any) {
   const sendTokenTx = chain.new.Transaction()
-  sendTokenTx.actions = [chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
+  sendTokenTx.actions = [await chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
   await sendTokenTx.sign([options.privateKey])
@@ -87,7 +87,7 @@ async function sendToken(chain: Chain, options: any) {
 /** Send 'cryptocurrency' (value) between accounts on the chain */
 async function sendCurrency(chain: Chain, options: any) {
   const sendCurrencyTx = chain.new.Transaction()
-  sendCurrencyTx.actions = [chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
+  sendCurrencyTx.actions = [await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()
   await sendCurrencyTx.sign([options.privateKey])

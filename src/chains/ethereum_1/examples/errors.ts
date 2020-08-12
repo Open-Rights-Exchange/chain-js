@@ -32,7 +32,7 @@ import { EthereumChainSettings, EthereumChainForkType, EthUnit, EthereumChainEnd
     await ropsten.connect()
 
     const transaction = await ropsten.new.Transaction()
-    transaction.actions = [ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
+    transaction.actions = [await ropsten.composeAction(ChainActionType.TokenTransfer, composeEthTransferParams)]
     await transaction.prepareToBeSigned()
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(ropstenPrivate)])

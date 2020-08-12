@@ -58,7 +58,10 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
 }
 
 /** Compose an object for a chain contract action */
-export function composeAction(chainActionType: ChainActionType | EosChainActionType, args: any): EosActionStruct {
+export async function composeAction(
+  chainActionType: ChainActionType | EosChainActionType,
+  args: any,
+): Promise<EosActionStruct> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
     notSupported(`ComposeAction:${chainActionType}`)

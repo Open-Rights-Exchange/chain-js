@@ -26,7 +26,7 @@ describe('Compose Chain Actions', () => {
       toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
       amount: '10',
     }
-    const actAction = composeAction(ChainActionType.ValueTransfer, args)
+    const actAction = await composeAction(ChainActionType.ValueTransfer, args)
 
     expect({ to: actAction.to, value: actAction.value }).toEqual(expAction)
   })
@@ -41,7 +41,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       value: '20',
     }
-    const actAction = composeAction(EthereumChainActionType.ERC20Approve, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC20Approve, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -54,7 +54,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       value: '20',
     }
-    const actAction = composeAction(EthereumChainActionType.ERC20Burn, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC20Burn, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -67,7 +67,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       value: '20',
     }
-    const actAction = composeAction(EthereumChainActionType.ERC20Issue, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC20Issue, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -81,7 +81,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       value: '20',
     }
-    const actAction = composeAction(EthereumChainActionType.ERC20Transfer, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC20Transfer, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -96,7 +96,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       value: '20',
     }
-    const actAction = composeAction(EthereumChainActionType.ERC20TransferFrom, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC20TransferFrom, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -110,7 +110,7 @@ describe('Compose Chain Actions', () => {
       precision: 18,
       tokenId: 1,
     }
-    const actAction = composeAction(EthereumChainActionType.ERC721Approve, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC721Approve, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -123,7 +123,7 @@ describe('Compose Chain Actions', () => {
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       tokenId: 1,
     }
-    const actAction = composeAction(EthereumChainActionType.ERC721Transfer, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC721Transfer, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 
@@ -137,7 +137,7 @@ describe('Compose Chain Actions', () => {
       to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
       tokenId: 1,
     }
-    const actAction = composeAction(EthereumChainActionType.ERC721TransferFrom, args)
+    const actAction = await composeAction(EthereumChainActionType.ERC721TransferFrom, args)
     expect({ to: actAction.to, contract: actAction.contract }).toEqual(expAction)
   })
 })
