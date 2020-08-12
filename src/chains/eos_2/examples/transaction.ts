@@ -126,7 +126,7 @@ const { env } = process
 
   // ---> send token
   // const transaction = kylin.new.Transaction()
-  // transaction.actions = [kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
+  // transaction.actions = [await kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()

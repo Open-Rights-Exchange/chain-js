@@ -79,7 +79,7 @@ async function run() {
   transaction.actions = [action]
   // // Alternatively, set action using raw transaction
   // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))
-  const decomposed = algoTest.decomposeAction(transaction.actions[0])
+  const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()

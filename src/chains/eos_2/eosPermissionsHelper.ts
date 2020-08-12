@@ -62,12 +62,12 @@ export class PermissionsHelper {
   // Currently only using the public key for the permission
 
   /** Compose a collection of actions to add the requested permissions */
-  composeAddPermissionActions(
+  async composeAddPermissionActions(
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] = [],
     appendKeyToExistingPermission: boolean = false,
-  ): EosActionStruct[] {
+  ): Promise<EosActionStruct[]> {
     if (isNullOrEmpty(permissionsToAdd)) return null
     const updateAuthActions: EosActionStruct[] = []
 
@@ -90,7 +90,7 @@ export class PermissionsHelper {
     })
     // compose updateAuth actions
     // Todo: Sort newPermissions by dependencies in case one permission to add requires another one in the list as its parent
-    newPermissions.forEach(permissionToAdd => {
+    newPermissions.map(async permissionToAdd => {
       const updateAuthParams = {
         auth: permissionToAdd.required_auth,
         authAccount,
@@ -98,29 +98,29 @@ export class PermissionsHelper {
         parent: permissionToAdd.parent,
         permission: permissionToAdd.perm_name,
       }
-      const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
+      const updateAuthAction = await composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
       updateAuthActions.push(updateAuthAction)
     })
 
     return updateAuthActions
   }
 
-  composeDeletePermissionActions = (
+  composeDeletePermissionActions = async (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToDelete: DeletePermissionsParams[] = [],
-  ): EosActionStruct[] => {
+  ): Promise<EosActionStruct[]> => {
     const delteAuthActions: EosActionStruct[] = []
     if (isNullOrEmpty(permissionsToDelete)) return null
 
-    permissionsToDelete.forEach(auth => {
+    permissionsToDelete.map(async auth => {
       const deleteAuthParams = {
         authAccount,
         authPermission,
         account: auth.accountName,
         permission: auth.permissionName,
       }
-      const deleteAuthAction = composeAction(ChainActionType.AccountDeleteAuth, deleteAuthParams)
+      const deleteAuthAction = await composeAction(ChainActionType.AccountDeleteAuth, deleteAuthParams)
       delteAuthActions.push(deleteAuthAction)
     })
 
@@ -157,20 +157,20 @@ export class PermissionsHelper {
       parent: permissionToUpdate.parent,
       permission: permissionToUpdate.perm_name,
     }
-    const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
+    const updateAuthAction = await composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
     return updateAuthAction
   }
 
   /** Compose a collection of actions to link actions to permissions */
-  composeLinkPermissionActions = (
+  composeLinkPermissionActions = async (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToLink: LinkPermissionsParams[] = [],
-  ): EosActionStruct[] => {
+  ): Promise<EosActionStruct[]> => {
     const linkAuthActions: EosActionStruct[] = []
     if (isNullOrEmpty(permissionsToLink)) return null
 
-    permissionsToLink.forEach(link => {
+    permissionsToLink.map(async link => {
       const linkAuthParams = {
         authAccount,
         authPermission,
@@ -178,7 +178,7 @@ export class PermissionsHelper {
         action: link.action,
         permission: link.permissionName,
       }
-      const linkAuthAction = composeAction(ChainActionType.AccountLinkAuth, linkAuthParams)
+      const linkAuthAction = await composeAction(ChainActionType.AccountLinkAuth, linkAuthParams)
       linkAuthActions.push(linkAuthAction)
     })
 
@@ -186,22 +186,22 @@ export class PermissionsHelper {
   }
 
   /** Compose a collection of actions to unlink actions to permissions */
-  composeUnlinkPermissionActions = (
+  composeUnlinkPermissionActions = async (
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToUnlink: UnlinkPermissionsParams[] = [],
-  ): EosActionStruct[] => {
+  ): Promise<EosActionStruct[]> => {
     if (isNullOrEmpty(permissionsToUnlink)) return null
     const unlinkAuthActions: EosActionStruct[] = []
 
-    permissionsToUnlink.forEach(link => {
+    permissionsToUnlink.map(async link => {
       const unlinkAuthParams = {
         action: link.action,
         authAccount,
         authPermission,
         contract: link.contract,
       }
-      const unlinkAuthAction = composeAction(ChainActionType.AccountUnlinkAuth, unlinkAuthParams)
+      const unlinkAuthAction = await composeAction(ChainActionType.AccountUnlinkAuth, unlinkAuthParams)
       unlinkAuthActions.push(unlinkAuthAction)
     })
 

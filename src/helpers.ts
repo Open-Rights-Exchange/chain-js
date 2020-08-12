@@ -210,7 +210,7 @@ export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, key: string)
 
 /** returns the number of decimal places in a number (expressed as a string) - supports exponential notiation
  *  e.g. '.05' = 2, '25e-100'= 100. '2.5e-99' = 100 */
-export function getDecimalPlaces(num = '') {
+export function getDecimalPlacesFromString(num: string = '') {
   const match = num.match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/)
   if (!match) {
     return 0
