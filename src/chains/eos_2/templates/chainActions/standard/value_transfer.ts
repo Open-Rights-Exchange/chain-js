@@ -1,9 +1,9 @@
 import { ValueTransferParams, ActionDecomposeReturn, ChainActionType } from '../../../../../models'
-import { toEosEntityName, toEosSymbol } from '../../../helpers'
+import { toEosEntityName, toEosSymbol, toEosAssetPaddedAmount } from '../../../helpers'
 import {
   composeAction as eosTokenTransferComposeAction,
   decomposeAction as eosTokenTransferDecomposeAction,
-  TokenTransferParams as EosTokenTransferParams,
+  EosTokenTransferParams,
 } from '../chainSpecific/eosToken_transfer'
 import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from '../../../eosConstants'
 
@@ -13,7 +13,7 @@ export const composeAction = (params: ValueTransferParams) => {
   const { amount, contractName, symbol, permission } = params
   return eosTokenTransferComposeAction({
     ...params,
-    amount,
+    amount: toEosAssetPaddedAmount(amount, 4), // EOS token has precision 4
     contractName: contractName || toEosEntityName(DEFAULT_CHAIN_TOKEN_ADDRESS),
     permission: permission ? toEosEntityName(permission) : toEosEntityName('active'),
     symbol: symbol ? toEosSymbol(symbol) : toEosSymbol(NATIVE_CHAIN_SYMBOL),
@@ -25,6 +25,7 @@ export const decomposeAction = (action: any): ActionDecomposeReturn => {
   if (decomposed) {
     return {
       ...decomposed,
+      // TODO EOS - should provide precision by reverse engineering eos asset string
       chainActionType: ChainActionType.ValueTransfer,
     }
   }

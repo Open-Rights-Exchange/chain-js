@@ -53,6 +53,7 @@ async function run() {
   )
 
   /** Encrypt and decrypt value using algo crypto function */
+  // encryption options can use N:{65536, 131072, 262144, 524288, 1048576}
   const encrypted = encrypt('somevalue', 'mypassword', { salt: 'mysalt' })
   console.log('encrypted:', encrypted)
 

@@ -36,7 +36,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedNewAccount)
+    const actAction = await decomposeAction(composedNewAccount)
 
     expect(actAction).toEqual(expAction)
   })
@@ -54,7 +54,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedDeleteAuth)
+    const actAction = await decomposeAction(composedDeleteAuth)
 
     expect(actAction).toEqual(expAction)
   })
@@ -73,7 +73,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedLinkAuth)
+    const actAction = await decomposeAction(composedLinkAuth)
 
     expect(actAction).toEqual(expAction)
   })
@@ -91,7 +91,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedUnlinkAuth)
+    const actAction = await decomposeAction(composedUnlinkAuth)
 
     expect(actAction).toEqual(expAction)
   })
@@ -128,7 +128,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedUpdateAuth)
+    const actAction = await decomposeAction(composedUpdateAuth)
 
     expect(actAction).toEqual(expAction)
   })
@@ -152,7 +152,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedCreateEscrowCreate)
+    const actAction = await decomposeAction(composedCreateEscrowCreate)
 
     expect(actAction).toEqual(expAction)
   })
@@ -181,7 +181,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedCreateEscrowDefine)
+    const actAction = await decomposeAction(composedCreateEscrowDefine)
 
     expect(actAction).toEqual(expAction)
   })
@@ -201,7 +201,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedCreateEscrowInit)
+    const actAction = await decomposeAction(composedCreateEscrowInit)
 
     expect(actAction).toEqual(expAction)
   })
@@ -220,7 +220,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedCreateEscrowReclaim)
+    const actAction = await decomposeAction(composedCreateEscrowReclaim)
 
     expect(actAction).toEqual(expAction)
   })
@@ -240,7 +240,7 @@ describe('Decompose Chain Actions', () => {
       },
       partial: false,
     }
-    const actActions = decomposeAction(composedCreateEscrowTransfer)
+    const actActions = await decomposeAction(composedCreateEscrowTransfer)
     expect(actActions).toContainEqual(expAction)
   })
 
@@ -258,7 +258,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedCreateEscrowWhitelist)
+    const actAction = await decomposeAction(composedCreateEscrowWhitelist)
 
     expect(actAction).toEqual(expAction)
   })
@@ -277,7 +277,7 @@ describe('Decompose Chain Actions', () => {
       },
       partial: false,
     }
-    const actAction = decomposeAction(composedEosTokenApprove)
+    const actAction = await decomposeAction(composedEosTokenApprove)
 
     expect(actAction).toContainEqual(expAction)
   })
@@ -297,7 +297,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedEosTokenCreate)
+    const actAction = await decomposeAction(composedEosTokenCreate)
 
     expect(actAction).toEqual(expAction)
   })
@@ -318,7 +318,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedEosTokenIssue)
+    const actAction = await decomposeAction(composedEosTokenIssue)
 
     expect(actAction).toEqual(expAction)
   })
@@ -338,7 +338,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedEosTokenRetire)
+    const actAction = await decomposeAction(composedEosTokenRetire)
 
     expect(actAction).toEqual(expAction)
   })
@@ -357,7 +357,7 @@ describe('Decompose Chain Actions', () => {
       },
       partial: false,
     }
-    const actAction = decomposeAction(composedEosTokenTransfer)
+    const actAction = await decomposeAction(composedEosTokenTransfer)
 
     expect(actAction).toContainEqual(expAction)
   })
@@ -393,7 +393,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedEosTokenTransferFrom)
+    const actAction = await decomposeAction(composedEosTokenTransferFrom)
 
     expect(actAction).toEqual(expAction)
   })
@@ -414,7 +414,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedOreCreateAccount)
+    const actAction = await decomposeAction(composedOreCreateAccount)
 
     expect(actAction).toEqual(expAction)
   })
@@ -433,7 +433,7 @@ describe('Decompose Chain Actions', () => {
         partial: false,
       },
     ]
-    const actAction = decomposeAction(composedOreUpsertRight)
+    const actAction = await decomposeAction(composedOreUpsertRight)
 
     expect(actAction).toEqual(expAction)
   })

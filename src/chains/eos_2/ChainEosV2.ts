@@ -5,7 +5,6 @@ import {
   TransactionOptions,
   ChainType,
   ChainEntityName,
-  ChainAsset,
   ChainDate,
   PublicKey,
   PrivateKey,
@@ -128,12 +127,12 @@ class ChainEosV2 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType, args: any): EosActionStruct => {
+  public composeAction = async (actionType: ChainActionType, args: any): Promise<EosActionStruct> => {
     return composeAction(actionType, args)
   }
 
   /** Decompose a contract action and return the action type (if any) and its data */
-  public decomposeAction = (action: EosActionStruct): EosDecomposeReturn[] => {
+  public decomposeAction = async (action: EosActionStruct): Promise<EosDecomposeReturn[]> => {
     return decomposeAction(action)
   }
 
