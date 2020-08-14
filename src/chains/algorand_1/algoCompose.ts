@@ -28,7 +28,6 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
-  Payment: PaymentTemplate,
   KeyRegistration: KeyRegistrationTemplate,
   Payment: PaymentTemplate,
 }

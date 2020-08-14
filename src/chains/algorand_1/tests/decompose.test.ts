@@ -134,7 +134,7 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedKeyRegistration)
   })
 
-  it('creates payment action object', async () => {
+  it('decomposes payment action object', async () => {
     const args: AlgorandActionPaymentParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -147,6 +147,6 @@ describe('Compose Algorand Chain Actions', () => {
 
     const actAction = decomposeAction(composedAction)
 
-    expect(actAction).toEqual(decomposedPayment)
+    expect(actAction[0]).toEqual(decomposedPayment[0])
   })
 })
