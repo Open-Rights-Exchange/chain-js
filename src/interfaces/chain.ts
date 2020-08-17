@@ -32,9 +32,9 @@ export interface Chain {
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   connect(): Promise<void>
   /** Compose an object for a chain contract action */
-  composeAction(chainActionType: any, args: any): any
+  composeAction(chainActionType: any, args: any): Promise<any>
   /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
-  decomposeAction(action: any): { chainActionType: any; args: any; partial?: boolean }[]
+  decomposeAction(action: any): Promise<{ chainActionType: any; args: any; partial?: boolean }[]>
   /** Fetch balance for token (or native chain asset)
    * If no value is provided for contract, some chains use the default token contract
    * Returns a string to allow for large numbers */

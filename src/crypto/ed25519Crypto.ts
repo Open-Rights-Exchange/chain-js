@@ -29,7 +29,7 @@ export type Ed25519PasswordEncryptionOptions = {
 /** Options used by scrypt library to derive a key from password and salt */
 export const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
   salt: '',
-  N: 16384,
+  N: 65536,
   r: 8,
   p: 1,
   dkLen: 32,

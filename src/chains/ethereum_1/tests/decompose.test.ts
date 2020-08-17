@@ -35,7 +35,7 @@ describe('Decompose Chain Actions', () => {
         },
       },
     ]
-    const actAction = decomposeAction(composedEthTransferAction)
+    const actAction = await decomposeAction(composedEthTransferAction)
 
     expect(actAction).toEqual(expAction)
   })
@@ -62,7 +62,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC20ApproveAction)
+    const actAction = await decomposeAction(composedERC20ApproveAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -78,7 +78,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC20BurnAction)
+    const actAction = await decomposeAction(composedERC20BurnAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -94,7 +94,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC20IssueAction)
+    const actAction = await decomposeAction(composedERC20IssueAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -120,7 +120,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC20TransferAction)
+    const actAction = await decomposeAction(composedERC20TransferAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -148,7 +148,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC20TransferFromAction)
+    const actAction = await decomposeAction(composedERC20TransferFromAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -165,7 +165,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC721ApproveAction)
+    const actAction = await decomposeAction(composedERC721ApproveAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -182,7 +182,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC721TransferAction)
+    const actAction = await decomposeAction(composedERC721TransferAction)
     expect(actAction).toEqual(expAction)
   })
 
@@ -200,7 +200,7 @@ describe('Decompose Chain Actions', () => {
       },
     ]
 
-    const actAction = decomposeAction(composedERC721TransferFromAction)
+    const actAction = await decomposeAction(composedERC721TransferFromAction)
     expect(actAction).toEqual(expAction)
   })
 })

@@ -66,12 +66,12 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
+  public composeAction = async (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
     return composeAction(this._chainState, actionType, args)
   }
 
   /** Decompose an action and return the action type (if any) and its data */
-  public decomposeAction = (action: AlgorandTxAction): ActionDecomposeReturn[] => {
+  public decomposeAction = async (action: AlgorandTxAction): Promise<ActionDecomposeReturn[]> => {
     return decomposeAction(action)
   }
 

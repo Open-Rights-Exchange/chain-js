@@ -16,7 +16,7 @@ Chains plug-ins included: **Algorand**, **EOS**, **Ethereum (V1)** - more coming
   // create a transaction object
   const sendTokenTx = await chain.new.Transaction()
   // set contract action(s) - composeAction simplifies transaction composition
-  sendTokenTx.actions = [ chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', amount: '10.00' }) ]
+  sendTokenTx.actions = [ await chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', amount: '10.00' }) ]
   ...
   // sign and send the transaction to the chain
   await sendTokenTx.sign([privateKey])
