@@ -9,12 +9,13 @@ import {
   AlgorandKeyRegistrationParams,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
+import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes key registration action */
 export const composeAction = (args: AlgorandKeyRegistrationParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const { from, note, voteKey, selectionKey, voteFirst, voteLast, voteKeyDilution } = argsEncodedForSdk
+  const { from, note, voteKey, selectionKey, voteFirst, voteLast, voteKeyDilution, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeKeyRegistrationTxnWithSuggestedParams(
     from,
     note,
@@ -25,6 +26,9 @@ export const composeAction = (args: AlgorandKeyRegistrationParams, suggestedPara
     voteKeyDilution,
     suggestedParams,
   )
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 

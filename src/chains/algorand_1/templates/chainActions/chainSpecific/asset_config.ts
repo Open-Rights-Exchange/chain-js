@@ -15,7 +15,7 @@ import { isNullOrEmpty } from '../../../../../helpers'
  * Composes asset config action */
 export const composeAction = (args: AlgorandActionAssetConfigParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const { from, note, assetIndex, assetManager, assetReserve, assetFreeze, assetClawback } = argsEncodedForSdk
+  const { from, note, assetIndex, assetManager, assetReserve, assetFreeze, assetClawback, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetConfigTxnWithSuggestedParams(
     from,
     note,
@@ -27,6 +27,9 @@ export const composeAction = (args: AlgorandActionAssetConfigParams, suggestedPa
     suggestedParams,
     args.strictEmptyAddressChecking,
   )
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 

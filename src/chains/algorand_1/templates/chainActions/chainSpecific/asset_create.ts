@@ -30,6 +30,7 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
     assetName,
     assetURL,
     assetMetadataHash,
+    reKeyTo,
   } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetCreateTxnWithSuggestedParams(
     from,
@@ -47,7 +48,9 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
     assetMetadataHash,
     suggestedParams,
   )
-
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 
