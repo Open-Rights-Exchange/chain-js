@@ -21,11 +21,13 @@ import {
   decomposedKeyRegistration,
   decomposedPayment,
 } from './mockups/decomposedActions'
+import { AlgorandChainState } from '../algoChainState'
 
 // import { AlgorandChainState } from '../algoChainState'
 
-describe('Compose Algorand Chain Actions', () => {
-  it('creates asset create action object', async () => {
+describe('Decompose Algorand Chain Actions', () => {
+  let chainState: AlgorandChainState
+  it('decomposes asset create action object', async () => {
     const args: AlgorandActionAssetCreateParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -41,7 +43,7 @@ describe('Compose Algorand Chain Actions', () => {
       assetURL: '',
       assetMetadataHash: '',
     }
-    const chainState = await getChainState()
+    chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetCreate, args)
 
     const actAction = decomposeAction(composedAction)
@@ -49,7 +51,7 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedAssetCreate)
   }, 1000)
 
-  it('creates asset config action object', async () => {
+  it('decomposes asset config action object', async () => {
     const args: AlgorandActionAssetConfigParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -60,7 +62,6 @@ describe('Compose Algorand Chain Actions', () => {
       assetManager: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       strictEmptyAddressChecking: false,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetConfig, args)
 
     const actAction = decomposeAction(composedAction)
@@ -68,7 +69,7 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedAssetConfig)
   }, 1000)
 
-  it('creates asset freeze action object', async () => {
+  it('decomposes asset freeze action object', async () => {
     const args: AlgorandActionAssetFreezeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -76,7 +77,6 @@ describe('Compose Algorand Chain Actions', () => {
       freezeTarget: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       freezeState: true,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetFreeze, args)
 
     const actAction = decomposeAction(composedAction)
@@ -84,7 +84,7 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedAssetFreeze)
   }, 1000)
 
-  it('creates asset transfer action object', async () => {
+  it('decomposes asset transfer action object', async () => {
     const args: AlgorandActionAssetTransferParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -94,7 +94,6 @@ describe('Compose Algorand Chain Actions', () => {
       assetRevocationTarget: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       amount: 1000,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetTransfer, args)
 
     const actAction = decomposeAction(composedAction)
@@ -102,13 +101,12 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedAssetTransfer)
   }, 1000)
 
-  it('creates asset destroy action object', async () => {
+  it('decomposes asset destroy action object', async () => {
     const args: AlgorandActionAssetDestroyParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
       assetIndex: 12345,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetDestroy, args)
 
     const actAction = decomposeAction(composedAction)
@@ -116,7 +114,7 @@ describe('Compose Algorand Chain Actions', () => {
     expect(actAction).toEqual(decomposedAssetDestroy)
   }, 1000)
 
-  it('creates key registration action object', async () => {
+  it('decomposes key registration action object', async () => {
     const args: AlgorandKeyRegistrationParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -126,7 +124,6 @@ describe('Compose Algorand Chain Actions', () => {
       voteLast: 100000,
       voteKeyDilution: 100,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.KeyRegistration, args)
 
     const actAction = decomposeAction(composedAction)
@@ -142,7 +139,6 @@ describe('Compose Algorand Chain Actions', () => {
       closeRemainderTo: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       amount: 10,
     }
-    const chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.Payment, args)
 
     const actAction = decomposeAction(composedAction)
