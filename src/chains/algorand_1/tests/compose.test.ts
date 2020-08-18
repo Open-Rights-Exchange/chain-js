@@ -30,7 +30,6 @@ async function sleep(waitTimeInMs: number) {
 describe('Compose Algorand Chain Actions', () => {
   let chainState: AlgorandChainState
   it('creates asset create action object', async () => {
-    await sleep(3000)
     const args: AlgorandActionAssetCreateParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -58,7 +57,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset config action object', async () => {
-    await sleep(3000)
+    await sleep(1000)
     const args: AlgorandActionAssetConfigParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -80,7 +79,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset freeze action object', async () => {
-    await sleep(3000)
+    await sleep(2000)
     const args: AlgorandActionAssetFreezeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -120,7 +119,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset destroy action object', async () => {
-    await sleep(3000)
+    await sleep(4000)
     const args: AlgorandActionAssetDestroyParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -137,7 +136,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates key registration action object', async () => {
-    await sleep(3000)
+    await sleep(5000)
     const args: AlgorandKeyRegistrationParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -158,7 +157,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates payment action object', async () => {
-    await sleep(3000)
+    await sleep(6000)
     const args: AlgorandActionPaymentParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
