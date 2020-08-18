@@ -21,10 +21,12 @@ import {
   AlgorandActionPaymentParams,
 } from '../models'
 import { getChainState } from './mockups/chainState'
+import { AlgorandChainState } from '../algoChainState'
 
 // import { AlgorandChainState } from '../algoChainState'
 
 describe('Compose Algorand Chain Actions', () => {
+  let chainState: AlgorandChainState
   it('creates asset create action object', async () => {
     const args: AlgorandActionAssetCreateParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -41,8 +43,8 @@ describe('Compose Algorand Chain Actions', () => {
       assetURL: '',
       assetMetadataHash: '',
     }
+    chainState = await getChainState()
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetCreate, args)
 
     actAction.fee = 387000
@@ -64,7 +66,6 @@ describe('Compose Algorand Chain Actions', () => {
       strictEmptyAddressChecking: false,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetConfig, args)
 
     actAction.fee = 387000
@@ -83,7 +84,6 @@ describe('Compose Algorand Chain Actions', () => {
       freezeState: true,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetFreeze, args)
 
     actAction.fee = 387000
@@ -104,7 +104,6 @@ describe('Compose Algorand Chain Actions', () => {
       amount: 1000,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetTransfer, args)
 
     actAction.fee = 387000
@@ -121,7 +120,6 @@ describe('Compose Algorand Chain Actions', () => {
       assetIndex: 12345,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetDestroy, args)
 
     actAction.fee = 387000
@@ -142,13 +140,11 @@ describe('Compose Algorand Chain Actions', () => {
       voteKeyDilution: 100,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.KeyRegistration, args)
 
     actAction.fee = 387000
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
-    console.log(JSON.stringify(actAction))
 
     expect(JSON.stringify(actAction)).toEqual(composedKeyRegistration)
   })
@@ -162,7 +158,6 @@ describe('Compose Algorand Chain Actions', () => {
       amount: 10,
     }
 
-    const chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.Payment, args)
 
     actAction.fee = 387000
