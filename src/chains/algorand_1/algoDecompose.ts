@@ -39,7 +39,7 @@ export function decomposeAction(
         decomposedActions.push({ chainActionType, args })
       }
     } catch (err) {
-      console.log('problem in decomposeAction:', err)
+      // console.log('problem in decomposeAction:', err)
     }
   })
 
