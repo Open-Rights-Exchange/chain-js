@@ -47,7 +47,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetCreate)
-  })
+  }, 1000)
 
   it('creates asset config action object', async () => {
     const args: AlgorandActionAssetConfigParams = {
@@ -66,7 +66,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetConfig)
-  })
+  }, 1000)
 
   it('creates asset freeze action object', async () => {
     const args: AlgorandActionAssetFreezeParams = {
@@ -82,7 +82,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetFreeze)
-  })
+  }, 1000)
 
   it('creates asset transfer action object', async () => {
     const args: AlgorandActionAssetTransferParams = {
@@ -100,7 +100,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetTransfer)
-  })
+  }, 1000)
 
   it('creates asset destroy action object', async () => {
     const args: AlgorandActionAssetDestroyParams = {
@@ -114,7 +114,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetDestroy)
-  })
+  }, 1000)
 
   it('creates key registration action object', async () => {
     const args: AlgorandKeyRegistrationParams = {
@@ -132,7 +132,7 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedKeyRegistration)
-  })
+  }, 1000)
 
   it('decomposes payment action object', async () => {
     const args: AlgorandActionPaymentParams = {
@@ -148,5 +148,5 @@ describe('Compose Algorand Chain Actions', () => {
     const actAction = decomposeAction(composedAction)
 
     expect(actAction[0]).toEqual(decomposedPayment[0])
-  })
+  }, 1000)
 })
