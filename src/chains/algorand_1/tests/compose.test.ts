@@ -23,11 +23,14 @@ import {
 import { getChainState } from './mockups/chainState'
 import { AlgorandChainState } from '../algoChainState'
 
-// import { AlgorandChainState } from '../algoChainState'
+async function sleep(waitTimeInMs: number) {
+  return new Promise(resolve => setTimeout(resolve, waitTimeInMs))
+}
 
 describe('Compose Algorand Chain Actions', () => {
   let chainState: AlgorandChainState
   it('creates asset create action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionAssetCreateParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -55,6 +58,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset config action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionAssetConfigParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -76,6 +80,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset freeze action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionAssetFreezeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -94,6 +99,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset transfer action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionAssetTransferParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -114,6 +120,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates asset destroy action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionAssetDestroyParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -130,6 +137,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates key registration action object', async () => {
+    await sleep(3000)
     const args: AlgorandKeyRegistrationParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -150,6 +158,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates payment action object', async () => {
+    await sleep(3000)
     const args: AlgorandActionPaymentParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
