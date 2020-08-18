@@ -38,10 +38,21 @@ const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
 }
 
 const composeAlgoPaymentParams: Partial<AlgorandActionPaymentParams> = {
-  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  from: 'WCZV75K44NWDFWTYJCCOJ6NZC2TYAODLIC7GFMMXRKY2JNPW3LTB4IUL3U',
   to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
   note: 'transfer memo',
   amount: 1,
+}
+
+// requires transaction setup with betanet endpoints and accounts.
+// example is not repeatable. Each time the account(from) is successfully reKeyed,
+// next time transaction will require signature of the new address(reKeyTo)
+const composeAlgoReKeyParams: Partial<AlgorandActionPaymentParams> = {
+  from: 'WCZV75K44NWDFWTYJCCOJ6NZC2TYAODLIC7GFMMXRKY2JNPW3LTB4IUL3U',
+  to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  note: 'transfer memo',
+  amount: 1,
+  reKeyTo: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
 }
 
 // raw transaction ('blob' returned from the Algo SDK transaction sign function)
@@ -77,12 +88,14 @@ async function run() {
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = composeAlgoPaymentParams
   transaction.actions = [action]
+
   // // Alternatively, set action using raw transaction
   // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
+  
   console.log('required signatures (before signing): ', transaction.missingSignatures)
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('send response: %o', JSON.stringify(await transaction.send()))
