@@ -23,10 +23,6 @@ import {
 import { getChainState } from './mockups/chainState'
 import { AlgorandChainState } from '../algoChainState'
 
-async function sleep(waitTimeInMs: number) {
-  return new Promise(resolve => setTimeout(resolve, waitTimeInMs))
-}
-
 describe('Compose Algorand Chain Actions', () => {
   let chainState: AlgorandChainState
   it('creates asset create action object', async () => {
@@ -54,10 +50,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetCreate)
-  })
+  }, 1000)
 
   it('creates asset config action object', async () => {
-    await sleep(1000)
     const args: AlgorandActionAssetConfigParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -76,10 +71,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetConfig)
-  })
+  }, 1000)
 
   it('creates asset freeze action object', async () => {
-    await sleep(2000)
     const args: AlgorandActionAssetFreezeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -95,10 +89,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetFreeze)
-  })
+  }, 1000)
 
   it('creates asset transfer action object', async () => {
-    await sleep(3000)
     const args: AlgorandActionAssetTransferParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -116,10 +109,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetTransfer)
-  })
+  }, 1000)
 
   it('creates asset destroy action object', async () => {
-    await sleep(4000)
     const args: AlgorandActionAssetDestroyParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -133,10 +125,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetDestroy)
-  })
+  }, 1000)
 
   it('creates key registration action object', async () => {
-    await sleep(5000)
     const args: AlgorandKeyRegistrationParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -154,10 +145,9 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedKeyRegistration)
-  })
+  }, 1000)
 
   it('creates payment action object', async () => {
-    await sleep(6000)
     const args: AlgorandActionPaymentParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'create',
@@ -173,5 +163,5 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedPayment)
-  })
+  }, 1000)
 })
