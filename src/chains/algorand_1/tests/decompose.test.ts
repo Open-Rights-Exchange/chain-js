@@ -46,10 +46,10 @@ describe('Decompose Algorand Chain Actions', () => {
     chainState = await getChainState()
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetCreate, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetCreate)
-  }, 2000)
+  })
 
   it('decomposes asset config action object', async () => {
     const args: AlgorandActionAssetConfigParams = {
@@ -64,10 +64,10 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetConfig, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetConfig)
-  }, 2000)
+  }, 1000)
 
   it('decomposes asset freeze action object', async () => {
     const args: AlgorandActionAssetFreezeParams = {
@@ -79,10 +79,10 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetFreeze, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetFreeze)
-  }, 2000)
+  }, 1000)
 
   it('decomposes asset transfer action object', async () => {
     const args: AlgorandActionAssetTransferParams = {
@@ -96,10 +96,10 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetTransfer, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetTransfer)
-  }, 3000)
+  }, 1000)
 
   it('decomposes asset destroy action object', async () => {
     const args: AlgorandActionAssetDestroyParams = {
@@ -109,7 +109,7 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.AssetDestroy, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetDestroy)
   }, 1000)
@@ -126,10 +126,10 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.KeyRegistration, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedKeyRegistration)
-  }, 2000)
+  }, 1000)
 
   it('decomposes payment action object', async () => {
     const args: AlgorandActionPaymentParams = {
@@ -141,8 +141,8 @@ describe('Decompose Algorand Chain Actions', () => {
     }
     const composedAction = await composeAction(chainState, AlgorandChainActionType.Payment, args)
 
-    const actAction = decomposeAction(composedAction)
+    const actAction = await decomposeAction(composedAction)
 
     expect(actAction[0]).toEqual(decomposedPayment[0])
-  }, 3000)
+  }, 1000)
 })

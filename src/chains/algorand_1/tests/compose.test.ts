@@ -50,7 +50,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetCreate)
-  }, 1000)
+  })
 
   it('creates asset config action object', async () => {
     const args: AlgorandActionAssetConfigParams = {
