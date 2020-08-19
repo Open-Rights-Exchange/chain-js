@@ -71,7 +71,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetConfig)
-  }, 1000)
+  })
 
   it('creates asset freeze action object', async () => {
     const args: AlgorandActionAssetFreezeParams = {
@@ -89,7 +89,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetFreeze)
-  }, 1000)
+  })
 
   it('creates asset transfer action object', async () => {
     const args: AlgorandActionAssetTransferParams = {
@@ -109,7 +109,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetTransfer)
-  }, 1000)
+  })
 
   it('creates asset destroy action object', async () => {
     const args: AlgorandActionAssetDestroyParams = {
@@ -125,7 +125,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedAssetDestroy)
-  }, 1000)
+  })
 
   it('creates key registration action object', async () => {
     const args: AlgorandKeyRegistrationParams = {
@@ -145,7 +145,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedKeyRegistration)
-  }, 1000)
+  })
 
   it('creates payment action object', async () => {
     const args: AlgorandActionPaymentParams = {
@@ -163,5 +163,5 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedPayment)
-  }, 1000)
+  })
 })

@@ -67,7 +67,7 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetConfig)
-  }, 1000)
+  })
 
   it('decomposes asset freeze action object', async () => {
     const args: AlgorandActionAssetFreezeParams = {
@@ -82,7 +82,7 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetFreeze)
-  }, 1000)
+  })
 
   it('decomposes asset transfer action object', async () => {
     const args: AlgorandActionAssetTransferParams = {
@@ -99,7 +99,7 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetTransfer)
-  }, 1000)
+  })
 
   it('decomposes asset destroy action object', async () => {
     const args: AlgorandActionAssetDestroyParams = {
@@ -112,7 +112,7 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedAssetDestroy)
-  }, 1000)
+  })
 
   it('decomposes key registration action object', async () => {
     const args: AlgorandKeyRegistrationParams = {
@@ -144,5 +144,5 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction[0]).toEqual(decomposedPayment[0])
-  }, 1000)
+  })
 })
