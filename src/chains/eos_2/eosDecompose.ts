@@ -62,16 +62,18 @@ export async function decomposeAction(action: EosActionStruct): Promise<EosDecom
   const actionData: EosDecomposeReturn[] = []
 
   // interate over all possible decompose and return all that can be decomposed (i.e returns a chainActionType from decomposeFunc)
-  decomposeActionFuncs.forEach((decomposeFunc: any) => {
-    try {
-      const { chainActionType, args, partial } = decomposeFunc(action) || {}
-      if (chainActionType) {
-        actionData.push({ chainActionType, args, partial })
+  await Promise.all(
+    decomposeActionFuncs.map(async (decomposeFunc: any) => {
+      try {
+        const { chainActionType, args, partial } = (await decomposeFunc(action)) || {}
+        if (chainActionType) {
+          actionData.push({ chainActionType, args, partial })
+        }
+      } catch (err) {
+        // console.log('problem in decomposeAction:', err)
       }
-    } catch (err) {
-      // console.log('problem in decomposeAction:', err)
-    }
-  })
+    }),
+  )
 
   // return null and not an empty array if no matches
   return !isNullOrEmpty(actionData) ? actionData : null
