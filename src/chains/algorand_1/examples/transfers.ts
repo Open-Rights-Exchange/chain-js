@@ -44,15 +44,26 @@ const composeAlgoPaymentParams: Partial<AlgorandActionPaymentParams> = {
   amount: 1,
 }
 
+// As of Aug 2020 - Rekey feature only available on beta test net - use beta endpoints to run.
 // requires transaction setup with betanet endpoints and accounts.
-// example is not repeatable. Each time the account(from) is successfully reKeyed,
+// example is only repeatable by each time switching between composeAlgoReKeyParamsA and B, providing the necessary private key:
+// paramsA -> ALGOBETANET_rekeyaccount_PRIVATE_KEY_A,
+// paramsB -> ALGOBETANET_rekeyaccount_PRIVATE_KEY_B
 // next time transaction will require signature of the new address(reKeyTo)
-const composeAlgoReKeyParams: Partial<AlgorandActionPaymentParams> = {
-  from: 'WCZV75K44NWDFWTYJCCOJ6NZC2TYAODLIC7GFMMXRKY2JNPW3LTB4IUL3U',
+const composeAlgoReKeyParamsA: Partial<AlgorandActionPaymentParams> = {
+  from: env.ALGOBETANET_rekeyaccount_A,
   to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
   note: 'transfer memo',
   amount: 1,
-  reKeyTo: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  reKeyTo: env.ALGOBETANET_rekeyaccount_B,
+}
+
+const composeAlgoReKeyParamsB: Partial<AlgorandActionPaymentParams> = {
+  from: env.ALGOBETANET_rekeyaccount_A,
+  to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  note: 'transfer memo',
+  amount: 1,
+  reKeyTo: env.ALGOBETANET_rekeyaccount_A,
 }
 
 // raw transaction ('blob' returned from the Algo SDK transaction sign function)
@@ -73,7 +84,7 @@ const payRawTransaction: any = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoBetanetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -83,7 +94,7 @@ async function run() {
   const transaction = await algoTest.new.Transaction()
 
   // Compose an action from basic parameters using composeAction function
-  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
+  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsA)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = composeAlgoPaymentParams
@@ -97,7 +108,7 @@ async function run() {
   await transaction.validate()
   
   console.log('required signatures (before signing): ', transaction.missingSignatures)
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_A)])
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
