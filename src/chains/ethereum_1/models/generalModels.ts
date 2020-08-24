@@ -18,14 +18,36 @@ export enum EthereumBlockType {
   Pending = 'pending',
 }
 
+export enum EthereumTxPriority {
+  Slow = 'slow',
+  Average = 'average',
+  Fast = 'fast',
+}
+
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
+  txPriority: EthereumTxPriority
+  maxFeeIncreasePercentage?: number
 }
 
 export type EthereumChainForkType = {
   chainName: string
   hardFork: string
+}
+
+export type EthereumChainInfo = {
+  headBlockNumber: number
+  headBlockTime: Date
+  version: string
+  nativeInfo: EthereumNativeChainInfo
+}
+
+export type EthereumNativeChainInfo = {
+  chainId: number
+  gasLimit: number
+  gasUsed: number
+  currentGasPrice: string
 }
 
 /** Chain urls and related details used to connect to chain */
