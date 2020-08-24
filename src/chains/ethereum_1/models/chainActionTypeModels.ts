@@ -10,3 +10,5 @@ export enum EthereumChainActionType {
   ERC721Transfer = 'ERC721Transfer',
   ERC721TransferFrom = 'ERC721TransferFrom',
 }
+
+// TODO ETH - move all Eth template models to here
