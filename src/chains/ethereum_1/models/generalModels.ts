@@ -18,6 +18,7 @@ export enum EthereumBlockType {
   Pending = 'pending',
 }
 
+/** Transaction fee priority */
 export enum EthereumTxPriority {
   Slow = 'slow',
   Average = 'average',
@@ -27,8 +28,10 @@ export enum EthereumTxPriority {
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
-  txPriority: EthereumTxPriority
-  maxFeeIncreasePercentage?: number
+  defaultTransactionSettings: {
+    transactionPriority: EthereumTxPriority
+    maxFeeIncreasePercentage?: number
+  }
 }
 
 export type EthereumChainForkType = {
