@@ -7,7 +7,7 @@ import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString } from '../helpers'
+import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString, toEthereumSignature } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
@@ -18,6 +18,7 @@ import {
   EthereumChainActionType,
   EthereumAddress,
   EthereumChainEndpoint,
+  EthereumTxPriority,
 } from '../models'
 import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
@@ -25,20 +26,9 @@ import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecifi
 
 import { erc20Abi } from '../templates/abis/erc20Abi'
 import { erc721Abi } from '../templates/abis/erc721Abi'
+import { EthTransferParams } from '../templates/chainActions/chainSpecific/eth_transfer'
 
 require('dotenv').config()
-
-const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: PrivateKey) => {
-  console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEthereumV1).new.Transaction()
-  transaction.actions = transactionActions
-  await transaction.prepareToBeSigned()
-  await transaction.validate()
-  transaction.sign([key])
-  if (transaction.missingSignatures) console.log('missing sigs:', transaction.missingSignatures)
-  console.log(JSON.stringify(transaction.toJson()))
-  return transaction
-}
 
 const { env } = process
 ;(async () => {
@@ -54,25 +44,31 @@ const { env } = process
       },
     ]
 
-    const ropstenChainOptions: EthereumChainForkType = {
-      chainName: 'ropsten',
-      hardFork: 'istanbul',
+    const ropstenChainOptions: EthereumChainSettings = {
+      chainForkType: {
+        chainName: 'ropsten',
+        hardFork: 'istanbul',
+      },
+      txPriority: EthereumTxPriority.Average,
     }
 
     // EthereumRawTransaction type input for setFromRaw()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
     const sampleSetFromRawTrx = {
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
-      value: toWei(10, EthUnit.Milliether),
-      //  data: '0x00',
-      //  gasPrice: '0x00',
-      //  gasLimit: '0x00',
+      to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      value: '0x01',
+      data: '0x00',
     }
 
     const composeValueTransferParams: ValueTransferParams = {
       toAccountName: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
-      amount: '0.000000000000000033',
+      amount: '0.000000000000000001',
       symbol: toEthereumSymbol(EthUnit.Ether),
+    }
+
+    const composeEthTransferParams: EthTransferParams = {
+      to: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      value: '0.000000000000000001',
     }
 
     const composeTokenTransferParams: TokenTransferParams = {
@@ -103,25 +99,30 @@ const { env } = process
       tokenId: 1,
     }
 
-    const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
-      chainForkType: ropstenChainOptions,
-    } as EthereumChainSettings)
+    const defaultEthTxOptions: EthereumTransactionOptions = {
+      gasLimit: 145000,
+      chain: 'ropsten',
+      hardfork: 'istanbul',
+    }
+
+    const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, ropstenChainOptions)
     await ropsten.connect()
 
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
-    const transaction = await ropsten.new.Transaction()
+    const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
-    console.log(transaction.actions[0])
+    console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     console.log(JSON.stringify(decomposed))
     await transaction.prepareToBeSigned()
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
-    // const transaction = await ropsten.new.Transaction()
+    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [await ropsten.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -153,7 +154,7 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send erc20 issue Transaction
-    // const transaction = await ropsten.new.Transaction()
+    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [await ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -165,15 +166,19 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
-    // const transaction = await ropsten.new.Transaction()
+    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     // await transaction.setFromRaw(sampleSetFromRawTrx)
+    // await transaction.prepareToBeSigned()
+    // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
+    // console.log('decomposd action:', decomposed)
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    // console.log('raw transaction: ', JSON.stringify(transaction.raw))
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Compose & Decompose erc721 transferFrom Transaction
-    // const transaction = await ropsten.new.Transaction()
+    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [
     //   await ropsten.composeAction(EthereumChainActionType.ERC721TransferFrom, composeERC721TransferFromParams),
     // ]
