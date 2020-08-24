@@ -18,7 +18,7 @@ import {
   EthereumChainActionType,
   EthereumAddress,
   EthereumChainEndpoint,
-  EthereumTxPriority,
+  EthereumTxExecutionPriority,
 } from '../models'
 import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
@@ -51,7 +51,7 @@ const { env } = process
       },
       defaultTransactionSettings: {
         maxFeeIncreasePercentage: 0.2,
-        transactionPriority: EthereumTxPriority.Average,
+        executionPriority: EthereumTxExecutionPriority.Average,
       },
     }
 
