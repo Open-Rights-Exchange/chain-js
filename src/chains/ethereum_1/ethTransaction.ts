@@ -20,7 +20,7 @@ import {
   EthereumActionHelperInput,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isArrayLengthOne, isNullOrEmpty } from '../../helpers'
+import { isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   ethereumTrxArgIsNullOrEmpty,
@@ -137,14 +137,16 @@ export class EthereumTransaction implements Transaction {
     if (!this._actionHelper) {
       throwNewError('Transaction serialization failure. Transaction has no actions.')
     }
-    const { gasLimit, nonce } = this._options || {}
-    const { to, value, data } = this._actionHelper.raw
+    const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce } = this._options || {}
+    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, to, value, data } = this._actionHelper.raw
     // Convert gas price returned from getGasPrice to Gwei
     const gasPrice =
-      this._options?.gasPrice || toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))
-    // TODO Eth - set gasLimit from tx options
+      nullifyIfEmpty(gasPriceAction) ||
+      nullifyIfEmpty(gasPriceOptions) ||
+      toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))
+    const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
     // EthereumJsTx  expects gasPrice and gasLimit in Gwei
-    const trxBody = { nonce, to, value, data, gasPrice, gasLimit }
+    const trxBody = { nonce, gasPrice, gasLimit, to, value, data }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._ethereumJsTx = new EthereumJsTx(trxBody, trxOptions)
     this.setNonceIfEmpty(this.senderAddress)
