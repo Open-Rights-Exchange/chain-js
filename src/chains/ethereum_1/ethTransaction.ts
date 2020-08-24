@@ -122,7 +122,11 @@ export class EthereumTransaction implements Transaction {
   get header(): EthereumTransactionHeader {
     this.assertHasBeenPrepared()
     const { nonce, gasPrice, gasLimit } = this.raw
-    return { nonce, gasPrice, gasLimit }
+    return {
+      nonce: nullifyIfEmpty(bufferToHex(nonce)),
+      gasLimit: nullifyIfEmpty(bufferToHex(gasLimit)),
+      gasPrice: nullifyIfEmpty(bufferToHex(gasPrice)),
+    }
   }
 
   /** Options provided when the transaction class was created */
