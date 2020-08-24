@@ -5,7 +5,7 @@ import { isANumber, getDecimalPlacesFromString, isNullOrEmpty, isAString } from 
 import { throwNewError } from '../../../errors'
 
 /** Attempts to transform a value to a standard Buffer class */
-export function toEthBuffer(data: string | Buffer | number): Buffer {
+export function toEthBuffer(data: string | BN | Buffer | number): Buffer {
   return toBuffer(data)
 }
 
