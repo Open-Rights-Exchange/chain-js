@@ -1,6 +1,6 @@
-import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN } from 'ethereumjs-util'
+import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
 import { isString } from 'util'
-import { isNullOrEmpty } from '../../../helpers'
+import { isNullOrEmpty, isABuffer } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -11,6 +11,7 @@ import {
 } from '../models'
 import { toEthBuffer, ensureHexPrefix } from './generalHelpers'
 
+// todo eth - this should not have copied code - is the bug worked-around? if not, we should consider using a diff library
 // Reimplemented from ethereumjs-util module to workaround a current bug
 /** Checks if a valid signature with ECDSASignature */
 export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
@@ -132,4 +133,9 @@ export function toEthUnit(unit: string): EthUnit {
   } catch (err) {
     throw new Error('Not a valid ethereum unit type.')
   }
+}
+
+/** accepts a hexstring or Buffer and returns hexstring (converts buffer to hexstring) */
+export function convertBufferToHexStringIfNeeded(value: string | Buffer) {
+  return isABuffer(value) ? bufferToHex(value as Buffer) : (value as string)
 }
