@@ -1,6 +1,6 @@
 import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
+import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   ethereumTrxArgIsNullOrEmpty,
@@ -90,7 +90,7 @@ export class EthereumActionHelper {
   /** Action properties (encoded as hex string for most fields)
    *  Returns null for any 'empty' Eth values e.g. (0x00...00) */
   public get action(): EthereumTransactionAction {
-    return {
+    const returnValue = {
       nonce: ethereumTrxArgIsNullOrEmpty(this._nonce) ? null : this._nonce,
       gasLimit: ethereumTrxArgIsNullOrEmpty(this._gasLimit) ? null : this._gasLimit,
       gasPrice: ethereumTrxArgIsNullOrEmpty(this._gasPrice) ? null : this._gasPrice,
@@ -99,11 +99,13 @@ export class EthereumActionHelper {
       data: ethereumTrxArgIsNullOrEmpty(this._data) ? null : this._data,
       value: ethereumTrxArgIsNullOrEmpty(this._value) ? null : this._value,
     }
+    removeEmptyValuesInJsonObject(returnValue)
+    return returnValue
   }
 
   /** Action properties in raw form (encoded as Buffer) */
   public get raw(): EthereumRawTransactionAction {
-    return {
+    const returnValue = {
       nonce: nullifyIfEmpty(toEthBuffer(this._nonce)),
       gasLimit: nullifyIfEmpty(toEthBuffer(this._gasLimit)),
       gasPrice: nullifyIfEmpty(toEthBuffer(this._gasPrice)),
@@ -112,6 +114,8 @@ export class EthereumActionHelper {
       data: nullifyIfEmpty(toEthBuffer(this._data)),
       value: nullifyIfEmpty(toEthBuffer(this._value)),
     }
+    removeEmptyValuesInJsonObject(returnValue)
+    return returnValue
   }
 
   /** Action properties including raw data */
