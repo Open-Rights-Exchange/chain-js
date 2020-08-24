@@ -1,6 +1,6 @@
 import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { isNullOrEmpty } from '../../helpers'
+import { isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   ethereumTrxArgIsNullOrEmpty,
@@ -48,7 +48,7 @@ export class EthereumActionHelper {
 
   /** apply rules for imput params, set class private properties, throw if violation */
   private assertAndValidateEthereumActionInput(actionInput: EthereumActionHelperInput) {
-    const { from, to, data, value, contract } = actionInput
+    const { nonce, gasPrice, gasLimit, from, to, data, value, contract } = actionInput
 
     // cant provide both contract and data properties
     if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
@@ -73,7 +73,7 @@ export class EthereumActionHelper {
     } else this._data = toEthereumTxData(ZERO_HEX)
 
     // use helper library to consume tranasaction and allow multiple types for input params
-    const ethJsTx = new EthereumJsTx({ to, data: this._data, value })
+    const ethJsTx = new EthereumJsTx({ nonce, gasPrice, gasLimit, to, data: this._data, value })
     this._nonce = bufferToHex(ethJsTx.nonce)
     this._gasLimit = bufferToHex(ethJsTx.gasLimit)
     this._gasPrice = bufferToHex(ethJsTx.gasPrice)
@@ -104,13 +104,13 @@ export class EthereumActionHelper {
   /** Action properties in raw form (encoded as Buffer) */
   public get raw(): EthereumRawTransactionAction {
     return {
-      nonce: toEthBuffer(this._nonce),
-      gasLimit: toEthBuffer(this._gasLimit),
-      gasPrice: toEthBuffer(this._gasPrice),
-      to: toEthBuffer(this._to),
-      from: toEthBuffer(this._from),
-      data: toEthBuffer(this._data),
-      value: toEthBuffer(this._value),
+      nonce: nullifyIfEmpty(toEthBuffer(this._nonce)),
+      gasLimit: nullifyIfEmpty(toEthBuffer(this._gasLimit)),
+      gasPrice: nullifyIfEmpty(toEthBuffer(this._gasPrice)),
+      to: nullifyIfEmpty(toEthBuffer(this._to)),
+      from: nullifyIfEmpty(toEthBuffer(this._from)),
+      data: nullifyIfEmpty(toEthBuffer(this._data)),
+      value: nullifyIfEmpty(toEthBuffer(this._value)),
     }
   }
 
