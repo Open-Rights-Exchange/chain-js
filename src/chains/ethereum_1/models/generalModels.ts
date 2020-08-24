@@ -96,7 +96,7 @@ export type EthereumString = {
 }
 
 // similar to ethereum-js BufferLike but also includes string
-export type EthereumValue = string | number | Buffer | BN
+export type EthereumMultiValue = string | number | Buffer | BN
 
 /** Ethereum value units */
 // See: https://www.languagesandnumbers.com/articles/en/ethereum-ether-units

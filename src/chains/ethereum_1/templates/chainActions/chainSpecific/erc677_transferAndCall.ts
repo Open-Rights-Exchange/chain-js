@@ -1,6 +1,6 @@
 import {
   EthereumAddress,
-  EthereumValue,
+  EthereumMultiValue,
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
@@ -15,7 +15,7 @@ export interface Erc20TransferAndCallParams {
   precision?: number
   to: EthereumAddress
   value: string
-  data: EthereumValue[]
+  data: EthereumMultiValue[]
 }
 
 export const composeAction = ({ contractAddress, from, precision, to, value, data }: Erc20TransferAndCallParams) => {
@@ -40,7 +40,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       from,
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       value: getArrayIndexOrNull(contract?.parameters, 1) as string,
-      data: getArrayIndexOrNull(contract?.parameters, 2) as EthereumValue[],
+      data: getArrayIndexOrNull(contract?.parameters, 2) as EthereumMultiValue[],
     }
     const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
     return {

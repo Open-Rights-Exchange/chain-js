@@ -1,14 +1,14 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
 import BN from 'bn.js'
-import { EthereumValue, EthereumTxExecutionPriority } from './generalModels'
+import { EthereumMultiValue, EthereumTxExecutionPriority } from './generalModels'
 
 export type EthereumAbi = any[]
 /** Information needed to generate Trx Data to invoke desired smart contract action */
 export type EthereumActionContract = {
   abi: any
   method: string
-  parameters: (EthereumValue | EthereumValue[])[]
+  parameters: (EthereumMultiValue | EthereumMultiValue[])[]
 }
 
 /** Ethereum address encoded as a Hex String */
@@ -17,7 +17,7 @@ export type EthereumAddress = string
 /** Ethereum address encoded as a Buffer */
 export type EthereumAddressBuffer = Buffer
 
-export type EthereumMethodName = EthereumValue & string
+export type EthereumMethodName = EthereumMultiValue & string
 
 /** Transaction with raw Buffer data */
 export type EthereumRawTransaction = {
@@ -45,16 +45,16 @@ export type EthereumRawTransactionAction = {
 
 /** Transaction data that support multiple types for each field (e.g. Buffer, hex string, etc.) */
 export type EthereumActionHelperInput = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
+  nonce?: EthereumMultiValue
+  gasPrice?: EthereumMultiValue
+  gasLimit?: EthereumMultiValue
   from?: EthereumAddress | EthereumAddressBuffer
   to?: EthereumAddress | EthereumAddressBuffer
-  value?: EthereumValue
+  value?: EthereumMultiValue
   data?: EthereumTxData
-  v?: EthereumValue
-  r?: EthereumValue
-  s?: EthereumValue
+  v?: EthereumMultiValue
+  r?: EthereumMultiValue
+  s?: EthereumMultiValue
   contract?: EthereumActionContract
 }
 
@@ -76,16 +76,16 @@ export type EthereumTransactionAction = {
 
 /** Transaction properties that contain the gas & nonce */
 export type EthereumTransactionHeader = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
+  nonce?: Buffer
+  gasPrice?: Buffer
+  gasLimit?: Buffer
 }
 
 /** Transaction 'header' options set to chain along with transaction */
 export type EthereumTransactionOptions = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
+  nonce?: EthereumMultiValue
+  gasPrice?: EthereumMultiValue
+  gasLimit?: EthereumMultiValue
   chain: number | string
   hardfork: string
   maxFeeIncreasePercentage?: number
