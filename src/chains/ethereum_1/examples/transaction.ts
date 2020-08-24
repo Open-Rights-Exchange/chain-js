@@ -49,7 +49,10 @@ const { env } = process
         chainName: 'ropsten',
         hardFork: 'istanbul',
       },
-      txPriority: EthereumTxPriority.Average,
+      defaultTransactionSettings: {
+        maxFeeIncreasePercentage: 0.2,
+        transactionPriority: EthereumTxPriority.Average,
+      },
     }
 
     // EthereumRawTransaction type input for setFromRaw()
