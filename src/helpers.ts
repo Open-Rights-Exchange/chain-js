@@ -258,3 +258,9 @@ export function isArrayLengthOne(array: any[]) {
 export function objectHasProperty(obj: object, propertyName: string) {
   return Object.keys(obj).some(key => key === propertyName)
 }
+
+/** if value is empty (e.g. empty buffer), returns null, otherwise return the value passed-in */
+export function nullifyIfEmpty(value: any) {
+  if (isNullOrEmpty(value)) return null
+  return value
+}
