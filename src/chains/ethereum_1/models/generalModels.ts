@@ -19,7 +19,7 @@ export enum EthereumBlockType {
 }
 
 /** Transaction fee priority */
-export enum EthereumTxPriority {
+export enum EthereumTxExecutionPriority {
   Slow = 'slow',
   Average = 'average',
   Fast = 'fast',
@@ -29,7 +29,7 @@ export enum EthereumTxPriority {
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
   defaultTransactionSettings: {
-    transactionPriority: EthereumTxPriority
+    executionPriority: EthereumTxExecutionPriority
     maxFeeIncreasePercentage?: number
   }
 }
