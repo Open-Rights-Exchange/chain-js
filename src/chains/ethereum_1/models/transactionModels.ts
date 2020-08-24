@@ -19,7 +19,7 @@ export type EthereumAddressBuffer = Buffer
 
 export type EthereumMethodName = EthereumValue & string
 
-/** Transaction with hex data */
+/** Transaction with raw Buffer data */
 export type EthereumRawTransaction = {
   nonce?: Buffer
   gasPrice?: Buffer
@@ -32,7 +32,7 @@ export type EthereumRawTransaction = {
   s?: Buffer
 }
 
-/** Transaction action with hex data */
+/** Transaction action with raw Buffer data */
 export type EthereumRawTransactionAction = {
   from?: EthereumAddressBuffer
   nonce?: Buffer
@@ -43,7 +43,7 @@ export type EthereumRawTransactionAction = {
   data?: Buffer
 }
 
-/** Transaction with hex data - ready to be signed and sent to chain */
+/** Transaction data that support multiple types for each field (e.g. Buffer, hex string, etc.) */
 export type EthereumActionHelperInput = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
@@ -74,7 +74,7 @@ export type EthereumTransactionAction = {
   contract?: EthereumActionContract
 }
 
-/** Transaction properties that contain the fee & priority info */
+/** Transaction properties that contain the gas & nonce */
 export type EthereumTransactionHeader = {
   nonce?: EthereumValue
   gasPrice?: EthereumValue
@@ -90,8 +90,8 @@ export type EthereumTransactionOptions = {
   hardfork: string
 }
 
-/** Hexadecimal format of contrat action data */
-export type EthereumTxData = (string | Buffer) & EthereumTxDataBrand
+/** Contract action data encoded as hex string */
+export type EthereumTxData = string & EthereumTxDataBrand
 
 /** Brand signifiying a valid value - assigned by using toEthereumTxData */
 export enum EthereumTxDataBrand {
