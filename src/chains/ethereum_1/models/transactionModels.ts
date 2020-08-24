@@ -88,6 +88,8 @@ export type EthereumTransactionOptions = {
   gasLimit?: EthereumValue
   chain: number | string
   hardfork: string
+  maxFeeIncreasePercentage?: number
+  desiredFee?: string
 }
 
 /** Contract action data encoded as hex string */
@@ -106,3 +108,8 @@ export type EthereumTxResult = {
 
 /** Response from chain after sending transaction */
 export type EthereumTxChainResponse = TransactionReceipt
+
+/** Cost in chain resources to run the transaction */
+export type EthereumTransactionCost = {
+  gas: string
+}
