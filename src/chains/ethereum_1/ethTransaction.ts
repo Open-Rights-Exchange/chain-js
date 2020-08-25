@@ -194,8 +194,8 @@ export class EthereumTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
-      this._actionHelper = new EthereumActionHelper(raw)
       const trxOptions = this.getOptionsForEthereumJsTx()
+      this._actionHelper = new EthereumActionHelper(raw, trxOptions)
       this._ethereumJsTx = new EthereumJsTx(this._actionHelper.raw, trxOptions)
       this._requiresPrepare = true
       this._isValidated = false
@@ -264,7 +264,8 @@ export class EthereumTransaction implements Transaction {
         'addAction failed. Transaction already has an action. Use transaction.actions to replace existing action.',
       )
     }
-    this._actionHelper = new EthereumActionHelper(action)
+    const trxOptions = this.getOptionsForEthereumJsTx()
+    this._actionHelper = new EthereumActionHelper(action, trxOptions)
     this._requiresPrepare = true
     this._isValidated = false
   }
