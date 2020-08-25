@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { BN } from 'ethereumjs-util'
 import { Chain } from '../../interfaces'
 import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
 // import { ChainState } from './chainState';
@@ -78,14 +77,14 @@ class ChainEthereumV1 implements Chain {
     return this._chainState.chainInfo
   }
 
-  public composeAction = (
+  public composeAction = async (
     actionType: ChainActionType | EthereumChainActionType,
     args: any,
-  ): EthereumTransactionAction => {
+  ): Promise<EthereumTransactionAction> => {
     return composeAction(actionType, args)
   }
 
-  public decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn[] => {
+  public decomposeAction = async (action: EthereumTransactionAction): Promise<EthereumDecomposeReturn[]> => {
     return decomposeAction(action)
   }
 

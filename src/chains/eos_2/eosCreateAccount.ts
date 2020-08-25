@@ -191,13 +191,13 @@ export class EosCreateAccount implements CreateAccount {
     } else {
       switch (accountType) {
         case EosNewAccountType.Native:
-          createAccountActions = composeAction(ChainActionType.AccountCreate, params)
+          createAccountActions = await composeAction(ChainActionType.AccountCreate, params)
           break
         case EosNewAccountType.NativeOre:
-          createAccountActions = [composeAction(EosChainActionType.OreCreateAccount, params)]
+          createAccountActions = [await composeAction(EosChainActionType.OreCreateAccount, params)]
           break
         case EosNewAccountType.CreateEscrow:
-          createAccountActions = [composeAction(EosChainActionType.CreateEscrowCreate, params)]
+          createAccountActions = [await composeAction(EosChainActionType.CreateEscrowCreate, params)]
           break
         case EosNewAccountType.VirtualNested:
           // For a virual 'nested' account, we don't have a create account action
@@ -351,7 +351,7 @@ export class EosCreateAccount implements CreateAccount {
       permission: newPermission.perm_name,
     }
     // add the permission to the bottom of the linked chain of permissions
-    const updateAuthAction = composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
+    const updateAuthAction = await composeAction(ChainActionType.AccountUpdateAuth, updateAuthParams)
     actionsToReturn = [updateAuthAction]
     // add actions to link the contract actions to this new permission
     // ... this enables calling of these contract actions by this permission and any of its upstream parents (i.e. all the other nexted virtual accounts)
@@ -362,7 +362,7 @@ export class EosCreateAccount implements CreateAccount {
         contract: a.contract,
         action: a.action,
       }))
-      const linkAuthActions = permissionHelper.composeLinkPermissionActions(
+      const linkAuthActions = await permissionHelper.composeLinkPermissionActions(
         parentAccountName,
         authPermission,
         permissionsToLink,

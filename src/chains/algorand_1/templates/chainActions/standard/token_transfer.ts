@@ -15,6 +15,7 @@ import {
 
 export const composeAction = (params: TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
   const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
+  // TODO Algo - the amount conversion should be based off precision - not assume microAlgos - this is an asset not algos
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
 
   return algoAssetTransferComposeAction(

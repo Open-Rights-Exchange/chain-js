@@ -39,7 +39,7 @@ describe('Compose Chain Actions', () => {
       stakeCpuQuantity: '1.0000 EOS',
       transfer: false,
     }
-    const actAction = composeAction(ChainActionType.AccountCreate, args)
+    const actAction = await composeAction(ChainActionType.AccountCreate, args)
     expect(actAction).toEqual(composedCreate)
   })
 
@@ -50,7 +50,7 @@ describe('Compose Chain Actions', () => {
       authPermission: 'active',
       permission: 'permission',
     }
-    const actAction = composeAction(ChainActionType.AccountDeleteAuth, args)
+    const actAction = await composeAction(ChainActionType.AccountDeleteAuth, args)
     expect(actAction).toEqual(composedDeleteAuth)
   })
 
@@ -62,7 +62,7 @@ describe('Compose Chain Actions', () => {
       contract: 'contract',
       permission: 'permission',
     }
-    const actAction = composeAction(ChainActionType.AccountLinkAuth, args)
+    const actAction = await composeAction(ChainActionType.AccountLinkAuth, args)
     expect(actAction).toEqual(composedLinkAuth)
   })
 
@@ -73,7 +73,7 @@ describe('Compose Chain Actions', () => {
       authPermission: 'active',
       contract: 'contract',
     }
-    const actAction = composeAction(ChainActionType.AccountUnlinkAuth, args)
+    const actAction = await composeAction(ChainActionType.AccountUnlinkAuth, args)
     expect(actAction).toEqual(composedUnlinkAuth)
   })
 
@@ -103,7 +103,7 @@ describe('Compose Chain Actions', () => {
       parent: 'parent',
       permission: 'permission',
     }
-    const actAction = composeAction(ChainActionType.AccountUpdateAuth, args)
+    const actAction = await composeAction(ChainActionType.AccountUpdateAuth, args)
     expect(actAction).toEqual(composedUpdateAuth)
   })
 
@@ -119,7 +119,7 @@ describe('Compose Chain Actions', () => {
       pricekey: '1',
       referralAccountName: 'referral',
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowCreate, args)
+    const actAction = await composeAction(EosChainActionType.CreateEscrowCreate, args)
     expect(actAction).toEqual(composedCreateEscrowCreate)
   })
 
@@ -141,7 +141,7 @@ describe('Compose Chain Actions', () => {
       rex: {},
       useRex: false,
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowDefine, args)
+    const actAction = await composeAction(EosChainActionType.CreateEscrowDefine, args)
     expect(actAction).toEqual(composedCreateEscrowDefine)
   })
 
@@ -154,7 +154,7 @@ describe('Compose Chain Actions', () => {
       minimumRAM: '0',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowInit, args)
+    const actAction = await composeAction(EosChainActionType.CreateEscrowInit, args)
     expect(actAction).toEqual(composedCreateEscrowInit)
   })
 
@@ -166,7 +166,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
       symbol: 'EOS,4',
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowReclaim, args)
+    const actAction = await composeAction(EosChainActionType.CreateEscrowReclaim, args)
     expect(actAction).toEqual(composedCreateEscrowReclaim)
   })
 
@@ -179,7 +179,7 @@ describe('Compose Chain Actions', () => {
       memo: 'memo',
       permission: 'active',
     }
-    const actActions = composeAction(EosChainActionType.CreateEscrowTransfer, args)
+    const actActions = await composeAction(EosChainActionType.CreateEscrowTransfer, args)
     expect(actActions).toEqual(composedCreateEscrowTransfer)
   })
 
@@ -191,7 +191,7 @@ describe('Compose Chain Actions', () => {
       permission: 'active',
       whitelistAccount: 'whitelisted',
     }
-    const actAction = composeAction(EosChainActionType.CreateEscrowWhitelist, args)
+    const actAction = await composeAction(EosChainActionType.CreateEscrowWhitelist, args)
     expect(actAction).toEqual(composedCreateEscrowWhitelist)
   })
 
@@ -205,7 +205,7 @@ describe('Compose Chain Actions', () => {
       symbol: 'EOS',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenApprove, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenApprove, args)
     expect(actAction).toEqual(composedEosTokenApprove)
   })
 
@@ -218,7 +218,7 @@ describe('Compose Chain Actions', () => {
       symbol: 'EOS',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenCreate, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenCreate, args)
     expect(actAction).toEqual(composedEosTokenCreate)
   })
 
@@ -232,7 +232,7 @@ describe('Compose Chain Actions', () => {
       memo: 'memoo',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenIssue, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenIssue, args)
     expect(actAction).toEqual(composedEosTokenIssue)
   })
 
@@ -245,7 +245,7 @@ describe('Compose Chain Actions', () => {
       memo: 'memo',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenRetire, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenRetire, args)
     expect(actAction).toEqual(composedEosTokenRetire)
   })
 
@@ -259,7 +259,7 @@ describe('Compose Chain Actions', () => {
       memo: 'memo',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenTransfer, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenTransfer, args)
     expect(actAction).toEqual(composedEosTokenTransfer)
   })
 
@@ -274,7 +274,7 @@ describe('Compose Chain Actions', () => {
       memo: 'memo',
       permission: 'active',
     }
-    const actAction = composeAction(EosChainActionType.EosTokenTransferFrom, args)
+    const actAction = await composeAction(EosChainActionType.EosTokenTransferFrom, args)
     expect(actAction).toEqual(composedEosTokenTransferFrom)
   })
 
@@ -288,7 +288,7 @@ describe('Compose Chain Actions', () => {
       pricekey: '1',
       referralAccountName: 'referral',
     }
-    const actAction = composeAction(EosChainActionType.OreCreateAccount, args)
+    const actAction = await composeAction(EosChainActionType.OreCreateAccount, args)
     expect(actAction).toEqual(composedOreCreateAccount)
   })
 
@@ -300,7 +300,7 @@ describe('Compose Chain Actions', () => {
       rightName: 'test',
       urls: 'www.aikon.com',
     }
-    const actAction = composeAction(EosChainActionType.OreUpsertRight, args)
+    const actAction = await composeAction(EosChainActionType.OreUpsertRight, args)
     expect(actAction).toEqual(composedOreUpsertRight)
   })
 })

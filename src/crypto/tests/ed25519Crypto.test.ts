@@ -49,20 +49,6 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       })
 
       describe('Iterations', () => {
-        it('One Thousand iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 1024 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('One Thousand iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
-        it('Eight Thousand iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 8192 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('Eight Thousand iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
         it('Sixteen Thousand iterations', async () => {
           const passwordKey = calculatePasswordByteArray(walletPassword, encryptionOptions)
           const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
@@ -74,34 +60,6 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
           const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 65536 })
           const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
           console.log('Sixty Five Thousand iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
-        it('One Hundred Thirty Thousand iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 131072 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('One Hundred Thirty Thousand iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
-        it('Five Hundred Twenty Four Thousand iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 524288 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('Five Hundred Twenty Four Thousand iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
-        it('One Million iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 1048576 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('One Million iterations', time.timeElapsed)
-          expect(time).toBeTruthy()
-        })
-
-        it('Two Million iterations', async () => {
-          const passwordKey = calculatePasswordByteArray(walletPassword, { ...encryptionOptions, N: 2097152 })
-          const time = await timed(() => encrypt(messageToEncrypt, passwordKey))()
-          console.log('Two Million iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
       })
