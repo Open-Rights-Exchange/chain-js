@@ -1,5 +1,5 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainType, ChainActionType, ActionDecomposeReturn, ChainEntityName } from '../../models'
+import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -11,6 +11,7 @@ import {
   AlgorandTransactionOptions,
   AlgorandTxAction,
   AlgorandChainInfo,
+  AlgorandDecomposeReturn,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
@@ -71,7 +72,7 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Decompose an action and return the action type (if any) and its data */
-  public decomposeAction = async (action: AlgorandTxAction): Promise<ActionDecomposeReturn[]> => {
+  public decomposeAction = async (action: AlgorandTxAction): Promise<AlgorandDecomposeReturn[]> => {
     return decomposeAction(action)
   }
 

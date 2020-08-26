@@ -15,8 +15,11 @@ import { isNullOrEmpty } from '../../../../../helpers'
  * Composes asset destroy action */
 export const composeAction = (args: AlgorandActionAssetDestroyParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const { from, note, assetIndex } = argsEncodedForSdk
+  const { from, note, assetIndex, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetDestroyTxnWithSuggestedParams(from, note, assetIndex, suggestedParams)
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 

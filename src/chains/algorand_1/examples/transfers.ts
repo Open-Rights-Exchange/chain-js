@@ -38,7 +38,7 @@ const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
 }
 
 const composeAlgoPaymentParams: Partial<AlgorandActionPaymentParams> = {
-  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  from: 'WCZV75K44NWDFWTYJCCOJ6NZC2TYAODLIC7GFMMXRKY2JNPW3LTB4IUL3U',
   to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
   note: 'transfer memo',
   amount: 1,
@@ -62,7 +62,7 @@ const payRawTransaction: any = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoBetanetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -77,14 +77,16 @@ async function run() {
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = composeAlgoPaymentParams
   transaction.actions = [action]
+
   // // Alternatively, set action using raw transaction
   // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
+  
   console.log('required signatures (before signing): ', transaction.missingSignatures)
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_A)])
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
