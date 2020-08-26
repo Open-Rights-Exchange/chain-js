@@ -34,50 +34,48 @@ const algoBetanetEndpoints = [{
 // paramsA -> ALGOBETANET_rekeyaccount_PRIVATE_KEY_A,
 // paramsB -> ALGOBETANET_rekeyaccount_PRIVATE_KEY_B
 // next time transaction will require signature of the new address(reKeyTo)
-const composeAlgoReKeyParamsA: Partial<AlgorandActionPaymentParams> = {
+const composeAlgoReKeyParamsToB: Partial<AlgorandActionPaymentParams> = {
   from: env.ALGOBETANET_rekeyaccount_A,
   to: env.ALGOBETANET_rekeyaccount_B,
-  note: 'transfer memo',
+  note: 'rekey account example a to b',
   amount: 1,
   reKeyTo: env.ALGOBETANET_rekeyaccount_B,
 }
 
-const composeAlgoReKeyParamsB: Partial<AlgorandActionPaymentParams> = {
+const composeAlgoReKeyParamsToA: Partial<AlgorandActionPaymentParams> = {
   from: env.ALGOBETANET_rekeyaccount_A,
   to: env.ALGOBETANET_rekeyaccount_B,
-  note: 'transfer memo',
+  note: 'rekey account example b to a',
   amount: 1,
   reKeyTo: env.ALGOBETANET_rekeyaccount_A,
 }
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoBetanetEndpoints)
-  await algoTest.connect()
-  if (algoTest.isConnected) {
-    console.log('Connected to %o', algoTest.chainId)
+  const algoBeta = new ChainFactory().create(ChainType.AlgorandV1, algoBetanetEndpoints)
+  await algoBeta.connect()
+  if (algoBeta.isConnected) {
+    console.log('Connected to %o', algoBeta.chainId)
   }
 
   /** Compose and send transaction */
-  const transaction = await algoTest.new.Transaction()
-
-  // Compose an action from basic parameters using composeAction function
-  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsB)
-  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAlgoReKeyParamsB)
-  // OR, set an action using params directly - values depend on the SDK requirements
-  // const action = composeAlgoPaymentParams
+  let transaction = await algoBeta.new.Transaction()
+  // rekey account a to b
+  let action = await algoBeta.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsToB)
   transaction.actions = [action]
-
-  // // Alternatively, set action using raw transaction
-  // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))
-  const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  
-  console.log('required signatures (before signing): ', transaction.missingSignatures)
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_A)])
+  console.log('send response AtoB: %o', JSON.stringify(await transaction.send()))
+  // rekey account back (b to a)
+  transaction = await algoBeta.new.Transaction()
+  action = await algoBeta.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsToA)
+  transaction.actions = [action]
+  await transaction.prepareToBeSigned()
+  await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_B)])
-  console.log('send response: %o', JSON.stringify(await transaction.send()))
+
+  console.log('send response BtoA: %o', JSON.stringify(await transaction.send()))
 }
 
 ;(async () => {
