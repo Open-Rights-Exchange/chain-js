@@ -20,6 +20,11 @@ import {
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
 
+export type ActionChainOptions = {
+  chain: string
+  hardfork: string
+}
+
 /** Helper class to ensure transaction actions properties are set correctly */
 export class EthereumActionHelper {
   // properties stored as hex stings (not raw Buffers)
@@ -39,16 +44,25 @@ export class EthereumActionHelper {
 
   private _contract: EthereumActionContract
 
+  private _v: string
+
+  private _r: string
+
+  private _s: string
+
+  private _chainOptions: ActionChainOptions
+
   /** Creates a new Action from 'human-readable' transfer or contact info
    *  OR from 'raw' data property
    *  Allows access to human-readable properties (method, parameters) or raw data (hex) */
-  constructor(actionInput: EthereumActionHelperInput) {
+  constructor(actionInput: EthereumActionHelperInput, chainOptions: ActionChainOptions) {
+    this._chainOptions = chainOptions
     this.assertAndValidateEthereumActionInput(actionInput)
   }
 
   /** apply rules for imput params, set class private properties, throw if violation */
   private assertAndValidateEthereumActionInput(actionInput: EthereumActionHelperInput) {
-    const { nonce, gasPrice, gasLimit, from, to, data, value, contract } = actionInput
+    const { nonce, gasPrice, gasLimit, from, to, data, value, v, r, s, contract } = actionInput
 
     // cant provide both contract and data properties
     if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
@@ -73,13 +87,29 @@ export class EthereumActionHelper {
     } else this._data = toEthereumTxData(ZERO_HEX)
 
     // use helper library to consume tranasaction and allow multiple types for input params
-    const ethJsTx = new EthereumJsTx({ nonce, gasPrice, gasLimit, to, data: this._data, value })
+    const ethJsTx = new EthereumJsTx(
+      {
+        nonce,
+        gasPrice,
+        gasLimit,
+        to,
+        data: this._data,
+        value,
+        v,
+        r,
+        s,
+      },
+      this._chainOptions,
+    )
     this._nonce = bufferToHex(ethJsTx.nonce)
     this._gasLimit = bufferToHex(ethJsTx.gasLimit)
     this._gasPrice = bufferToHex(ethJsTx.gasPrice)
     this._to = bufferToHex(ethJsTx.to)
     this._value = bufferToHex(ethJsTx.value)
     this._data = toEthereumTxData(bufferToHex(ethJsTx.data))
+    this._v = bufferToHex(ethJsTx.v)
+    this._r = bufferToHex(ethJsTx.r)
+    this._s = bufferToHex(ethJsTx.s)
   }
 
   /** Checks is data value is empty or implying 0 */
@@ -98,6 +128,9 @@ export class EthereumActionHelper {
       from: ethereumTrxArgIsNullOrEmpty(this._from) ? null : this._from,
       data: ethereumTrxArgIsNullOrEmpty(this._data) ? null : this._data,
       value: ethereumTrxArgIsNullOrEmpty(this._value) ? null : this._value,
+      v: ethereumTrxArgIsNullOrEmpty(this._v) ? null : this._v,
+      r: ethereumTrxArgIsNullOrEmpty(this._r) ? null : this._r,
+      s: ethereumTrxArgIsNullOrEmpty(this._s) ? null : this._s,
     }
     removeEmptyValuesInJsonObject(returnValue)
     return returnValue
@@ -113,6 +146,9 @@ export class EthereumActionHelper {
       from: nullifyIfEmpty(toEthBuffer(this._from)),
       data: nullifyIfEmpty(toEthBuffer(this._data)),
       value: nullifyIfEmpty(toEthBuffer(this._value)),
+      v: nullifyIfEmpty(toEthBuffer(this._v)),
+      r: nullifyIfEmpty(toEthBuffer(this._r)),
+      s: nullifyIfEmpty(toEthBuffer(this._s)),
     }
     removeEmptyValuesInJsonObject(returnValue)
     return returnValue
