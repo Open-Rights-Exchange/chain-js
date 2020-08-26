@@ -132,7 +132,7 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   freezeAccount?: AlgorandAddress
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddress
-  type?: AlgorandTransactionTypeCode
+  type?: string
   group?: string
   decimals?: number
   appIndex?: number

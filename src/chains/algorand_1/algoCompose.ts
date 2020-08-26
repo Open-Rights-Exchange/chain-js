@@ -28,8 +28,8 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
-  Payment: PaymentTemplate,
   KeyRegistration: KeyRegistrationTemplate,
+  Payment: PaymentTemplate,
 }
 
 /** Compose an object for a chain contract action */
@@ -44,8 +44,8 @@ export async function composeAction(
   }
 
   let actionHelper = new AlgorandActionHelper(args)
-  const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await chainState.getChainInfo())?.nativeInfo
-    ?.transactionHeaderParams
+  const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
+    chainState.chainInfo?.nativeInfo?.transactionHeaderParams
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
   // seperate-out the action param values (required by compose functions) from the suggestedParams (headers)
   const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = composerFunction(
