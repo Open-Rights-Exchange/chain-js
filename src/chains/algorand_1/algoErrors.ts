@@ -8,30 +8,27 @@ import { ChainErrorType } from '../../models'
  * IMPORTANT: These are in order of importance
  * ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up */
 export const ChainErrorRegExs: { [key: string]: string } = {
-  // AccountCreationFailedAlreadyExists: 'account_name_exists_exception',
-  // AccountDoesntExist: 'account_query_exception', // the account not on chain. Thrown by functions like link permission. Not thrown by get_account which throws 'unknown key \\(boost'
-  // AuthInvalid: 'authority_type_exception', // the permission isnt valid (or permission already exists in an account)
-  // AuthUnsatisfied: 'unsatisfied_authorization', // all permission or keys needed for transaction weren't provided
-  // AuthMissing: 'missing_auth_exception', // missing permission or key
-  // BlockDoesNotExist: 'unknown_block_exception',
-  // DataReadFailedKeyDoesNotExist: 'unknown key \\(boost',
-  // PermissionAlreadyLinked: 'Attempting to update required authority, but new requirement is same as old',
-  // PermissionNotLinked: 'Attempting to unlink authority, but no link found',
-  // PermissionDeleteFailedInUse:
-  //   '(Cannot delete a linked authority. Unlink the authority first|Cannot delete active authority|Cannot delete owner authority)',
-  // TokenBalanceTooLow: 'this is set within chainState code',
-  // TxConfirmFailure: 'TxConfirmFailure',
-  // TxExceededResources: '_exceeded', // includes all EOS resources
-  // MiscChainError: 'chain_type_exception',
-  // MiscBlockValidationError: 'block_validate_exception',
-  // MiscTransactionError: 'transaction_exception',
-  // MiscActionValidationError: 'action_validate_exception',
-  // MiscContractError: 'contract_exception',
-  // MiscDatabaseError: 'database_exception',
-  // MiscBlockProducerError: 'producer_exception',
-  // MiscWhitelistBlackListError: 'whitelist_blacklist_exception',
-  // MiscNodeError:
-  //   '(misc_exception|plugin_exception|wallet_exception|abi_exception|reversible_blocks_exception|block_log_exception|contract_api_exception|protocol_feature_exception|mongo_db_exception)',
+  AccountCreationFailedAlreadyExists: '(insert account|could not query|account raw data|error decoding account)',
+  AccountDoesntExist: 'unknown account', // the account not on chain. Thrown by functions like link permission. Not thrown by get_account which throws
+  AuthInvalid:
+    '(Sig or Msig|mystery sig|LogicSig not enabled|LogicSig.Logic too|LogicSig.Logic version|LogicSig.Logic bad|one of sig or msig)', // the permission isnt valid (or permission already exists in an account)
+  AuthUnsatisfied: '(signature validation|multisig validation|signed and not a Logic-only)', // all permission or keys needed for transaction weren't provided
+  AuthMissing: '(no sig|LogicSig.Logic empty)', // missing permission or key
+  BlockDoesNotExist: '(no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
+  DataReadFailedKeyDoesNotExist: 'key does not exist',
+  TokenBalanceTooLow: 'overflowed account balance',
+  // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg
+  TxExceededResources: 'exceeds balance',
+  MiscChainError: 'chain_type_exception',
+  MiscBlockValidationError: '(GenesisHash mismatch|GenesisHash required|GenesisID mismatch)',
+  MiscTransactionError:
+    '(tx does not|unknown consensus|rejected by logic|asset transaction|transaction (asset|from|cannot|invalid|note|tried|has|window|tries|had|pool)|TransactionPool|(remember|malformed|invlid) tx|transaction already)',
+  MiscActionValidationError:
+    '(address|nonempty AuthAddr|cannot close account|cannot spend from fee sink|cannot close fee sink|tx.|invalid application|programs|application|asset (name|metadata|unit|decimal|url))',
+  MiscContractError: 'condition violated',
+  MiscDatabaseError: 'database',
+  MiscBlockProducerError: '(generate block|applyUpgradeVote|write block|block number already)',
+  MiscNodeError: '(malformed|AlgorandFullNode|algod|Indexer|Unmarshall|agreementLedger)',
   UnknownError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
