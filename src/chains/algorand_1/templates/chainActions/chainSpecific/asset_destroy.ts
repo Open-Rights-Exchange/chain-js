@@ -15,15 +15,18 @@ import { isNullOrEmpty } from '../../../../../helpers'
  * Composes asset destroy action */
 export const composeAction = (args: AlgorandActionAssetDestroyParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const { from, note, assetIndex } = argsEncodedForSdk
+  const { from, note, assetIndex, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetDestroyTxnWithSuggestedParams(from, note, assetIndex, suggestedParams)
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 
 export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
   const actionParams = actionHelper.paramsOnly
-  // Identify chainActionType using type
+  // Cant identify using only type (more than one action uses AssetConfig type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.AssetConfig &&
     isNullOrEmpty(actionParams?.assetManager) &&

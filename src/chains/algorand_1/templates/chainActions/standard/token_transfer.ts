@@ -1,5 +1,11 @@
 import { ActionDecomposeReturn, ChainActionType, TokenTransferParams } from '../../../../../models'
-import { AlgorandUnit, AlgorandSuggestedParams, AlgorandActionAssetTransferParams } from '../../../models'
+import {
+  AlgorandUnit,
+  AlgorandSuggestedParams,
+  AlgorandActionAssetTransferParams,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+} from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
 import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
 import {
@@ -9,6 +15,7 @@ import {
 
 export const composeAction = (params: TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
   const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
+  // TODO Algo - the amount conversion should be based off precision - not assume microAlgos - this is an asset not algos
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
 
   return algoAssetTransferComposeAction(
@@ -24,7 +31,7 @@ export const composeAction = (params: TokenTransferParams, suggestedParams: Algo
   )
 }
 
-export const decomposeAction = (action: any): ActionDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn => {
   const decomposed = algoAssetTransferDecomposeAction(action)
   if (decomposed) {
     const decomposedArgs = decomposed.args

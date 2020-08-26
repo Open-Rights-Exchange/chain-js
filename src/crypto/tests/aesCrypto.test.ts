@@ -1,7 +1,6 @@
 /* eslint-disable quotes */
 import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions } from '../aesCrypto'
-
-// import { rejects } from 'assert';
+import { timed } from './utils'
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
   let privateKey: string
@@ -53,6 +52,14 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       })
       it('returns an encrypted string with different options', () => {
         expect(encrypted2).toEqual(expect.not.stringContaining(privateKey))
+      })
+
+      describe('Encrypt Iterations', () => {
+        it('Ten Thousand iterations', async () => {
+          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 10000 }))()
+          console.log('Ten Thousand iterations', time.timeElapsed)
+          expect(time).toBeTruthy()
+        })
       })
     })
 

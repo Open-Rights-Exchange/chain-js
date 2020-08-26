@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/camelcase */
@@ -21,20 +22,19 @@ require('dotenv').config()
 
 const { env } = process
 
-const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps1'
-
-export const algoTestnetEndpoints: ChainEndpoint[] = [
-  {
-    url: new URL(algoPureStakeTestnet),
-    options: {
-      headers: [
-        {
-          'X-API-Key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
-        },
-      ],
-    },
-  },
-]
+const algoApiKey = env.AGLORAND_API_KEY
+const algoMainnetEndpoints = [{ 
+  url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
+const algoTestnetEndpoints = [{ 
+  url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
+const algoBetanetEndpoints = [{ 
+  url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
+  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+}]
 
 const composeAssetConfigParams: AlgorandActionAssetConfigParams = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -94,12 +94,13 @@ const composeKeyRegistrationParams: AlgorandKeyRegistrationParams = {
   voteLast: 9000000,
   voteKeyDilution: 1739,
 }
-;(async () => {
+
+async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
-    console.log('Connected to %o', algoPureStakeTestnet)
+    console.log('Connected to %o', algoTest.chainId)
   }
 
   /** Compose and send transaction */
@@ -112,15 +113,20 @@ const composeKeyRegistrationParams: AlgorandKeyRegistrationParams = {
   // const action = await algoTest.composeAction(AlgorandChainActionType.KeyRegistration, composeKeyRegistrationParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
-  const decomposed = algoTest.decomposeAction(transaction.actions[0])
+  const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
+  console.log('send response: %o', JSON.stringify(await transaction.send()))
+}
+
+;(async () => {
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send()))
-  } catch (err) {
-    console.log(err)
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
   }
+  process.exit()
 })()

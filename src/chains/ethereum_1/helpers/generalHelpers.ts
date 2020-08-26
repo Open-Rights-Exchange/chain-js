@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js'
 import { toBuffer, BN } from 'ethereumjs-util'
 import { HEX_PREFIX, DEFAULT_TOKEN_PRECISION } from '../ethConstants'
-import { isANumber, getDecimalPlaces, isNullOrEmpty } from '../../../helpers'
+import { isANumber, getDecimalPlacesFromString, isNullOrEmpty, isAString } from '../../../helpers'
+import { throwNewError } from '../../../errors'
 
 /** Attempts to transform a value to a standard Buffer class */
 export function toEthBuffer(data: string | Buffer | number): Buffer {
@@ -47,8 +48,8 @@ export function toBigIntegerString(value: string | number | BN, base: number = 1
 /** Attempts to infer the precision of a token (eg ERC20) by counting digits after the decimal places in a number value string
  *  e.g. '0.120' = 3  - If no decimal places in the string, then returns default precision for token i.e. 0
  */
-export function inferTokenPrecisionFromValue(value: string): number {
-  let decmialPlaces = getDecimalPlaces(value)
+export function inferTokenPrecisionFromValue(value: string = ''): number {
+  let decmialPlaces = getDecimalPlacesFromString(value)
   if (decmialPlaces === 0) {
     decmialPlaces = DEFAULT_TOKEN_PRECISION
   }
@@ -61,6 +62,11 @@ export function inferTokenPrecisionFromValue(value: string): number {
  *  if no precision is provided, infers precision by number of digits after decimal e.g. ‘200.3300’ = 4
  */
 export function toTokenValueString(value: string, base: number = 10, precision: number): string {
+  if (!isAString(value)) {
+    throwNewError(
+      `Token value must be string (got ${value}). Include decimal places so that converter knows how many decimals in token (e.g. '2.0000' means 4 decimals). Or, include a value for precision.`,
+    )
+  }
   let usePrecision = precision
   if (isNullOrEmpty(precision)) {
     usePrecision = inferTokenPrecisionFromValue(value)

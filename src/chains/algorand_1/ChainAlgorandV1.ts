@@ -1,12 +1,5 @@
 import { notImplemented } from '../../helpers'
-import {
-  ChainEndpoint,
-  ChainInfo,
-  ChainType,
-  ChainActionType,
-  ActionDecomposeReturn,
-  ChainEntityName,
-} from '../../models'
+import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -17,6 +10,8 @@ import {
   AlgorandSymbol,
   AlgorandTransactionOptions,
   AlgorandTxAction,
+  AlgorandChainInfo,
+  AlgorandDecomposeReturn,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import * as algoCrypto from './algoCrypto'
@@ -61,7 +56,7 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Retrieve lastest chain info including head block number and time */
-  public get chainInfo(): ChainInfo {
+  public get chainInfo(): AlgorandChainInfo {
     this.assertIsConnected()
     return this._chainState.chainInfo
   }
@@ -72,12 +67,12 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
+  public composeAction = async (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
     return composeAction(this._chainState, actionType, args)
   }
 
   /** Decompose an action and return the action type (if any) and its data */
-  public decomposeAction = (action: AlgorandTxAction): ActionDecomposeReturn[] => {
+  public decomposeAction = async (action: AlgorandTxAction): Promise<AlgorandDecomposeReturn[]> => {
     return decomposeAction(action)
   }
 

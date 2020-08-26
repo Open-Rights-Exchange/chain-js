@@ -7,6 +7,7 @@ import { composeAction as AssetDestroyTemplate } from './templates/chainActions/
 import { composeAction as AssetFreezeTemplate } from './templates/chainActions/chainSpecific/asset_freeze'
 import { composeAction as AssetTransferTemplate } from './templates/chainActions/chainSpecific/asset_transfer'
 import { composeAction as KeyRegistrationTemplate } from './templates/chainActions/chainSpecific/key_registration'
+import { composeAction as PaymentTemplate } from './templates/chainActions/chainSpecific/payment'
 
 import {
   AlgorandChainActionType,
@@ -28,6 +29,7 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
   KeyRegistration: KeyRegistrationTemplate,
+  Payment: PaymentTemplate,
 }
 
 /** Compose an object for a chain contract action */
@@ -38,11 +40,12 @@ export async function composeAction(
 ): Promise<AlgorandTxActionSdkEncoded> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported()
+    notSupported(`ComposeAction:${chainActionType}`)
   }
 
   let actionHelper = new AlgorandActionHelper(args)
-  const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = await chainState.algoClient.getTransactionParams()
+  const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
+    chainState.chainInfo?.nativeInfo?.transactionHeaderParams
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
   // seperate-out the action param values (required by compose functions) from the suggestedParams (headers)
   const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = composerFunction(

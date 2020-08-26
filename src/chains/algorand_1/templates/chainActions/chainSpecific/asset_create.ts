@@ -8,6 +8,7 @@ import {
   AlgorandTxAction,
   AlgorandTxActionRaw,
   AlgorandActionAssetCreateParams,
+  AlgorandTxActionSdkEncoded,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 
@@ -29,6 +30,7 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
     assetName,
     assetURL,
     assetMetadataHash,
+    reKeyTo,
   } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetCreateTxnWithSuggestedParams(
     from,
@@ -46,14 +48,18 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
     assetMetadataHash,
     suggestedParams,
   )
-
+  if (!isNullOrEmpty(reKeyTo)) {
+    composedAction.addRekey(reKeyTo)
+  }
   return { ...composedAction }
 }
 
-export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): AlgorandDecomposeReturn => {
+export const decomposeAction = (
+  action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
+): AlgorandDecomposeReturn => {
   const actionHelper = new AlgorandActionHelper(action)
   const actionParams = actionHelper.paramsOnly
-  // Identify chainActionType using type
+  // Cant identify using only type (more than one action uses AssetConfig type) - must check params too
   if (actionParams?.type === AlgorandTransactionTypeCode.AssetConfig && !isNullOrEmpty(actionParams?.assetName)) {
     const returnData = {
       ...actionParams,

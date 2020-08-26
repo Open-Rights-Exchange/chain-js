@@ -88,6 +88,8 @@ const { env } = process
     fromAccountName: toEosEntityName('proppropprop'),
     toAccountName: toEosEntityName('oreidfunding'),
     amount: '0.0001',
+    // amount: '1.1',  // OR use precision param
+    // precision: 4,
     symbol: toEosSymbol('EOS'),
     memo: 'memo',
     permission: toEosEntityName('active'),
@@ -124,7 +126,7 @@ const { env } = process
 
   // ---> send token
   // const transaction = kylin.new.Transaction()
-  // transaction.actions = [kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
+  // transaction.actions = [await kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()

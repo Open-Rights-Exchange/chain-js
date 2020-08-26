@@ -27,6 +27,7 @@ export type AlgorandKeyRegistrationParams = {
   voteFirst: number // first round on which voteKey is valid
   voteLast: number // last round on which voteKey is valid
   voteKeyDilution: number // specified address can freeze or unfreeze user asset holdings
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionAssetCreateParams = {
@@ -43,6 +44,7 @@ export type AlgorandActionAssetCreateParams = {
   assetName: string // "friendly name" of asset
   assetURL?: string // optional string pointing to a URL relating to the asset
   assetMetadataHash?: string // optional hash commitment of some sort relating to the asset. 32 character length.
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionAssetConfigParams = {
@@ -54,12 +56,14 @@ export type AlgorandActionAssetConfigParams = {
   assetFreeze: AlgorandAddress //  new freeze manager Algorand address
   assetClawback: AlgorandAddress // specified address can revoke user asset holdings and send them to other addresses
   strictEmptyAddressChecking: boolean // throw an error if any of manager, reserve, freeze, or clawback are undefined. optional, defaults to true.
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionAssetDestroyParams = {
   from: AlgorandAddress // Algorand address of sender
   note: string // arbitrary data for sender to store
   assetIndex: number // uniquely specifying the asset
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionAssetFreezeParams = {
@@ -68,6 +72,7 @@ export type AlgorandActionAssetFreezeParams = {
   assetIndex: number // uniquely specifying the asset
   freezeTarget: AlgorandAddress //  Algorand address being frozen or unfrozen
   freezeState: boolean // true if freezeTarget should be frozen, false if freezeTarget should be allowed to transact
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionAssetTransferParams = {
@@ -78,6 +83,7 @@ export type AlgorandActionAssetTransferParams = {
   amount: number
   note: string
   assetIndex: number
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
 
 export type AlgorandActionPaymentParams = {
@@ -86,4 +92,5 @@ export type AlgorandActionPaymentParams = {
   amount: number
   closeRemainderTo?: AlgorandAddress
   note: string
+  reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }

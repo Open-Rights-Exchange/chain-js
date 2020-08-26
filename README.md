@@ -6,6 +6,8 @@
 
 ChainJS is a low-level Javascript helper library that helps you write code that can work with multiple blockchains. ChainJs uses a plug-in model and a unified interface to do common blockchain functions like constructing, signing, and sending blockchain transactions.
 
+Chains plug-ins included: **Algorand**, **EOS**, **Ethereum (V1)** - more coming soon
+
 ### Example code for sending a token
 
 ```javascript
@@ -14,7 +16,7 @@ ChainJS is a low-level Javascript helper library that helps you write code that 
   // create a transaction object
   const sendTokenTx = await chain.new.Transaction()
   // set contract action(s) - composeAction simplifies transaction composition
-  sendTokenTx.actions = [ chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', amount: '10.00' }) ]
+  sendTokenTx.actions = [ await chain.composeAction(ChainActionType.TokenTransfer, { to: '0x271...', contractAddress: '0x048...', amount: '10.00' }) ]
   ...
   // sign and send the transaction to the chain
   await sendTokenTx.sign([privateKey])

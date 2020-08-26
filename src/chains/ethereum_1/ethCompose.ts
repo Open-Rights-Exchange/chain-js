@@ -41,13 +41,13 @@ const ComposeAction: { [key: string]: (args: any) => any } = {
 }
 
 /** Compose an object for a chain contract action */
-export function composeAction(
+export async function composeAction(
   chainActionType: ChainActionType | EthereumChainActionType,
   args: any,
-): EthereumTransactionAction {
+): Promise<EthereumTransactionAction> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported()
+    notSupported(`ComposeAction:${chainActionType}`)
   }
   return composerFunction(args)
 }
