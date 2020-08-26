@@ -1,6 +1,7 @@
 import { EthereumActionHelper } from '../ethAction'
 import { toWei, toEthereumTxData } from '../helpers'
 import { EthUnit } from '../models'
+import { chainOptions } from './mockups/chain'
 
 describe('Ethereum Action Tests', () => {
   const ABI: any[] = [
@@ -34,12 +35,12 @@ describe('Ethereum Action Tests', () => {
     parameters,
   }
   it('creates eth transfer action object with to, value and contract', async () => {
-    const ethAction = new EthereumActionHelper({ to, value, contract })
+    const ethAction = new EthereumActionHelper({ to, value, contract }, chainOptions)
 
     expect(ethAction.hasData).toEqual(true)
   })
   it('creates eth transfer action object with only to & value ', async () => {
-    const ethAction = new EthereumActionHelper({ to, value })
+    const ethAction = new EthereumActionHelper({ to, value }, chainOptions)
 
     expect(ethAction.hasData).toEqual(false)
   })
@@ -48,7 +49,7 @@ describe('Ethereum Action Tests', () => {
     const data = toEthereumTxData('0x04825941Ad80A6a869e85606b29c9D25144E91e6')
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const ethAction = new EthereumActionHelper({ to, value, contract, data })
+      const ethAction = new EthereumActionHelper({ to, value, contract, data }, chainOptions)
     }).toThrowError('You can provide either data or contract but not both')
   })
 })
