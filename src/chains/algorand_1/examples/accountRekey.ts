@@ -36,7 +36,7 @@ const algoBetanetEndpoints = [{
 // next time transaction will require signature of the new address(reKeyTo)
 const composeAlgoReKeyParamsA: Partial<AlgorandActionPaymentParams> = {
   from: env.ALGOBETANET_rekeyaccount_A,
-  to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  to: env.ALGOBETANET_rekeyaccount_B,
   note: 'transfer memo',
   amount: 1,
   reKeyTo: env.ALGOBETANET_rekeyaccount_B,
@@ -44,7 +44,7 @@ const composeAlgoReKeyParamsA: Partial<AlgorandActionPaymentParams> = {
 
 const composeAlgoReKeyParamsB: Partial<AlgorandActionPaymentParams> = {
   from: env.ALGOBETANET_rekeyaccount_A,
-  to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
+  to: env.ALGOBETANET_rekeyaccount_B,
   note: 'transfer memo',
   amount: 1,
   reKeyTo: env.ALGOBETANET_rekeyaccount_A,
@@ -62,7 +62,7 @@ async function run() {
   const transaction = await algoTest.new.Transaction()
 
   // Compose an action from basic parameters using composeAction function
-  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsA)
+  const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoReKeyParamsB)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAlgoReKeyParamsB)
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = composeAlgoPaymentParams
@@ -76,7 +76,7 @@ async function run() {
   await transaction.validate()
   
   console.log('required signatures (before signing): ', transaction.missingSignatures)
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_A)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_B)])
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 

@@ -7,6 +7,7 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { AlgorandMultiSigOptions } from '../models'
+import { decrypt } from '../algoCrypto'
 
 require('dotenv').config()
 
@@ -61,6 +62,7 @@ async function run() {
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
   console.log('generatedKeys: %o', generatedKeys)
+  console.log('decrypted: ', decrypt(generatedKeys.privateKey, createAccountOptions.newKeysOptions.password, { salt: createAccountOptions.newKeysOptions.salt}))
   console.log('account name: %o', accountName)
   const account = await algoTest.new.Account(accountName)
   console.log('account: %o', account.name)
