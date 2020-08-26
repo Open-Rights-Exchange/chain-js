@@ -1,30 +1,61 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
-import { EthereumValue } from './generalModels'
+import BN from 'bn.js'
+import { EthereumMultiValue, EthereumTxExecutionPriority } from './generalModels'
 
 export type EthereumAbi = any[]
 /** Information needed to generate Trx Data to invoke desired smart contract action */
 export type EthereumActionContract = {
   abi: any
   method: string
-  parameters: (EthereumValue | EthereumValue[])[]
+  parameters: (EthereumMultiValue | EthereumMultiValue[])[]
 }
 
-export type EthereumAddress = EthereumValue & (string | Buffer)
+/** Ethereum address encoded as a Hex String */
+export type EthereumAddress = string
 
-export type EthereumMethodName = EthereumValue & string
+/** Ethereum address encoded as a Buffer */
+export type EthereumAddressBuffer = Buffer
 
-/** Transaction with hex data - ready to be signed and sent to chain */
+export type EthereumMethodName = EthereumMultiValue & string
+
+/** Transaction with raw Buffer data */
 export type EthereumRawTransaction = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
-  to?: EthereumAddress
-  value?: EthereumValue
+  nonce?: Buffer
+  gasPrice?: Buffer
+  gasLimit?: Buffer
+  to?: EthereumAddressBuffer
+  value?: Buffer
+  data?: Buffer
+  v?: Buffer
+  r?: Buffer
+  s?: Buffer
+}
+
+/** Transaction action with raw Buffer data */
+export type EthereumRawTransactionAction = {
+  from?: EthereumAddressBuffer
+  nonce?: Buffer
+  gasPrice?: Buffer
+  gasLimit?: Buffer
+  to?: EthereumAddressBuffer
+  value?: Buffer
+  data?: Buffer
+}
+
+/** Transaction data that support multiple types for each field (e.g. Buffer, hex string, etc.) */
+export type EthereumActionHelperInput = {
+  nonce?: EthereumMultiValue
+  gasPrice?: EthereumMultiValue
+  gasLimit?: EthereumMultiValue
+  from?: EthereumAddress | EthereumAddressBuffer
+  to?: EthereumAddress | EthereumAddressBuffer
+  value?: EthereumMultiValue
   data?: EthereumTxData
-  v?: EthereumValue
-  r?: EthereumValue
-  s?: EthereumValue
+  v?: EthereumMultiValue
+  r?: EthereumMultiValue
+  s?: EthereumMultiValue
+  contract?: EthereumActionContract
 }
 
 /** Properties of an ETH transaction action
@@ -33,31 +64,36 @@ export type EthereumRawTransaction = {
  *  data or contract - to create an action, optionally provide one but not both
  *  contract property used only to generate data prop when creating an new action */
 export type EthereumTransactionAction = {
+  nonce?: string
+  gasPrice?: string
+  gasLimit?: string
   to?: EthereumAddress
   from?: EthereumAddress
-  value?: EthereumValue
+  value?: string | number | BN
   data?: EthereumTxData
   contract?: EthereumActionContract
 }
 
-/** Transaction properties that contain the fee & priority info */
+/** Transaction properties that contain the gas & nonce */
 export type EthereumTransactionHeader = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
+  nonce?: Buffer
+  gasPrice?: Buffer
+  gasLimit?: Buffer
 }
 
 /** Transaction 'header' options set to chain along with transaction */
 export type EthereumTransactionOptions = {
-  nonce?: EthereumValue
-  gasPrice?: EthereumValue
-  gasLimit?: EthereumValue
+  nonce?: EthereumMultiValue
+  gasPrice?: EthereumMultiValue
+  gasLimit?: EthereumMultiValue
   chain: number | string
-  hardfork: EthereumValue & string
+  hardfork: string
+  maxFeeIncreasePercentage?: number
+  executionPriority?: EthereumTxExecutionPriority
 }
 
-/** Hexadecimal format of contrat action data */
-export type EthereumTxData = (string | Buffer) & EthereumTxDataBrand
+/** Contract action data encoded as hex string */
+export type EthereumTxData = string & EthereumTxDataBrand
 
 /** Brand signifiying a valid value - assigned by using toEthereumTxData */
 export enum EthereumTxDataBrand {
@@ -72,3 +108,8 @@ export type EthereumTxResult = {
 
 /** Response from chain after sending transaction */
 export type EthereumTxChainResponse = TransactionReceipt
+
+/** Cost in chain resources to run the transaction */
+export type EthereumTransactionCost = {
+  gas: string
+}

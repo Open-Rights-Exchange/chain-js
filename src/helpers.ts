@@ -13,6 +13,11 @@ export function isAUint8ArrayArray(obj: any) {
   return (obj as Array<any>).every(isAUint8Array)
 }
 
+export function isABuffer(value: any) {
+  if (value === undefined || value === null) return false
+  return Buffer.isBuffer(value)
+}
+
 export function isNullOrEmpty(obj: any): boolean {
   if (obj === undefined) {
     return true
@@ -23,6 +28,10 @@ export function isNullOrEmpty(obj: any): boolean {
 
   if (isAUint8Array(obj)) {
     return obj.length === 0
+  }
+
+  if (isABuffer(obj)) {
+    return obj.byteLength === 0
   }
 
   // Check for an empty array too
@@ -235,6 +244,11 @@ export function byteArrayToHexString(value: Uint8Array): string {
   return Buffer.from(value).toString('hex')
 }
 
+/** Convert a byte array to hex string */
+export function bufferToHexString(value: Buffer): string {
+  return value.toString('hex')
+}
+
 /** Whether array is exactly length of 1 */
 export function isArrayLengthOne(array: any[]) {
   if (!array) return false
@@ -243,4 +257,10 @@ export function isArrayLengthOne(array: any[]) {
 
 export function objectHasProperty(obj: object, propertyName: string) {
   return Object.keys(obj).some(key => key === propertyName)
+}
+
+/** if value is empty (e.g. empty buffer), returns null, otherwise return the value passed-in */
+export function nullifyIfEmpty(value: any) {
+  if (isNullOrEmpty(value)) return null
+  return value
 }

@@ -1,4 +1,5 @@
 import { EthUnit } from './models'
+import { IndexedObject } from '../../models'
 
 // sign transaction default parameters
 export const TRANSACTION_ENCODING = 'utf8'
@@ -28,3 +29,9 @@ export const ETH_TOKEN_PRECISION = 18
 
 /** The chain address of the default token contract (if any) */
 export const DEFAULT_CHAIN_TOKEN_ADDRESS: any = null
+
+export const TRANSACTION_FEE_PRIORITY_MULTIPLIERS: IndexedObject = {
+  slow: 0.96,
+  average: 1.0,
+  fast: 1.12,
+}

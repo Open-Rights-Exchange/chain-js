@@ -4,7 +4,7 @@ import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ConfirmType } from '../../models'
+import { ConfirmType } from '../../models'
 import { trimTrailingChars, isNullOrEmpty } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
@@ -13,6 +13,7 @@ import {
   EthereumBlockNumber,
   EthereumBlockType,
   EthereumChainEndpoint,
+  EthereumChainInfo,
   EthereumChainSettings,
   EthereumChainSettingsCommunicationSettings,
   EthereumSymbol,
@@ -31,7 +32,7 @@ export class EthereumChainState {
 
   private _activeEndpoint: EthereumChainEndpoint
 
-  private _chainInfo: ChainInfo
+  private _chainInfo: EthereumChainInfo
 
   private _chainSettings: EthereumChainSettings
 
@@ -54,11 +55,11 @@ export class EthereumChainState {
   /** * Return chain ID */
   public get chainId(): string {
     this.assertIsConnected()
-    return this._chainInfo?.nativeInfo?.chain_id
+    return this._chainInfo?.nativeInfo?.chainId.toString()
   }
 
   /** Return chain info - e.g. head block number */
-  public get chainInfo(): ChainInfo {
+  public get chainInfo(): EthereumChainInfo {
     this.assertIsConnected()
     return this._chainInfo
   }
@@ -113,17 +114,19 @@ export class EthereumChainState {
   }
 
   /** Retrieve lastest chain info including head block number and time */
-  public async getChainInfo(): Promise<ChainInfo> {
+  public async getChainInfo(): Promise<EthereumChainInfo> {
     const info = await this._web3.eth.getBlock(EthereumBlockType.Latest)
     const { gasLimit, gasUsed, number, timestamp } = info
+    const chainId = await this._web3.eth.getChainId()
     try {
       const nodeInfo = await this._web3.eth.getNodeInfo()
+      const currentGasPrice = await this.getCurrentGasPriceFromChain()
       this._chainInfo = {
         headBlockNumber: number,
         headBlockTime: new Date(timestamp),
         // Node information contains version example: 'Geth/v1.9.9-omnibus-e320ae4c-20191206/linux-amd64/go1.13.4'
         version: nodeInfo,
-        nativeInfo: { gasLimit, gasUsed },
+        nativeInfo: { chainId, gasLimit, gasUsed, currentGasPrice },
       }
       return this._chainInfo
     } catch (error) {
@@ -154,10 +157,9 @@ export class EthereumChainState {
   }
 
   /** Retrieve a the current price of gas from the chain */
-  public async getGasPrice(): Promise<number> {
+  async getCurrentGasPriceFromChain(): Promise<string> {
     try {
-      this.assertIsConnected()
-      const gasPrice = parseInt(await this._web3.eth.getGasPrice(), 10)
+      const gasPrice = await this._web3.eth.getGasPrice()
       return gasPrice
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
@@ -174,10 +176,7 @@ export class EthereumChainState {
 
   /** Get transaction count for an address
    *  Useful to calculate transaction nonce propery */
-  public async getTransactionCount(
-    address: EthereumAddress & string,
-    defaultBlock: EthereumBlockNumber,
-  ): Promise<number> {
+  public async getTransactionCount(address: EthereumAddress, defaultBlock: EthereumBlockNumber): Promise<number> {
     try {
       return this._web3.eth.getTransactionCount(ensureHexPrefix(address), defaultBlock)
     } catch (error) {

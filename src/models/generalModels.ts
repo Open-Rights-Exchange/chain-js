@@ -62,4 +62,4 @@ export type ChainInfo = {
 }
 
 /** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */
-export type IndexedObject = { [key: string]: string }
+export type IndexedObject = { [key: string]: any }

@@ -18,14 +18,39 @@ export enum EthereumBlockType {
   Pending = 'pending',
 }
 
+/** Transaction fee priority */
+export enum EthereumTxExecutionPriority {
+  Slow = 'slow',
+  Average = 'average',
+  Fast = 'fast',
+}
+
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
+  defaultTransactionSettings: {
+    executionPriority: EthereumTxExecutionPriority
+    maxFeeIncreasePercentage?: number
+  }
 }
 
 export type EthereumChainForkType = {
   chainName: string
   hardFork: string
+}
+
+export type EthereumChainInfo = {
+  headBlockNumber: number
+  headBlockTime: Date
+  version: string
+  nativeInfo: EthereumNativeChainInfo
+}
+
+export type EthereumNativeChainInfo = {
+  chainId: number
+  gasLimit: number
+  gasUsed: number
+  currentGasPrice: string
 }
 
 /** Chain urls and related details used to connect to chain */
@@ -71,7 +96,7 @@ export type EthereumString = {
 }
 
 // similar to ethereum-js BufferLike but also includes string
-export type EthereumValue = string | number | Buffer | BN
+export type EthereumMultiValue = string | number | Buffer | BN
 
 /** Ethereum value units */
 // See: https://www.languagesandnumbers.com/articles/en/ethereum-ether-units

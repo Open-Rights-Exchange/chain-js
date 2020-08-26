@@ -6,6 +6,7 @@ import {
   byteArrayToHexString,
   bufferToUint8Array,
   hexStringToByteArray,
+  isABuffer,
   isAString,
   isAUint8Array,
   isNullOrEmpty,
@@ -108,7 +109,7 @@ export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublic
 export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array): AlgorandSignature {
   if (isNullOrEmpty(rawSignature)) return null
   let sigUint8 = rawSignature
-  if (Buffer.isBuffer(rawSignature)) {
+  if (isABuffer(rawSignature)) {
     sigUint8 = bufferToUint8Array(rawSignature as Buffer)
   }
   return toAlgorandSignature(byteArrayToHexString(sigUint8))

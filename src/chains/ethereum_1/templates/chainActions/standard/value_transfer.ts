@@ -1,42 +1,38 @@
-import BN from 'bn.js'
 import { EthUnit, EthereumTransactionAction } from '../../../models'
-import { ethereumTrxArgIsNullOrEmpty, toWeiString } from '../../../helpers'
+import { toWeiString } from '../../../helpers'
 import { DEFAULT_ETH_SYMBOL } from '../../../ethConstants'
 import { ChainActionType, ValueTransferParams, ActionDecomposeReturn } from '../../../../../models'
-import { toChainEntityName } from '../../../../../helpers'
+import {
+  composeAction as ethTransferComposeAction,
+  decomposeAction as ethTransferDecomposeAction,
+  EthTransferParams,
+} from '../chainSpecific/eth_transfer'
 
 /** Sends ETH (in units of Wei) */
-export const composeAction = ({
-  fromAccountName,
-  toAccountName,
-  amount,
-  symbol = DEFAULT_ETH_SYMBOL,
-}: ValueTransferParams) => {
+export const composeAction = (params: ValueTransferParams) => {
+  const { fromAccountName, toAccountName, amount, symbol = DEFAULT_ETH_SYMBOL } = params
   const value = toWeiString(amount, symbol as EthUnit) // using 0 precision since the toWei already converts to right precision for EthUnit
-  return {
+  return ethTransferComposeAction({
     from: fromAccountName,
     to: toAccountName,
-    value: new BN(value, 10), // must be a hex '0x' string or BN
-  }
+    value,
+  } as EthTransferParams)
 }
 
 export const decomposeAction = (action: EthereumTransactionAction): ActionDecomposeReturn => {
-  const { to, from, value, data, contract } = action
-  if (to && value && !contract && ethereumTrxArgIsNullOrEmpty(data)) {
-    const returnData: ValueTransferParams = {
-      // coerce to string as EthereumAddress could be Buffer type
-      toAccountName: toChainEntityName(to as string),
-      fromAccountName: toChainEntityName(from as string),
-      amount: value as string,
-      symbol: EthUnit.Wei,
-    }
-    const partial = !returnData?.fromAccountName
+  const decomposed = ethTransferDecomposeAction(action)
+  if (decomposed) {
+    const decomposedArgs = decomposed.args
     return {
+      args: {
+        amount: decomposedArgs.value,
+        fromAccountName: decomposedArgs.from,
+        toAccountName: decomposedArgs.to,
+        symbol: EthUnit.Wei,
+      },
       chainActionType: ChainActionType.ValueTransfer,
-      args: returnData,
-      partial,
+      partial: decomposedArgs.partial,
     }
   }
-
   return null
 }
