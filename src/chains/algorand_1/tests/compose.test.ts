@@ -20,28 +20,12 @@ import {
   AlgorandKeyRegistrationParams,
   AlgorandActionPaymentParams,
 } from '../models'
-import { getChainState, algoTestnetEndpoints } from './mockups/chainState'
+import { getChainState } from './mockups/chainState'
 
-import AlgorandChainState from '../algoChainState'
-
-const nativeInfo = {
-  transactionHeaderParams: {
-    fee: 0,
-    genesisID: 'testnet-v1.0',
-    genesishashb64: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-    lastRound: 8815863,
-    consensusVersion: 'https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f',
-    minFee: 1000,
-  },
-}
-
-const mockGetChainInfo = jest.fn()
-
-jest.mock('../algoChainState', () => ({
-  getChainInfo: mockGetChainInfo,
-}))
+import { AlgorandChainState } from '../algoChainState'
 
 describe('Compose Algorand Chain Actions', () => {
+  let chainState: AlgorandChainState
   it('creates asset create action object', async () => {
     const args: AlgorandActionAssetCreateParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -58,12 +42,7 @@ describe('Compose Algorand Chain Actions', () => {
       assetURL: '',
       assetMetadataHash: '',
     }
-    const chainState = new AlgorandChainState(algoTestnetEndpoints)
-
-    mockGetChainInfo.mockReturnValue(Promise.resolve({ nativeInfo }))
-
-    console.log('CHAININFO: ', await chainState.getChainInfo())
-
+    chainState = await getChainState()
     const actAction = await composeAction(chainState, AlgorandChainActionType.AssetCreate, args)
 
     actAction.fee = 387000
