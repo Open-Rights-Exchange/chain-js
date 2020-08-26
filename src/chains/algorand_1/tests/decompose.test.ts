@@ -129,7 +129,7 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction).toEqual(decomposedKeyRegistration)
-  }, 1000)
+  })
 
   it('decomposes payment action object', async () => {
     const args: AlgorandActionPaymentParams = {
