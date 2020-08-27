@@ -64,7 +64,8 @@ const { env } = process
     }
 
     const composeValueTransferParams: ValueTransferParams = {
-      toAccountName: toChainEntityName('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      toAccountName: toChainEntityName('0x02efd355f8a9e08e7ff936908de1707e6202aae5'),
+      fromAccountName: toChainEntityName('0xbe7707f5ce404db142e1379ea8ba646d150ebfd7'),
       amount: '0.000000000000000001',
       symbol: toEthereumSymbol(EthUnit.Ether),
     }
@@ -114,14 +115,16 @@ const { env } = process
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
     const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
-    console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
-    const decomposed = await ropsten.decomposeAction(transaction.actions[0])
-    console.log(JSON.stringify(decomposed))
     await transaction.prepareToBeSigned()
     await transaction.validate()
-    await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey('0x201c20fa11e1dd63c7260f79570c6ffdbf5224db2468e930afe040c691da986b')])
     console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
+    const newTransaction = await ropsten.new.Transaction(defaultEthTxOptions)
+
+    await newTransaction.setFromRaw(transaction.raw)
+    console.info('SetFromRaw', newTransaction.actions)
+
     console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action

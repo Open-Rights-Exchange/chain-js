@@ -197,7 +197,7 @@ export class EthereumTransaction implements Transaction {
       const trxOptions = this.getOptionsForEthereumJsTx()
       this._actionHelper = new EthereumActionHelper(raw, trxOptions)
       this._ethereumJsTx = new EthereumJsTx(this._actionHelper.raw, trxOptions)
-      this._requiresPrepare = true
+      this._requiresPrepare = !this.hasAllRequiredSignatures
       this._isValidated = false
     }
   }
@@ -391,11 +391,10 @@ export class EthereumTransaction implements Transaction {
    *  Throws if action.from is not a valid address */
   public get missingSignatures(): EthereumAddress[] {
     this.assertIsValidated()
-    const missingSignature = this.hasAllRequiredSignatures ? null : this.requiredAuthorization
     if (isNullOrEmpty(this.requiredAuthorization)) {
       throwNewError('Cant determine signatures required - set a from address or attach a signature')
     }
-    return [missingSignature] // if no values, return null instead of empty array
+    return this.hasAllRequiredSignatures ? null : [this.requiredAuthorization] // if no values, return null instead of empty array
   }
 
   // Fees
