@@ -3,6 +3,8 @@ import { toBuffer, BN } from 'ethereumjs-util'
 import { HEX_PREFIX, DEFAULT_TOKEN_PRECISION } from '../ethConstants'
 import { isANumber, getDecimalPlacesFromString, isNullOrEmpty, isAString } from '../../../helpers'
 import { throwNewError } from '../../../errors'
+import { ERC20_TYPES } from '../templates/abis/erc20Abi'
+import { EthereumActionContract } from '../models'
 
 /** Attempts to transform a value to a standard Buffer class */
 export function toEthBuffer(data: string | BN | Buffer | number): Buffer {
@@ -90,4 +92,16 @@ export function fromTokenValueString(value: string, base: number = 10, precision
     negativePrecision = -1 * precision
   }
   return toTokenValueString(value, base, negativePrecision)
+}
+
+export function matchKnownAbiTypes(contract: EthereumActionContract) {
+  const isERC20Abi = ERC20_TYPES.every(type => {
+    return contract.abi?.find((abiField: any) => {
+      return abiField.name === type.name && abiField.type === type.type
+    })
+  })
+
+  return {
+    erc20: isERC20Abi,
+  }
 }

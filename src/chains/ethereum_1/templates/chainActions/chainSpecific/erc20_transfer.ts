@@ -6,7 +6,7 @@ import {
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
 import { getArrayIndexOrNull } from '../../../../../helpers'
-import { ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
+import { matchKnownAbiTypes, ethereumTrxArgIsNullOrEmpty, toTokenValueString } from '../../../helpers'
 
 export interface Erc20TransferParams {
   contractAddress: EthereumAddress
@@ -32,7 +32,9 @@ export const composeAction = ({ contractAddress, from, precision, to, value }: E
 
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
-  if (contract?.abi === erc20Abi && contract?.method === 'transfer') {
+
+  const abiType = matchKnownAbiTypes(contract)
+  if (abiType.erc20 && contract?.method === 'transfer') {
     const returnData: Erc20TransferParams = {
       contractAddress: to,
       from,

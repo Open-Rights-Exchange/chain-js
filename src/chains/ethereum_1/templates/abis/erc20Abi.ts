@@ -1,6 +1,15 @@
 // abi originally generated using open zepplin erc20 standard
 // added issue, burn, and decimals
 
+export const ERC20_TYPES = [
+  { name: 'Approval', type: 'event' },
+  { name: 'Transfer', type: 'event' },
+  { name: 'approve', type: 'function' },
+  { name: 'balanceOf', type: 'function' },
+  { name: 'transfer', type: 'function' },
+  { name: 'totalSupply', type: 'function' },
+]
+
 export const erc20Abi: any[] = [
   {
     anonymous: false,
