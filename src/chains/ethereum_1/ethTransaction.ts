@@ -58,14 +58,11 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthereumTransactionOptions
 
-  private _requiresPrepare: boolean
-
   private _signBuffer: Buffer
 
   constructor(chainState: EthereumChainState, options?: EthereumTransactionOptions) {
     this._chainState = chainState
     this._options = options
-    this._requiresPrepare = true
     this.applyDefaultOptions()
   }
 
@@ -117,10 +114,10 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Header includes values included in transaction when sent to the chain
-   *  These values are set by prepareToBeSigned() is called since it includes gasPrice, gasLimit, etc.
+   *  These values are set by setRawProperties() is called since it includes gasPrice, gasLimit, etc.
    */
   get header(): EthereumTransactionHeader {
-    this.assertHasBeenPrepared()
+    this.assertHasRaw()
     const { nonce, gasPrice, gasLimit } = this.raw
     return {
       nonce: nullifyIfEmpty(bufferToHex(nonce)),
@@ -138,14 +135,14 @@ export class EthereumTransaction implements Transaction {
   get raw(): EthereumRawTransaction {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has no action. Set action or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     const { nonce, gasLimit, gasPrice, to, value, data, v, r, s } = this._ethereumJsTx
     return { nonce, gasLimit, gasPrice, to, value, data, v, r, s }
   }
 
-  /** Whether the raw transaction body has been set or prepared */
+  /** Whether the raw transaction body has been set (via setting action or setFromRaw()) */
   get hasRaw(): boolean {
     return !!this._ethereumJsTx
   }
@@ -155,22 +152,23 @@ export class EthereumTransaction implements Transaction {
     return false
   }
 
-  /** Generate the raw transaction body using the actions attached
-   *  Also adds a header to the transaction that is included when transaction is signed
+  /**
+   *  Updates 'raw' transaction properties using the actions attached
+   *  Creates and sets private _ethereumJsTx (web3 EthereumJsTx object)
+   *  Also adds header values (nonce, gasPrice, gasLimit) if not already set in action
    */
-  public async prepareToBeSigned(): Promise<void> {
+  private setRawProperties(): void {
     this.assertIsConnected()
     this.assertHasAction()
-    this.assertNoSignatures()
     this.assertHasFeeSetting()
     if (!this._actionHelper) {
-      throwNewError('Transaction serialization failure. Transaction has no actions.')
+      throwNewError('Failed to set raw transaction properties. Transaction has no actions.')
     }
     const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce } = this._options || {}
-    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, to, value, data } = this._actionHelper.raw
+    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, to, value, data, v, r, s } = this._actionHelper.raw
 
     // TODO Eth - should have a seperate function that calculates gasPrice and gasLimit
-    // should respect options passed in by action, then speccfic gasPrice and gasLimit in tx options
+    // should respect options passed in by action, then specific gasPrice and gasLimit in tx options
     // and if none of those exist, calculate them from desiredFee, maxFeeIncreasePercentage and executionPriority
 
     // Convert gas price returned from getGasPrice to Gwei
@@ -180,25 +178,30 @@ export class EthereumTransaction implements Transaction {
       toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))
     const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
     // EthereumJsTx  expects gasPrice and gasLimit in Gwei
-    const trxBody = { nonce, gasPrice, gasLimit, to, value, data }
+    const trxBody = { nonce, gasPrice, gasLimit, to, value, data, v, r, s }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._ethereumJsTx = new EthereumJsTx(trxBody, trxOptions)
     this.setNonceIfEmpty(this.senderAddress)
     this.setSignBuffer()
-    this._requiresPrepare = false
     this._isValidated = false
+  }
+
+  /**
+   *  Updates 'raw' transaction properties using the actions attached
+   *  Note: This function does not need to be called - it is provided for consistancy with other chain interfaces
+   *  Raw properties are preparred automatically when action(s) is set or setFromRaw() is called
+   */
+  public async prepareToBeSigned(): Promise<void> {
+    this.assertIsConnected()
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
   async setFromRaw(raw: EthereumActionHelperInput): Promise<void> {
     this.assertIsConnected()
-    this.assertNoSignatures()
     if (raw) {
       const trxOptions = this.getOptionsForEthereumJsTx()
       this._actionHelper = new EthereumActionHelper(raw, trxOptions)
-      this._ethereumJsTx = new EthereumJsTx(this._actionHelper.raw, trxOptions)
-      this._requiresPrepare = true
-      this._isValidated = false
+      this.setRawProperties()
     }
   }
 
@@ -212,6 +215,7 @@ export class EthereumTransaction implements Transaction {
   /** calculates a unique nonce value for the tx (if not already set) by using the chain transaction count for a given address */
   async setNonceIfEmpty(fromAddress: EthereumAddress | EthereumAddressBuffer) {
     if (isNullOrEmpty(fromAddress)) return
+    this.assertHasRaw()
     const address = convertBufferToHexStringIfNeeded(fromAddress)
     if (!this.raw?.nonce || bufferToHex(this.raw?.nonce) === EMPTY_HEX) {
       this._ethereumJsTx.nonce = toEthBuffer(
@@ -266,8 +270,7 @@ export class EthereumTransaction implements Transaction {
     }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._actionHelper = new EthereumActionHelper(action, trxOptions)
-    this._requiresPrepare = true
-    this._isValidated = false
+    this.setRawProperties()
   }
 
   // validation
@@ -276,12 +279,7 @@ export class EthereumTransaction implements Transaction {
    *  Throws if any problems */
   public async validate(): Promise<void> {
     if (!this.hasRaw) {
-      throwNewError(
-        'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
-      )
-    }
-    if (this._requiresPrepare) {
-      throwNewError('Transaction missing header params. Call transaction.prepareToBeSigned()')
+      throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
     }
     // make sure the from address is a valid Eth address
     this.assertFromIsValid()
@@ -312,13 +310,14 @@ export class EthereumTransaction implements Transaction {
 
   /** Add signature to raw transaction - Accepts array with exactly one signature */
   addSignatures = (signatures: EthereumSignature[]): void => {
-    if (isNullOrEmpty(signatures)) {
+    if (isNullOrEmpty(signatures) && this.hasRaw) {
       this._ethereumJsTx.v = null
       this._ethereumJsTx.r = null
       this._ethereumJsTx.s = null
     } else if (!isArrayLengthOne(signatures)) {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     } else {
+      this.assertHasRaw()
       const signature = signatures[0]
       this.assertValidSignature(signature)
       const { v, r, s } = signature
@@ -391,11 +390,10 @@ export class EthereumTransaction implements Transaction {
    *  Throws if action.from is not a valid address */
   public get missingSignatures(): EthereumAddress[] {
     this.assertIsValidated()
-    const missingSignature = this.hasAllRequiredSignatures ? null : this.requiredAuthorization
     if (isNullOrEmpty(this.requiredAuthorization)) {
       throwNewError('Cant determine signatures required - set a from address or attach a signature')
     }
-    return [missingSignature] // if no values, return null instead of empty array
+    return this.hasAllRequiredSignatures ? null : [this.requiredAuthorization] // if no values, return null instead of empty array
   }
 
   // Fees
@@ -408,7 +406,7 @@ export class EthereumTransaction implements Transaction {
   /** Gets estimated cost in gas to execute this transaction (at current chain rates) */
   public async resourcesRequired(): Promise<EthereumTransactionCost> {
     let gas: string
-    this.assertHasBeenPrepared()
+    this.assertHasAction()
     try {
       const trxOptions = this.getOptionsForEthereumJsTx()
       const input = {
@@ -429,7 +427,6 @@ export class EthereumTransaction implements Transaction {
   /** Gets the estimated cost for this transaction
    *  if refresh = true, get updated cost from chain */
   async getEstimatedGas(refresh: boolean = false) {
-    this.assertHasBeenPrepared()
     if (isNullOrEmpty(this._estimatedGas) || refresh) {
       await this.resourcesRequired()
     }
@@ -440,7 +437,7 @@ export class EthereumTransaction implements Transaction {
   public async getSuggestedFee(
     priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
   ): Promise<EthereumTransactionCost> {
-    this.assertHasBeenPrepared()
+    this.assertHasAction()
     const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
     let gasPriceBN = new BN(gasPriceString)
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
@@ -456,7 +453,6 @@ export class EthereumTransaction implements Transaction {
 
   /** set the fee that you would like to pay - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
   public async setDesiredFee(fee: EthereumTransactionCost) {
-    this.assertHasBeenPrepared()
     const gasRequired = new BN((await this.resourcesRequired())?.gas)
     const totalFeeBN = new BN(fee.gas, 10)
     const gasPrice = totalFeeBN.div(gasRequired)
@@ -569,7 +565,7 @@ export class EthereumTransaction implements Transaction {
   /** Throws if not validated */
   private assertIsValidated(): void {
     this.assertIsConnected()
-    this.assertHasBeenPrepared()
+    this.assertHasRaw()
     if (!this._isValidated) {
       throwNewError('Transaction not validated. Call transaction.validate() first.')
     }
@@ -578,28 +574,21 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from (if present) is a valid ethereum address */
   private assertFromIsValid(): void {
     if (!this.isFromEmptyOrNullAddress() && !isValidEthereumAddress(this?.action?.from)) {
-      throwNewError('Transaction action[].from address (or address of attached signature) is not valid.')
+      throwNewError('Transaction action.from address is not valid.')
     }
   }
 
   /** Throws if an action isn't attached to this transaction */
   private assertHasAction() {
     if (isNullOrEmpty(this._actionHelper)) {
-      throwNewError('Transaction has no action. You can set the action using transaction.actions.')
-    }
-  }
-
-  /** Throws if no raw transaction body */
-  private assertHasBeenPrepared(): void {
-    if (this._requiresPrepare === true) {
-      throwNewError('Transaction needs to finish being prepped. Call prepareToBeSigned().')
+      throwNewError('Transaction has no action. You can set the action using transaction.actions or setFromRaw().')
     }
   }
 
   /** Throws if no raw transaction body */
   private assertHasRaw(): void {
     if (!this.hasRaw) {
-      throwNewError('Transaction doenst have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
+      throwNewError('Transaction doesnt have a transaction body. Set action or use setFromRaw().')
     }
   }
 
