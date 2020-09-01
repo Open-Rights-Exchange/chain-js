@@ -13,13 +13,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/open-rights-exchange/chain-js.git"
+    "url": "git+https://github.com/TeamAikon/chain-js.git"
   },
-  "author": "Open Rights Exchange",
+  "author": "AIKON",
   "bugs": {
-    "url": "https://github.com/open-rights-exchange/chain-js/issues"
+    "url": "https://github.com/TeamAikon/chain-js/issues"
   },
-  "homepage": "https://github.com/open-rights-exchange/chain-js#readme",
+  "homepage": "https://github.com/TeamAikon/chain-js#readme",
   "devDependencies": {
     "@types/jest": "^24.0.24",
     "@types/node": "^13.1.0",
