@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/chain-js.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/chain-js)
+[![CircleCI](https://circleci.com/gh/TeamAikon/chain-js.svg?style=svg)](https://circleci.com/gh/TeamAikon/chain-js)
 
 <img src="./docs/images/chainjs_logo.png" width="200" >
 
