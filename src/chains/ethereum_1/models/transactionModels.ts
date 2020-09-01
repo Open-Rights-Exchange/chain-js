@@ -41,6 +41,9 @@ export type EthereumRawTransactionAction = {
   to?: EthereumAddressBuffer
   value?: Buffer
   data?: Buffer
+  v?: Buffer
+  r?: Buffer
+  s?: Buffer
 }
 
 /** Transaction data that support multiple types for each field (e.g. Buffer, hex string, etc.) */
