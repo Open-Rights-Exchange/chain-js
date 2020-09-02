@@ -164,8 +164,18 @@ export class EthereumTransaction implements Transaction {
     if (!this._actionHelper) {
       throwNewError('Failed to set raw transaction properties. Transaction has no actions.')
     }
-    const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce } = this._options || {}
-    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, to, value, data, v, r, s } = this._actionHelper.raw
+    const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce: nonceOptions } = this._options || {}
+    const {
+      gasPrice: gasPriceAction,
+      gasLimit: gasLimitAction,
+      nonce: nonceAction,
+      to,
+      value,
+      data,
+      v,
+      r,
+      s,
+    } = this._actionHelper.raw
 
     // TODO Eth - should have a seperate function that calculates gasPrice and gasLimit
     // should respect options passed in by action, then specific gasPrice and gasLimit in tx options
@@ -177,6 +187,7 @@ export class EthereumTransaction implements Transaction {
       nullifyIfEmpty(gasPriceOptions) ||
       toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))
     const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
+    const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
     // EthereumJsTx  expects gasPrice and gasLimit in Gwei
     const trxBody = { nonce, gasPrice, gasLimit, to, value, data, v, r, s }
     const trxOptions = this.getOptionsForEthereumJsTx()
