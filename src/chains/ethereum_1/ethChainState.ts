@@ -159,7 +159,7 @@ export class EthereumChainState {
   /** Retrieve a the current price of gas from the chain */
   async getCurrentGasPriceFromChain(): Promise<string> {
     try {
-      const gasPrice = await this._web3.eth.getGasPrice()
+      const gasPrice = await this._web3.eth.getGasPrice() // returns gas price in wei
       return gasPrice
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
@@ -178,7 +178,7 @@ export class EthereumChainState {
    *  Useful to calculate transaction nonce propery */
   public async getTransactionCount(address: EthereumAddress, defaultBlock: EthereumBlockNumber): Promise<number> {
     try {
-      return this._web3.eth.getTransactionCount(ensureHexPrefix(address), defaultBlock)
+      return await this._web3.eth.getTransactionCount(ensureHexPrefix(address), defaultBlock)
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
