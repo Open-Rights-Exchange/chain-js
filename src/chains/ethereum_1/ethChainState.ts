@@ -156,10 +156,10 @@ export class EthereumChainState {
     }
   }
 
-  /** Retrieve a the current price of gas from the chain */
+  /** Retrieve a the current price of gas from the chain in units of Wei */
   async getCurrentGasPriceFromChain(): Promise<string> {
     try {
-      const gasPrice = await this._web3.eth.getGasPrice() // returns gas price in wei
+      const gasPrice = await this._web3.eth.getGasPrice()
       return gasPrice
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
