@@ -157,7 +157,7 @@ export class EthereumActionHelper {
   }
 
   /** update a single property in this action */
-  updateActionProperty(propertyName: string, value: any) {
+  private updateActionProperty(propertyName: string, value: any) {
     const actionInput: EthereumTransactionAction & IndexedObject = this.action
     actionInput[propertyName] = value
     this.assertAndValidateEthereumActionInput(actionInput)
