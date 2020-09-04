@@ -29,7 +29,7 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
     const returnData: EthTransferParams = {
       // coerce to string as EthereumAddress could be Buffer type
       to: toChainEntityName(to as string),
-      from: toChainEntityName(from as string),
+      from: from ? toChainEntityName(from as string) : null,
       value: value as string,
     }
     const partial = !returnData?.from

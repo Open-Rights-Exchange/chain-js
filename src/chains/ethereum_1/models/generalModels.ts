@@ -50,6 +50,7 @@ export type EthereumNativeChainInfo = {
   chainId: number
   gasLimit: number
   gasUsed: number
+  /** current chain gas price in Wei */
   currentGasPrice: string
 }
 
