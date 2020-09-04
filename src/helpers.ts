@@ -1,3 +1,4 @@
+import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
 import { TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
@@ -247,6 +248,19 @@ export function byteArrayToHexString(value: Uint8Array): string {
 /** Convert a byte array to hex string */
 export function bufferToHexString(value: Buffer): string {
   return value.toString('hex')
+}
+
+/** convert a decimal number string to a hex string - supports long decimals (uses BN)
+ *  e.g. '16' => '0xA'  */
+export function decimalToHexString(value: string) {
+  return `0x${new BN(value, 10).toString('hex')}`
+}
+
+/** Converts a decimal string to a hex string
+ *  If already hex string, returns same value */
+export function toHexStringIfNeeded(value: any) {
+  if (!isAString(value) || value.startsWith('0x')) return value
+  return decimalToHexString(value)
 }
 
 /** Whether array is exactly length of 1 */

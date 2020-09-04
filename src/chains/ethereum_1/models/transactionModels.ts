@@ -46,6 +46,7 @@ export type EthereumRawTransactionAction = {
   s?: Buffer
 }
 
+// todo: strongly type this to mirror EthereumJsTx - but also allow decimal string for gasPrice, gasLimit, value
 /** Transaction data that support multiple types for each field (e.g. Buffer, hex string, etc.) */
 export type EthereumActionHelperInput = {
   nonce?: EthereumMultiValue
@@ -86,9 +87,9 @@ export type EthereumTransactionHeader = {
 
 /** Transaction 'header' options set to chain along with transaction */
 export type EthereumTransactionOptions = {
-  nonce?: EthereumMultiValue
-  gasPrice?: EthereumMultiValue
-  gasLimit?: EthereumMultiValue
+  nonce?: string
+  gasPrice?: string
+  gasLimit?: string
   chain: number | string
   hardfork: string
   maxFeeIncreasePercentage?: number
@@ -112,7 +113,13 @@ export type EthereumTxResult = {
 /** Response from chain after sending transaction */
 export type EthereumTxChainResponse = TransactionReceipt
 
-/** Cost in chain resources to run the transaction */
+/** Cost in chain resources to run the transaction
+ *  Fee is in GWEI */
 export type EthereumTransactionCost = {
+  fee: string
+}
+
+/** Resouces required for transaction (in terms of gas) */
+export type EthereumTransactionResources = {
   gas: string
 }

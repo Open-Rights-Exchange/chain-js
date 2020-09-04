@@ -1,6 +1,6 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
 import { isString } from 'util'
-import { isNullOrEmpty, isABuffer } from '../../../helpers'
+import { isNullOrEmpty, isABuffer, isAString } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -39,7 +39,7 @@ export function isValidSignature(v: number, r: Buffer, s: Buffer): boolean {
 export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): value is EthereumTxData {
   if (isNullOrEmpty(value)) return false
   // return false for '0x' as well as empty string
-  if (typeof value === 'string') return ensureHexPrefix(value).length > 2
+  if (isAString(value)) return ensureHexPrefix(value as string).length > 2
   return true
 }
 
@@ -81,9 +81,9 @@ export function isValidEthereumAddress(value: string | Buffer | EthereumAddress)
  */
 export function toEthereumTxData(value: string | Buffer): EthereumTxData {
   if (isValidEthereumTxData(value)) {
-    return typeof value === 'string' ? (ensureHexPrefix(value) as EthereumTxData) : (value as EthereumTxData)
+    return isAString(value) ? (ensureHexPrefix(value) as EthereumTxData) : (value as EthereumTxData)
   }
-  throw new Error(`Not a valid ethereum public key:${value}.`)
+  throw new Error(`Not valid ethereum transaction data:${JSON.stringify(value)}.`)
 }
 
 /** Accepts hex string checks if a valid ethereum public key
@@ -113,7 +113,7 @@ export function toEthereumSignature(value: string | ECDSASignature): EthereumSig
   if (isValidEthereumSignature(value)) {
     return value
   }
-  throw new Error(`Not a valid ethereum signature:${value}.`)
+  throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
 
 /** Accepts hex string checks if a valid ethereum address

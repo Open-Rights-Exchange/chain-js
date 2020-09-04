@@ -23,9 +23,6 @@ import {
 import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
 import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecific/erc721_transferFrom'
-
-import { erc20Abi } from '../templates/abis/erc20Abi'
-import { erc721Abi } from '../templates/abis/erc721Abi'
 import { EthTransferParams } from '../templates/chainActions/chainSpecific/eth_transfer'
 
 require('dotenv').config()
@@ -50,7 +47,7 @@ const { env } = process
         hardFork: 'istanbul',
       },
       defaultTransactionSettings: {
-        maxFeeIncreasePercentage: 0.2,
+        maxFeeIncreasePercentage: 20,
         executionPriority: EthereumTxExecutionPriority.Average,
       },
     }
@@ -103,7 +100,7 @@ const { env } = process
     }
 
     const defaultEthTxOptions: EthereumTransactionOptions = {
-      gasLimit: 145000,
+      // gasLimit: '145000',
       chain: 'ropsten',
       hardfork: 'istanbul',
     }
