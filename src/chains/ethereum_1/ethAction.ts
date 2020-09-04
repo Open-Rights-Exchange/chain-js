@@ -1,6 +1,14 @@
 import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
+import {
+  decimalToHexString,
+  isABuffer,
+  isNullOrEmpty,
+  nullifyIfEmpty,
+  removeEmptyValuesInJsonObject,
+  toBuffer,
+  toHexStringIfNeeded,
+} from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   ethereumTrxArgIsNullOrEmpty,
@@ -19,6 +27,7 @@ import {
 } from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
+import { IndexedObject } from '../../models'
 
 export type ActionChainOptions = {
   chain: string
@@ -62,7 +71,24 @@ export class EthereumActionHelper {
 
   /** apply rules for imput params, set class private properties, throw if violation */
   private assertAndValidateEthereumActionInput(actionInput: EthereumActionHelperInput) {
-    const { nonce, gasPrice, gasLimit, from, to, data, value, v, r, s, contract } = actionInput
+    const {
+      nonce,
+      gasPrice: gasPriceInput,
+      gasLimit: gasLimitInput,
+      from,
+      to,
+      data,
+      value: valueInput,
+      v,
+      r,
+      s,
+      contract,
+    } = actionInput
+
+    // convert decimal strings to hex strings
+    const gasPrice = toHexStringIfNeeded(gasPriceInput)
+    const gasLimit = toHexStringIfNeeded(gasLimitInput)
+    const value = toHexStringIfNeeded(valueInput)
 
     // cant provide both contract and data properties
     if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
@@ -80,7 +106,7 @@ export class EthereumActionHelper {
     }
 
     // set data from provided data or contract properties
-    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = data
+    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(data)
     else if (!ethereumTrxArgIsNullOrEmpty(contract)) {
       this._data = generateDataFromContractAction(contract)
       this._contract = contract
@@ -112,6 +138,31 @@ export class EthereumActionHelper {
     this._s = bufferToHex(ethJsTx.s)
   }
 
+  /** set gasLimit - value should be a decimal string in units of gas e.g. '1.0' */
+  set gasLimit(value: string) {
+    const valueHex = decimalToHexString(value)
+    this.updateActionProperty('gasLimit', valueHex)
+  }
+
+  /** set gasPrice - value should be a decimal string in units of GWEI e.g. '0.00001' */
+  set gasPrice(value: string) {
+    const valueHex = decimalToHexString(value)
+    this.updateActionProperty('gasPrice', valueHex)
+  }
+
+  /** set nonce - value is a string or Buffer */
+  set nonce(value: string | Buffer) {
+    const valueBuffer = isABuffer(value) ? value : toBuffer(value)
+    this.updateActionProperty('nonce', valueBuffer)
+  }
+
+  /** update a single property in this action */
+  updateActionProperty(propertyName: string, value: any) {
+    const actionInput: EthereumTransactionAction & IndexedObject = this.action
+    actionInput[propertyName] = value
+    this.assertAndValidateEthereumActionInput(actionInput)
+  }
+
   /** Checks is data value is empty or implying 0 */
   get hasData(): boolean {
     return !ethereumTrxArgIsNullOrEmpty(this._data)
@@ -126,7 +177,7 @@ export class EthereumActionHelper {
       gasPrice: ethereumTrxArgIsNullOrEmpty(this._gasPrice) ? null : this._gasPrice,
       to: ethereumTrxArgIsNullOrEmpty(this._to) ? null : this._to,
       from: ethereumTrxArgIsNullOrEmpty(this._from) ? null : this._from,
-      data: ethereumTrxArgIsNullOrEmpty(this._data) ? null : this._data,
+      data: ethereumTrxArgIsNullOrEmpty(this._data) ? null : toEthereumTxData(this._data),
       value: ethereumTrxArgIsNullOrEmpty(this._value) ? null : this._value,
       v: ethereumTrxArgIsNullOrEmpty(this._v) ? null : this._v,
       r: ethereumTrxArgIsNullOrEmpty(this._r) ? null : this._r,
