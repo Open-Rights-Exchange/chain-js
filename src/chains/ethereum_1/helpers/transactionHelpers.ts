@@ -73,3 +73,9 @@ export function generateDataFromContractAction(contractAction: EthereumActionCon
   const methodHex = functionSignatureToHex(abiToFunctionSignature(method, abi))
   return toEthereumTxData(contract.methods[methodHex](...parameters).encodeABI())
 }
+
+/** if value is null or a empty Eth value (e.g. '0x00..') returns null, otherwise return the value passed-in */
+export function nullifyIfEmptyEthereumValue(value: any) {
+  if (ethereumTrxArgIsNullOrEmpty(value)) return null
+  return value
+}
