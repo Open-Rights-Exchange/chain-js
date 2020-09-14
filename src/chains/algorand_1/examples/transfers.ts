@@ -62,7 +62,7 @@ const payRawTransaction: any = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoBetanetEndpoints)
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -87,6 +87,9 @@ async function run() {
   
   console.log('required signatures (before signing): ', transaction.missingSignatures)
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
+
+  console.log('transaction with signature:', transaction.actions[0])
+
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
