@@ -38,7 +38,7 @@ const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
 }
 
 const composeAlgoPaymentParams: Partial<AlgorandActionPaymentParams> = {
-  from: 'WCZV75K44NWDFWTYJCCOJ6NZC2TYAODLIC7GFMMXRKY2JNPW3LTB4IUL3U',
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
   note: 'transfer memo',
   amount: 1,
@@ -86,7 +86,7 @@ async function run() {
   await transaction.validate()
   
   console.log('required signatures (before signing): ', transaction.missingSignatures)
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOBETANET_rekeyaccount_PRIVATE_KEY_A)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
