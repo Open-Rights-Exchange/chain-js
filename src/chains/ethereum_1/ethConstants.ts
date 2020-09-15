@@ -13,8 +13,8 @@ export const DEFAULT_BLOCKS_TO_CHECK = 20
 export const DEFAULT_CHECK_INTERVAL = 500
 export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 
-// default values for ETH transfers
-export const DEFAULT_ETH_SYMBOL = EthUnit.Wei
+// default unit for ETH transfers
+export const DEFAULT_ETH_UNIT = EthUnit.Wei
 
 // address realted
 export const ZERO_HEX = '0x00'
