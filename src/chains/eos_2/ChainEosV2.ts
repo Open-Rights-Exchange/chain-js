@@ -81,8 +81,9 @@ class ChainEosV2 implements Chain {
   }
 
   /** Returns chain native token symbol and default token contract address */
-  public get nativeToken(): { symbol: EosSymbol; tokenAddress: EosEntityName } {
+  public get nativeToken(): { defaultUnit: string; symbol: EosSymbol; tokenAddress: EosEntityName } {
     return {
+      defaultUnit: NATIVE_CHAIN_TOKEN_SYMBOL, // EOS doesnt use a seperate unit for the token - just returning the EOS symbol
       symbol: toEosSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
       tokenAddress: toEosEntityName(NATIVE_CHAIN_TOKEN_ADDRESS),
     }
