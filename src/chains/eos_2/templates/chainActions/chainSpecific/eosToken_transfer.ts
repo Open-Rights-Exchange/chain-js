@@ -6,7 +6,7 @@ import {
   toEosAsset,
   EosAssetHelper,
 } from '../../../helpers'
-import { DEFAULT_CHAIN_TOKEN_ADDRESS } from '../../../eosConstants'
+import { NATIVE_CHAIN_TOKEN_ADDRESS } from '../../../eosConstants'
 
 const actionName = 'transfer'
 export interface EosTokenTransferParams {
@@ -20,7 +20,7 @@ export interface EosTokenTransferParams {
 }
 
 export const composeAction = ({
-  contractName = toEosEntityName(DEFAULT_CHAIN_TOKEN_ADDRESS),
+  contractName = toEosEntityName(NATIVE_CHAIN_TOKEN_ADDRESS),
   fromAccountName,
   toAccountName,
   amount,

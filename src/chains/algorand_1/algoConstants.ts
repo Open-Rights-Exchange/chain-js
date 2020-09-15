@@ -12,6 +12,6 @@ export const ALGORAND_TRX_COMFIRMATION_ROUNDS = 1000
 export const DEFAULT_TIMEOUT_FOR_TRX_CONFIRM = 500
 export const DEFAULT_ALGO_SYMBOL = AlgorandUnit.Microalgo
 /** The chain address of the default token contract (if any) */
-export const DEFAULT_CHAIN_TOKEN_ADDRESS: any = null
-// token related
-export const NATIVE_CHAIN_SYMBOL = 'algo'
+export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
+// The symbol for the native token/currency on the chain
+export const NATIVE_CHAIN_TOKEN_SYMBOL = 'algo'

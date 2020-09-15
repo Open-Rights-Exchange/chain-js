@@ -20,7 +20,7 @@ import { AlgorandAccount } from './algoAccount'
 import { AlgorandTransaction } from './algoTransaction'
 import { composeAction } from './algoCompose'
 import { decomposeAction } from './algoDecompose'
-import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './algoConstants'
+import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS } from './algoConstants'
 import {
   toAlgorandSymbol,
   isValidAlgorandPrivateKey,
@@ -199,8 +199,8 @@ class ChainAlgorandV1 implements Chain {
   /** Returns chain native token symbol and default token contract address */
   public get nativeToken(): { symbol: AlgorandSymbol; tokenAddress: AlgorandAddress } {
     return {
-      symbol: toAlgorandSymbol(NATIVE_CHAIN_SYMBOL),
-      tokenAddress: DEFAULT_CHAIN_TOKEN_ADDRESS,
+      symbol: toAlgorandSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
+      tokenAddress: NATIVE_CHAIN_TOKEN_ADDRESS,
     }
   }
 

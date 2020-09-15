@@ -18,8 +18,8 @@ export const DEFAULT_CREATEESCROW_CONTRACT = 'createescrow'
 export const DEFAULT_ORE_ACCOUNT_PRICEKEY = 1
 export const DEFAULT_CREATEESCROW_APPNAME = 'free'
 
-// token related
-export const NATIVE_CHAIN_SYMBOL = 'EOS'
+// The symbol for the native token/currency on the chain
+export const NATIVE_CHAIN_TOKEN_SYMBOL = 'EOS'
 
-/** The chain address of the default token contract (if any) */
-export const DEFAULT_CHAIN_TOKEN_ADDRESS = 'eosio.token'
+/** The chain address of the native (default) token contract (if any) */
+export const NATIVE_CHAIN_TOKEN_ADDRESS = 'eosio.token'

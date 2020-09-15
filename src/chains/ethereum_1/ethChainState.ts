@@ -22,7 +22,7 @@ import {
 } from './models'
 import { ensureHexPrefix, bigNumberToString } from './helpers'
 import { erc20Abi } from './templates/abis/erc20Abi'
-import { NATIVE_CHAIN_SYMBOL } from './ethConstants'
+import { NATIVE_CHAIN_TOKEN_SYMBOL } from './ethConstants'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -195,7 +195,7 @@ export class EthereumChainState {
     tokenAddress?: EthereumAddress,
   ): Promise<{ balance: string }> {
     // Get balance for Eth
-    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_SYMBOL.toLowerCase()) {
+    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_TOKEN_SYMBOL.toLowerCase()) {
       return { balance: await this.getEthBalance(account) }
     }
     if (isNullOrEmpty(tokenAddress)) {

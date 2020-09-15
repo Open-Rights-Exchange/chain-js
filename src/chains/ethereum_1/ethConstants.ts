@@ -23,12 +23,11 @@ export const EMPTY_HEX = '0x'
 export const HEX_PREFIX = '0x'
 
 // token related
-export const NATIVE_CHAIN_SYMBOL = 'ETH'
+export const NATIVE_CHAIN_TOKEN_SYMBOL = 'ETH'
+/** The chain address of the default token/currency contract (if any) */
+export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
 export const DEFAULT_TOKEN_PRECISION = 0 // assumes a token has no digits of precision unless specified
 export const ETH_TOKEN_PRECISION = 18
-
-/** The chain address of the default token contract (if any) */
-export const DEFAULT_CHAIN_TOKEN_ADDRESS: any = null
 
 export const TRANSACTION_FEE_PRIORITY_MULTIPLIERS: IndexedObject = {
   slow: 0.96,
