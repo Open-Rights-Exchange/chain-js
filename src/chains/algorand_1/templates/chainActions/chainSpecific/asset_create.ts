@@ -51,7 +51,8 @@ export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedPa
   if (!isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
-  return { ...composedAction }
+  const actionHelper = new AlgorandActionHelper(composedAction)
+  return actionHelper.action // convert raw action to use hex strings
 }
 
 export const decomposeAction = (
