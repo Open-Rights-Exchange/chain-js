@@ -72,9 +72,9 @@ export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCOD
 }
 
 // convert buffer into a string
-export function bufferToString(buffer: Buffer) {
+export function bufferToString(buffer: Buffer, encoding: string = 'utf8') {
   if (!buffer) return null
-  return buffer.toString()
+  return buffer.toString(encoding)
 }
 
 // convert buffer into a Uint8Array
