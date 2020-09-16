@@ -7,14 +7,14 @@ import {
   AlgorandTxActionRaw,
 } from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
-import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
+import { DEFAULT_ALGO_UNIT } from '../../../algoConstants'
 import {
   composeAction as algoPaymentComposeAction,
   decomposeAction as algoPaymentDecomposeAction,
 } from '../chainSpecific/payment'
 
 export const composeAction = (params: ValueTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
-  const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
+  const { amount: amountString, symbol = DEFAULT_ALGO_UNIT } = params
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
   return algoPaymentComposeAction(
     {

@@ -22,6 +22,7 @@ import {
   EthereumChainActionType,
   EthereumDecomposeReturn,
   EthereumSymbol,
+  EthUnit,
 } from './models'
 import {
   isValidEthereumDateString,
@@ -35,7 +36,7 @@ import {
   toEthereumSignature,
   toEthereumSymbol,
 } from './helpers'
-import { NATIVE_CHAIN_SYMBOL, DEFAULT_CHAIN_TOKEN_ADDRESS } from './ethConstants'
+import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -94,10 +95,11 @@ class ChainEthereumV1 implements Chain {
   }
 
   /** Returns chain native token symbol and default token contract address */
-  public get nativeToken(): { symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
+  public get nativeToken(): { defaultUnit: EthUnit, symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
     return {
-      symbol: toEthereumSymbol(NATIVE_CHAIN_SYMBOL),
-      tokenAddress: DEFAULT_CHAIN_TOKEN_ADDRESS,
+      defaultUnit: DEFAULT_ETH_UNIT,
+      symbol: toEthereumSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
+      tokenAddress: NATIVE_CHAIN_TOKEN_ADDRESS,
     }
   }
 

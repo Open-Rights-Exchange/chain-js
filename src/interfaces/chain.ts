@@ -28,7 +28,7 @@ export interface Chain {
   /** Returns chain plug-in name */
   description: string
   /** Returns the native (default) asset symbol for the chain and default token address (if any) */
-  nativeToken: { symbol: ChainSymbol; tokenAddress: any }
+  nativeToken: { defaultUnit: string; symbol: ChainSymbol; tokenAddress: any }
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   connect(): Promise<void>
   /** Compose an object for a chain contract action */

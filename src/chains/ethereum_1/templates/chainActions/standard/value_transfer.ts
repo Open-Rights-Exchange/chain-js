@@ -1,6 +1,6 @@
 import { EthUnit, EthereumTransactionAction } from '../../../models'
 import { toWeiString } from '../../../helpers'
-import { DEFAULT_ETH_SYMBOL } from '../../../ethConstants'
+import { DEFAULT_ETH_UNIT } from '../../../ethConstants'
 import { ChainActionType, ValueTransferParams, ActionDecomposeReturn } from '../../../../../models'
 import {
   composeAction as ethTransferComposeAction,
@@ -10,7 +10,7 @@ import {
 
 /** Sends ETH (in units of Wei) */
 export const composeAction = (params: ValueTransferParams) => {
-  const { fromAccountName, toAccountName, amount, symbol = DEFAULT_ETH_SYMBOL } = params
+  const { fromAccountName, toAccountName, amount, symbol = DEFAULT_ETH_UNIT } = params
   const value = toWeiString(amount, symbol as EthUnit) // using 0 precision since the toWei already converts to right precision for EthUnit
   return ethTransferComposeAction({
     from: fromAccountName,
