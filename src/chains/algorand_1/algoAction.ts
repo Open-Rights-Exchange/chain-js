@@ -157,14 +157,15 @@ export class AlgorandActionHelper {
 
   /** Transaction-specific properties - required for sending action to the chain */
   public get transactionHeaderParams(): AlgorandTxHeaderParams {
-    return {
+    const header: AlgorandTxHeaderParams = {
       genesisID: this.raw.genesisID,
       genesisHash: bufferToString(this.raw.genesisHash, 'base64'),
       firstRound: this.raw.firstRound,
       lastRound: this.raw.lastRound,
-      fee: this.raw.fee,
-      flatFee: this.raw.flatFee,
     }
+    if (!isNullOrEmpty(this.raw.fee)) header.fee = this.raw.fee
+    if (!isNullOrEmpty(this.raw.flatFee)) header.flatFee = this.raw.flatFee
+    return header
   }
 
   /** Action properties - excludes 'suggestedParams' fields (e.g. genesisID) */
@@ -217,8 +218,8 @@ export class AlgorandActionHelper {
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesishashb64, 'base64')
     rawAction.firstRound = rawAction.firstRound || chainTxParams.lastRound // start with the most recent chain round (chainTxParams.lastRound)
     rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
-    rawAction.fee = rawAction.flatFee === true ? rawAction.fee || chainTxParams.minFee : chainTxParams.minFee
-    rawAction.flatFee = rawAction.flatFee || false
+    rawAction.fee = rawAction.fee || chainTxParams.minFee
+    rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
   }
 
   /** Remove fields from object that are undefined, null, or empty */
