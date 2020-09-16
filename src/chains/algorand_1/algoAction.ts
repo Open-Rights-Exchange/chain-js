@@ -62,6 +62,7 @@ export class AlgorandActionHelper {
   public get action(): AlgorandTxAction {
     const returnVal = {
       ...this.raw,
+      genesisHash: this.raw.genesisHash ? bufferToString(this.raw.genesisHash, 'base64') : undefined,
       to: toAlgorandAddressFromRaw(this.raw.to),
       from: toAlgorandAddressFromRaw(this.raw.from),
       closeRemainderTo: toAlgorandAddressFromRaw(this.raw.closeRemainderTo),
@@ -158,7 +159,7 @@ export class AlgorandActionHelper {
   public get transactionHeaderParams(): AlgorandTxHeaderParams {
     return {
       genesisID: this.raw.genesisID,
-      genesisHash: this.raw.genesisHash,
+      genesisHash: bufferToString(this.raw.genesisHash, 'base64'),
       firstRound: this.raw.firstRound,
       lastRound: this.raw.lastRound,
       fee: this.raw.fee,
@@ -213,7 +214,7 @@ export class AlgorandActionHelper {
   applyCurrentTxHeaderParamsWhereNeeded(chainTxParams: AlgorandChainTransactionParamsStruct) {
     const rawAction = this.raw
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
-    rawAction.genesisHash = rawAction.genesisHash || chainTxParams.genesishashb64
+    rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesishashb64, 'base64')
     rawAction.firstRound = rawAction.firstRound || chainTxParams.lastRound // start with the most recent chain round (chainTxParams.lastRound)
     rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
     rawAction.fee = rawAction.flatFee === true ? rawAction.fee || chainTxParams.minFee : chainTxParams.minFee
