@@ -1,6 +1,12 @@
 import { BN } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
-import { ChainDateBrand, ChainEntityNameBrand, ChainSymbolBrand, EncryptedDataString } from '../../../models'
+import {
+  ChainDateBrand,
+  ChainEntityNameBrand,
+  ChainSymbolBrand,
+  EncryptedDataString,
+  TxExecutionPriority,
+} from '../../../models'
 import { EncryptionOptions, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
 
 /** Category of chain functions - useful in error mapping */
@@ -18,18 +24,11 @@ export enum EthereumBlockType {
   Pending = 'pending',
 }
 
-/** Transaction fee priority */
-export enum EthereumTxExecutionPriority {
-  Slow = 'slow',
-  Average = 'average',
-  Fast = 'fast',
-}
-
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
   defaultTransactionSettings: {
-    executionPriority: EthereumTxExecutionPriority
+    executionPriority: TxExecutionPriority
     maxFeeIncreasePercentage?: number
   }
 }

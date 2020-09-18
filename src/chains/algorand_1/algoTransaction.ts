@@ -2,7 +2,7 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import { Transaction } from '../../interfaces'
-import { ConfirmType } from '../../models'
+import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
 import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
@@ -596,5 +596,23 @@ export class AlgorandTransaction implements Transaction {
   /** JSON representation of transaction data */
   public toJson(): any {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
+  }
+
+  // Fees
+
+  public get supportsFee() {
+    return false
+  }
+
+  public async resourcesRequired(): Promise<any> {
+    return null
+  }
+
+  public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
+    return null
+  }
+
+  public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
+    return null
   }
 }

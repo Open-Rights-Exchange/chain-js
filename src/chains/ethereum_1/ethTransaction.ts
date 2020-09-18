@@ -4,7 +4,7 @@ import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
 import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ConfirmType } from '../../models'
+import { ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -20,7 +20,6 @@ import {
   EthereumActionHelperInput,
   EthereumTransactionCost,
   EthereumTransactionResources,
-  EthereumTxExecutionPriority,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
@@ -53,7 +52,7 @@ export class EthereumTransaction implements Transaction {
   /** Transaction object (using ethereumjs-tx library) */
   private _ethereumJsTx: EthereumJsTx
 
-  private _executionPriority: EthereumTxExecutionPriority
+  private _executionPriority: TxExecutionPriority
 
   private _maxFeeIncreasePercentage: number
 
@@ -76,7 +75,7 @@ export class EthereumTransaction implements Transaction {
     this._executionPriority =
       this._options?.executionPriority ??
       this._chainState?.chainSettings?.defaultTransactionSettings?.executionPriority ??
-      EthereumTxExecutionPriority.Average
+      TxExecutionPriority.Average
   }
 
   /** Multisig transactions are not supported by ethereum */
@@ -453,7 +452,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Get the suggested Eth fee (in GWEI) for this transaction */
   public async getSuggestedFee(
-    priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
+    priority: TxExecutionPriority = TxExecutionPriority.Average,
   ): Promise<EthereumTransactionCost> {
     this.assertHasAction()
     const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
@@ -513,11 +512,11 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Get the execution priority for the transaction - higher value attaches more fees */
-  public get executionPriority(): EthereumTxExecutionPriority {
+  public get executionPriority(): TxExecutionPriority {
     return this._executionPriority
   }
 
-  public set executionPriority(value: EthereumTxExecutionPriority) {
+  public set executionPriority(value: TxExecutionPriority) {
     this._executionPriority = value
   }
 
