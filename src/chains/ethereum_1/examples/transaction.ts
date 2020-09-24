@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
-import { ChainActionType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
+import { ChainActionType, ConfirmType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
 import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString, toEthereumSignature } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
@@ -100,7 +100,8 @@ const { env } = process
     }
 
     const defaultEthTxOptions: EthereumTransactionOptions = {
-      // gasLimit: '145000',
+      gasLimit: '300000',
+      gasPrice: '200',
       chain: 'ropsten',
       hardfork: 'istanbul',
     }

@@ -456,7 +456,12 @@ export class EthereumTransaction implements Transaction {
     priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
   ): Promise<EthereumTransactionCost> {
     this.assertHasAction()
-    const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
+    let gasPriceString
+    if (ethereumTrxArgIsNullOrEmpty(this._actionHelper.action.gasPrice)) {
+      gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
+    } else {
+      gasPriceString = this._actionHelper.raw.gasPrice
+    }
     let gasPriceinWeiBN = new BN(gasPriceString)
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
     gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)

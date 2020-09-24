@@ -2,11 +2,9 @@ import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
-  isABuffer,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
-  toBuffer,
   toHexStringIfNeeded,
 } from '../../helpers'
 import {
@@ -151,9 +149,9 @@ export class EthereumActionHelper {
   }
 
   /** set nonce - value is a string or Buffer */
-  set nonce(value: string | Buffer) {
-    const valueBuffer = isABuffer(value) ? value : toBuffer(value)
-    this.updateActionProperty('nonce', valueBuffer)
+  set nonce(value: string) {
+    const valueHex = decimalToHexString(value)
+    this.updateActionProperty('nonce', valueHex)
   }
 
   /** update a single property in this action */
