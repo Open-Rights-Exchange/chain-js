@@ -43,9 +43,9 @@ export class EthereumTransaction implements Transaction {
 
   private _chainState: EthereumChainState
 
-  private _actualCost: EthereumTransactionCost
+  private _actualCost: string
 
-  private _desiredFee: EthereumTransactionCost
+  private _desiredFee: string
 
   /** estimated gas for transacton - encoded as string to handle big numbers */
   private _estimatedGas: string
@@ -62,6 +62,8 @@ export class EthereumTransaction implements Transaction {
   private _options: EthereumTransactionOptions
 
   private _signBuffer: Buffer
+
+  private _transactionId: string
 
   constructor(chainState: EthereumChainState, options?: EthereumTransactionOptions) {
     this._chainState = chainState
@@ -454,33 +456,28 @@ export class EthereumTransaction implements Transaction {
   /** Get the suggested Eth fee (in GWEI) for this transaction */
   public async getSuggestedFee(
     priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
-  ): Promise<EthereumTransactionCost> {
+  ): Promise<string> {
     this.assertHasAction()
-    let gasPriceString
-    if (ethereumTrxArgIsNullOrEmpty(this._actionHelper.action.gasPrice)) {
-      gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
-    } else {
-      gasPriceString = this._actionHelper.raw.gasPrice
-    }
+    const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
     let gasPriceinWeiBN = new BN(gasPriceString)
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
     gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
-    const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas()))
-    return { fee: totalFee.toString(10) }
+    const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
+    return totalFee.toString(10)
   }
 
   /** get the desired fee to spend on sending the transaction */
-  public async getDesiredFee(): Promise<EthereumTransactionCost> {
+  public async getDesiredFee(): Promise<string> {
     return this._desiredFee
   }
 
   /** set the fee that you would like to pay (in GWEI) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
-  public async setDesiredFee(desiredFee: EthereumTransactionCost) {
-    const gasRequired = new BN((await this.resourcesRequired())?.gas)
-    const desiredFeeBn = new BN(desiredFee.fee, 10)
+  public async setDesiredFee(desiredFee: string) {
+    const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
+    const desiredFeeBn = new BN(desiredFee, 10)
     const gasPriceBn = desiredFeeBn.div(gasRequired)
     this._desiredFee = desiredFee
-    const gasPriceString = gasPriceBn.toString()
+    const gasPriceString = gasPriceBn.toString(10).slice(0, -9)
     const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
     const gasLimitString = (gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
     this._actionHelper.gasPrice = gasPriceString
@@ -488,8 +485,20 @@ export class EthereumTransaction implements Transaction {
     this.updateEthTxFromAction()
   }
 
+  public get transactionId(): string {
+    return this._transactionId
+  }
+
   /** get the actual cost for sending the transaction */
-  public async getActualCost(): Promise<EthereumTransactionCost> {
+  public async getActualCost(): Promise<string> {
+    if (!isNullOrEmpty(this._actualCost)) {
+      return this._actualCost
+    }
+    if (isNullOrEmpty(this.transactionId)) {
+      throwNewError('actualCost can not be retrieved before transaction is sent')
+    }
+    const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
+    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
     return this._actualCost
   }
 
@@ -559,6 +568,7 @@ export class EthereumTransaction implements Transaction {
     // generate nonce (using privateKey) if not already present
     await this.setNonceIfEmpty(bufferToHex(privateToAddress(privateKeyBuffer)))
     this._ethereumJsTx?.sign(privateKeyBuffer)
+    this._transactionId = `0x${this._ethereumJsTx.hash(true).toString('hex')}`
   }
 
   // send
@@ -574,8 +584,6 @@ export class EthereumTransaction implements Transaction {
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
     const signedTransaction = bufferToHex(this._ethereumJsTx.serialize())
     const response = await this._chainState.sendTransaction(signedTransaction, waitForConfirm, communicationSettings)
-    // todo eth - this code likely doesnt work - it looks like it returns the property not the actual spend
-    // this._actualCost = { gas: this._ethereumJsTx.gasPrice.toString() }
     return response
   }
 

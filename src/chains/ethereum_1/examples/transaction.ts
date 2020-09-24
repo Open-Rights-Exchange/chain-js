@@ -24,6 +24,7 @@ import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
 import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecific/erc721_transferFrom'
 import { EthTransferParams } from '../templates/chainActions/chainSpecific/eth_transfer'
+import { EthereumTransaction } from '../ethTransaction'
 
 require('dotenv').config()
 
@@ -100,8 +101,6 @@ const { env } = process
     }
 
     const defaultEthTxOptions: EthereumTransactionOptions = {
-      gasLimit: '300000',
-      gasPrice: '200',
       chain: 'ropsten',
       hardfork: 'istanbul',
     }
@@ -110,17 +109,20 @@ const { env } = process
     await ropsten.connect()
 
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
-    const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    const transaction = (await ropsten.new.Transaction(defaultEthTxOptions)) as EthereumTransaction
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     console.log(JSON.stringify(decomposed))
+    const fee = await transaction.getSuggestedFee(EthereumTxExecutionPriority.Fast)
+    transaction.setDesiredFee(fee)
     await transaction.prepareToBeSigned()
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('send response:', JSON.stringify(await transaction.send()))
+    console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    console.log(await transaction.getActualCost())
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
     // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
