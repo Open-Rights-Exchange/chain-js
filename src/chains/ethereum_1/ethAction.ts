@@ -2,6 +2,7 @@ import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
+  isAString,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
@@ -83,8 +84,13 @@ export class EthereumActionHelper {
       contract,
     } = actionInput
 
+    const gasPriceInWei =
+      isAString(gasPriceInput) && !(gasPriceInput as string).startsWith('0x')
+        ? `${gasPriceInput}000000000`
+        : gasPriceInput
+
     // convert decimal strings to hex strings
-    const gasPrice = toHexStringIfNeeded(gasPriceInput)
+    const gasPrice = toHexStringIfNeeded(gasPriceInWei)
     const gasLimit = toHexStringIfNeeded(gasLimitInput)
     const value = toHexStringIfNeeded(valueInput)
 
@@ -144,7 +150,7 @@ export class EthereumActionHelper {
 
   /** set gasPrice - value should be a decimal string in units of GWEI e.g. '0.00001' */
   set gasPrice(value: string) {
-    const valueHex = decimalToHexString(value)
+    const valueHex = decimalToHexString(value.concat('000000000'))
     this.updateActionProperty('gasPrice', valueHex)
   }
 
