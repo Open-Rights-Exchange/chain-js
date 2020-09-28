@@ -134,6 +134,7 @@ const { env } = process
   // console.log('missing signatures:', await transaction.missingSignatures)
   // const txResponse = await transaction.send(ConfirmType.After001)
   // console.log('send response:', JSON.stringify(txResponse))
+  // console.log('transactionId: ', transaction.transactionId)
   // ----<
 
   // ---> demo transaction
@@ -142,8 +143,9 @@ const { env } = process
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
   // await transaction.validate()
-  // await transaction.sign([toEosPrivateKey(env.ORE_TESTNET_APPOREID_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
   // console.log('missing signatures:', await transaction.missingSignatures)
+  // console.log('id: ', transaction.transactionId)
   // const txResponse = await transaction.send()
   // console.log('send response:', JSON.stringify(txResponse))
   // ----<
