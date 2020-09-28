@@ -7,7 +7,7 @@ import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, ConfirmType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toWei, toEthereumSymbol, fromTokenValueString, toEthereumSignature } from '../helpers'
+import { toEthereumPrivateKey, toWei, toEthereumSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
@@ -109,7 +109,7 @@ const { env } = process
     await ropsten.connect()
 
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
-    const transaction = (await ropsten.new.Transaction(defaultEthTxOptions)) as EthereumTransaction
+    const transaction = (await ropsten.new.Transaction(defaultEthTxOptions)) as EthereumTransaction // TODO: remove typing after adding fee helpers to interface
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
