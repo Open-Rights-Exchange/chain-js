@@ -21,6 +21,7 @@ import {
   EthereumTransactionCost,
   EthereumTransactionResources,
   EthereumTxExecutionPriority,
+  EthUnit,
 } from './models'
 import { throwNewError } from '../../errors'
 import { isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
@@ -35,6 +36,9 @@ import {
   toEthereumSignature,
   toGweiFromWei,
   toEthereumTxData,
+  ensureHexPrefix,
+  toWeiString,
+  toEthString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -453,7 +457,7 @@ export class EthereumTransaction implements Transaction {
     return this._estimatedGas
   }
 
-  /** Get the suggested Eth fee (in GWEI) for this transaction */
+  /** Get the suggested Eth fee (in Ether) for this transaction */
   public async getSuggestedFee(
     priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
   ): Promise<string> {
@@ -463,20 +467,21 @@ export class EthereumTransaction implements Transaction {
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
     gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
     const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
-    return totalFee.toString(10)
+    return toEthString(totalFee.toString(10), EthUnit.Wei)
   }
 
-  /** get the desired fee to spend on sending the transaction */
+  /** get the desired fee (in Ether) to spend on sending the transaction */
   public async getDesiredFee(): Promise<string> {
-    return this._desiredFee
+    return toEthString(this._desiredFee, EthUnit.Wei)
   }
 
-  /** set the fee that you would like to pay (in GWEI) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
+  /** set the fee that you would like to pay (in Ether) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
   public async setDesiredFee(desiredFee: string) {
+    const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
     const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
-    const desiredFeeBn = new BN(desiredFee, 10)
+    const desiredFeeBn = new BN(desiredFeeWei, 10)
     const gasPriceBn = desiredFeeBn.div(gasRequired)
-    this._desiredFee = desiredFee
+    this._desiredFee = desiredFeeWei
     const gasPriceString = gasPriceBn.toString(10).slice(0, -9)
     const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
     const gasLimitString = (gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
@@ -485,11 +490,13 @@ export class EthereumTransaction implements Transaction {
     this.updateEthTxFromAction()
   }
 
+  /** Signature has to exist to be able to get transactionId */
   public get transactionId(): string {
-    return this._transactionId
+    this.assertHasSignature()
+    return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
   }
 
-  /** get the actual cost for sending the transaction */
+  /** get the actual cost (in Ether) for sending the transaction */
   public async getActualCost(): Promise<string> {
     if (!isNullOrEmpty(this._actualCost)) {
       return this._actualCost
@@ -499,7 +506,7 @@ export class EthereumTransaction implements Transaction {
     }
     const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
     this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
-    return this._actualCost
+    return toEthString(this._actualCost, EthUnit.Wei)
   }
 
   /** get the estimated cost for sending the transaction */
@@ -568,7 +575,6 @@ export class EthereumTransaction implements Transaction {
     // generate nonce (using privateKey) if not already present
     await this.setNonceIfEmpty(bufferToHex(privateToAddress(privateKeyBuffer)))
     this._ethereumJsTx?.sign(privateKeyBuffer)
-    this._transactionId = `0x${this._ethereumJsTx.hash(true).toString('hex')}`
   }
 
   // send
