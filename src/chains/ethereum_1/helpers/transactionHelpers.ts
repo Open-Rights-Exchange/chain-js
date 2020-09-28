@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import { BN, bufferToHex } from 'ethereumjs-util'
-import { isNullOrEmpty } from '../../../helpers'
-import { EthUnit, EthereumActionContract } from '../models'
+import { isAString, isNullOrEmpty } from '../../../helpers'
+import { EthUnit, EthereumActionContract, EthereumMultiValue } from '../models'
 import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../ethConstants'
 import { toEthereumTxData } from './cryptoModelHelpers'
 
@@ -36,11 +36,27 @@ export function toWei(amount: BN | number, fromType: EthUnit) {
   return web3.utils.toWei(new BN(amount), fromType)
 }
 
-/** convert a decimal string from fromType to Wei units 
+/** convert a decimal string from fromType to Wei units
  *  Returns a string */
 export function toWeiString(amount: string, fromType: EthUnit): string {
   const web3 = new Web3()
   return web3.utils.toWei(amount, fromType)
+}
+
+export function fromWeiString(wei: string, toType: EthUnit): string {
+  const web3 = new Web3()
+  return web3.utils.fromWei(wei, toType)
+}
+
+export function toEthString(amount: string, fromType: EthUnit): string {
+  const wei = toWeiString(amount, fromType)
+  const eth = fromWeiString(wei, EthUnit.Ether)
+  return eth
+}
+
+/** Return true if a string value and not hex */
+export function isDecimalString(value: EthereumMultiValue): boolean {
+  return isAString(value) && !(value as string).startsWith('0x')
 }
 
 /** Converts wei amount to Gwei

@@ -2,7 +2,6 @@ import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
-  isAString,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
@@ -15,6 +14,8 @@ import {
   isValidEthereumAddress,
   toEthereumTxData,
   toEthBuffer,
+  toWeiString,
+  isDecimalString,
 } from './helpers'
 import {
   EthereumActionContract,
@@ -23,6 +24,7 @@ import {
   EthereumRawTransactionAction,
   EthereumTxData,
   EthereumTransactionAction,
+  EthUnit,
 } from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
@@ -84,10 +86,11 @@ export class EthereumActionHelper {
       contract,
     } = actionInput
 
-    const gasPriceInWei =
-      isAString(gasPriceInput) && !(gasPriceInput as string).startsWith('0x')
-        ? `${gasPriceInput}000000000`
-        : gasPriceInput
+    // Checking if gasPrice value given as decimal Gwei string
+    // if so, we are converting it to Wei before converting to hex string
+    const gasPriceInWei = isDecimalString(gasPriceInput)
+      ? toWeiString(gasPriceInput as string, EthUnit.Gwei)
+      : gasPriceInput
 
     // convert decimal strings to hex strings
     const gasPrice = toHexStringIfNeeded(gasPriceInWei)
@@ -142,15 +145,15 @@ export class EthereumActionHelper {
     this._s = bufferToHex(ethJsTx.s)
   }
 
-  /** set gasLimit - value should be a decimal string in units of gas e.g. '1.0' */
+  /** set gasLimit - value should be a decimal string in units of gas e.g. '21000' */
   set gasLimit(value: string) {
     const valueHex = decimalToHexString(value)
     this.updateActionProperty('gasLimit', valueHex)
   }
 
-  /** set gasPrice - value should be a decimal string in units of GWEI e.g. '0.00001' */
+  /** set gasPrice - value should be a decimal string in units of GWEI e.g. '123' */
   set gasPrice(value: string) {
-    const valueHex = decimalToHexString(value.concat('000000000'))
+    const valueHex = decimalToHexString(toWeiString(value, EthUnit.Gwei))
     this.updateActionProperty('gasPrice', valueHex)
   }
 
