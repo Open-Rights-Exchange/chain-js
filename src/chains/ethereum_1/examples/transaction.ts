@@ -7,7 +7,7 @@ import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
 import { ChainActionType, ConfirmType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toWei, toEthereumSymbol } from '../helpers'
+import { toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
@@ -121,8 +121,10 @@ const { env } = process
     await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
     console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001)))
-    console.log(await transaction.getActualCost())
+    console.log('transaction ID: ', transaction.transactionId)
+    console.log('send response:', JSON.stringify(await transaction.send()))
+    // console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001))) // wait for transaction to complete on-chain before returning
+    console.log(`actual cost of tx in ETH - available once tx is processed: ${await transaction.getActualCost()}`)
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
     // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
