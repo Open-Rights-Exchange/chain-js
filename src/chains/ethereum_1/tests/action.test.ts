@@ -1,5 +1,5 @@
 import { EthereumActionHelper } from '../ethAction'
-import { toWei, toEthereumTxData } from '../helpers'
+import { toWeiBN, toEthereumTxData } from '../helpers'
 import { EthUnit } from '../models'
 import { chainOptions } from './mockups/chain'
 
@@ -28,7 +28,7 @@ describe('Ethereum Action Tests', () => {
   const method = 'mint'
   const parameters = [50]
   const to = '0x04825941Ad80A6a869e85606b29c9D25144E91e6'
-  const value = toWei(100, EthUnit.Finney)
+  const value = toWeiBN(100, EthUnit.Finney)
   const contract = {
     abi: ABI,
     method,
