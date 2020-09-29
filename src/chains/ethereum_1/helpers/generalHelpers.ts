@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { toBuffer, BN } from 'ethereumjs-util'
-import { HEX_PREFIX, DEFAULT_TOKEN_PRECISION } from '../ethConstants'
+import { DEFAULT_TOKEN_PRECISION } from '../ethConstants'
 import { isANumber, getDecimalPlacesFromString, isNullOrEmpty, isAString } from '../../../helpers'
 import { throwNewError } from '../../../errors'
 import { ERC20_TYPES } from '../templates/abis/erc20Abi'
@@ -14,11 +14,6 @@ export function toEthBuffer(data: string | BN | Buffer | number): Buffer {
 /** object is of type BN (big number) */
 export function isABN(value: any) {
   return BN.isBN(value)
-}
-
-/** Checks that string starts with 0x - appends if not */
-export function ensureHexPrefix(key: string) {
-  return key.startsWith(HEX_PREFIX) ? key : `${HEX_PREFIX}${key}`
 }
 
 /** convert a balance and decimals into a long value string
