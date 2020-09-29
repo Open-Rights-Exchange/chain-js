@@ -1,6 +1,6 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
 import { ZERO_HEX, EMPTY_HEX, ZERO_ADDRESS } from '../ethConstants'
-import { toWeiBN, toEthereumAddress, toEthereumPrivateKey, ethereumTrxArgIsNullOrEmpty } from '../helpers'
+import { toWeiBN, toEthereumAddress, toEthereumPrivateKey, isNullOrEmptyEthereumValue } from '../helpers'
 import { EthUnit } from '../models'
 
 describe('Ethereum Helper Functions', () => {
@@ -27,11 +27,11 @@ describe('Ethereum Helper Functions', () => {
   })
 
   it('tests ethereumTrxArgIsNullOrEmpty', async () => {
-    expect(ethereumTrxArgIsNullOrEmpty('0x123')).toEqual(false)
-    expect(ethereumTrxArgIsNullOrEmpty(0)).toEqual(true)
-    expect(ethereumTrxArgIsNullOrEmpty(ZERO_HEX)).toEqual(true)
-    expect(ethereumTrxArgIsNullOrEmpty(EMPTY_HEX)).toEqual(true)
-    expect(ethereumTrxArgIsNullOrEmpty(ZERO_ADDRESS)).toEqual(true)
-    expect(ethereumTrxArgIsNullOrEmpty(Buffer.from(ZERO_HEX, 'hex'))).toEqual(true)
+    expect(isNullOrEmptyEthereumValue('0x123')).toEqual(false)
+    expect(isNullOrEmptyEthereumValue(0)).toEqual(true)
+    expect(isNullOrEmptyEthereumValue(ZERO_HEX)).toEqual(true)
+    expect(isNullOrEmptyEthereumValue(EMPTY_HEX)).toEqual(true)
+    expect(isNullOrEmptyEthereumValue(ZERO_ADDRESS)).toEqual(true)
+    expect(isNullOrEmptyEthereumValue(Buffer.from(ZERO_HEX, 'hex'))).toEqual(true)
   })
 })

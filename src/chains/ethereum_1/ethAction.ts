@@ -10,7 +10,7 @@ import {
 } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
-  ethereumTrxArgIsNullOrEmpty,
+  isNullOrEmptyEthereumValue,
   generateDataFromContractAction,
   isValidEthereumAddress,
   toEthereumTxData,
@@ -98,7 +98,7 @@ export class EthereumActionHelper {
     const value = toHexStringIfNeeded(valueInput)
 
     // cant provide both contract and data properties
-    if (!ethereumTrxArgIsNullOrEmpty(contract) && !ethereumTrxArgIsNullOrEmpty(data)) {
+    if (!isNullOrEmptyEthereumValue(contract) && !isNullOrEmptyEthereumValue(data)) {
       throwNewError('You can provide either data or contract but not both')
     }
 
@@ -113,8 +113,8 @@ export class EthereumActionHelper {
     }
 
     // set data from provided data or contract properties
-    if (!ethereumTrxArgIsNullOrEmpty(data)) this._data = toEthereumTxData(data)
-    else if (!ethereumTrxArgIsNullOrEmpty(contract)) {
+    if (!isNullOrEmptyEthereumValue(data)) this._data = toEthereumTxData(data)
+    else if (!isNullOrEmptyEthereumValue(contract)) {
       this._data = generateDataFromContractAction(contract)
       this._contract = contract
     } else this._data = toEthereumTxData(ZERO_HEX)
@@ -172,23 +172,23 @@ export class EthereumActionHelper {
 
   /** Checks is data value is empty or implying 0 */
   get hasData(): boolean {
-    return !ethereumTrxArgIsNullOrEmpty(this._data)
+    return !isNullOrEmptyEthereumValue(this._data)
   }
 
   /** Action properties (encoded as hex string for most fields)
    *  Returns null for any 'empty' Eth values e.g. (0x00...00) */
   public get action(): EthereumTransactionAction {
     const returnValue = {
-      nonce: ethereumTrxArgIsNullOrEmpty(this._nonce) ? null : this._nonce,
-      gasLimit: ethereumTrxArgIsNullOrEmpty(this._gasLimit) ? null : this._gasLimit,
-      gasPrice: ethereumTrxArgIsNullOrEmpty(this._gasPrice) ? null : this._gasPrice,
-      to: ethereumTrxArgIsNullOrEmpty(this._to) ? null : this._to,
-      from: ethereumTrxArgIsNullOrEmpty(this._from) ? null : this._from,
-      data: ethereumTrxArgIsNullOrEmpty(this._data) ? null : toEthereumTxData(this._data),
-      value: ethereumTrxArgIsNullOrEmpty(this._value) ? null : this._value,
-      v: ethereumTrxArgIsNullOrEmpty(this._v) ? null : this._v,
-      r: ethereumTrxArgIsNullOrEmpty(this._r) ? null : this._r,
-      s: ethereumTrxArgIsNullOrEmpty(this._s) ? null : this._s,
+      nonce: isNullOrEmptyEthereumValue(this._nonce) ? null : this._nonce,
+      gasLimit: isNullOrEmptyEthereumValue(this._gasLimit) ? null : this._gasLimit,
+      gasPrice: isNullOrEmptyEthereumValue(this._gasPrice) ? null : this._gasPrice,
+      to: isNullOrEmptyEthereumValue(this._to) ? null : this._to,
+      from: isNullOrEmptyEthereumValue(this._from) ? null : this._from,
+      data: isNullOrEmptyEthereumValue(this._data) ? null : toEthereumTxData(this._data),
+      value: isNullOrEmptyEthereumValue(this._value) ? null : this._value,
+      v: isNullOrEmptyEthereumValue(this._v) ? null : this._v,
+      r: isNullOrEmptyEthereumValue(this._r) ? null : this._r,
+      s: isNullOrEmptyEthereumValue(this._s) ? null : this._s,
     }
     removeEmptyValuesInJsonObject(returnValue)
     return returnValue

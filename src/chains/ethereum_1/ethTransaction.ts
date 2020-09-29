@@ -28,7 +28,7 @@ import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from
 import {
   convertBufferToHexStringIfNeeded,
   convertEthUnit,
-  ethereumTrxArgIsNullOrEmpty,
+  isNullOrEmptyEthereumValue,
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
@@ -201,7 +201,7 @@ export class EthereumTransaction implements Transaction {
     this.assertHasAction()
     await this.setNonceIfEmpty(this.senderAddress)
     // set gasLimit if not already set, set it using the execution Priority specified for this transaction
-    if (ethereumTrxArgIsNullOrEmpty(this._actionHelper.action.gasLimit)) {
+    if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
       const gasFee = await this.getSuggestedFee(this._executionPriority)
       await this.setDesiredFee(gasFee)
     }
@@ -230,7 +230,7 @@ export class EthereumTransaction implements Transaction {
     if (isNullOrEmpty(fromAddress)) return
     this.assertHasRaw()
     const address = convertBufferToHexStringIfNeeded(fromAddress)
-    if (ethereumTrxArgIsNullOrEmpty(this.raw?.nonce)) {
+    if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
       const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)
       this._actionHelper.nonce = txCount.toString()
       this.updateEthTxFromAction()
@@ -296,7 +296,7 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
     }
     const { gasPrice, gasLimit } = this._ethereumJsTx
-    if (ethereumTrxArgIsNullOrEmpty(gasPrice) || ethereumTrxArgIsNullOrEmpty(gasLimit)) {
+    if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
       throwNewError('Transaction validation failure.Missing gasPrice or gasLimit.Call prepareToBeSigned() to auto-set.')
     }
     // make sure the from address is a valid Eth address
@@ -429,10 +429,10 @@ export class EthereumTransaction implements Transaction {
     try {
       const trxOptions = this.getOptionsForEthereumJsTx()
       const input = {
-        to: ethereumTrxArgIsNullOrEmpty(this.action.to) ? null : this.action.to,
+        to: isNullOrEmptyEthereumValue(this.action.to) ? null : this.action.to,
         from: this.senderAddress, // from is required for estimateGas
-        value: ethereumTrxArgIsNullOrEmpty(this.action.value) ? 0 : this.action.value,
-        data: ethereumTrxArgIsNullOrEmpty(this.action.data) ? null : this.action.data,
+        value: isNullOrEmptyEthereumValue(this.action.value) ? 0 : this.action.value,
+        data: isNullOrEmptyEthereumValue(this.action.data) ? null : this.action.data,
         chain: trxOptions?.chain,
         fork: trxOptions.hardfork,
       }
@@ -496,7 +496,7 @@ export class EthereumTransaction implements Transaction {
 
   /** get the actual cost (in Ether) for sending the transaction */
   public async getActualCost(): Promise<string> {
-    if (!ethereumTrxArgIsNullOrEmpty(this._actualCost)) {
+    if (!isNullOrEmptyEthereumValue(this._actualCost)) {
       return this._actualCost
     }
     const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
@@ -609,7 +609,7 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from (if present) is a valid ethereum address - also checks that from is provided if data was */
   private assertFromIsValid(): void {
     // if data is provided in the action, then there must be a from value
-    if (!ethereumTrxArgIsNullOrEmpty(this?.action?.data) && ethereumTrxArgIsNullOrEmpty(this?.action?.from)) {
+    if (!isNullOrEmptyEthereumValue(this?.action?.data) && isNullOrEmptyEthereumValue(this?.action?.from)) {
       throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
     }
     if (!this.isFromEmptyOrNullAddress() && !isValidEthereumAddress(this?.action?.from)) {
@@ -637,7 +637,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether the from address is null or empty */
   private isFromEmptyOrNullAddress(): boolean {
-    return ethereumTrxArgIsNullOrEmpty(this?.action?.from)
+    return isNullOrEmptyEthereumValue(this?.action?.from)
   }
 
   getOptionsForEthereumJsTx() {

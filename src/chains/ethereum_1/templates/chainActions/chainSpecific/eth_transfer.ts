@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { EthereumTransactionAction, EthereumAddress } from '../../../models'
-import { ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { isNullOrEmptyEthereumValue } from '../../../helpers'
 import { ChainActionType, ActionDecomposeReturn } from '../../../../../models'
 import { toChainEntityName } from '../../../../../helpers'
 
@@ -22,7 +22,7 @@ export const composeAction = (params: EthTransferParams) => {
 
 export const decomposeAction = (action: EthereumTransactionAction): ActionDecomposeReturn => {
   const { to, from, value, data, contract } = action
-  if (to && value && !contract && ethereumTrxArgIsNullOrEmpty(data)) {
+  if (to && value && !contract && isNullOrEmptyEthereumValue(data)) {
     const returnData: EthTransferParams = {
       // coerce to string as EthereumAddress could be Buffer type
       to: toChainEntityName(to as string),
