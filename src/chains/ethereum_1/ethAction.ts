@@ -2,6 +2,7 @@ import { bufferToHex, BN } from 'ethereumjs-util'
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
+  hasHexPrefix,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
@@ -15,7 +16,6 @@ import {
   toEthereumTxData,
   toEthBuffer,
   toWeiString,
-  isDecimalString,
 } from './helpers'
 import {
   EthereumActionContract,
@@ -86,11 +86,11 @@ export class EthereumActionHelper {
       contract,
     } = actionInput
 
-    // Checking if gasPrice value given as decimal Gwei string
-    // if so, we are converting it to Wei before converting to hex string
-    const gasPriceInWei = isDecimalString(gasPriceInput)
-      ? toWeiString(gasPriceInput as string, EthUnit.Gwei)
-      : gasPriceInput
+    // if value is hex encoded string, then it doesnt need to be converted (already in units of Wei)
+    // otherwise, a decimal string value is expected to be in units of Gwei - we convert to Wei
+    const gasPriceInWei = hasHexPrefix(gasPriceInput)
+      ? gasPriceInput
+      : toWeiString(gasPriceInput as string, EthUnit.Gwei)
 
     // convert decimal strings to hex strings
     const gasPrice = toHexStringIfNeeded(gasPriceInWei)
