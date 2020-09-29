@@ -24,9 +24,10 @@ import {
   EthUnit,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
+import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
+  convertEthUnit,
   ethereumTrxArgIsNullOrEmpty,
   isValidEthereumAddress,
   isValidEthereumSignature,
@@ -35,10 +36,7 @@ import {
   toEthereumPublicKey,
   toEthereumSignature,
   toGweiFromWei,
-  toEthereumTxData,
-  ensureHexPrefix,
   toWeiString,
-  toEthString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -66,8 +64,6 @@ export class EthereumTransaction implements Transaction {
   private _options: EthereumTransactionOptions
 
   private _signBuffer: Buffer
-
-  private _transactionId: string
 
   constructor(chainState: EthereumChainState, options?: EthereumTransactionOptions) {
     this._chainState = chainState
@@ -467,12 +463,12 @@ export class EthereumTransaction implements Transaction {
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
     gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
     const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
-    return toEthString(totalFee.toString(10), EthUnit.Wei)
+    return convertEthUnit(totalFee.toString(10), EthUnit.Wei, EthUnit.Ether)
   }
 
   /** get the desired fee (in Ether) to spend on sending the transaction */
   public async getDesiredFee(): Promise<string> {
-    return toEthString(this._desiredFee, EthUnit.Wei)
+    return convertEthUnit(this._desiredFee, EthUnit.Wei, EthUnit.Ether)
   }
 
   /** set the fee that you would like to pay (in Ether) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
@@ -490,23 +486,22 @@ export class EthereumTransaction implements Transaction {
     this.updateEthTxFromAction()
   }
 
-  /** Signature has to exist to be able to get transactionId */
+  /** Hash of transaction - signature must be present to determine transactionId */
   public get transactionId(): string {
-    this.assertHasSignature()
+    if (!this.hasAnySignatures) {
+      throwNewError('Cant determine transaction ID - missing transaction signature')
+    }
     return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
   }
 
   /** get the actual cost (in Ether) for sending the transaction */
   public async getActualCost(): Promise<string> {
-    if (!isNullOrEmpty(this._actualCost)) {
+    if (!ethereumTrxArgIsNullOrEmpty(this._actualCost)) {
       return this._actualCost
-    }
-    if (isNullOrEmpty(this.transactionId)) {
-      throwNewError('actualCost can not be retrieved before transaction is sent')
     }
     const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
     this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
-    return toEthString(this._actualCost, EthUnit.Wei)
+    return convertEthUnit(this._actualCost, EthUnit.Wei, EthUnit.Ether)
   }
 
   /** get the estimated cost for sending the transaction */
