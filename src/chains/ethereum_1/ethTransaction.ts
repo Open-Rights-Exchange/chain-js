@@ -500,6 +500,9 @@ export class EthereumTransaction implements Transaction {
       return this._actualCost
     }
     const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
+    if (!transaction?.gasUsed) {
+      throw new Error('Cant retrieve actual cost - Transaction not found on chain')
+    }
     this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
     return convertEthUnit(this._actualCost, EthUnit.Wei, EthUnit.Ether)
   }
