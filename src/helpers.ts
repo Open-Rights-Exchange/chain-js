@@ -256,6 +256,16 @@ export function decimalToHexString(value: string) {
   return `0x${new BN(value, 10).toString('hex')}`
 }
 
+/** Return true if value is a hexidecimal encoded string (is prefixed by 0x) */
+export function hasHexPrefix(value: any): boolean {
+  return isAString(value) && (value as string).startsWith('0x')
+}
+
+/** Checks that string starts with 0x - appends if not */
+export function ensureHexPrefix(key: string) {
+  return key.startsWith('0x') ? key : `${'0x'}${key}`
+}
+
 /** Converts a decimal string to a hex string
  *  If already hex string, returns same value */
 export function toHexStringIfNeeded(value: any) {
