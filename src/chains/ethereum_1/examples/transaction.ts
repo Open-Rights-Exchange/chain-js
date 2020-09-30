@@ -5,7 +5,14 @@
 /* eslint-disable no-console */
 import { BN } from 'ethereumjs-util'
 import { ChainFactory, ChainType, Chain } from '../../../index'
-import { ChainActionType, ConfirmType, PrivateKey, TokenTransferParams, ValueTransferParams } from '../../../models'
+import {
+  ChainActionType,
+  ConfirmType,
+  PrivateKey,
+  TokenTransferParams,
+  TxExecutionPriority,
+  ValueTransferParams,
+} from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
 import { toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
@@ -18,7 +25,6 @@ import {
   EthereumChainActionType,
   EthereumAddress,
   EthereumChainEndpoint,
-  EthereumTxExecutionPriority,
 } from '../models'
 import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
@@ -49,7 +55,7 @@ const { env } = process
       },
       defaultTransactionSettings: {
         maxFeeIncreasePercentage: 20,
-        executionPriority: EthereumTxExecutionPriority.Average,
+        executionPriority: TxExecutionPriority.Average,
       },
     }
 
@@ -114,7 +120,7 @@ const { env } = process
     console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     console.log(JSON.stringify(decomposed))
-    const fee = await transaction.getSuggestedFee(EthereumTxExecutionPriority.Fast)
+    const fee = await transaction.getSuggestedFee(TxExecutionPriority.Fast)
     transaction.setDesiredFee(fee)
     await transaction.prepareToBeSigned()
     await transaction.validate()
