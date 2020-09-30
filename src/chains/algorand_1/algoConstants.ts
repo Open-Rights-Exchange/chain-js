@@ -1,4 +1,5 @@
 import * as nacl from 'tweetnacl'
+import { IndexedObject } from '../../models'
 import { AlgorandUnit } from './models'
 
 export const ALGORAND_ADDRESS_LENGTH = 58
@@ -15,3 +16,9 @@ export const DEFAULT_ALGO_UNIT = AlgorandUnit.Microalgo
 export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
 /** The symbol for the native token/currency on the chain */
 export const NATIVE_CHAIN_TOKEN_SYMBOL = 'algo'
+
+export const TRANSACTION_FEE_PRIORITY_MULTIPLIERS: IndexedObject = {
+  slow: 1,
+  average: 10,
+  fast: 20,
+}
