@@ -47,6 +47,9 @@ export interface Transaction {
   supportsFee: boolean
   /** Whether the chain supports signing a transactions using a multi-signature account */
   supportsMultisigTransaction: boolean
+  /** Returns transaction hash that can be used to query the transaction on chain
+   *  Cannot be called before signing the transaction */
+  transactionId: string
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */

@@ -50,6 +50,8 @@ export class EosTransaction implements Transaction {
 
   private _isValidated: boolean
 
+  private _transactionId: string
+
   constructor(chainState: EosChainState, options?: EosTxOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
@@ -351,6 +353,18 @@ export class EosTransaction implements Transaction {
     })
   }
 
+  private async setTransactionId(sendReceipt: Promise<any>) {
+    const result = await sendReceipt
+    this._transactionId = result?.transactionId
+  }
+
+  public get transactionId(): string {
+    if (isNullOrEmpty(this._transactionId)) {
+      throwNewError('Transaction has to be sent to chain to retrieve transactioId')
+    }
+    return this._transactionId
+  }
+
   // authorizations
 
   /** An array of the unique set of account/permission/publicKey for all actions in transaction
@@ -461,6 +475,7 @@ export class EosTransaction implements Transaction {
       waitForConfirm,
       communicationSettings,
     )
+    this.setTransactionId(this._sendReceipt)
     return this._sendReceipt
   }
 

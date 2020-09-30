@@ -21,7 +21,7 @@ import {
   objectHasProperty,
   trimTrailingChars,
 } from '../../helpers'
-import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_SYMBOL } from './algoConstants'
+import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_TOKEN_SYMBOL } from './algoConstants'
 import { toAlgo } from './helpers'
 
 export class AlgorandChainState {
@@ -132,7 +132,7 @@ export class AlgorandChainState {
     tokenAddress?: AlgorandAddress,
   ): Promise<{ balance: string }> {
     // Get balance for Algo
-    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_SYMBOL.toLowerCase()) {
+    if ((symbol || '').toLowerCase() === NATIVE_CHAIN_TOKEN_SYMBOL.toLowerCase()) {
       return { balance: await this.getAlgorandBalance(account) }
     }
 

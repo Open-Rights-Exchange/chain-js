@@ -20,12 +20,14 @@ import {
   EthereumActionHelperInput,
   EthereumTransactionCost,
   EthereumTransactionResources,
+  EthUnit,
 } from './models'
 import { throwNewError } from '../../errors'
-import { isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
+import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
-  ethereumTrxArgIsNullOrEmpty,
+  convertEthUnit,
+  isNullOrEmptyEthereumValue,
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
@@ -33,7 +35,7 @@ import {
   toEthereumPublicKey,
   toEthereumSignature,
   toGweiFromWei,
-  toEthereumTxData,
+  toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 
@@ -42,9 +44,9 @@ export class EthereumTransaction implements Transaction {
 
   private _chainState: EthereumChainState
 
-  private _actualCost: EthereumTransactionCost
+  private _actualCost: string
 
-  private _desiredFee: EthereumTransactionCost
+  private _desiredFee: string
 
   /** estimated gas for transacton - encoded as string to handle big numbers */
   private _estimatedGas: string
@@ -198,7 +200,7 @@ export class EthereumTransaction implements Transaction {
     this.assertHasAction()
     await this.setNonceIfEmpty(this.senderAddress)
     // set gasLimit if not already set, set it using the execution Priority specified for this transaction
-    if (ethereumTrxArgIsNullOrEmpty(this._actionHelper.action.gasLimit)) {
+    if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
       const gasFee = await this.getSuggestedFee(this._executionPriority)
       await this.setDesiredFee(gasFee)
     }
@@ -227,7 +229,7 @@ export class EthereumTransaction implements Transaction {
     if (isNullOrEmpty(fromAddress)) return
     this.assertHasRaw()
     const address = convertBufferToHexStringIfNeeded(fromAddress)
-    if (ethereumTrxArgIsNullOrEmpty(this.raw?.nonce)) {
+    if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
       const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)
       this._actionHelper.nonce = txCount.toString()
       this.updateEthTxFromAction()
@@ -293,7 +295,7 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
     }
     const { gasPrice, gasLimit } = this._ethereumJsTx
-    if (ethereumTrxArgIsNullOrEmpty(gasPrice) || ethereumTrxArgIsNullOrEmpty(gasLimit)) {
+    if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
       throwNewError('Transaction validation failure.Missing gasPrice or gasLimit.Call prepareToBeSigned() to auto-set.')
     }
     // make sure the from address is a valid Eth address
@@ -426,10 +428,10 @@ export class EthereumTransaction implements Transaction {
     try {
       const trxOptions = this.getOptionsForEthereumJsTx()
       const input = {
-        to: ethereumTrxArgIsNullOrEmpty(this.action.to) ? null : this.action.to,
+        to: isNullOrEmptyEthereumValue(this.action.to) ? null : this.action.to,
         from: this.senderAddress, // from is required for estimateGas
-        value: ethereumTrxArgIsNullOrEmpty(this.action.value) ? 0 : this.action.value,
-        data: ethereumTrxArgIsNullOrEmpty(this.action.data) ? null : this.action.data,
+        value: isNullOrEmptyEthereumValue(this.action.value) ? 0 : this.action.value,
+        data: isNullOrEmptyEthereumValue(this.action.data) ? null : this.action.data,
         chain: trxOptions?.chain,
         fork: trxOptions.hardfork,
       }
@@ -450,31 +452,30 @@ export class EthereumTransaction implements Transaction {
     return this._estimatedGas
   }
 
-  /** Get the suggested Eth fee (in GWEI) for this transaction */
-  public async getSuggestedFee(
-    priority: TxExecutionPriority = TxExecutionPriority.Average,
-  ): Promise<EthereumTransactionCost> {
+  /** Get the suggested Eth fee (in Ether) for this transaction */
+  public async getSuggestedFee(priority: TxExecutionPriority = TxExecutionPriority.Average): Promise<string> {
     this.assertHasAction()
     const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
     let gasPriceinWeiBN = new BN(gasPriceString)
     const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
     gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
-    const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas()))
-    return { fee: totalFee.toString(10) }
+    const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
+    return convertEthUnit(totalFee.toString(10), EthUnit.Wei, EthUnit.Ether)
   }
 
-  /** get the desired fee to spend on sending the transaction */
-  public async getDesiredFee(): Promise<EthereumTransactionCost> {
-    return this._desiredFee
+  /** get the desired fee (in Ether) to spend on sending the transaction */
+  public async getDesiredFee(): Promise<string> {
+    return convertEthUnit(this._desiredFee, EthUnit.Wei, EthUnit.Ether)
   }
 
-  /** set the fee that you would like to pay (in GWEI) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
-  public async setDesiredFee(desiredFee: EthereumTransactionCost) {
-    const gasRequired = new BN((await this.resourcesRequired())?.gas)
-    const desiredFeeBn = new BN(desiredFee.fee, 10)
+  /** set the fee that you would like to pay (in Ether) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
+  public async setDesiredFee(desiredFee: string) {
+    const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
+    const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
+    const desiredFeeBn = new BN(desiredFeeWei, 10)
     const gasPriceBn = desiredFeeBn.div(gasRequired)
-    this._desiredFee = desiredFee
-    const gasPriceString = gasPriceBn.toString()
+    this._desiredFee = desiredFeeWei
+    const gasPriceString = gasPriceBn.toString(10).slice(0, -9)
     const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
     const gasLimitString = (gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
     this._actionHelper.gasPrice = gasPriceString
@@ -482,9 +483,25 @@ export class EthereumTransaction implements Transaction {
     this.updateEthTxFromAction()
   }
 
-  /** get the actual cost for sending the transaction */
-  public async getActualCost(): Promise<EthereumTransactionCost> {
-    return this._actualCost
+  /** Hash of transaction - signature must be present to determine transactionId */
+  public get transactionId(): string {
+    if (!this.hasAnySignatures) {
+      throwNewError('Cant determine transaction ID - missing transaction signature')
+    }
+    return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
+  }
+
+  /** get the actual cost (in Ether) for sending the transaction */
+  public async getActualCost(): Promise<string> {
+    if (!isNullOrEmptyEthereumValue(this._actualCost)) {
+      return this._actualCost
+    }
+    const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
+    if (!transaction?.gasUsed) {
+      throw new Error('Cant retrieve actual cost - Transaction not found on chain')
+    }
+    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
+    return convertEthUnit(this._actualCost, EthUnit.Wei, EthUnit.Ether)
   }
 
   /** get the estimated cost for sending the transaction */
@@ -568,8 +585,6 @@ export class EthereumTransaction implements Transaction {
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
     const signedTransaction = bufferToHex(this._ethereumJsTx.serialize())
     const response = await this._chainState.sendTransaction(signedTransaction, waitForConfirm, communicationSettings)
-    // todo eth - this code likely doesnt work - it looks like it returns the property not the actual spend
-    // this._actualCost = { gas: this._ethereumJsTx.gasPrice.toString() }
     return response
   }
 
@@ -594,7 +609,7 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from (if present) is a valid ethereum address - also checks that from is provided if data was */
   private assertFromIsValid(): void {
     // if data is provided in the action, then there must be a from value
-    if (!ethereumTrxArgIsNullOrEmpty(this?.action?.data) && ethereumTrxArgIsNullOrEmpty(this?.action?.from)) {
+    if (!isNullOrEmptyEthereumValue(this?.action?.data) && isNullOrEmptyEthereumValue(this?.action?.from)) {
       throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
     }
     if (!this.isFromEmptyOrNullAddress() && !isValidEthereumAddress(this?.action?.from)) {
@@ -622,7 +637,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether the from address is null or empty */
   private isFromEmptyOrNullAddress(): boolean {
-    return ethereumTrxArgIsNullOrEmpty(this?.action?.from)
+    return isNullOrEmptyEthereumValue(this?.action?.from)
   }
 
   getOptionsForEthereumJsTx() {

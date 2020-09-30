@@ -6,7 +6,7 @@ import {
   EthereumChainActionType,
 } from '../../../models'
 import { erc721Abi } from '../../abis/erc721Abi'
-import { toEthereumAddress, ethereumTrxArgIsNullOrEmpty } from '../../../helpers'
+import { toEthereumAddress, isNullOrEmptyEthereumValue } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
 
 export interface Erc721TransferParams {
@@ -38,7 +38,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       tokenId: getArrayIndexOrNull(contract?.parameters, 1) as number,
     }
-    const partial = !returnData?.from || ethereumTrxArgIsNullOrEmpty(to)
+    const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
     return {
       chainActionType: EthereumChainActionType.ERC721Transfer,
       args: returnData,
