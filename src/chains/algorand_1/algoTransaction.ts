@@ -620,4 +620,8 @@ export class AlgorandTransaction implements Transaction {
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
     return null
   }
+
+  public async getActualCost(): Promise<string> {
+    return ''
+  }
 }

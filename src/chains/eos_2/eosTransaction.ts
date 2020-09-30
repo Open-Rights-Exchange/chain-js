@@ -531,6 +531,10 @@ export class EosTransaction implements Transaction {
     return null
   }
 
+  public async getActualCost(): Promise<string> {
+    return ''
+  }
+
   // ------------------------ EOS Specific functionality -------------------------------
   // Put any EOS chain specific feature that aren't included in the standard Transaction interface below here  */
   // calling code can access these functions by first casting the generic object into an eos-specific flavor
