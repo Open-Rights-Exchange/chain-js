@@ -115,7 +115,7 @@ const { env } = process
     await ropsten.connect()
 
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
-    const transaction = (await ropsten.new.Transaction(defaultEthTxOptions)) as EthereumTransaction // TODO: remove typing after adding fee helpers to interface
+    const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -128,8 +128,8 @@ const { env } = process
     console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log('transaction ID: ', transaction.transactionId)
-    console.log('send response:', JSON.stringify(await transaction.send()))
-    // console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001))) // wait for transaction to complete on-chain before returning
+    // console.log('send response:', JSON.stringify(await transaction.send())) // getActualCost will most likely fail because it will be called before execution
+    console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001))) // wait for transaction to complete on-chain before returning
     console.log(`actual cost of tx in ETH - available once tx is processed: ${await transaction.getActualCost()}`)
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
