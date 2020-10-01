@@ -251,6 +251,12 @@ export class AlgorandChainState {
     return this._algoClientWithTxHeader
   }
 
+  /** This waits for transaction to be confirmed then returns trx result */
+  public async getTransactionById(id: string): Promise<any> {
+    await this.waitForTransactionConfirmation(id)
+    return this._algoClient.transactionById(id)
+  }
+
   /** Checks for required header 'X-API_key' */
   private assertEndpointHasTokenHeader(): void {
     if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
