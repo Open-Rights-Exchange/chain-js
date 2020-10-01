@@ -38,6 +38,8 @@ import {
   toAlgorandPublicKey,
   toRawTransactionFromSignResults,
   getPublicKeyForAddress,
+  microToAlgoString,
+  algoToMicro,
 } from './helpers'
 import {
   toAlgorandSignatureFromRawSig,
@@ -614,17 +616,18 @@ export class AlgorandTransaction implements Transaction {
     return this._algoSdkTransaction?.estimateSize()
   }
 
-  public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
-    const trx: AlgorandTxAction = { ...this._actionHelper.action, fee: desiredFee, flatFee: true }
+  public async setDesiredFee(desiredFee: string): Promise<any> {
+    const fee = algoToMicro(desiredFee)
+    const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
   }
 
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
-    return (await this.resourcesRequired()) * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+    return microToAlgoString((await this.resourcesRequired()) * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority])
   }
 
   public async getActualCost(): Promise<string> {
     const trx = await this._chainState.getTransactionById(this.transactionId)
-    return trx?.fee.toString()
+    return microToAlgoString(trx?.fee)
   }
 }
