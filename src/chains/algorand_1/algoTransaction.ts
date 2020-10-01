@@ -49,6 +49,7 @@ import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
+import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -609,19 +610,21 @@ export class AlgorandTransaction implements Transaction {
     return false
   }
 
-  public async resourcesRequired(): Promise<any> {
-    return null
+  public async resourcesRequired(): Promise<number> {
+    return this._algoSdkTransaction?.estimateSize()
   }
 
   public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
-    return null
+    const trx: AlgorandTxAction = { ...this._actionHelper.action, fee: desiredFee, flatFee: true }
+    this.actions = [trx]
   }
 
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
-    return null
+    return (await this.resourcesRequired()) * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
   }
 
   public async getActualCost(): Promise<string> {
-    return ''
+    const trx = await this._chainState.getTransactionById(this.transactionId)
+    return trx?.fee.toString()
   }
 }
