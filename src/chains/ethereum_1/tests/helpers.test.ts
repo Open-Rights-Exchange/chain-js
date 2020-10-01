@@ -26,7 +26,7 @@ describe('Ethereum Helper Functions', () => {
     expect(toEthereumPrivateKey(value)).toEqual(expValue)
   })
 
-  it('tests ethereumTrxArgIsNullOrEmpty', async () => {
+  it('tests isNullOrEmptyEthereumValue', async () => {
     expect(isNullOrEmptyEthereumValue('0x123')).toEqual(false)
     expect(isNullOrEmptyEthereumValue(0)).toEqual(true)
     expect(isNullOrEmptyEthereumValue(ZERO_HEX)).toEqual(true)

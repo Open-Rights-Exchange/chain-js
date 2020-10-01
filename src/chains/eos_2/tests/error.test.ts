@@ -46,4 +46,37 @@ describe('Error mapping', () => {
 
     expect(actErrorType).toEqual(expErrorType)
   })
+
+  // sets fetchMock to throw an error on the next call to fetch (jsonRpc.get_abi calls fetch and triggers the error to be thrown)
+  it('maps a account does not exist error', async () => {
+    let actErrorType = null
+    const expErrorType = ChainErrorType.AccountDoesntExist
+
+    const expReturn = {
+      message: 'assertion failure with message: to account does not exist',
+      error: {
+        code: 3050003,
+        name: 'eosio_assert_message_exception',
+        what: 'eosio_assert_message assertion failure',
+        details: [
+          {
+            message: 'assertion failure with message: to account does not exist',
+            file: 'wasm_interface.cpp',
+            line_number: '1075',
+            method: 'exec_one',
+          },
+        ],
+      },
+    }
+    fetchMock.once(JSON.stringify(expReturn), { status: 500 })
+    try {
+      await jsonRpc.get_abi('placeholder')
+    } catch (e) {
+      // eslint-disable-next-line jest/no-try-expect
+      expect(e).toBeInstanceOf(RpcError)
+      const mappedError = mapChainError(e)
+      actErrorType = mappedError.errorType
+    }
+    expect(actErrorType).toEqual(expErrorType)
+  })
 })
