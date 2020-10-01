@@ -106,6 +106,10 @@ export class AlgorandTransaction implements Transaction {
    *  Also adds a header to the transaction that is included when transaction is signed
    */
   public async prepareToBeSigned(): Promise<void> {
+    // if we already have a raw transaction, we dont need to recreate another one - and shouldnt assertNoSignatures()
+    if (this.hasRaw) {
+      return
+    }
     this.assertIsConnected()
     this.assertNoSignatures()
     this.assertHasAction()
@@ -149,9 +153,10 @@ export class AlgorandTransaction implements Transaction {
     const decodedTx = algosdk.decodeObj(blob)?.txn
     if (!decodedTx) throwNewError('Cant decode blob into transaction')
     // convert packed transaction blob into AlgorandTxActionSdkEncoded using Algo SDK
-    const action: AlgorandTxActionSdkEncoded = AlgoTransactionClass.from_obj_for_encoding(decodedTx)
+    const action: AlgorandTxActionRaw = AlgoTransactionClass.from_obj_for_encoding(decodedTx)
     this.actions = [action]
     this.setRawTransactionFromSignResults({ txID: null, blob })
+    this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the data from action
     this._isValidated = false
   }
 
@@ -414,13 +419,13 @@ export class AlgorandTransaction implements Transaction {
 
   /** Get the raw transaction (either regular or multisig) */
   get rawTransaction(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
-    let signedTransaction
+    let rawTransaction
     if (this.isMultiSig) {
-      signedTransaction = this._rawTransactionMultisig
+      rawTransaction = this._rawTransactionMultisig
     } else {
-      signedTransaction = this._rawTransaction
+      rawTransaction = this._rawTransaction
     }
-    return signedTransaction
+    return rawTransaction
   }
 
   /** Public Key of account that has signed (or will sign) this transaction (for non-multisig)

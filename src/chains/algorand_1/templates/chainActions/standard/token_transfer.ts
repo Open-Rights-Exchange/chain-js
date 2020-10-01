@@ -7,14 +7,14 @@ import {
   AlgorandTxActionRaw,
 } from '../../../models'
 import { toMicroAlgo } from '../../../helpers'
-import { DEFAULT_ALGO_SYMBOL } from '../../../algoConstants'
+import { DEFAULT_ALGO_UNIT } from '../../../algoConstants'
 import {
   composeAction as algoAssetTransferComposeAction,
   decomposeAction as algoAssetTransferDecomposeAction,
 } from '../chainSpecific/asset_transfer'
 
 export const composeAction = (params: TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
-  const { amount: amountString, symbol = DEFAULT_ALGO_SYMBOL } = params
+  const { amount: amountString, symbol = DEFAULT_ALGO_UNIT } = params
   // TODO Algo - the amount conversion should be based off precision - not assume microAlgos - this is an asset not algos
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
 

@@ -72,9 +72,9 @@ export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCOD
 }
 
 // convert buffer into a string
-export function bufferToString(buffer: Buffer) {
+export function bufferToString(buffer: Buffer, encoding: string = 'utf8') {
   if (!buffer) return null
-  return buffer.toString()
+  return buffer.toString(encoding)
 }
 
 // convert buffer into a Uint8Array
@@ -254,6 +254,16 @@ export function bufferToHexString(value: Buffer): string {
  *  e.g. '16' => '0xA'  */
 export function decimalToHexString(value: string) {
   return `0x${new BN(value, 10).toString('hex')}`
+}
+
+/** Return true if value is a hexidecimal encoded string (is prefixed by 0x) */
+export function hasHexPrefix(value: any): boolean {
+  return isAString(value) && (value as string).startsWith('0x')
+}
+
+/** Checks that string starts with 0x - appends if not */
+export function ensureHexPrefix(key: string) {
+  return key.startsWith('0x') ? key : `${'0x'}${key}`
 }
 
 /** Converts a decimal string to a hex string

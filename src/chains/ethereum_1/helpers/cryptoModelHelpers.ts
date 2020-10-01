@@ -1,6 +1,6 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
 import { isString } from 'util'
-import { isNullOrEmpty, isABuffer, isAString } from '../../../helpers'
+import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -9,7 +9,7 @@ import {
   EthereumTxData,
   EthUnit,
 } from '../models'
-import { toEthBuffer, ensureHexPrefix } from './generalHelpers'
+import { toEthBuffer } from './generalHelpers'
 
 // todo eth - this should not have copied code - is the bug worked-around? if not, we should consider using a diff library
 // Reimplemented from ethereumjs-util module to workaround a current bug

@@ -120,11 +120,11 @@ export type AlgorandTxActionStruct = {
   appForeignApps?: number[]
   reKeyTo?: AlgorandAddressStruct
   genesisID?: string
-  genesisHash?: string
+  genesisHash?: Buffer
   firstRound?: number
   lastRound?: number
   fee?: number
-  flatFee?: boolean
+  flatFee?: boolean // flatfee is not included in the actual transaction data sent to chain - its only a hint to the algoSdk.transaction object
 }
 
 /** Algorand transaction encoded and 'minified' ready to send to chain */
@@ -140,7 +140,7 @@ export type AlgorandTxEncodedForChain = {
   lv?: number // lastRound
   fee?: number // fee
   gen?: string // genesisID
-  gn?: string // genesisHash - Buffer.from(genesisHash, 'base64')
+  gh?: Buffer // genesisHash - Buffer.from(genesisHash, 'base64')
   lx?: Buffer // Buffer.from(lease),
   grp?: Buffer // group
   voteKey?: Buffer // voteKey

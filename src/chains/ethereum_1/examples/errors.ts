@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainErrorType, ConfirmType } from '../../../models'
-import { toEthereumPrivateKey, toWei } from '../helpers'
+import { toEthereumPrivateKey, toWeiBN } from '../helpers'
 import { EthereumChainSettings, EthereumChainForkType, EthUnit, EthereumChainEndpoint } from '../models'
 ;(async () => {
   try {
@@ -23,7 +23,7 @@ import { EthereumChainSettings, EthereumChainForkType, EthUnit, EthereumChainEnd
     // Assuming authorizing account balance is NOT >= 1000 ETH
     const composeEthTransferParams = {
       to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      value: toWei(1000, EthUnit.Ether),
+      value: toWeiBN(1000, EthUnit.Ether),
     }
 
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, {
