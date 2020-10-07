@@ -43,7 +43,10 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): any {
-    return this._accountName
+    if (this?._options?.multiSigOptions) {
+      return determineMultiSigAddress(multiSigOptions)
+    }
+    return toAddressFromPublicKey(this._publicKey)
   }
 
   /** Account type to be created */
@@ -103,17 +106,19 @@ export class AlgorandCreateAccount implements CreateAccount {
     notSupported('CreateAccount.determineNewAccountName')
   }
 
-  /* Not supported for Algorand */
-  async generateAccountName(): Promise<any> {
-    // TODO Algo
-    notSupported('CreateAccount.generateAccountName')
-    return null
+  /* Returns a the Algorand Address for the public key provide in options - OR generates a new private/public/address 
+     Updates generatedKeys for the newly generated name (since name/account is derived from publicKey */
+  async generateAccountName(): Promise<AlgorandAddress> {
+    if (!this._publicKey) {
+      await this.generateAccountNameString()
+    }
+    return this.accountName()
   }
 
-  /** Not supported */
-  generateAccountNameString = (): any => {
-    // TODO Algo
-    notSupported('CreateAccount.generateAccountNameString')
+  /* Returns a string of the Algorand Address for the public key provide in options - OR generates a new private/public/address */
+  async generateAccountNameString(): Promise<string> {
+    await this.generateKeysIfNeeded()
+    return this.accountName() as string
   }
 
   /** Checks create options - if publicKeys are missing,
@@ -130,12 +135,9 @@ export class AlgorandCreateAccount implements CreateAccount {
     // No new key pair is generated for multisig account
     if (!multiSigOptions) {
       // get keys from options or generate
-      publicKey = this?._options?.publicKey
-      if (!publicKey) {
+      if (!this._publicKey) {
         await this.generateAccountKeys()
-        publicKey = this._generatedKeys?.publicKey
       }
-      this._accountName = await toAddressFromPublicKey(publicKey)
     }
     this._accountType = AlgorandNewAccountType.Native
   }
@@ -145,7 +147,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     const { newKeysOptions } = this._options || {}
     const { password } = newKeysOptions || {}
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, newKeysOptions)
-    this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
+    this._publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
   private assertValidOptionPublicKeys() {

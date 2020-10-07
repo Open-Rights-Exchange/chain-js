@@ -106,9 +106,8 @@ export class EthereumCreateAccount implements CreateAccount {
     return null
   }
 
-  /** Not supported */
-  generateAccountNameString = (): any => {
-    // TODO ETH
+  // TODO ETH
+  async generateAccountNameString(): Promise<string> {
     notSupported('CreateAccount.generateAccountNameString')
   }
 
