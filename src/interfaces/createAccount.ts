@@ -40,7 +40,7 @@ export interface CreateAccount {
   account names MUST be base32 encoded in compliance with the EOS standard (usually 12 characters)
   account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
   account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars */
-  generateAccountNameString(prefix: string): string
+  generateAccountNameString(prefix: string): Promise<string>
   /** Checks if publicKeys are provide in Options.
    *  If not, generates new public keys and stores them in class's generatedKeys property
    *  Also adds the new keys to the class's options.publicKeys property */
