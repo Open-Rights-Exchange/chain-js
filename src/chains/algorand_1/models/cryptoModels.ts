@@ -1,9 +1,16 @@
 import { Ed25519PasswordEncryptionOptions } from '../../../crypto/ed25519Crypto'
-import { PrivateKeyBrand, PublicKeyBrand, SignatureBrand, EncryptedDataString } from '../../../models'
+import {
+  PrivateKeyBrand,
+  PublicKeyBrand,
+  SignatureBrand,
+  EncryptedDataString,
+  ChainEntityNameBrand,
+} from '../../../models'
 
 /** an address string - formatted correctly for algorand */
 export type AlgorandAddress = string
-
+/** will be used as accountName */
+export type AlgorandEntityName = string & ChainEntityNameBrand
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
