@@ -109,6 +109,7 @@ export class EthereumCreateAccount implements CreateAccount {
   // TODO ETH
   async generateAccountNameString(): Promise<string> {
     notSupported('CreateAccount.generateAccountNameString')
+    return ''
   }
 
   /** Checks create options - if publicKeys are missing,
