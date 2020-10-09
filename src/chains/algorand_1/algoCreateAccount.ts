@@ -107,9 +107,9 @@ export class AlgorandCreateAccount implements CreateAccount {
     notSupported('CreateAccount.composeTransaction')
   }
 
-  // TODO: Support recycling
+  // TODO: Support recycling & alreadyExists
   /** Determine if desired account name is usable for a new account.
-   * Recycling is not supported for now.
+   * Recycling is not supported for now. Will be supported in the future.
    */
   async determineNewAccountName(accountName: AlgorandEntityName): Promise<any> {
     return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
