@@ -13,7 +13,7 @@ import {
   EosPrivateKey,
   EosTxOptions,
 } from './models'
-import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
+import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
 import { Transaction } from '../../interfaces'
@@ -519,20 +519,22 @@ export class EosTransaction implements Transaction {
     return false
   }
 
+  // TODO: to be implement
   public async resourcesRequired(): Promise<any> {
-    return null
+    notImplemented()
   }
 
   public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
-    return null
+    notSupported('setDesiredFee')
   }
 
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
-    return null
+    notSupported('getSuggestedFee')
   }
 
-  public async getActualCost(): Promise<string> {
-    return ''
+  // TODO: to be implemented
+  public async getActualCost(): Promise<any> {
+    notImplemented()
   }
 
   // ------------------------ EOS Specific functionality -------------------------------
