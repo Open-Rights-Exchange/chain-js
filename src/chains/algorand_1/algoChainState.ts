@@ -254,7 +254,12 @@ export class AlgorandChainState {
   /** This waits for transaction to be confirmed then returns trx result */
   public async getTransactionById(id: string): Promise<any> {
     await this.waitForTransactionConfirmation(id)
-    return this._algoClient.transactionById(id)
+    return this.algoClient.transactionById(id)
+  }
+
+  /** Gets recommented fee (microalgo) per byte according to network's transaction load */
+  public async getSuggestedFeePerByte(): Promise<number> {
+    return this.algoClient.getSuggestedFee()
   }
 
   /** Checks for required header 'X-API_key' */
