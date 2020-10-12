@@ -30,6 +30,7 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxHeaderParams,
   AlgorandTxSignResults,
+  AlgorandTransactionResources,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
@@ -51,7 +52,7 @@ import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
-import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
+import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -609,23 +610,35 @@ export class AlgorandTransaction implements Transaction {
   // Fees
 
   public get supportsFee() {
-    return false
+    return true
   }
 
-  public async resourcesRequired(): Promise<number> {
-    return this._algoSdkTransaction?.estimateSize()
+  /** Returns Algorand spesific transaction resource unit (bytes) */
+  public async resourcesRequired(): Promise<AlgorandTransactionResources> {
+    return { bytes: this._algoSdkTransaction?.estimateSize() }
   }
 
-  public async setDesiredFee(desiredFee: string): Promise<any> {
+  /** Gets desiredFee input as algos string
+   *  Sets transaction fee propert as flatfee */
+  public async setDesiredFee(desiredFee: string) {
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
   }
 
-  public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
-    return microToAlgoString((await this.resourcesRequired()) * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority])
+  /** Returns transaction fee as microalgos string */
+  public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
+    if (priority === TxExecutionPriority.Slow) {
+      return MINIMUM_TRANSACTION_FEE
+    }
+    return microToAlgoString(
+      (await this.resourcesRequired()).bytes *
+        (await this._chainState.getSuggestedFeePerByte()) *
+        TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority],
+    )
   }
 
+  /** get the actual cost (in Algos) for executing the transaction  */
   public async getActualCost(): Promise<string> {
     const trx = await this._chainState.getTransactionById(this.transactionId)
     return microToAlgoString(trx?.fee)
