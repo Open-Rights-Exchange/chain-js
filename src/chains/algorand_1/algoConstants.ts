@@ -17,8 +17,14 @@ export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
 /** The symbol for the native token/currency on the chain */
 export const NATIVE_CHAIN_TOKEN_SYMBOL = 'algo'
 
+export const MINIMUM_TRANSACTION_FEE = '1000'
+
+/** Slow -> minimum transaction fee,
+ *  Average ->  suggested fee per byte from chainState
+ *  Fast -> multiply suggested fee by 1.2
+ */
 export const TRANSACTION_FEE_PRIORITY_MULTIPLIERS: IndexedObject = {
-  slow: 1,
-  average: 10,
-  fast: 20,
+  slow: 0,
+  average: 1,
+  fast: 2,
 }
