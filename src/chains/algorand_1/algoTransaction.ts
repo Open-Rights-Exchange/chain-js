@@ -615,7 +615,8 @@ export class AlgorandTransaction implements Transaction {
 
   /** Returns Algorand spesific transaction resource unit (bytes) */
   public async resourcesRequired(): Promise<AlgorandTransactionResources> {
-    return { bytes: this._algoSdkTransaction?.estimateSize() }
+    const bytes = await this._algoSdkTransaction?.estimateSize()
+    return { bytes }
   }
 
   /** Gets desiredFee input as algos string
@@ -628,14 +629,10 @@ export class AlgorandTransaction implements Transaction {
 
   /** Returns transaction fee as microalgos string */
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
-    if (priority === TxExecutionPriority.Slow) {
-      return MINIMUM_TRANSACTION_FEE
-    }
-    return microToAlgoString(
-      (await this.resourcesRequired()).bytes *
-        (await this._chainState.getSuggestedFeePerByte()) *
-        TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority],
-    )
+    const { bytes } = await this.resourcesRequired()
+    const suggestedFeePerByte = await this._chainState.getSuggestedFeePerByte()
+    const microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+    return microToAlgoString(microalgos)
   }
 
   /** get the actual cost (in Algos) for executing the transaction  */
