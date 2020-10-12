@@ -259,7 +259,8 @@ export class AlgorandChainState {
 
   /** Gets recommented fee (microalgo) per byte according to network's transaction load */
   public async getSuggestedFeePerByte(): Promise<number> {
-    return this.algoClient.getSuggestedFee()
+    const { fee } = await this.algoClient.suggestedFee()
+    return fee
   }
 
   /** Checks for required header 'X-API_key' */
