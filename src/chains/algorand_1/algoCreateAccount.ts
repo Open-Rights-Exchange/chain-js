@@ -48,12 +48,13 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
-    if (this._publicKey) {
-      return toAlgorandEntityName(toAddressFromPublicKey(this._publicKey))
-    }
     if (this._multiSigOptions) {
       return toAlgorandEntityName(determineMultiSigAddress(this._multiSigOptions))
     }
+    if (this._publicKey) {
+      return toAlgorandEntityName(toAddressFromPublicKey(this._publicKey))
+    }
+
     return null
   }
 
@@ -115,9 +116,9 @@ export class AlgorandCreateAccount implements CreateAccount {
     return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
   }
 
-  /** Returns a the Algorand Address as AlgorandEntityName brand for the public key provide in options -
+  /** Returns the Algorand Address as AlgorandEntityName for the public key provided in options -
      OR generates a new private/public/address 
-     Updates generatedKeys for the newly generated name (since name/account is derived from publicKey */
+     Updates generatedKeys for the newly generated name (since name/account is derived from publicKey) */
   async generateAccountName(): Promise<AlgorandEntityName> {
     const accountName = await this.generateAccountNameString()
     return toAlgorandEntityName(accountName)
