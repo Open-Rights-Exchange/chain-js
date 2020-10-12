@@ -31,7 +31,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   return { transactionId: txID, transaction: returnTx }
 }
 /** expects microAlgo in number format that AlgoSdk uses
- * returns standard native chain currency in string format */
+ * returns algo in string format */
 export function microToAlgoString(microAlgo: number): string {
   const algo = microAlgo / 1000000
   return algo.toString()

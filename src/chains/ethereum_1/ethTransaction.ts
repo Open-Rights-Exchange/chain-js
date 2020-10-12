@@ -491,7 +491,7 @@ export class EthereumTransaction implements Transaction {
     return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
   }
 
-  /** get the actual cost (in Ether) for sending the transaction */
+  /** get the actual cost (in Ether) for executing the transaction */
   public async getActualCost(): Promise<string> {
     if (!isNullOrEmptyEthereumValue(this._actualCost)) {
       return this._actualCost
