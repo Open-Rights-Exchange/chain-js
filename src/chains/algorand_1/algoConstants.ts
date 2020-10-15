@@ -19,12 +19,12 @@ export const NATIVE_CHAIN_TOKEN_SYMBOL = 'algo'
 
 export const MINIMUM_TRANSACTION_FEE = '1000'
 
-/** Slow -> minimum transaction fee,
+/** Slow -> minimum transaction fee - we pass in 0 for the fixedFee then it will use the minimum fee
  *  Average ->  suggested fee per byte from chainState
- *  Fast -> multiply suggested fee by 1.2
+ *  Fast -> multiply suggested fee by 1.2 - as per recommendation from Algorand Foundation
  */
 export const TRANSACTION_FEE_PRIORITY_MULTIPLIERS: IndexedObject = {
   slow: 0,
   average: 1,
-  fast: 2,
+  fast: 1.2,
 }
