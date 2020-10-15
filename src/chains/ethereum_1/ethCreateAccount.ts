@@ -100,9 +100,9 @@ export class EthereumCreateAccount implements CreateAccount {
     return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
   }
 
-  /** Returns a the Ethereum Address as EthereumEntityName brand for the public key provide in options -
-     OR generates a new private/public/address 
-     Updates generatedKeys for the newly generated name (since name/account is derived from publicKey */
+  /** Returns the Ethereum Address as EthereumEntityName for the public key provided in options
+    OR generates a new private/public/address 
+    Updates generatedKeys for the newly generated name (since name/account is derived from publicKey */
   async generateAccountName(): Promise<EthereumEntityName> {
     const accountName = await this.generateAccountNameString()
     return toEthereumEntityName(accountName)
