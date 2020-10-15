@@ -1,7 +1,13 @@
 import { isValidAddress } from 'algosdk'
 import * as base32 from 'hi-base32'
 import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
-import { AlgorandAddress, AlgorandAddressStruct, AlgorandPublicKey, AlgorandSymbol } from '../models'
+import {
+  AlgorandAddress,
+  AlgorandAddressStruct,
+  AlgorandEntityName,
+  AlgorandPublicKey,
+  AlgorandSymbol,
+} from '../models'
 import { toAddressFromPublicKey, toAlgorandPublicKey } from './cryptoModelHelpers'
 import { ALGORAND_ADDRESS_BYTES_ONLY_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH, PUBLIC_KEY_LENGTH } from '../algoConstants'
 
@@ -27,6 +33,16 @@ export function isValidAlgorandAddress(address: string): boolean {
 export function toAlgorandAddress(value: string): AlgorandAddress {
   if (isValidAlgorandAddress(value)) {
     return value
+  }
+  if (value === '') {
+    return null
+  }
+  throw new Error(`Not a valid Algorand Account:${value}.`)
+}
+
+export function toAlgorandEntityName(value: string): AlgorandEntityName {
+  if (isValidAlgorandAddress(value)) {
+    return value as AlgorandEntityName
   }
   if (value === '') {
     return null

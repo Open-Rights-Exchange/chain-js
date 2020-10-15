@@ -2,7 +2,7 @@ import { EthereumChainState } from './ethChainState'
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
 import { getEthereumAddressFromPublicKey, generateNewAccountKeysAndEncryptPrivateKeys } from './ethCrypto'
-import { isValidEthereumPublicKey } from './helpers'
+import { isValidEthereumPublicKey, toEthereumEntityName } from './helpers'
 import { isNullOrEmpty, notSupported } from '../../helpers'
 import {
   EthereumAddress,
@@ -92,24 +92,26 @@ export class EthereumCreateAccount implements CreateAccount {
     notSupported('CreateAccount.composeTransaction')
   }
 
+  // TODO: support alreadyExists
   /** Determine if desired account name is usable for a new account.
+   * Recycling is not supported on Ethereum
    */
-  async determineNewAccountName(): Promise<any> {
-    // TODO ETH
-    notSupported('CreateAccount.determineNewAccountName')
+  async determineNewAccountName(accountName: EthereumEntityName): Promise<any> {
+    return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
   }
 
-  /* Not supported for Ethereum */
+  /** Returns the Ethereum Address as EthereumEntityName for the public key provided in options
+    OR generates a new private/public/address 
+    Updates generatedKeys for the newly generated name (since name/account is derived from publicKey */
   async generateAccountName(): Promise<EthereumEntityName> {
-    // TODO ETH
-    notSupported('CreateAccount.generateAccountName')
-    return null
+    const accountName = await this.generateAccountNameString()
+    return toEthereumEntityName(accountName)
   }
 
-  /** Not supported */
-  generateAccountNameString = (): any => {
-    // TODO ETH
-    notSupported('CreateAccount.generateAccountNameString')
+  /* Returns a string of the Ethereum Address for the public key provide in options - OR generates a new private/public/address */
+  async generateAccountNameString(): Promise<string> {
+    await this.generateKeysIfNeeded()
+    return this.accountName as string
   }
 
   /** Checks create options - if publicKeys are missing,

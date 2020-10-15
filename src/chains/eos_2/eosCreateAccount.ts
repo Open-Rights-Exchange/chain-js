@@ -255,7 +255,7 @@ export class EosCreateAccount implements CreateAccount {
   /** Generates a random EOS compatible account name and checks chain to see if it is arleady in use.
    *  If already in use, this function is called recursively until a unique name is generated */
   async generateAccountName(prefix: string, checkIfNameUsedOnChain: boolean = true): Promise<EosEntityName> {
-    const accountName = this.generateAccountNameString(prefix)
+    const accountName = await this.generateAccountNameString(prefix)
     let exists = false
     if (checkIfNameUsedOnChain) {
       exists = await this.doesAccountExist(accountName)
@@ -271,7 +271,7 @@ export class EosCreateAccount implements CreateAccount {
     account names can also contain only the following characters: a-z, 1-5, & '.' In regex: [a-z1-5\.]{12}
     account names are generated based on the current unix timestamp + some randomness, and cut to be 12 chars
   */
-  generateAccountNameString = (prefix: string = ''): EosEntityName => {
+  async generateAccountNameString(prefix: string = ''): Promise<EosEntityName> {
     return toEosEntityName((prefix + timestampEosBase32() + randomEosBase32()).substr(0, ACCOUNT_NAME_MAX_LENGTH))
   }
 

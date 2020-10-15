@@ -2,21 +2,29 @@ import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
 import { isNullOrEmpty, notSupported } from '../../helpers'
 import {
-  AlgorandAddress,
   AlgorandCreateAccountOptions,
+  AlgorandEntityName,
   AlgorandGeneratedKeys,
+  AlgorandMultiSigOptions,
   AlgorandNewAccountType,
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
-import { isValidAlgorandPublicKey, determineMultiSigAddress, toAddressFromPublicKey } from './helpers'
+import {
+  isValidAlgorandPublicKey,
+  determineMultiSigAddress,
+  toAddressFromPublicKey,
+  toAlgorandEntityName,
+} from './helpers'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
  *  Generates new account keys if not provide */
 export class AlgorandCreateAccount implements CreateAccount {
-  private _accountName: AlgorandAddress
+  private _publicKey: AlgorandPublicKey
+
+  private _multiSigOptions: AlgorandMultiSigOptions
 
   private _chainState: AlgorandChainState
 
@@ -31,19 +39,23 @@ export class AlgorandCreateAccount implements CreateAccount {
   constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
     this._options = options
-    const multiSigOptions = this?._options?.multiSigOptions
-    // if multisig options are given, then compute a multisig account address using the passed in algorand addresses in multisig options
-    if (multiSigOptions) {
-      this._accountName = determineMultiSigAddress(multiSigOptions)
-    }
+    this._publicKey = options?.publicKey
+    this._multiSigOptions = options?.multiSigOptions || null
   }
 
   // ---- Interface implementation
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
-  get accountName(): any {
-    return this._accountName
+  get accountName(): AlgorandEntityName {
+    if (this._multiSigOptions) {
+      return toAlgorandEntityName(determineMultiSigAddress(this._multiSigOptions))
+    }
+    if (this._publicKey) {
+      return toAlgorandEntityName(toAddressFromPublicKey(this._publicKey))
+    }
+
+    return null
   }
 
   /** Account type to be created */
@@ -96,46 +108,41 @@ export class AlgorandCreateAccount implements CreateAccount {
     notSupported('CreateAccount.composeTransaction')
   }
 
+  // TODO: Support recycling & alreadyExists
   /** Determine if desired account name is usable for a new account.
+   * Recycling is not supported for now. Will be supported in the future.
    */
-  async determineNewAccountName(): Promise<any> {
-    // TODO Algo
-    notSupported('CreateAccount.determineNewAccountName')
+  async determineNewAccountName(accountName: AlgorandEntityName): Promise<any> {
+    return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
   }
 
-  /* Not supported for Algorand */
-  async generateAccountName(): Promise<any> {
-    // TODO Algo
-    notSupported('CreateAccount.generateAccountName')
-    return null
+  /** Returns the Algorand Address as AlgorandEntityName for the public key provided in options -
+     OR generates a new private/public/address 
+     Updates generatedKeys for the newly generated name (since name/account is derived from publicKey) */
+  async generateAccountName(): Promise<AlgorandEntityName> {
+    const accountName = await this.generateAccountNameString()
+    return toAlgorandEntityName(accountName)
   }
 
-  /** Not supported */
-  generateAccountNameString = (): any => {
-    // TODO Algo
-    notSupported('CreateAccount.generateAccountNameString')
+  /* Returns a string of the Algorand Address for the public key provide in options - OR generates a new private/public/address */
+  async generateAccountNameString(): Promise<string> {
+    await this.generateKeysIfNeeded()
+    return this.accountName as string
   }
 
-  /** Checks create options - if publicKeys are missing,
+  /** Checks create options - if both publicKey and multiSigOptions are missing,
    *  autogenerate the public and private key pair and add them to options
    *  Algorand keys are represented as hex strings in chainjs.
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
    */
   async generateKeysIfNeeded() {
-    let publicKey: AlgorandPublicKey
     this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
-
-    const multiSigOptions = this?._options?.multiSigOptions
-    // No new key pair is generated for multisig account
-    if (!multiSigOptions) {
+    if (!this._publicKey) {
       // get keys from options or generate
-      publicKey = this?._options?.publicKey
-      if (!publicKey) {
+      if (!this._multiSigOptions) {
         await this.generateAccountKeys()
-        publicKey = this._generatedKeys?.publicKey
       }
-      this._accountName = await toAddressFromPublicKey(publicKey)
     }
     this._accountType = AlgorandNewAccountType.Native
   }
@@ -145,7 +152,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     const { newKeysOptions } = this._options || {}
     const { password } = newKeysOptions || {}
     this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, newKeysOptions)
-    this._options.publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
+    this._publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
   private assertValidOptionPublicKeys() {
