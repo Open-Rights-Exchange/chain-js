@@ -1,4 +1,14 @@
-import { ConfirmType, Signature, PublicKey, PrivateKey, TransactionOptions, TransactionResult } from '../models'
+import {
+  ConfirmType,
+  Signature,
+  PublicKey,
+  PrivateKey,
+  TransactionOptions,
+  TransactionResult,
+  TransactionResources,
+  TransactionCost,
+  TxExecutionPriority,
+} from '../models'
 
 /**
  * The Transaction interface declares the operations that all concrete chain (chain)transaction classes must implement
@@ -33,6 +43,8 @@ export interface Transaction {
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
   signBuffer: any
+  /** Does the chain support fees for transactions */
+  supportsFee: boolean
   /** Whether the chain supports signing a transactions using a multi-signature account */
   supportsMultisigTransaction: boolean
   /** Returns transaction hash that can be used to query the transaction on chain
@@ -49,9 +61,18 @@ export interface Transaction {
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
+  /** Cost that is paid after transaction has executed on chain
+   * Return format is string of chain's default native currency unit */
+  getActualCost(): Promise<string>
+  /** Get the suggested fee for this transaction */
+  getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.
    *  Requires at least one action set. Must be called before sign() */
   prepareToBeSigned(): Promise<void>
+  /** Gets estimated cost in chain specific units to execute this transaction (at current chain rates) */
+  resourcesRequired(): Promise<TransactionResources>
+  /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) */
+  setDesiredFee(desiredFee: TransactionCost): Promise<void>
   /** Set the body of the transaction using raw (hex) transaction data
    *  This is one of the ways to set the actions for the transaction */
   setFromRaw(raw: any): Promise<void>

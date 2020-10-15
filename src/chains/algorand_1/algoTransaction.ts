@@ -2,7 +2,7 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import { Transaction } from '../../interfaces'
-import { ConfirmType } from '../../models'
+import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
 import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
@@ -30,6 +30,7 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxHeaderParams,
   AlgorandTxSignResults,
+  AlgorandTransactionResources,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
@@ -38,6 +39,8 @@ import {
   toAlgorandPublicKey,
   toRawTransactionFromSignResults,
   getPublicKeyForAddress,
+  microToAlgoString,
+  algoToMicro,
 } from './helpers'
 import {
   toAlgorandSignatureFromRawSig,
@@ -49,6 +52,7 @@ import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
+import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -601,5 +605,40 @@ export class AlgorandTransaction implements Transaction {
   /** JSON representation of transaction data */
   public toJson(): any {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
+  }
+
+  // Fees
+
+  public get supportsFee() {
+    return true
+  }
+
+  /** Returns Algorand specific transaction resource unit (bytes) */
+  public async resourcesRequired(): Promise<AlgorandTransactionResources> {
+    const bytes = await this._algoSdkTransaction?.estimateSize()
+    return { bytes }
+  }
+
+  /** Sets transaction fee propert as flatfee
+   *  desiredFee units is in algos (expressed as a string)
+   */
+  public async setDesiredFee(desiredFee: string) {
+    const fee = algoToMicro(desiredFee)
+    const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
+    this.actions = [trx]
+  }
+
+  /** Returns transaction fee in units of microalgos (expressed as a string) */
+  public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
+    const { bytes } = await this.resourcesRequired()
+    const suggestedFeePerByte = await this._chainState.getSuggestedFeePerByte()
+    const microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+    return microToAlgoString(microalgos)
+  }
+
+  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string) */
+  public async getActualCost(): Promise<string> {
+    const trx = await this._chainState.getTransactionById(this.transactionId)
+    return microToAlgoString(trx?.fee)
   }
 }

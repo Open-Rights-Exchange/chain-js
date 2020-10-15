@@ -4,7 +4,7 @@ import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
 import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ConfirmType } from '../../models'
+import { ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -20,7 +20,6 @@ import {
   EthereumActionHelperInput,
   EthereumTransactionCost,
   EthereumTransactionResources,
-  EthereumTxExecutionPriority,
   EthUnit,
 } from './models'
 import { throwNewError } from '../../errors'
@@ -55,7 +54,7 @@ export class EthereumTransaction implements Transaction {
   /** Transaction object (using ethereumjs-tx library) */
   private _ethereumJsTx: EthereumJsTx
 
-  private _executionPriority: EthereumTxExecutionPriority
+  private _executionPriority: TxExecutionPriority
 
   private _maxFeeIncreasePercentage: number
 
@@ -78,7 +77,7 @@ export class EthereumTransaction implements Transaction {
     this._executionPriority =
       this._options?.executionPriority ??
       this._chainState?.chainSettings?.defaultTransactionSettings?.executionPriority ??
-      EthereumTxExecutionPriority.Average
+      TxExecutionPriority.Average
   }
 
   /** Multisig transactions are not supported by ethereum */
@@ -454,9 +453,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Get the suggested Eth fee (in Ether) for this transaction */
-  public async getSuggestedFee(
-    priority: EthereumTxExecutionPriority = EthereumTxExecutionPriority.Average,
-  ): Promise<string> {
+  public async getSuggestedFee(priority: TxExecutionPriority = TxExecutionPriority.Average): Promise<string> {
     this.assertHasAction()
     const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
     let gasPriceinWeiBN = new BN(gasPriceString)
@@ -494,7 +491,7 @@ export class EthereumTransaction implements Transaction {
     return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
   }
 
-  /** get the actual cost (in Ether) for sending the transaction */
+  /** get the actual cost (in Ether) for executing the transaction */
   public async getActualCost(): Promise<string> {
     if (!isNullOrEmptyEthereumValue(this._actualCost)) {
       return this._actualCost
@@ -532,11 +529,11 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Get the execution priority for the transaction - higher value attaches more fees */
-  public get executionPriority(): EthereumTxExecutionPriority {
+  public get executionPriority(): TxExecutionPriority {
     return this._executionPriority
   }
 
-  public set executionPriority(value: EthereumTxExecutionPriority) {
+  public set executionPriority(value: TxExecutionPriority) {
     this._executionPriority = value
   }
 

@@ -1,6 +1,6 @@
 import { AlgorandValue, AlgorandMultiSigOptions } from './generalModels'
 import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
-import { AlgorandTxActionStruct, AlgorandTransactionTypeCode } from './algoStructures'
+import { AlgorandTxActionStruct } from './algoStructures'
 
 /**
  * Chain response type after a transaction is confirmed on the chain
@@ -147,4 +147,11 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   appAccounts?: AlgorandAddress[]
   appForeignApps?: number[]
   reKeyTo?: AlgorandAddress
+}
+
+/** Algorand spesific transaction execution resource unit
+ * Used for calculation transaction cost
+ */
+export type AlgorandTransactionResources = {
+  bytes: number
 }
