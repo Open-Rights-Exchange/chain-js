@@ -613,21 +613,22 @@ export class AlgorandTransaction implements Transaction {
     return true
   }
 
-  /** Returns Algorand spesific transaction resource unit (bytes) */
+  /** Returns Algorand specific transaction resource unit (bytes) */
   public async resourcesRequired(): Promise<AlgorandTransactionResources> {
     const bytes = await this._algoSdkTransaction?.estimateSize()
     return { bytes }
   }
 
-  /** Gets desiredFee input as algos string
-   *  Sets transaction fee propert as flatfee */
+  /** Sets transaction fee propert as flatfee
+   *  desiredFee units is in algos (expressed as a string)
+   */
   public async setDesiredFee(desiredFee: string) {
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
   }
 
-  /** Returns transaction fee as microalgos string */
+  /** Returns transaction fee in units of microalgos (expressed as a string) */
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
     const { bytes } = await this.resourcesRequired()
     const suggestedFeePerByte = await this._chainState.getSuggestedFeePerByte()
@@ -635,7 +636,7 @@ export class AlgorandTransaction implements Transaction {
     return microToAlgoString(microalgos)
   }
 
-  /** get the actual cost (in Algos) for executing the transaction  */
+  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string) */
   public async getActualCost(): Promise<string> {
     const trx = await this._chainState.getTransactionById(this.transactionId)
     return microToAlgoString(trx?.fee)
