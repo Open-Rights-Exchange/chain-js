@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import { stringifySafe } from './helpers'
 import { ChainErrorType } from './models'
 
