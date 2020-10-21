@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { ChainEndpoint, ChainInfo, ConfirmType } from '../../models'
+import { ChainEndpoint, ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
 import {
   AlgorandAddress,
   AlgoClient,
@@ -13,16 +13,26 @@ import {
   AlgorandSymbol,
   AlgorandTxResult,
   AlgorandUnit,
+  AlgorandTxChainResponse,
 } from './models'
 import {
   getHeaderValueFromEndpoint,
   hexStringToByteArray,
   isNullOrEmpty,
   objectHasProperty,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
   trimTrailingChars,
 } from '../../helpers'
-import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_TOKEN_SYMBOL } from './algoConstants'
+import {
+  ALGORAND_POST_CONTENT_TYPE,
+  DEFAULT_BLOCKS_TO_CHECK,
+  DEFAULT_GET_BLOCK_ATTEMPTS,
+  DEFAULT_CHECK_INTERVAL,
+  NATIVE_CHAIN_TOKEN_SYMBOL,
+} from './algoConstants'
 import { toAlgo } from './helpers'
+import { mapChainError } from './algoErrors'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -121,6 +131,12 @@ export class AlgorandChainState {
     }
   }
 
+  public async getBlock(blockNumber: number): Promise<any> {
+    this.assertIsConnected()
+    const block = await this._algoClient.block(blockNumber)
+    return block
+  }
+
   /** Get the balance for an account from the chain
    *  If symbol = 'algo', returns Algo balance (in units of Algo)
    *  Else returns the asset balance of the account for the provided symbol (asset symbol),  if the symbol is valid
@@ -179,20 +195,12 @@ export class AlgorandChainState {
     }
   }
 
-  /**
-   * Confirms a transaction on chain by repeatedly checking if the given transaction id is in the pending transactions on the chain
-   * Transactions are generally confirmed in less than 5 seconds on Algorand
-   */
-  async waitForTransactionConfirmation(transactionId: string) {
-    let waitingConfirmation = true
-
-    while (waitingConfirmation) {
-      // eslint-disable-next-line no-await-in-loop
-      const pendingTransaction = await this._algoClient.pendingTransactionInformation(transactionId)
-      if (pendingTransaction.round != null && pendingTransaction.round > 0) {
-        // Got the completed Transaction
-        waitingConfirmation = false
-      }
+  /** Retrieve the default settings for chain communications */
+  static get defaultCommunicationSettings() {
+    return {
+      blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
+      checkInterval: DEFAULT_CHECK_INTERVAL,
+      getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
     }
   }
 
@@ -206,35 +214,219 @@ export class AlgorandChainState {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: AlgorandChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
-    const sendResult: Partial<AlgorandTxResult> = {}
-
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
-
+    let sendResult: AlgorandTxResult
+    let transactionId
+    // get the head block just before sending the transaction
+    const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
     // eslint-disable-next-line no-useless-catch
     try {
-      // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
-      if (waitForConfirm === ConfirmType.None) {
-        const transactionId = (await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)) as string
-        sendResult.chainResponse = null
-        sendResult.transactionId = transactionId
-      }
-      // returns transactionReceipt after submitting transaction AND waiting for a confirmation
-      if (waitForConfirm === ConfirmType.After001) {
-        const transactionId = await this._algoClientWithTxHeader.sendRawTransaction(
-          hexStringToByteArray(signedTransaction),
-        )
-        await this.waitForTransactionConfirmation(transactionId)
-        sendResult.transactionId = transactionId
-        sendResult.chainResponse = await this._algoClient.transactionById(transactionId)
-      }
+      const { txId } = await this._algoClientWithTxHeader.sendRawTransaction(hexStringToByteArray(signedTransaction))
+      transactionId = txId
     } catch (error) {
-      // ALGO TODO: map chain error
-      throw error
+      const chainError = mapChainError(error)
+      throw chainError
     }
 
-    return sendResult as AlgorandTxResult
+    if (waitForConfirm !== ConfirmType.None) {
+      // Since it wont retrieve transaction response from algorand rpc (unlike EOS) it will automatically start with currentHeadBlock
+      const startFromBlockNumber = currentHeadBlock
+
+      sendResult = await this.awaitTransaction(
+        { transactionId } as AlgorandTxResult,
+        waitForConfirm,
+        startFromBlockNumber,
+        communicationSettings,
+      )
+    }
+
+    return { transactionId, ...sendResult } as AlgorandTxResult
+  }
+
+  private async awaitTransaction(
+    transactionResult: AlgorandTxResult,
+    waitForConfirm: ConfirmType,
+    startFromBlockNumber: number,
+    communicationSettings: AlgorandChainSettingsCommunicationSettings,
+  ): Promise<AlgorandTxResult> {
+    // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
+    const useCommunicationSettings = communicationSettings ?? {
+      ...AlgorandChainState.defaultCommunicationSettings,
+      ...this.chainSettings?.communicationSettings,
+    }
+    const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
+    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
+      throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
+    }
+    if (!startFromBlockNumber || startFromBlockNumber <= 1) {
+      throwNewError('A valid number (greater than 1) must be provided for startFromBlockNumber param')
+    }
+    return new Promise((resolve, reject) => {
+      const getBlockAttempt = 1
+      const { transactionId } = transactionResult || {}
+      // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
+      const nextBlockNumToCheck = startFromBlockNumber - 1
+
+      // Schedule first call of recursive function
+      // if will keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
+      // ... or until we reach a max number of blocks or block read attempts
+      setTimeout(
+        async () =>
+          this.checkIfAwaitConditionsReached(
+            reject,
+            resolve,
+            blocksToCheck,
+            checkInterval,
+            getBlockAttempt,
+            maxBlockReadAttempts,
+            nextBlockNumToCheck,
+            startFromBlockNumber,
+            null,
+            transactionId,
+            transactionResult,
+            waitForConfirm,
+          ),
+        checkInterval,
+      )
+    })
+  }
+
+  /** While processing awaitTransaction, check if we've reached our limits to wait
+   *  Otherwise, schedule next check  */
+  private async checkIfAwaitConditionsReached(
+    reject: (value?: unknown) => void,
+    resolve: (value?: unknown) => void,
+    blocksToCheck: number,
+    checkInterval: number,
+    getBlockAttempt: number,
+    maxBlockReadAttempts: number,
+    blockNumToCheck: number,
+    startFromBlockNumber: number,
+    transactionBlockNumberParam: number,
+    transactionId: string,
+    transactionResult: AlgorandTxResult,
+    waitForConfirm: ConfirmType,
+  ) {
+    let transactionBlockNumber = transactionBlockNumberParam
+    let nextGetBlockAttempt: number
+    let nextBlockNumToCheck = blockNumToCheck
+    let possibleTransactionBlock: any
+    let transactionResponse: AlgorandTxChainResponse
+    try {
+      if (!transactionBlockNumber) {
+        possibleTransactionBlock = await this.getBlock(blockNumToCheck)
+      }
+
+      transactionResponse = this.blockHasTransaction(possibleTransactionBlock, transactionId)
+      if (!isNullOrEmpty(transactionResponse)) {
+        transactionBlockNumber = possibleTransactionBlock.round
+      }
+      // check if we've met our limit rules
+      const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
+        transactionBlockNumber,
+        waitForConfirm,
+        // blocksToCheck,
+      )
+      if (hasReachedConfirmLevel) {
+        resolveAwaitTransaction(resolve, {
+          chainResponse: transactionResponse,
+          ...transactionResult,
+        } as AlgorandTxResult)
+        return
+      }
+      nextBlockNumToCheck = blockNumToCheck + 1
+    } catch (error) {
+      const mappedError = mapChainError(error)
+      if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
+        // Try to read the specific block - up to getBlockAttempts times
+        if (getBlockAttempt >= maxBlockReadAttempts) {
+          rejectAwaitTransaction(
+            reject,
+            ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
+            `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
+            error,
+          )
+          return
+        }
+        nextGetBlockAttempt = getBlockAttempt + 1
+      } else {
+        // re-throw error - not one we can handle here
+        throw mappedError
+      }
+    }
+
+    if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
+      rejectAwaitTransaction(
+        reject,
+        ChainErrorDetailCode.ConfirmTransactionTimeout,
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
+          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        null,
+      )
+      return
+    }
+    // not yet reached limit - set a timer to call this function again (in checkInterval ms)
+    const checkAgainInMs = checkInterval
+    setTimeout(
+      async () =>
+        this.checkIfAwaitConditionsReached(
+          reject,
+          resolve,
+          blocksToCheck,
+          checkInterval,
+          nextGetBlockAttempt,
+          maxBlockReadAttempts,
+          nextBlockNumToCheck,
+          startFromBlockNumber,
+          transactionBlockNumber,
+          transactionId,
+          transactionResult,
+          waitForConfirm,
+        ),
+      checkAgainInMs,
+    )
+  }
+
+  /** block has reached the confirmation level requested */
+  hasReachedConfirmLevel = async (
+    transactionBlockNumber: number,
+    waitForConfirm: ConfirmType,
+    // blocksToCheck: number, Will be added with other ConfirmTypes
+  ): Promise<boolean> => {
+    // check that we've reached the required number of confirms
+    // let lastRound: number
+    // let confirmNumber: number
+    switch (waitForConfirm) {
+      case ConfirmType.None:
+        return true
+      case ConfirmType.After001:
+        // confirmed at least once if in a block
+        return !!transactionBlockNumber
+      case ConfirmType.After007:
+        throw new Error('Not Implemented')
+      case ConfirmType.After010:
+        throw new Error('Not Implemented')
+      // ConfirmType.Final is not supported yet but a possible implementation is commented.
+      case ConfirmType.Final:
+        throw new Error('Not Implemented')
+      //   // don't have a transactionBlockNumber yet
+      //   if (!transactionBlockNumber) return false
+      //   lastRound = (await this.getChainInfo())?.nativeInfo?.transactionHeaderParams?.lastRound
+      //   // check if blocksToCheck allows us to read enough blocks to get to final confirm
+      //   confirmNumber = lastRound - transactionBlockNumber
+      //   return confirmNumber >= blocksToCheck
+      default:
+        return false
+    }
+  }
+
+  /** Check if a block includes a transaction */
+  public blockHasTransaction = (block: any, transactionId: string): AlgorandTxChainResponse => {
+    const { transactions } = block?.txns
+    const result = transactions?.find((transaction: any) => transaction?.tx === transactionId)
+    return result
   }
 
   /** Return instance of algo sdk */
@@ -251,10 +443,17 @@ export class AlgorandChainState {
     return this._algoClientWithTxHeader
   }
 
-  /** This waits for transaction to be confirmed then returns trx result */
+  /** Searched transaction on chain by id
+   * Returns null if transaction does not exsits (this includes invalid id)
+   */
   public async getTransactionById(id: string): Promise<any> {
-    await this.waitForTransactionConfirmation(id)
-    return this.algoClient.transactionById(id)
+    let transaction
+    try {
+      transaction = this.algoClient.transactionById(id)
+    } catch (error) {
+      return null
+    }
+    return transaction
   }
 
   /** Gets recommented fee (microalgo) per byte according to network's transaction load */
