@@ -14,7 +14,8 @@ export const ChainErrorRegExs: { [key: string]: string } = {
     '(Sig or Msig|mystery sig|LogicSig not enabled|LogicSig.Logic too|LogicSig.Logic version|LogicSig.Logic bad|one of sig or msig)', // the permission isnt valid (or permission already exists in an account)
   AuthUnsatisfied: '(signature validation|multisig validation|signed and not a Logic-only)', // all permission or keys needed for transaction weren't provided
   AuthMissing: '(no sig|LogicSig.Logic empty)', // missing permission or key
-  BlockDoesNotExist: '(no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
+  BlockDoesNotExist:
+    '(/ps1/v1/block|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
   DataReadFailedKeyDoesNotExist: 'key does not exist',
   TokenBalanceTooLow: 'overflowed account balance',
   // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg
@@ -22,7 +23,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   MiscChainError: 'chain_type_exception',
   MiscBlockValidationError: '(GenesisHash mismatch|GenesisHash required|GenesisID mismatch)',
   MiscTransactionError:
-    '(tx does not|unknown consensus|rejected by logic|asset transaction|transaction (asset|from|cannot|invalid|note|tried|has|window|tries|had|pool)|TransactionPool|(remember|malformed|invlid) tx|transaction already)',
+    '(tx does not|unknown consensus|rejected by logic|asset transaction|transaction (asset|from|cannot|invalid|note|tried|has|window|tries|had|pool)|TransactionPool|(remember|malformed|invlid) tx|transaction already|ps1/v1/transaction)',
   MiscActionValidationError:
     '(address|nonempty AuthAddr|cannot close account|cannot spend from fee sink|cannot close fee sink|tx.|invalid application|programs|application|asset (name|metadata|unit|decimal|url))',
   MiscContractError: 'condition violated',
@@ -45,7 +46,7 @@ export function mapChainError(error: RpcError | Error): ChainError {
     errorMessage = `${stringifySafe(error.json)}`
     errorJson = error.json
   } else if (error instanceof Error) {
-    errorSearchString = `${error.name} ${error.message}`
+    errorSearchString = `${stringifySafe(error)}`
     errorMessage = errorSearchString
   } else {
     errorSearchString = stringifySafe(error)
