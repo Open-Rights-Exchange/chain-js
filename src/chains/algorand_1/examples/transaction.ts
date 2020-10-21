@@ -6,10 +6,12 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TxExecutionPriority } from '../../../models'
+import { ChainEndpoint, ChainActionType, TxExecutionPriority, ConfirmType } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { AlgorandTransaction } from '../algoTransaction'
+import { AlgorandChainState } from '../algoChainState'
+import { ChainAlgorandV1 } from '../ChainAlgorandV1'
 
 require('dotenv').config()
 
@@ -51,9 +53,8 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
   /** Compose and send transaction */
-  const transaction = await algoTest.new.Transaction() as AlgorandTransaction
+  const transaction = await algoTest.new.Transaction()
   composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
@@ -68,7 +69,8 @@ async function run() {
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send()))
+    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    // Using ConfirmType.None for transaction.send might make getActualCost return null
     console.log('actual fee: ', await transaction.getActualCost())
   } catch (err) {
     console.log(err)
