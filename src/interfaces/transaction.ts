@@ -72,7 +72,7 @@ export interface Transaction {
   /** Gets estimated cost in chain specific units to execute this transaction (at current chain rates) */
   resourcesRequired(): Promise<TransactionResources>
   /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) */
-  setDesiredFee(desiredFee: TransactionCost): Promise<void>
+  setDesiredFee(desiredFee: TransactionCost, options?: any): Promise<void>
   /** Set the body of the transaction using raw (hex) transaction data
    *  This is one of the ways to set the actions for the transaction */
   setFromRaw(raw: any): Promise<void>
