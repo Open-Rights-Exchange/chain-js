@@ -217,7 +217,6 @@ export class AlgorandChainState {
     }
     let sendResult: AlgorandTxResult
     let transactionId
-
     // eslint-disable-next-line no-useless-catch
     try {
       const { txId } = await this._algoClientWithTxHeader.sendRawTransaction(hexStringToByteArray(signedTransaction))
