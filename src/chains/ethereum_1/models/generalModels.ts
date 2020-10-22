@@ -28,6 +28,7 @@ export enum EthereumBlockType {
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
+  communicationSettings?: EthereumChainSettingsCommunicationSettings
   defaultTransactionSettings: {
     executionPriority: TxExecutionPriority
     maxFeeIncreasePercentage?: number
@@ -74,8 +75,11 @@ export type EthereumChainEndpoint = {
   health?: number
 }
 
-/** For future use - add any settings needed to customize communication with API endpoint */
-export type EthereumChainSettingsCommunicationSettings = {}
+export type EthereumChainSettingsCommunicationSettings = {
+  blocksToCheck: number
+  checkInterval: number
+  getBlockAttempts: number
+}
 
 export type EthereumBlockNumber = string | number | BN | BigNumber | EthereumBlockType
 export type EthereumDate = string & ChainDateBrand // Datetime string in the format YYYY-MM-DDTHH:MM:SS.sss
