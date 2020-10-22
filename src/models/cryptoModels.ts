@@ -43,3 +43,8 @@ export type AccountKeysStruct = {
     active: PrivateKey | EncryptedDataString
   }
 }
+
+export enum CryptoCurve {
+  Secp256k1 = 'secp256k1',
+  Ed25519 = 'ed25519',
+}

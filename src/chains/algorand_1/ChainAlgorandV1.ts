@@ -1,5 +1,5 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName } from '../../models'
+import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -112,6 +112,8 @@ class ChainAlgorandV1 implements Chain {
   }
 
   // --------- Chain crytography functions */
+  /** Primary cryptography curve used by this chain */
+  cryptoCurve: CryptoCurve.Ed25519
 
   /** Decrypts the encrypted value with a password, and using ed25519 algorithm and SHA512 hash function */
   decrypt = algoCrypto.decrypt

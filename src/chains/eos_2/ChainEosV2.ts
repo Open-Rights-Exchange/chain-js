@@ -1,14 +1,15 @@
 import { RpcError } from 'eosjs'
 import {
   ChainActionType,
-  ChainInfo,
-  TransactionOptions,
-  ChainType,
-  ChainEntityName,
   ChainDate,
-  PublicKey,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  CryptoCurve,
   PrivateKey,
+  PublicKey,
   Signature,
+  TransactionOptions,
 } from '../../models'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS } from './eosConstants'
 import { Chain } from '../../interfaces'
@@ -172,6 +173,8 @@ class ChainEosV2 implements Chain {
   }
 
   // --------- Chain crytography functions */
+  /** Primary cryptography curve used by this chain */
+  cryptoCurve: CryptoCurve.Secp256k1
 
   /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
