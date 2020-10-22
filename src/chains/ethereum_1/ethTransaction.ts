@@ -477,7 +477,7 @@ export class EthereumTransaction implements Transaction {
     this._desiredFee = desiredFeeWei
     const gasPriceString = gasPriceBn.toString(10).slice(0, -9)
     const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
-    const gasLimitString = (gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
+    const gasLimitString = Math.round(gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
     this._actionHelper.gasPrice = gasPriceString
     this._actionHelper.gasLimit = gasLimitString
     this.updateEthTxFromAction()
