@@ -218,7 +218,7 @@ export class AlgorandChainState {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
     let sendResult: AlgorandTxResult
-    let transactionId
+    let transactionId: string
     // get the head block just before sending the transaction
     const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
     // eslint-disable-next-line no-useless-catch
