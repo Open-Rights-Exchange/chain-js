@@ -98,6 +98,11 @@ export type EthereumTransactionOptions = {
   executionPriority?: TxExecutionPriority
 }
 
+export type EthereumSetDesiredFeeOptions = {
+  gasLimitOverride?: string
+  gasPriceOverride?: string
+}
+
 /** Contract action data encoded as hex string */
 export type EthereumTxData = string & EthereumTxDataBrand
 

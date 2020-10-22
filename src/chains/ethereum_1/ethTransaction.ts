@@ -18,6 +18,7 @@ import {
   EthereumBlockType,
   EthereumChainSettingsCommunicationSettings,
   EthereumActionHelperInput,
+  EthereumSetDesiredFeeOptions,
   EthereumTransactionCost,
   EthereumTransactionResources,
   EthUnit,
@@ -179,7 +180,13 @@ export class EthereumTransaction implements Transaction {
     const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
     const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
     // update action helper with updated nonce and gas values
-    const trxBody: EthereumActionHelperInput = { ...this._actionHelper.action, nonce, gasPrice, gasLimit }
+    const trxBody: EthereumActionHelperInput = {
+      ...this._actionHelper.action,
+      nonce,
+      gasPrice,
+      gasLimit,
+      contract: this._actionHelper.contract,
+    }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
     this.updateEthTxFromAction()
@@ -468,16 +475,25 @@ export class EthereumTransaction implements Transaction {
     return convertEthUnit(this._desiredFee, EthUnit.Wei, EthUnit.Ether)
   }
 
-  /** set the fee that you would like to pay (in Ether) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage) */
-  public async setDesiredFee(desiredFee: string) {
+  /** set the fee that you would like to pay (in Ether) - this will set the gasPrice and gasLimit (based on maxFeeIncreasePercentage)
+   *  If gasLimitOverride is provided, gasPrice will be calculated and gasLimit will be set to gasLimitOverride
+   * */
+  public async setDesiredFee(desiredFee: string, options?: EthereumSetDesiredFeeOptions) {
+    const { gasLimitOverride, gasPriceOverride } = options || {}
     const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
     const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
     const desiredFeeBn = new BN(desiredFeeWei, 10)
     const gasPriceBn = desiredFeeBn.div(gasRequired)
     this._desiredFee = desiredFeeWei
-    const gasPriceString = gasPriceBn.toString(10).slice(0, -9)
+    let gasPriceString = gasPriceBn.toString(10).slice(0, -9)
     const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
-    const gasLimitString = Math.round(gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
+    let gasLimitString = Math.round(gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
+    if (gasLimitOverride) {
+      gasLimitString = gasLimitOverride
+    }
+    if (gasPriceOverride) {
+      gasPriceString = gasPriceOverride
+    }
     this._actionHelper.gasPrice = gasPriceString
     this._actionHelper.gasLimit = gasLimitString
     this.updateEthTxFromAction()
