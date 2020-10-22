@@ -2,9 +2,9 @@ import Web3 from 'web3'
 import BN from 'bn.js'
 import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
-import { BlockTransactionString } from 'web3-eth'
-import { throwNewError, throwAndLogError } from '../../errors'
-import { ConfirmType } from '../../models'
+import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
+import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
+import { ChainErrorDetailCode, ChainErrorType, ConfirmType } from '../../models'
 import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
@@ -21,7 +21,12 @@ import {
   EthereumTxChainResponse,
 } from './models'
 import { erc20Abi } from './templates/abis/erc20Abi'
-import { NATIVE_CHAIN_TOKEN_SYMBOL } from './ethConstants'
+import {
+  DEFAULT_BLOCKS_TO_CHECK,
+  DEFAULT_CHECK_INTERVAL,
+  DEFAULT_GET_BLOCK_ATTEMPTS,
+  NATIVE_CHAIN_TOKEN_SYMBOL,
+} from './ethConstants'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -148,6 +153,14 @@ export class EthereumChainState {
     try {
       this.assertIsConnected()
       const block = await this._web3.eth.getBlock(blockNumber)
+      // unlike Algo and EOS getBlock function of web3 doesnt throw if block does not exist
+      if (isNullOrEmpty(block)) {
+        const blockDoesNotExistError = mapChainError(
+          new Error(`Block ${blockNumber} does not exist`),
+          ChainFunctionCategory.Block,
+        )
+        throw blockDoesNotExistError
+      }
       return block
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.Block)
@@ -246,11 +259,16 @@ export class EthereumChainState {
     return { balance: balanceString, tokenName, tokenSymbol }
   }
 
-  /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: BlockTransactionString, transactionId: string): boolean => {
+  /** Check if a block includes a transaction
+   * if includes return transaction, if not return null
+   */
+  public blockHasTransaction = (block: BlockTransactionString, transactionId: string): Promise<TransactionReceipt> => {
     const { transactions } = block
-    const result = transactions?.includes(transactionId)
-    return !!result
+    const result = transactions?.find((transaction: any) => transaction === transactionId)
+    if (isNullOrEmpty(result)) {
+      return null
+    }
+    return this.getTransactionById(result)
   }
 
   /** Submits the transaction to the chain and waits only until it gets a transaction hash
@@ -269,6 +287,15 @@ export class EthereumChainState {
     })
   }
 
+  /** Retrieve the default settings for chain communications */
+  static get defaultCommunicationSettings() {
+    return {
+      blocksToCheck: DEFAULT_BLOCKS_TO_CHECK,
+      checkInterval: DEFAULT_CHECK_INTERVAL,
+      getBlockAttempts: DEFAULT_GET_BLOCK_ATTEMPTS,
+    }
+  }
+
   /** Broadcast a signed transaction to the chain
   /* if ConfirmType.None, returns the transaction hash without waiting for further tx receipt
   /* if ConfirmType.After001, waits for the transaction to finalize on chain and then returns the tx receipt
@@ -279,32 +306,204 @@ export class EthereumChainState {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     communicationSettings?: EthereumChainSettingsCommunicationSettings,
   ): Promise<EthereumTxResult> {
-    const sendResult: Partial<EthereumTxResult> = {}
-
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
 
+    let sendResult: EthereumTxResult
+    let transactionId: string
+
+    // get the head block just before sending the transaction
+    const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
+
     try {
-      // returns transactionHash after submitting transaction does NOT wait for confirmation from chain
-      if (waitForConfirm === ConfirmType.None) {
-        const transactionHash = (await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)) as string
-        sendResult.chainResponse = null
-        sendResult.transactionId = transactionHash
-      }
-      // returns transactionReceipt after submitting transaction AND waiting for a confirmation
-      if (waitForConfirm === ConfirmType.After001) {
-        sendResult.chainResponse = (await this._web3.eth.sendSignedTransaction(
-          signedTransaction,
-        )) as EthereumTxChainResponse
-        sendResult.transactionId = sendResult?.chainResponse?.transactionHash
-      }
+      const transactionHash = (await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)) as string
+      transactionId = transactionHash
     } catch (error) {
       const chainError = mapChainError(error, ChainFunctionCategory.Transaction)
       throw chainError
     }
+    if (waitForConfirm !== ConfirmType.None) {
+      // Since it wont retrieve transaction response from ethereum (unlike EOS) it will automatically start with currentHeadBlock
+      const startFromBlockNumber = currentHeadBlock
 
-    return sendResult as EthereumTxResult
+      sendResult = await this.awaitTransaction(
+        { transactionId } as EthereumTxResult,
+        waitForConfirm,
+        startFromBlockNumber,
+        communicationSettings,
+      )
+    }
+
+    return { transactionId, ...sendResult } as EthereumTxResult
+  }
+
+  private async awaitTransaction(
+    transactionResult: EthereumTxResult,
+    waitForConfirm: ConfirmType,
+    startFromBlockNumber: number,
+    communicationSettings: EthereumChainSettingsCommunicationSettings,
+  ): Promise<EthereumTxResult> {
+    // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
+    const useCommunicationSettings = communicationSettings ?? {
+      ...EthereumChainState.defaultCommunicationSettings,
+      ...this.chainSettings?.communicationSettings,
+    }
+    const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
+    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
+      throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
+    }
+    if (!startFromBlockNumber || startFromBlockNumber <= 1) {
+      throwNewError('A valid number (greater than 1) must be provided for startFromBlockNumber param')
+    }
+    return new Promise((resolve, reject) => {
+      const getBlockAttempt = 1
+      const { transactionId } = transactionResult || {}
+      // starting block number should be the block number in the transaction receipt. If block number not in transaction, use preCommitHeadBlockNum
+      const nextBlockNumToCheck = startFromBlockNumber - 1
+
+      // Schedule first call of recursive function
+      // if will keep reading blocks from the chain (every checkInterval) until we find the transationId in a block
+      // ... or until we reach a max number of blocks or block read attempts
+      setTimeout(
+        async () =>
+          this.checkIfAwaitConditionsReached(
+            reject,
+            resolve,
+            blocksToCheck,
+            checkInterval,
+            getBlockAttempt,
+            maxBlockReadAttempts,
+            nextBlockNumToCheck,
+            startFromBlockNumber,
+            null,
+            transactionId,
+            transactionResult,
+            waitForConfirm,
+          ),
+        checkInterval,
+      )
+    })
+  }
+
+  /** While processing awaitTransaction, check if we've reached our limits to wait
+   *  Otherwise, schedule next check  */
+  private async checkIfAwaitConditionsReached(
+    reject: (value?: unknown) => void,
+    resolve: (value?: unknown) => void,
+    blocksToCheck: number,
+    checkInterval: number,
+    getBlockAttempt: number,
+    maxBlockReadAttempts: number,
+    blockNumToCheck: number,
+    startFromBlockNumber: number,
+    transactionBlockNumberParam: number,
+    transactionId: string,
+    transactionResult: EthereumTxResult,
+    waitForConfirm: ConfirmType,
+  ) {
+    let transactionBlockNumber = transactionBlockNumberParam
+    let nextGetBlockAttempt: number
+    let nextBlockNumToCheck = blockNumToCheck
+    let possibleTransactionBlock: any
+    let transactionResponse: EthereumTxChainResponse
+    try {
+      if (!transactionBlockNumber) {
+        possibleTransactionBlock = await this.getBlock(blockNumToCheck)
+      }
+
+      transactionResponse = await this.blockHasTransaction(possibleTransactionBlock, transactionId)
+      if (!isNullOrEmpty(transactionResponse)) {
+        transactionBlockNumber = possibleTransactionBlock?.number
+      }
+      // check if we've met our limit rules
+      const hasReachedConfirmLevel = await this.hasReachedConfirmLevel(
+        transactionBlockNumber,
+        waitForConfirm,
+        // blocksToCheck,
+      )
+      if (hasReachedConfirmLevel) {
+        resolveAwaitTransaction(resolve, {
+          chainResponse: transactionResponse,
+          ...transactionResult,
+        } as EthereumTxResult)
+        return
+      }
+      nextBlockNumToCheck = blockNumToCheck + 1
+    } catch (error) {
+      const mappedError = mapChainError(error)
+      if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
+        // Try to read the specific block - up to getBlockAttempts times
+        if (getBlockAttempt >= maxBlockReadAttempts) {
+          rejectAwaitTransaction(
+            reject,
+            ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
+            `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
+            error,
+          )
+          return
+        }
+        nextGetBlockAttempt = getBlockAttempt + 1
+      } else {
+        // re-throw error - not one we can handle here
+        throw mappedError
+      }
+    }
+
+    if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
+      rejectAwaitTransaction(
+        reject,
+        ChainErrorDetailCode.ConfirmTransactionTimeout,
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
+          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        null,
+      )
+      return
+    }
+    // not yet reached limit - set a timer to call this function again (in checkInterval ms)
+    const checkAgainInMs = checkInterval
+    setTimeout(
+      async () =>
+        this.checkIfAwaitConditionsReached(
+          reject,
+          resolve,
+          blocksToCheck,
+          checkInterval,
+          nextGetBlockAttempt,
+          maxBlockReadAttempts,
+          nextBlockNumToCheck,
+          startFromBlockNumber,
+          transactionBlockNumber,
+          transactionId,
+          transactionResult,
+          waitForConfirm,
+        ),
+      checkAgainInMs,
+    )
+  }
+
+  /** block has reached the confirmation level requested */
+  hasReachedConfirmLevel = async (transactionBlockNumber: number, waitForConfirm: ConfirmType): Promise<boolean> => {
+    // check that we've reached the required number of confirms
+    switch (waitForConfirm) {
+      case ConfirmType.None:
+        return true
+      case ConfirmType.After001:
+        // confirmed at least once if in a block
+        return !!transactionBlockNumber
+      case ConfirmType.After007:
+        throw new Error('Not Implemented')
+      case ConfirmType.After010:
+        throw new Error('Not Implemented')
+      case ConfirmType.Final:
+        throw new Error('Not Implemented')
+      default:
+        return false
+    }
+  }
+
+  public async getTransactionById(id: string): Promise<TransactionReceipt> {
+    return this.web3.eth.getTransactionReceipt(id)
   }
 
   /** Return instance of Web3js API */
