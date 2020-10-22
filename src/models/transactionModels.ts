@@ -11,6 +11,19 @@ export type TransactionResult = {
 export type TransactionChainResponse = any
 export type TransactionId = string
 
+/** Resouces required for transaction */
+export type TransactionResources = any
+
+/** Cost required for transaction */
+export type TransactionCost = any
+
+/** Transaction fee priority */
+export enum TxExecutionPriority {
+  Slow = 'slow',
+  Average = 'average',
+  Fast = 'fast',
+}
+
 /** Specifies how many block confirmations should be received before considering transaction is complete */
 export enum ConfirmType {
   /** Don't wait for any block confirmations */

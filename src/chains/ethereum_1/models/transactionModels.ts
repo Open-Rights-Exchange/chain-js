@@ -1,7 +1,9 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
 import BN from 'bn.js'
-import { EthereumMultiValue, EthereumTxExecutionPriority } from './generalModels'
+
+import { TxExecutionPriority } from '../../../models'
+import { EthereumMultiValue } from './generalModels'
 
 export type EthereumAbi = any[]
 /** Information needed to generate Trx Data to invoke desired smart contract action */
@@ -93,7 +95,12 @@ export type EthereumTransactionOptions = {
   chain: number | string
   hardfork: string
   maxFeeIncreasePercentage?: number
-  executionPriority?: EthereumTxExecutionPriority
+  executionPriority?: TxExecutionPriority
+}
+
+export type EthereumSetDesiredFeeOptions = {
+  gasLimitOverride?: string
+  gasPriceOverride?: string
 }
 
 /** Contract action data encoded as hex string */

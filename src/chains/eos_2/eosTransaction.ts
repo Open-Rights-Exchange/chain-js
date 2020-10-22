@@ -13,9 +13,9 @@ import {
   EosPrivateKey,
   EosTxOptions,
 } from './models'
-import { isAString, isAnObject, isNullOrEmpty, getUniqueValues } from '../../helpers'
+import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { ConfirmType } from '../../models'
+import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
 import { Transaction } from '../../interfaces'
 
 export type PublicKeyMapCache = {
@@ -511,6 +511,30 @@ export class EosTransaction implements Transaction {
       return deRawifiedTransaction
     }
     throw Error('Missing or malformed rawTransaction (rawToUint8Array)')
+  }
+
+  // Fees
+
+  public get supportsFee() {
+    return false
+  }
+
+  // TODO: to be implement
+  public async resourcesRequired(): Promise<any> {
+    notImplemented()
+  }
+
+  public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
+    notSupported('setDesiredFee')
+  }
+
+  public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
+    notSupported('getSuggestedFee')
+  }
+
+  // TODO: to be implemented
+  public async getActualCost(): Promise<any> {
+    notImplemented()
   }
 
   // ------------------------ EOS Specific functionality -------------------------------

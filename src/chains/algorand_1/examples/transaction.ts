@@ -6,9 +6,10 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType } from '../../../models'
+import { ChainEndpoint, ChainActionType, TxExecutionPriority } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
+import { AlgorandTransaction } from '../algoTransaction'
 
 require('dotenv').config()
 
@@ -52,19 +53,23 @@ async function run() {
   }
 
   /** Compose and send transaction */
-  const transaction = await algoTest.new.Transaction()
+  const transaction = await algoTest.new.Transaction() as AlgorandTransaction
   composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
+  const suggestedFee = await transaction.getSuggestedFee(TxExecutionPriority.Average)
+  console.log('suggestedFee: ', suggestedFee)
+  await transaction.setDesiredFee(suggestedFee)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   try {
     console.log('send response: %o', JSON.stringify(await transaction.send()))
+    console.log('actual fee: ', await transaction.getActualCost())
   } catch (err) {
     console.log(err)
   }
