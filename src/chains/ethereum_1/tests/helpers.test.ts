@@ -20,7 +20,7 @@ describe('Ethereum Helper Functions', () => {
   })
 
   it('tests toEthereumPrivateKey', async () => {
-    const expValue = '0x12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'
+    const expValue = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'
     const value = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'
 
     expect(toEthereumPrivateKey(value)).toEqual(expValue)
