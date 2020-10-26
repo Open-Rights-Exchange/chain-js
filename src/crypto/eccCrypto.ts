@@ -27,7 +27,7 @@ export function encryptWithPublicKey(
  * The encrypted value is a hex-encoded string
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export function decryptWithPrivateKey(encrypted: Asymmetric.EncryptedAsymmetric, privateKeyBuffer: Buffer): string {
-  const ecdh = crypto.createECDH('secp256k1')
+  const ecdh = crypto.createECDH(Asymmetric.CurveType.Secp256k1)
   if (privateKeyBuffer.length !== 32) {
     throwNewError('decryptWithPrivateKey private key buffer must be 32 bytes. Cant decrypt using value provided')
   }
