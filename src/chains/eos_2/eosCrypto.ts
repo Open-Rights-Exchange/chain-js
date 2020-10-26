@@ -54,11 +54,12 @@ export async function encryptWithPublicKey(
   publicKey: EosPublicKey,
   options: Asymmetric.Options,
 ): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Secp256k1 }
   const publicKeyBuffer = eosEcc
     .PublicKey(publicKey)
     .toUncompressed()
     .toBuffer()
-  const response = EccCrypto.encryptWithPublicKey(unencrypted, publicKeyBuffer, options)
+  const response = EccCrypto.encryptWithPublicKey(unencrypted, publicKeyBuffer, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: Asymmetric.Scheme.EOS } }
   return JSON.stringify(encryptedToReturn)
 }
