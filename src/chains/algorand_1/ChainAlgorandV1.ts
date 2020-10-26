@@ -116,11 +116,20 @@ class ChainAlgorandV1 implements Chain {
   cryptoCurve: CryptoCurve.Ed25519
 
   /** Decrypts the encrypted value with a password, and using ed25519 algorithm and SHA512 hash function */
-  decrypt = algoCrypto.decrypt
+  decryptWithPassword = algoCrypto.decryptWithPassword
 
   /** Encrypts a string with a password, and using ed25519 algorithm and SHA512 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = algoCrypto.encrypt
+  encryptWithPassword = algoCrypto.encryptWithPassword
+
+  /** Decrypts the encrypted value using a private key
+   * The encrypted value is either a stringified JSON object or a JSON object
+   * ... and must have been encrypted with the public key that matches the private ley provided */
+  decryptWithPrivateKey = algoCrypto.decryptWithPrivateKey
+
+  /** Encrypts a string using a public key
+   * The encrypted result can be decrypted with the matching private key */
+  encryptWithPublicKey = algoCrypto.encryptWithPublicKey
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
