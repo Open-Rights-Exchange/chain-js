@@ -53,7 +53,7 @@ export async function encryptWithPublicKey(
   options: Asymmetric.Options,
 ): Promise<string> {
   const encrypted = await EthCrypto.encryptWithPublicKey(publicKey, unencrypted)
-  const encryptedToReturn = { ...encrypted, ...{ scheme: Asymmetric.Scheme.Etherem } }
+  const encryptedToReturn = { ...encrypted, ...{ scheme: Asymmetric.Scheme.Ethereum } }
   return JSON.stringify(encryptedToReturn)
 }
 

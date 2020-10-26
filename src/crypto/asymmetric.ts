@@ -21,19 +21,23 @@ type Data =
   | Float64Array
   | DataView
 
-type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
-type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
+export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
+export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
+export enum CurveType {
+  Secp256k1 = 'secp256k1',
+  Ed25519 = 'ed25519',
+}
 
 export enum Scheme {
   Algorand = 'chainjs.algorand.ed25519',
   EOS = 'chainjs.eos.secp256k1',
-  Etherem = 'chainjs.ethereum.secp256k1',
+  Ethereum = 'chainjs.ethereum.secp256k1',
 }
 
 export type Options = {
   hashCypherType: CipherGCMTypes
   macCipherType: CipherGCMTypes // e.g. 'sha256'
-  curveType: string // e.g. 'secp256k1'
+  curveType: CurveType // e.g. 'secp256k1' or 'ed25519'
   symmetricCypherType: CipherGCMTypes
   keyFormat: ECDHKeyFormat
   iv: Buffer
@@ -47,7 +51,7 @@ export type Options = {
 export const DefaultEciesOptions: Options = {
   hashCypherType: 'sha256',
   macCipherType: 'sha256',
-  curveType: 'secp256k1',
+  curveType: CurveType.Secp256k1,
   symmetricCypherType: 'aes-128-ecb',
   // iv is used in symmetric cipher, set null if the cipher does not need an
   // initialization vector (e.g. a cipher in ecb mode). Set undefined if you
