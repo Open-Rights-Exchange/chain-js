@@ -1,3 +1,4 @@
+import ed2Curve from 'ed2curve'
 import nacl from 'tweetnacl'
 import scrypt from 'scrypt-async'
 import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
@@ -127,4 +128,29 @@ export function isValidPublicKey(value: Uint8Array): boolean {
 export function isValidPrivateKey(value: Uint8Array): boolean {
   if (isNullOrEmpty(value)) return false
   return value.length === 64
+}
+
+/** Generated EphemPublicKey and SharedSecret
+ * The ed25519PublicKey parameter must be 32 byte encoded as a Uint8Array */
+export function generateEphemPublicKeyAndSharedSecret(ed25519PublicKey: Uint8Array) {
+  const { publicKey: ephemPublicKey, secretKey } = nacl.box.keyPair()
+  const encodedEphemPublicKey = encodeBase64(ephemPublicKey)
+  // **IMPORTANT**: algosdk only uses nacl module for generating signature
+  // Thus it uses nacl.sign.keyPair() to generate ed25519 pk/sk
+  // ed25519 keys are only for signature operation.
+  // To use it with DiffieHellman encryption we need to convert keypair to curve25519
+  // Then we can use converted key to generate secret via nacl.box
+  // https://stackoverflow.com/questions/26954215/how-to-use-ed25519-to-encrypt-decrypt-data
+  const curve25519PublicKey = ed2Curve.convertPublicKey(ed25519PublicKey)
+  const sharedSecret = nacl.box.before(curve25519PublicKey, secretKey)
+  return { ephemPublicKey: encodedEphemPublicKey, sharedSecret }
+}
+
+/** Generates sharedSecret using ephemPublicKey and ed25519SecretKey
+ * The ed25519PublicKey parameter must be 32 byte encoded as a Uint8Array */
+export function generateSharedSecret(ephemPublicKey: Uint8Array, ed25519SecretKey: Uint8Array) {
+  const curve25519SecretKey = ed2Curve.convertSecretKey(ed25519SecretKey)
+  // Check IMPORTANT comment in generateEphemPublicKeyAndSharedSecret()
+  const sharedSecret = nacl.box.before(ephemPublicKey, curve25519SecretKey)
+  return sharedSecret
 }
