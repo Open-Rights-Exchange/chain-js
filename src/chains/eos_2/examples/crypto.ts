@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { encryptWithPublicKey, decryptWithPrivateKey } from '../../../crypto/eccCrypto'
 import { toEosPrivateKey, toEosPublicKey } from '../helpers'
 import { eosPrivateKeyToEccPrivateKey, eosPublicKeyToEccPublicKey } from '../eosCrypto'
 
@@ -40,9 +39,9 @@ async function run() {
   console.log('decrypted text:', decrypted1)
 
   // asymmetric encrypt/decrypt with publicKey/privateKey
-  const encrypted2 = await kylin.encryptWithPublicKey('mystringEos', toEosPublicKey('EOS...'))
+  const encrypted2 = await kylin.encryptWithPublicKey('mystringEos', toEosPublicKey('EOS741pEuhGBr8xrsW1c5rbRfswRkWK89Qz7rM13uUrGA2eJcnGnx'))
   console.log('encrypted text:', encrypted2)
-  const decrypted2 = await kylin.decryptWithPrivateKey(encrypted2, toEosPrivateKey('5...'))
+  const decrypted2 = await kylin.decryptWithPrivateKey(encrypted2, toEosPrivateKey('5Je8CkQWxvgJvcxmYWiuSxLnL6nCL21DAysAYxx5Rui4N7bwbPy'))
   console.log('decrypted text:', decrypted2)
 
 }
