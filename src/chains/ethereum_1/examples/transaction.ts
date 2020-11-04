@@ -15,7 +15,7 @@ import {
 } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
 import { toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+import { fromTokenValueString, toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
   EthereumChainForkType,
@@ -55,7 +55,7 @@ const { env } = process
       },
       defaultTransactionSettings: {
         maxFeeIncreasePercentage: 20,
-        executionPriority: TxExecutionPriority.Average,
+        executionPriority: TxExecutionPriority.Fast,
       },
     }
 
@@ -87,8 +87,9 @@ const { env } = process
     }
 
     const composeERC20TransferParams: Erc20TransferParams = {
-      contractAddress: '0x04825941Ad80A6a869e85606b29c9D25144E91e6',
-      to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      from: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
       precision: 18, // precision should be provided if possible
       value: '20',
     }
@@ -149,8 +150,10 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send erc20 transfer Transaction
-    // const transaction = await ropsten.new.Transaction()
-    // transaction.actions = [await ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
+    // const transaction = ropsten.new.Transaction(ropstenChainOptions)
+    // transaction.actions = [
+    //   await ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams),
+    // ]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     // console.log(decomposed)
@@ -158,6 +161,8 @@ const { env } = process
     //   'token value converted back using precision:',
     //   fromTokenValueString(decomposed[0]?.args?.amount, 10, composeERC20TransferParams?.precision),
     // )
+    // // const fee = await transaction.getSuggestedFee(TxExecutionPriority.Fast)
+    // // await transaction.setDesiredFee(fee)
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])

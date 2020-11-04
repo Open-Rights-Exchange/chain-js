@@ -8,9 +8,10 @@ import {
   ChainInfo,
   ChainSymbol,
   ChainType,
+  CryptoCurve,
   EncryptedDataString,
-  PublicKey,
   PrivateKey,
+  PublicKey,
   Signature,
   TransactionOptions,
 } from '../models'
@@ -65,7 +66,8 @@ export interface Chain {
   }
 
   // Chain Crypto functions
-
+  /** Primary cryptography curve used by this chain */
+  cryptoCurve: CryptoCurve
   /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
   decrypt(encrypted: EncryptedDataString, password: string, options?: any): string

@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint } from '../../../models'
+import { ChainActionType, ChainEndpoint, TokenTransferParams } from '../../../models'
 import {
   AlgorandActionAssetConfigParams,
   AlgorandChainActionType,
@@ -16,7 +16,8 @@ import {
   AlgorandActionAssetFreezeParams,
   AlgorandActionAssetTransferParams,
 } from '../models'
-import { toAlgorandPrivateKey } from '../helpers'
+import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 
 require('dotenv').config()
 
@@ -66,23 +67,15 @@ const composeAssetCreateParams: AlgorandActionAssetCreateParams = {
 const composeAssetDestroyParams: AlgorandActionAssetDestroyParams = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   note: 'destroy',
-  assetIndex: 11137706,
+  assetIndex: 12739610,
 }
 
 const composeAssetFreezeParams: AlgorandActionAssetFreezeParams = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   note: 'freeze',
-  assetIndex: 11137706,
+  assetIndex: 12739610,
   freezeTarget: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   freezeState: true,
-}
-
-const composeAssetTransferParams: AlgorandActionAssetTransferParams = {
-  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  amount: 5,
-  note: 'example',
-  assetIndex: 11137706,
 }
 
 const composeKeyRegistrationParams: AlgorandKeyRegistrationParams = {
@@ -95,6 +88,34 @@ const composeKeyRegistrationParams: AlgorandKeyRegistrationParams = {
   voteKeyDilution: 1739,
 }
 
+const composeAssetTransferParams: AlgorandActionAssetTransferParams = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  amount: 5,
+  note: 'example',
+  assetIndex: 12739610,
+}
+
+// allow an account to accept an asset (0 value transfer to self)
+const composeAcceptAssetParams: AlgorandActionAssetTransferParams = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  amount: 0,
+  note: 'Allow Demo1',
+  assetIndex: 12739610,
+}
+
+// use standard TokenTransfer action type
+const composeTokenTransferParams: TokenTransferParams = {
+  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  amount: '0.002',
+  memo: 'example',
+  contractName: toChainEntityName('12739610'),
+  symbol: toAlgorandSymbol('Demo1'),
+  precision: 4,
+}
+
 async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -105,12 +126,15 @@ async function run() {
 
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  const action = await algoTest.composeAction(AlgorandChainActionType.AssetCreate, composeAssetCreateParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.KeyRegistration, composeKeyRegistrationParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetCreate, composeAssetCreateParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetConfig, composeAssetConfigParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetDestroy, composeAssetDestroyParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetFreeze, composeAssetFreezeParams)
-  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAssetTransferParams)
-  // const action = await algoTest.composeAction(AlgorandChainActionType.KeyRegistration, composeKeyRegistrationParams)
+  const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAssetTransferParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAcceptAssetParams)
+  // const action = await algoTest.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)
+
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])

@@ -5,8 +5,8 @@ import {
   EthereumDecomposeReturn,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { getArrayIndexOrNull } from '../../../../../helpers'
-import { matchKnownAbiTypes, isNullOrEmptyEthereumValue, toTokenValueString } from '../../../helpers'
+import { getArrayIndexOrNull, toTokenValueString } from '../../../../../helpers'
+import { matchKnownAbiTypes, isNullOrEmptyEthereumValue } from '../../../helpers'
 
 export interface Erc20TransferParams {
   contractAddress: EthereumAddress
