@@ -14,8 +14,8 @@ import {
   ValueTransferParams,
 } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
-import { fromTokenValueString, toChainEntityName } from '../../../helpers'
+import { fromTokenValueString, toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
   EthereumChainForkType,
