@@ -1,22 +1,20 @@
+import { toTokenValueString } from '../../../../../helpers'
 import { ActionDecomposeReturn, ChainActionType, TokenTransferParams } from '../../../../../models'
 import {
-  AlgorandUnit,
   AlgorandSuggestedParams,
   AlgorandActionAssetTransferParams,
   AlgorandTxAction,
   AlgorandTxActionRaw,
 } from '../../../models'
-import { toMicroAlgo } from '../../../helpers'
-import { DEFAULT_ALGO_UNIT } from '../../../algoConstants'
 import {
   composeAction as algoAssetTransferComposeAction,
   decomposeAction as algoAssetTransferDecomposeAction,
 } from '../chainSpecific/asset_transfer'
 
 export const composeAction = (params: TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
-  const { amount: amountString, symbol = DEFAULT_ALGO_UNIT } = params
-  // TODO Algo - the amount conversion should be based off precision - not assume microAlgos - this is an asset not algos
-  const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
+  const { amount: amountString, precision } = params
+  // adjust string based on precicion e.g. '1.2' precision=4 => 12000
+  const amount = parseInt(toTokenValueString(amountString, 10, precision), 10)
 
   return algoAssetTransferComposeAction(
     {
@@ -24,7 +22,6 @@ export const composeAction = (params: TokenTransferParams, suggestedParams: Algo
       to: params.toAccountName,
       amount,
       note: params.memo,
-      symbol,
       assetIndex: parseInt(params.contractName, 10),
     } as AlgorandActionAssetTransferParams,
     suggestedParams,
