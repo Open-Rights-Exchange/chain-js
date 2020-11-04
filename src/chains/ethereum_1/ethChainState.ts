@@ -5,7 +5,7 @@ import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString } from 'web3-eth'
 import { throwNewError, throwAndLogError } from '../../errors'
 import { ConfirmType } from '../../models'
-import { ensureHexPrefix, isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
   ChainFunctionCategory,
@@ -20,7 +20,6 @@ import {
   EthereumTxResult,
   EthereumTxChainResponse,
 } from './models'
-import { bigNumberToString } from './helpers'
 import { erc20Abi } from './templates/abis/erc20Abi'
 import { NATIVE_CHAIN_TOKEN_SYMBOL } from './ethConstants'
 
