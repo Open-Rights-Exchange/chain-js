@@ -23,6 +23,7 @@ import {
 } from '../../helpers'
 import { ALGORAND_POST_CONTENT_TYPE, NATIVE_CHAIN_TOKEN_SYMBOL } from './algoConstants'
 import { toAlgo } from './helpers'
+import { mapChainError } from './algoErrors'
 
 export class AlgorandChainState {
   private _activeEndpoint: ChainEndpoint
@@ -116,8 +117,8 @@ export class AlgorandChainState {
       }
       return this._chainInfo
     } catch (error) {
-      // ALGO TODO: map chain error
-      throw error
+      const chainError = mapChainError(error)
+      throw chainError
     }
   }
 
@@ -230,8 +231,8 @@ export class AlgorandChainState {
         sendResult.chainResponse = await this._algoClient.transactionById(transactionId)
       }
     } catch (error) {
-      // ALGO TODO: map chain error
-      throw error
+      const chainError = mapChainError(error)
+      throw chainError
     }
 
     return sendResult as AlgorandTxResult
