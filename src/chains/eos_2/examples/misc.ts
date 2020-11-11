@@ -60,35 +60,30 @@ async function run() {
   // })
   // console.log('deleteAuthAction action:', deleteAuthAction)
 
-  // crypto
-  const encrypted = kylin.encrypt('mystring', 'password', {salt:'mysalt'})
-  console.log('encrypted text:', encrypted)
-  const decrypted = kylin.decrypt(encrypted, 'password', {salt:'mysalt'})
-  console.log('decrypted text:', decrypted)
 
   // get token balance
   console.log('get token balance:', await kylin.fetchBalance(toEosEntityName('oreoreoreore'), toEosSymbol('EOS')))
   console.log('get everipediaiq token balance:', await kylin.fetchBalance(toEosEntityName('everipediaiq'), toEosSymbol('IQ'), 'everipediaiq'))
 
   // error mapping
-  // const err = new RpcError({
-  //   message: 'Internal Service Error',
-  //   error: {
-  //     code: 3080002,
-  //     name: 'tx_net_usage_exceeded',
-  //     what: 'Transaction exceeded the current network usage limit imposed on the transaction',
-  //     details: [
-  //       {
-  //         message: 'transaction net usage is too high: 120 > 0',
-  //         file: 'transaction_context.cpp',
-  //         line_number: '462',
-  //         method: 'check_net_usage',
-  //       },
-  //     ],
-  //   },
-  // })
-  // const chainError = kylin.mapChainError(err)
-  // console.log('chainError type is:', chainError.errorType)
+  const err = new RpcError({
+    message: 'Internal Service Error',
+    error: {
+      code: 3080002,
+      name: 'tx_net_usage_exceeded',
+      what: 'Transaction exceeded the current network usage limit imposed on the transaction',
+      details: [
+        {
+          message: 'transaction net usage is too high: 120 > 0',
+          file: 'transaction_context.cpp',
+          line_number: '462',
+          method: 'check_net_usage',
+        },
+      ],
+    },
+  })
+  const chainError = kylin.mapChainError(err)
+  console.log('chainError type is:', chainError.errorType)
   
 }
 ;(async () => {
