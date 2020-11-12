@@ -8,9 +8,10 @@ import {
   ChainInfo,
   ChainSymbol,
   ChainType,
+  CryptoCurve,
   EncryptedDataString,
-  PublicKey,
   PrivateKey,
+  PublicKey,
   Signature,
   TransactionOptions,
 } from '../models'
@@ -65,13 +66,21 @@ export interface Chain {
   }
 
   // Chain Crypto functions
-
+  /** Primary cryptography curve used by this chain */
+  cryptoCurve: CryptoCurve
   /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt(encrypted: EncryptedDataString, password: string, options?: any): string
+  decryptWithPassword(encrypted: EncryptedDataString, password: string, options?: any): string
   /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt(unencrypted: string, password: string, options?: any): EncryptedDataString
+  encryptWithPassword(unencrypted: string, password: string, options?: any): EncryptedDataString
+  /** Decrypts the encrypted value using a private key
+   * The encrypted value is a stringified JSON object
+   * ... and must have been encrypted with the public key that matches the private ley provided */
+  decryptWithPrivateKey(encrypted: string, privateKey: PrivateKey, options?: any): Promise<string>
+  /** Encrypts a string using a public key into a stringified JSON object
+   * The encrypted result can be decrypted with the matching private key */
+  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<string>
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */

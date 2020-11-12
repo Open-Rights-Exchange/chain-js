@@ -50,6 +50,8 @@ describe('Ethereum Action Tests', () => {
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const ethAction = new EthereumActionHelper({ to, value, contract, data }, chainOptions)
-    }).toThrowError('You can provide either data or contract but not both')
+    }).toThrowError(
+      'Data and contract were both provided but when data is generated from contract, it doesnt match the data passed in.',
+    )
   })
 })

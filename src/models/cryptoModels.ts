@@ -21,7 +21,7 @@ export type EncryptedDataString = string & EncryptedDataStringBrand
 // TODO: eth public key is of type buffer
 export type PublicKey = (string & PublicKeyBrand) | any
 /** a private key string - formatted correctly for the chain */
-export type PrivateKey = string & PrivateKeyBrand
+export type PrivateKey = (string & PrivateKeyBrand) | any
 /** a signature string - formatted correcly for the chain */
 export type Signature = string & SignatureBrand
 
@@ -42,4 +42,9 @@ export type AccountKeysStruct = {
   privateKeys: {
     active: PrivateKey | EncryptedDataString
   }
+}
+
+export enum CryptoCurve {
+  Secp256k1 = 'secp256k1',
+  Ed25519 = 'ed25519',
 }

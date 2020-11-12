@@ -7,7 +7,8 @@ import {
   EncryptedDataString,
   TxExecutionPriority,
 } from '../../../models'
-import { EncryptionOptions, EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
+import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
+import { AesCrypto } from '../../../crypto'
 
 /** Category of chain functions - useful in error mapping */
 export enum ChainFunctionCategory {
@@ -88,7 +89,7 @@ export type EthereumGeneratedKeys = {
 
 export type EthereumNewKeysOptions = {
   password: string
-  encryptionOptions?: EncryptionOptions
+  encryptionOptions?: AesCrypto.AesEncryptionOptions
 }
 
 export type EthereumString = {

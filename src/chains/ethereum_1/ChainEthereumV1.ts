@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainInfo, ChainType, ChainAsset, ChainEntityName, ChainDate } from '../../models'
+import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -159,14 +159,25 @@ class ChainEthereumV1 implements Chain {
   }
 
   // --------- Chain crytography functions */
+  /** Primary cryptography curve used by this chain */
+  cryptoCurve: CryptoCurve.Secp256k1
 
   /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt = ethcrypto.decrypt
+  decryptWithPassword = ethcrypto.decryptWithPassword
 
   /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = ethcrypto.encrypt
+  encryptWithPassword = ethcrypto.encryptWithPassword
+
+  /** Decrypts the encrypted value using a private key
+   * The encrypted value is either a stringified JSON object or a JSON object
+   * ... and must have been encrypted with the public key that matches the private ley provided */
+  decryptWithPrivateKey = ethcrypto.decryptWithPrivateKey
+
+  /** Encrypts a string using a public key
+   * The encrypted result can be decrypted with the matching private key */
+  encryptWithPublicKey = ethcrypto.encryptWithPublicKey
 
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature

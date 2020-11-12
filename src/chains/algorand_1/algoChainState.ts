@@ -124,8 +124,8 @@ export class AlgorandChainState {
       }
       return this._chainInfo
     } catch (error) {
-      // ALGO TODO: map chain error
-      throw error
+      const chainError = mapChainError(error)
+      throw chainError
     }
   }
 

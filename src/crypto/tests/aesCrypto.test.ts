@@ -1,5 +1,5 @@
 /* eslint-disable quotes */
-import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions } from '../aesCrypto'
+import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions, decryptWithPassword, encryptWithPassword } from '../aesCrypto'
 import { timed } from './utils'
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
@@ -20,8 +20,8 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
       salt,
       iter,
     }
-    encrypted = encrypt(privateKey, walletPassword, encryptionOptions)
-    encrypted2 = encrypt(privateKey, walletPassword, { salt, iter: 1000 })
+    encrypted = encryptWithPassword(privateKey, walletPassword, encryptionOptions)
+    encrypted2 = encryptWithPassword(privateKey, walletPassword, { salt, iter: 1000 })
   })
 
   describe('deriveKey', () => {
@@ -56,7 +56,7 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
 
       describe('Encrypt Iterations', () => {
         it('Ten Thousand iterations', async () => {
-          const time = await timed(() => encrypt(privateKey, walletPassword, { salt, iter: 10000 }))()
+          const time = await timed(() => encryptWithPassword(privateKey, walletPassword, { salt, iter: 10000 }))()
           console.log('Ten Thousand iterations', time.timeElapsed)
           expect(time).toBeTruthy()
         })
@@ -65,15 +65,15 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
 
     describe('decrypt', () => {
       it('returns the original privateKey', () => {
-        const decrypted = decrypt(encrypted, walletPassword, encryptionOptions)
+        const decrypted = decryptWithPassword(encrypted, walletPassword, encryptionOptions)
         expect(decrypted.toString()).toMatch(privateKey)
       })
       it('does not throw with no (optional) iter', () => {
-        const decrypted = decrypt(encrypted, walletPassword, { salt })
+        const decrypted = decryptWithPassword(encrypted, walletPassword, { salt })
         expect(decrypted.toString()).toMatch(privateKey)
       })
       it('automatically infers iter value from encrypted value (iter:1000)', () => {
-        const decrypted2 = decrypt(encrypted2, walletPassword, { salt })
+        const decrypted2 = decryptWithPassword(encrypted2, walletPassword, { salt })
         expect(decrypted2.toString()).toMatch(privateKey)
       })
     })

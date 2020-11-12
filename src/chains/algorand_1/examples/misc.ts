@@ -8,7 +8,7 @@ import { toChainEntityName } from '../../../helpers'
 import { ChainError, ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandSymbol } from '../helpers'
-import { decrypt, encrypt } from '../algoCrypto'
+import { decryptWithPassword, encryptWithPassword } from '../algoCrypto'
 import { ChainAlgorandV1 } from '../ChainAlgorandV1'
 import { mapChainError } from '../algoErrors'
 
@@ -62,10 +62,10 @@ async function run() {
 
   /** Encrypt and decrypt value using algo crypto function */
   // encryption options can use N:{65536, 131072, 262144, 524288, 1048576}
-  const encrypted = encrypt('somevalue', 'mypassword', { salt: 'mysalt' })
+  const encrypted = encryptWithPassword('somevalue', 'mypassword', { salt: 'mysalt' })
   console.log('encrypted:', encrypted)
 
-  const decrypted = decrypt(encrypted, 'mypassword', { salt: 'mysalt' })
+  const decrypted = decryptWithPassword(encrypted, 'mypassword', { salt: 'mysalt' })
   console.log('decrypted:', decrypted)
 
   // map chain error

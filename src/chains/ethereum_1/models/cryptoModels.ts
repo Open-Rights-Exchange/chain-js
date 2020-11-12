@@ -1,5 +1,4 @@
 import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand } from '../../../models'
-import * as aesCrypto from '../../../crypto/aesCrypto'
 
 /** an ethereum transaction signature */
 export interface ECDSASignature {
@@ -7,12 +6,6 @@ export interface ECDSASignature {
   r: Buffer
   s: Buffer
 }
-
-/** Additional parameters for encryption/decryption - for SHA256 algorithm */
-export type EncryptionOptions = aesCrypto.AesEncryptionOptions
-
-/** Encryption modes supported by crypto library (default is gcm) */
-export type EncryptionMode = aesCrypto.EncryptionMode
 
 /** a private key string - formatted correctly for ethereum */
 export type EthereumPrivateKey = string & PrivateKeyBrand

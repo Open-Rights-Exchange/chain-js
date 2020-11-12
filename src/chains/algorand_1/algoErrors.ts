@@ -18,7 +18,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   BlockDoesNotExist:
     '((?=failed to retrieve)(.*)(?=block/[0-9]+)(.*)|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
   DataReadFailedKeyDoesNotExist: 'key does not exist',
-  TokenBalanceTooLow: 'overflowed account balance',
+  TokenBalanceTooLow: 'overflowed account balance|overspend',
   // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg
   TxExceededResources: 'exceeds balance',
   MiscChainError: 'chain_type_exception',

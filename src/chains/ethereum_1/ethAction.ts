@@ -99,7 +99,11 @@ export class EthereumActionHelper {
 
     // cant provide both contract and data properties
     if (!isNullOrEmptyEthereumValue(contract) && !isNullOrEmptyEthereumValue(data)) {
-      throwNewError('You can provide either data or contract but not both')
+      if (data !== generateDataFromContractAction(contract)) {
+        throwNewError(
+          'Data and contract were both provided but when data is generated from contract, it doesnt match the data passed in.',
+        )
+      }
     }
 
     // convert from param into an address string (and chack for validity)
@@ -113,10 +117,11 @@ export class EthereumActionHelper {
     }
 
     // set data from provided data or contract properties
-    if (!isNullOrEmptyEthereumValue(data)) this._data = toEthereumTxData(data)
-    else if (!isNullOrEmptyEthereumValue(contract)) {
+    if (!isNullOrEmptyEthereumValue(contract)) {
       this._data = generateDataFromContractAction(contract)
       this._contract = contract
+    } else if (!isNullOrEmptyEthereumValue(data)) {
+      this._data = toEthereumTxData(data)
     } else this._data = toEthereumTxData(ZERO_HEX)
 
     // use helper library to consume tranasaction and allow multiple types for input params
