@@ -642,7 +642,7 @@ export class AlgorandTransaction implements Transaction {
   public async getActualCost(): Promise<string> {
     try {
       const trx = await this._chainState.getTransactionById(this.transactionId)
-      return microToAlgoString(trx?.fee)
+      return trx ? microToAlgoString(trx?.fee) : null
     } catch (err) {
       return null
     }
