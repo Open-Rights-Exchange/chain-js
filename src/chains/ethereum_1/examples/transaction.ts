@@ -129,9 +129,9 @@ const { env } = process
     console.log('raw transaction: ', transaction.raw)
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log('transaction ID: ', transaction.transactionId)
-    // console.log('send response:', JSON.stringify(await transaction.send())) // getActualCost will most likely fail because it will be called before execution
-    console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001))) // wait for transaction to complete on-chain before returning
-    console.log(`actual cost of tx in ETH - available once tx is processed: ${await transaction.getActualCost()}`)
+    console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.None)))
+    // console.log('send response:', JSON.stringify(await transaction.send(ConfirmType.After001))) // wait for transaction to complete on-chain before returning
+    // console.log(`actual cost of tx in ETH - available once tx is processed: ${await transaction.getActualCost()}`) // getActualCost will throw if called before tx is commited to chain
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
     // const transaction = ropsten.new.Transaction(defaultEthTxOptions)
