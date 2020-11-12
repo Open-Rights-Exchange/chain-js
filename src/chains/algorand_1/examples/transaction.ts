@@ -40,6 +40,7 @@ interface valueTransferParams {
 }
 
 const composeValueTransferParams: valueTransferParams = {
+  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   toAccountName: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
   amount: 1000000,
   symbol: AlgorandUnit.Microalgo,
@@ -55,7 +56,6 @@ async function run() {
   }
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
