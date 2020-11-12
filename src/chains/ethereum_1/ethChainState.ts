@@ -160,7 +160,7 @@ export class EthereumChainState {
     try {
       this.assertIsConnected()
       const block = await this._web3.eth.getBlock(blockNumber)
-      // unlike Algo and EOS getBlock function of web3 doesnt throw if block does not exist
+      // getBlock function of web3 doesnt throw if block does not exist
       if (isNullOrEmpty(block)) {
         const blockDoesNotExistError = mapChainError(
           new Error(`Block ${blockNumber} does not exist`),
@@ -320,9 +320,6 @@ export class EthereumChainState {
     let sendResult: EthereumTxResult
     let transactionId: string
 
-    // get the head block just before sending the transaction
-    const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
-
     try {
       const transactionHash = (await this.sendTransactionWithoutWaitingForConfirm(signedTransaction)) as string
       transactionId = transactionHash
@@ -331,6 +328,8 @@ export class EthereumChainState {
       throw chainError
     }
     if (waitForConfirm !== ConfirmType.None) {
+      // get the head block just before sending the transaction
+      const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
       // Since it wont retrieve transaction response from ethereum (unlike EOS) it will automatically start with currentHeadBlock
       const startFromBlockNumber = currentHeadBlock
 
