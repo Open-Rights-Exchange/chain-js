@@ -234,6 +234,13 @@ class ChainAlgorandV1 implements Chain {
       throwNewError('Not connected to chain')
     }
   }
+
+  /** Access to underlying algoSdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
+   */
+  public get algoClient() {
+    return this._chainState?.algoClient
+  }
 }
 
 export { ChainAlgorandV1 }
