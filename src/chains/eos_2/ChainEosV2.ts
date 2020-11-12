@@ -316,6 +316,13 @@ class ChainEosV2 implements Chain {
       throwNewError('Not connected to chain')
     }
   }
+
+  /** Access to underlying eosjs sdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
+   */
+  public get eosjs() {
+    return this._chainState?.eosjs
+  }
 }
 
 export { ChainEosV2 }
