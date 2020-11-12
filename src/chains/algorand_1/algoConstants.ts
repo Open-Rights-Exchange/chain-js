@@ -12,6 +12,14 @@ export const ALGORAND_POST_CONTENT_TYPE = { 'content-type': 'application/x-binar
 export const ALGORAND_TRX_COMFIRMATION_ROUNDS = 1000
 export const DEFAULT_TIMEOUT_FOR_TRX_CONFIRM = 500
 export const DEFAULT_ALGO_UNIT = AlgorandUnit.Microalgo
+
+/** number of chain blocks to poll after submitting a transaction before failing */
+export const DEFAULT_BLOCKS_TO_CHECK = 20
+/** time to wait (in ms) between checking chain for a new block (to see if transaction appears within it) */
+export const DEFAULT_CHECK_INTERVAL = 500
+/** number of times to attempt to read a chain endpoint before failing the read */
+export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
+
 /** The chain address of the default token contract (if any) */
 export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
 /** The symbol for the native token/currency on the chain */

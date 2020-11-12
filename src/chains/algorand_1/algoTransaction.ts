@@ -636,9 +636,15 @@ export class AlgorandTransaction implements Transaction {
     return microToAlgoString(microalgos)
   }
 
-  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string) */
+  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string)
+   * Returns null if transaction id is not found in chain
+   */
   public async getActualCost(): Promise<string> {
-    const trx = await this._chainState.getTransactionById(this.transactionId)
-    return microToAlgoString(trx?.fee)
+    try {
+      const trx = await this._chainState.getTransactionById(this.transactionId)
+      return trx ? microToAlgoString(trx?.fee) : null
+    } catch (err) {
+      return null
+    }
   }
 }

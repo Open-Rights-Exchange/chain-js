@@ -5,28 +5,36 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { toChainEntityName } from '../../../helpers'
-import { ChainFactory, ChainType } from '../../../index'
+import { ChainError, ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandSymbol } from '../helpers'
 import { decryptWithPassword, encryptWithPassword } from '../algoCrypto'
+import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+import { mapChainError } from '../algoErrors'
 
 require('dotenv').config()
 
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY
-const algoMainnetEndpoints = [{ 
-  url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
-}]
-const algoTestnetEndpoints = [{ 
-  url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
-}]
-const algoBetanetEndpoints = [{ 
-  url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
-}]
+const algoMainnetEndpoints = [
+  {
+    url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
+    options: { headers: [{ 'X-API-Key': algoApiKey }] },
+  },
+]
+const algoTestnetEndpoints = [
+  {
+    url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
+    options: { headers: [{ 'X-API-Key': algoApiKey }] },
+  },
+]
+const algoBetanetEndpoints = [
+  {
+    url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
+    options: { headers: [{ 'X-API-Key': algoApiKey }] },
+  },
+]
 
 async function run() {
   /** Create Algorand chain instance */
@@ -59,6 +67,16 @@ async function run() {
 
   const decrypted = decryptWithPassword(encrypted, 'mypassword', { salt: 'mysalt' })
   console.log('decrypted:', decrypted)
+
+  // map chain error
+  try {
+    const { algoClient } = algoTest as ChainAlgorandV1
+    const { timestamp } = await algoClient.block(99999999999)
+  } catch (error) {
+    const chainError = mapChainError(error)
+    console.log('Chain Error Type:', chainError.errorType)
+
+  }
 }
 
 ;(async () => {
