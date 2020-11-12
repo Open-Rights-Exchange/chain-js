@@ -29,6 +29,7 @@ import {
   convertBufferToHexStringIfNeeded,
   convertEthUnit,
   isNullOrEmptyEthereumValue,
+  isSameEthHexValue,
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
@@ -381,12 +382,12 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey = (publicKey: EthereumPublicKey): boolean => {
-    return this.signedByPublicKey === publicKey
+    return isSameEthHexValue(this.signedByPublicKey, publicKey)
   }
 
   /** Whether there is an attached signature for the publicKey of the address */
   public async hasSignatureForAuthorization(authorization: EthereumAddress): Promise<boolean> {
-    return this.signedByAddress === authorization
+    return isSameEthHexValue(this.signedByAddress, authorization)
   }
 
   /** Whether signature is attached to transaction (and/or whether the signature is correct)
@@ -394,7 +395,7 @@ export class EthereumTransaction implements Transaction {
   public get hasAllRequiredSignatures(): boolean {
     // if action.from exists, make sure it matches the attached signature
     if (!this.isFromEmptyOrNullAddress()) {
-      return this.signedByAddress === this.action?.from
+      return isSameEthHexValue(this.signedByAddress, this.action?.from)
     }
     // if no specific action.from, just confirm any signature is attached
     return this.hasAnySignatures

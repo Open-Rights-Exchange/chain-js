@@ -62,7 +62,8 @@ export interface Transaction {
   /** Whether there is an attached signature for the provided publicKey */
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
   /** Cost that is paid after transaction has executed on chain
-   * Return format is string of chain's default native currency unit */
+   * Return format is string of chain's default native currency unit
+   * Throws if transaction not found on-chain */
   getActualCost(): Promise<string>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>

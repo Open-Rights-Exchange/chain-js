@@ -39,9 +39,11 @@ export type AlgorandChainInfo = {
  * Once any such parameter is there, change the type from any to an object containing specific properties */
 export type AlgorandChainSettings = any
 
-/**  Currently nothing is needed in algorand chain communication settings. 
- Once any such parameter is there, change the type from any to an object containing specific properties */
-export type AlgorandChainSettingsCommunicationSettings = any
+export type AlgorandChainSettingsCommunicationSettings = {
+  blocksToCheck: number
+  checkInterval: number
+  getBlockAttempts: number
+}
 
 /**  Multisig options required to create a multisignature account for Algorand */
 export type AlgorandMultiSigOptions = {

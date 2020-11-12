@@ -13,7 +13,7 @@ describe('Ethereum Helper Functions', () => {
   })
 
   it('tests toEthereumAddress', async () => {
-    const expValue = '0x27105356F6C1ede0e92020e6225E46DC1F496b81'
+    const expValue = '0x27105356f6c1ede0e92020e6225e46dc1f496b81'
     const value = '27105356F6C1ede0e92020e6225E46DC1F496b81'
 
     expect(toEthereumAddress(value)).toEqual(expValue)

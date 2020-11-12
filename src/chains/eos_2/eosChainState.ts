@@ -2,7 +2,7 @@ import { Api, JsonRpc, RpcInterfaces } from 'eosjs'
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
-import { ChainError, throwNewError, throwAndLogError } from '../../errors'
+import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
 import { ChainInfo, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
 import { fetchWrapper, trimTrailingChars, isAString, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
@@ -430,7 +430,7 @@ export class EosChainState {
         blocksToCheck,
       )
       if (hasReachedConfirmLevel) {
-        this.resolveAwaitTransaction(resolve, transactionResult)
+        resolveAwaitTransaction(resolve, transactionResult)
         return
       }
       nextBlockNumToCheck = blockNumToCheck + 1
@@ -439,7 +439,7 @@ export class EosChainState {
       if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
         // Try to read the specific block - up to getBlockAttempts times
         if (getBlockAttempt >= maxBlockReadAttempts) {
-          this.rejectAwaitTransaction(
+          rejectAwaitTransaction(
             reject,
             ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
             `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
@@ -455,7 +455,7 @@ export class EosChainState {
     }
 
     if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
-      this.rejectAwaitTransaction(
+      rejectAwaitTransaction(
         reject,
         ChainErrorDetailCode.ConfirmTransactionTimeout,
         `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
@@ -524,26 +524,8 @@ export class EosChainState {
     }
   }
 
-  resolveAwaitTransaction = (resolve: any, transaction: any) => {
-    resolve(transaction)
-  }
-
-  /** All errors are of ErrorType TxConfirmFailure
-   *  A more specfic cause of the error is passed via errorDetailCode param
-   */
-  rejectAwaitTransaction = (
-    reject: any,
-    errorDetailCode: ChainErrorDetailCode,
-    errorMessage: string,
-    originalError: Error,
-  ) => {
-    const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorDetailCode }, originalError)
-    reject(error)
-  }
-
-  /** Access to underlying eosjs principals
-   *  Warning! You should not write code to these interface is you can use the chainjs functions instead
-   *  These are provided as an escape hatch just in case
+  /** Access to underlying eosjs sdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
    */
   get eosjs() {
     return {

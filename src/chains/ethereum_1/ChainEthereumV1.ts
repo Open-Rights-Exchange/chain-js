@@ -264,6 +264,13 @@ class ChainEthereumV1 implements Chain {
       throwNewError('Not connected to chain')
     }
   }
+
+  /** Access to underlying web3 sdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
+   */
+  public get web3() {
+    return this._chainState?.web3
+  }
 }
 
 export { ChainEthereumV1 }

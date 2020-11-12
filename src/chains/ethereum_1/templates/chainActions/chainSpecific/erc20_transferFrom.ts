@@ -5,8 +5,8 @@ import {
   EthereumChainActionType,
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
-import { toEthereumAddress, isNullOrEmptyEthereumValue, toTokenValueString } from '../../../helpers'
-import { getArrayIndexOrNull } from '../../../../../helpers'
+import { toEthereumAddress, isNullOrEmptyEthereumValue } from '../../../helpers'
+import { getArrayIndexOrNull, toTokenValueString } from '../../../../../helpers'
 
 export interface Erc20TransferFromParams {
   contractAddress: EthereumAddress
