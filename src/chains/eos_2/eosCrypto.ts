@@ -13,6 +13,8 @@ import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
 const { Keygen } = require('eosjs-keygen')
 
+const EOS_ASYMMETRIC_SCHEME_NAME = 'chainjs.eos.secp256k1'
+
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
 // eslint-disable-next-line prefer-destructuring
@@ -59,8 +61,8 @@ export async function encryptWithPublicKey(
     .PublicKey(publicKey)
     .toUncompressed()
     .toBuffer()
-  const response = Asymmetric.encrypt(publicKeyBuffer, unencrypted, useOptions)
-  const encryptedToReturn = { ...response, ...{ scheme: Asymmetric.Scheme.EOS } }
+  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: EOS_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 
@@ -75,7 +77,7 @@ export async function decryptWithPrivateKey(
   const useOptions = { ...options, curveType: Asymmetric.CurveType.Secp256k1 }
   const privateKeyBuffer = eosEcc.PrivateKey(privateKey).toBuffer()
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return Asymmetric.decrypt(encryptedObject, privateKeyBuffer, useOptions)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyBuffer, useOptions)
 }
 
 /** Signs data with private key */

@@ -7,13 +7,11 @@ import { isNullOrEmpty } from '../helpers'
 import { throwNewError } from '../errors'
 import { ensureEncryptedValueIsObject } from './cryptoHelpers'
 import {
-  generateEphemPublicKeyAndSharedSecret as generateEphemPublicKeyAndSharedSecretEd25519,
-  generateSharedSecret as generateSharedSecretEd25519,
-} from './ed25519Crypto'
-import {
-  generateEphemPublicKeyAndSharedSecret as generateEphemPublicKeyAndSharedSecretECC,
-  generateSharedSecret as generateSharedSecretECC,
-} from './eccCrypto'
+  generateEphemPublicKeyAndSharedSecretType1,
+  generateSharedSecretType1,
+  generateEphemPublicKeyAndSharedSecretEd25519,
+  generateSharedSecretEd25519,
+} from './diffieHellman'
 
 const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 
@@ -37,11 +35,9 @@ export enum CurveType {
   Ed25519 = 'ed25519',
 }
 
-export enum Scheme {
-  Algorand = 'chainjs.algorand.ed25519',
-  EOS = 'chainjs.eos.secp256k1',
-  Ethereum = 'chainjs.ethereum.secp256k1',
-}
+// Informational string added to encrypted results - useful when decrypting in determining set of options used
+// e.g. 'chainjs.ethereum.secp256k1.v2'
+export type Scheme = string
 
 export type Options = {
   hashCypherType?: CipherGCMTypes
@@ -164,14 +160,14 @@ export type EncryptedAsymmetric = {
   mac: string
 }
 
-function generateSharedSecretAndReturnEphemPublicKey(
+function generateSharedSecretAndEphemPublicKey(
   publicKey: NodeJS.ArrayBufferView,
   curveType: CurveType,
   keyFormat?: ECDHKeyFormat,
 ) {
   let result
   if (curveType === CurveType.Secp256k1) {
-    result = generateEphemPublicKeyAndSharedSecretECC(publicKey, curveType, keyFormat)
+    result = generateEphemPublicKeyAndSharedSecretType1(publicKey, curveType, keyFormat)
   }
   if (curveType === CurveType.Ed25519) {
     result = generateEphemPublicKeyAndSharedSecretEd25519(publicKey as Uint8Array)
@@ -191,7 +187,7 @@ function generateSharedSecretUsingPrivateKey(
   let ephemPublicKeyBuffer
   if (curveType === CurveType.Secp256k1) {
     ephemPublicKeyBuffer = Buffer.from(ephemPublicKey, 'hex')
-    sharedSecret = generateSharedSecretECC(ephemPublicKeyBuffer, privateKey, curveType)
+    sharedSecret = generateSharedSecretType1(ephemPublicKeyBuffer, privateKey, curveType)
   }
   if (curveType === CurveType.Ed25519) {
     ephemPublicKeyBuffer = Buffer.from(ephemPublicKey, 'hex')
@@ -202,10 +198,14 @@ function generateSharedSecretUsingPrivateKey(
   return { ephemPublicKeyBuffer, sharedSecret }
 }
 
-/** ECDH encryption with publicKey */
-export function encrypt(publicKey: NodeJS.ArrayBufferView, plainText: string, options?: Options): EncryptedAsymmetric {
+/** ECDH encryption using publicKey */
+export function encryptWithPublicKey(
+  publicKey: NodeJS.ArrayBufferView,
+  plainText: string,
+  options?: Options,
+): EncryptedAsymmetric {
   const useOptions = composeOptions(options)
-  const { ephemPublicKey, sharedSecret } = generateSharedSecretAndReturnEphemPublicKey(
+  const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
     publicKey,
     useOptions?.curveType,
     useOptions?.keyFormat,
@@ -241,8 +241,12 @@ export function encrypt(publicKey: NodeJS.ArrayBufferView, plainText: string, op
   }
 }
 
-/** ECDH decryption with privateKey */
-export function decrypt(encrypted: EncryptedAsymmetric, privateKey: NodeJS.ArrayBufferView, options?: Options) {
+/** ECDH decryption using privateKey */
+export function decryptWithPrivateKey(
+  encrypted: EncryptedAsymmetric,
+  privateKey: NodeJS.ArrayBufferView,
+  options?: Options,
+) {
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
