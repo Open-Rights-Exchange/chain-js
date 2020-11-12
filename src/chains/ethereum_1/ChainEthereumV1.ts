@@ -95,7 +95,7 @@ class ChainEthereumV1 implements Chain {
   }
 
   /** Returns chain native token symbol and default token contract address */
-  public get nativeToken(): { defaultUnit: EthUnit, symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
+  public get nativeToken(): { defaultUnit: EthUnit; symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
     return {
       defaultUnit: DEFAULT_ETH_UNIT,
       symbol: toEthereumSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
@@ -252,6 +252,13 @@ class ChainEthereumV1 implements Chain {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
     }
+  }
+
+  /** Access to underlying web3 sdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
+   */
+  public get web3() {
+    return this._chainState?.web3
   }
 }
 
