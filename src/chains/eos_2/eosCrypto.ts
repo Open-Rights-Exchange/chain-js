@@ -2,7 +2,7 @@
 import * as eosEcc from 'eosjs-ecc'
 import base58 from 'bs58'
 import * as Asymmetric from '../../crypto/asymmetric'
-import { AesCrypto, CryptoHelpers, EccCrypto } from '../../crypto'
+import { AesCrypto, CryptoHelpers } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
 import { KeyPair, KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
@@ -12,6 +12,8 @@ import { toEosPublicKey } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
 const { Keygen } = require('eosjs-keygen')
+
+const EOS_ASYMMETRIC_SCHEME_NAME = 'chainjs.eos.secp256k1'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -59,18 +61,23 @@ export async function encryptWithPublicKey(
     .PublicKey(publicKey)
     .toUncompressed()
     .toBuffer()
-  const response = EccCrypto.encryptWithPublicKey(unencrypted, publicKeyBuffer, useOptions)
-  const encryptedToReturn = { ...response, ...{ scheme: Asymmetric.Scheme.EOS } }
+  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: EOS_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
-export async function decryptWithPrivateKey(encrypted: string, privateKey: string): Promise<string> {
+export async function decryptWithPrivateKey(
+  encrypted: string,
+  privateKey: string,
+  options?: Asymmetric.Options,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Secp256k1 }
   const privateKeyBuffer = eosEcc.PrivateKey(privateKey).toBuffer()
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return EccCrypto.decryptWithPrivateKey(encryptedObject, privateKeyBuffer)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyBuffer, useOptions)
 }
 
 /** Signs data with private key */

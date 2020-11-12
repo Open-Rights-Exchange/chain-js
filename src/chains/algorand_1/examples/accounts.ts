@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
+import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
 import { AlgorandMultiSigOptions } from '../models'
 
 require('dotenv').config()
@@ -61,11 +62,11 @@ async function run() {
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
   console.log('generatedKeys: %o', generatedKeys)
-  console.log('decrypted privateKey: ', algoTest.decryptWithPassword(generatedKeys.privateKey, createAccountOptions.newKeysOptions.password, { salt: createAccountOptions.newKeysOptions.salt}))
+  const decryptedPrivateKey = algoTest.decryptWithPassword(generatedKeys.privateKey, createAccountOptions.newKeysOptions.password, { salt: createAccountOptions.newKeysOptions.salt})
+  console.log('decrypted privateKey: ', decryptedPrivateKey)
   console.log('account name: %o', accountName)
   const account = await algoTest.new.Account(accountName)
   console.log('account: %o', account.name)
-
   // /** Create Algorand multisig account */
   // const createMultiSigAccount = algoTest.new.CreateAccount(createMultiSigAccountOptions)
   // await createMultiSigAccount.generateKeysIfNeeded()

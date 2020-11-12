@@ -35,7 +35,7 @@ export const ropstenEndpoints: ChainEndpoint[] = [
       '5103e43473c469878ce7cd435de7baf98095c0193ac71aaed93b27cd9c012ff7d999584df06fa9a09208150a51b6b78e269e091c22cfe59044d875b3a373e6e1',
     )
     const privateKey = toEthereumPrivateKey('0x7261573a28ebe63af0833d2666c3fbd0016f32db7137c5895fd390ee0e62ad40')
-    const encrypted = await ropsten.encryptWithPublicKey('EthMystring', publicKey)
+    const encrypted = await ropsten.encryptWithPublicKey('text to encrypt', publicKey)
     console.log('encrypted text:', encrypted)
     const decrypted = await ropsten.decryptWithPrivateKey(encrypted, privateKey)
     console.log('decrypted text:', decrypted)

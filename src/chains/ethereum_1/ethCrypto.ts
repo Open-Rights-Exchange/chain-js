@@ -11,6 +11,8 @@ import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers
 import { EncryptedDataString } from '../../models'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
+const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'chainjs.ethereum.secp256k1'
+
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
 // eslint-disable-next-line prefer-destructuring
@@ -53,7 +55,7 @@ export async function encryptWithPublicKey(
   options: Asymmetric.Options,
 ): Promise<string> {
   const encrypted = await EthCrypto.encryptWithPublicKey(publicKey, unencrypted)
-  const encryptedToReturn = { ...encrypted, ...{ scheme: Asymmetric.Scheme.Ethereum } }
+  const encryptedToReturn = { ...encrypted, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 

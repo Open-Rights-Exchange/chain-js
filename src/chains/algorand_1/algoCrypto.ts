@@ -1,8 +1,7 @@
 /* eslint-disable new-cap */
 import * as algosdk from 'algosdk'
 import * as Asymmetric from '../../crypto/asymmetric'
-import { EccCrypto } from '../../crypto'
-import { byteArrayToHexString, hexStringToByteArray, notImplemented } from '../../helpers'
+import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
   AlgoEncryptionOptions,
@@ -16,6 +15,8 @@ import {
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+
+const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'chainjs.algorand.ed25519'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -60,21 +61,29 @@ export async function encryptWithPublicKey(
   publicKey: AlgorandPublicKey,
   options: Asymmetric.Options,
 ): Promise<string> {
-  notImplemented() // todo implement this
-  const publicKeyBuffer = Buffer.from('')
-  const response = EccCrypto.encryptWithPublicKey(unencrypted, publicKeyBuffer, options)
-  const encryptedToReturn = { ...response, ...{ scheme: Asymmetric.Scheme.Algorand } }
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
+  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
-export async function decryptWithPrivateKey(encrypted: string, privateKey: AlgorandPrivateKey): Promise<string> {
-  notImplemented() // todo implement this
-  const privateKeyBuffer = Buffer.from('')
+export async function decryptWithPrivateKey(
+  encrypted: string,
+  privateKey: AlgorandPrivateKey,
+  options: Asymmetric.Options,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
+  // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
+  // so we separate it and take the first half as our secretKey for encryption
+  const sk = privateKey.slice(0, privateKey.length / 2)
+  const privateKeyByteArray = hexStringToByteArray(sk)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return EccCrypto.decryptWithPrivateKey(encryptedObject, privateKeyBuffer)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyByteArray, useOptions)
 }
 
 /** Signs a string with a private key
