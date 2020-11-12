@@ -9,7 +9,7 @@ import { ChainFunctionCategory } from './models'
 // ... keep the Misc.. errors at the bottom - they catch the categories if not caught by a more specific error higher up
 export const DefaultChainErrorRegExs: { [key: string]: string } = {
   AuthInvalid: '(invalid transaction v, r, s values|public key|private key|invalid signature|signing failed)', // the permission isnt valid (or permission already exists in an account)
-  BlockDoesNotExist: '(header for hash not found|neither block nor hash specified)',
+  BlockDoesNotExist: '(does not exist|header for hash not found|neither block nor hash specified)',
   DataReadFailedKeyDoesNotExist: 'not found',
   TxExceededResources: '(insufficient funds|insufficient balance)', // insufficient funds for gas * price + value
   // catch-all errors for a category
@@ -22,7 +22,7 @@ export const DefaultChainErrorRegExs: { [key: string]: string } = {
 // Match messages for each type of error category
 // Some errors have the same message thrown by the chain (e.g. 'not found') - diff meaning for each 'category' of errors
 export const BlockErrorRegExs: { [key: string]: string } = {
-  BlockDoesNotExist: 'not found',
+  BlockDoesNotExist: '(not found|does not exist)',
   MiscBlockError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
 
