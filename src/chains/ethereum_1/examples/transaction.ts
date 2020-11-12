@@ -151,9 +151,7 @@ const { env } = process
 
     // ---> Sign and send erc20 transfer Transaction
     // const transaction = ropsten.new.Transaction(ropstenChainOptions)
-    // transaction.actions = [
-    //   await ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams),
-    // ]
+    // transaction.actions = [ await ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams) ]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     // console.log(decomposed)
