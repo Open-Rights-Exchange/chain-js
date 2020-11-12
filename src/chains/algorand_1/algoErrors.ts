@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable no-restricted-syntax */
 import { RpcError } from 'eosjs'
 import { ChainError } from '../../errors'
@@ -15,7 +16,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   AuthUnsatisfied: '(signature validation|multisig validation|signed and not a Logic-only)', // all permission or keys needed for transaction weren't provided
   AuthMissing: '(no sig|LogicSig.Logic empty)', // missing permission or key
   BlockDoesNotExist:
-    '(/ps1/v1/block|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
+    '((?=failed to retrieve)(.*)(?=block/[0-9]+)(.*)|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
   DataReadFailedKeyDoesNotExist: 'key does not exist',
   TokenBalanceTooLow: 'overflowed account balance',
   // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg
