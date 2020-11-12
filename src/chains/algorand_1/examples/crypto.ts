@@ -35,7 +35,7 @@ async function run() {
   }
 
   const encryptedPw = await algoTest.encryptWithPublicKey(
-    'password',
+    'text to encrypt',
     toAlgorandPublicKey('a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45'),
   )
   console.log(encryptedPw)
