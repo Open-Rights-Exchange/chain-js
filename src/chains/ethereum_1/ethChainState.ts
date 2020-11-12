@@ -5,7 +5,7 @@ import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
 import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
 import { ChainErrorDetailCode, ChainErrorType, ConfirmType } from '../../models'
-import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, trimTrailingChars } from '../../helpers'
+import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, objectHasProperty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
   ChainFunctionCategory,
@@ -222,7 +222,7 @@ export class EthereumChainState {
 
     const { balance, tokenSymbol } = await this.getErc20TokenBalance(erc20Contract, account)
 
-    if ((symbol || '').toLowerCase() !== (tokenSymbol || '').toLowerCase()) {
+    if (tokenSymbol && (symbol || '').toLowerCase() !== (tokenSymbol || '').toLowerCase()) {
       throw Error(`Different token symbol found at: ${tokenAddress}. Found symbol:${tokenSymbol} instead of:${symbol}`)
     }
 
@@ -246,10 +246,12 @@ export class EthereumChainState {
     account: EthereumAddress,
   ): Promise<{ balance: string; tokenName?: string; tokenSymbol?: string }> {
     let balanceString = '0.0000'
-    const balance: BN = await contract?.methods?.balanceOf(account)?.call()
-    const decimals = await contract?.methods?.decimals()?.call()
-    const tokenName = await contract?.methods?.name()?.call()
-    const tokenSymbol = await contract?.methods?.symbol()?.call()
+    const balance: BN = this.isMethodCallable(contract, 'balanceOf')
+      ? await contract?.methods?.balanceOf(account)?.call()
+      : null
+    const decimals = this.isMethodCallable(contract, 'decimals') ? await contract?.methods?.decimals()?.call() : null
+    const tokenName = this.isMethodCallable(contract, 'name') ? await contract?.methods?.name()?.call() : null
+    const tokenSymbol = this.isMethodCallable(contract, 'symbol') ? await contract?.methods?.symbol()?.call() : null
 
     if (balance && decimals) {
       balanceString = bigNumberToString(balance, decimals)
@@ -257,6 +259,15 @@ export class EthereumChainState {
 
     /** Returns 0.0000 if no balance found for token contract */
     return { balance: balanceString, tokenName, tokenSymbol }
+  }
+
+  /** Whether a callable method exists on an ethereum contract */
+  public isMethodCallable(contract: Contract, methodName: string): boolean {
+    const methods = contract?.methods
+    if (objectHasProperty(methods, methodName) && objectHasProperty(methods[methodName], 'call')) {
+      return true
+    }
+    return false
   }
 
   /** Check if a block includes a transaction
