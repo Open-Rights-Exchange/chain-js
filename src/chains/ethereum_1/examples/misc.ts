@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models/generalModels'
-import { toEthereumSymbol } from '../helpers'
+import { toEthereumPrivateKey, toEthereumPublicKey, toEthereumSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 
 require('dotenv').config()
@@ -28,6 +28,17 @@ export const ropstenEndpoints: ChainEndpoint[] = [
     // console.log('encrypted text:', encrypted)
     // const decrypted = ropsten.decrypt(encrypted, 'password', 'mysalt')
     // console.log('decrypted text:', decrypted)
+
+    // encrypt with public key / decrypt with private key
+    // address: 0xefA688712c9635e264B18908c6DFD394782c2C24
+    const publicKey = toEthereumPublicKey(
+      '5103e43473c469878ce7cd435de7baf98095c0193ac71aaed93b27cd9c012ff7d999584df06fa9a09208150a51b6b78e269e091c22cfe59044d875b3a373e6e1',
+    )
+    const privateKey = toEthereumPrivateKey('0x7261573a28ebe63af0833d2666c3fbd0016f32db7137c5895fd390ee0e62ad40')
+    const encrypted = await ropsten.encryptWithPublicKey('text to encrypt', publicKey)
+    console.log('encrypted text:', encrypted)
+    const decrypted = await ropsten.decryptWithPrivateKey(encrypted, privateKey)
+    console.log('decrypted text:', decrypted)
 
     // get token balance
     console.log('get Eth balance:', await ropsten.fetchBalance(toChainEntityName('0x69bC139aFf2C03Bff634D1e62431B288c1a55f2e'), toEthereumSymbol('eth')))

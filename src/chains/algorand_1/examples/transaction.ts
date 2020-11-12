@@ -6,10 +6,12 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TxExecutionPriority } from '../../../models'
+import { ChainEndpoint, ChainActionType, TxExecutionPriority, ConfirmType } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { AlgorandTransaction } from '../algoTransaction'
+import { AlgorandChainState } from '../algoChainState'
+import { ChainAlgorandV1 } from '../ChainAlgorandV1'
 
 require('dotenv').config()
 
@@ -38,6 +40,7 @@ interface valueTransferParams {
 }
 
 const composeValueTransferParams: valueTransferParams = {
+  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   toAccountName: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
   amount: 1000000,
   symbol: AlgorandUnit.Microalgo,
@@ -51,10 +54,8 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
   /** Compose and send transaction */
-  const transaction = await algoTest.new.Transaction() as AlgorandTransaction
-  composeValueTransferParams.fromAccountName = 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'
+  const transaction = await algoTest.new.Transaction()
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
@@ -68,8 +69,9 @@ async function run() {
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send()))
-    console.log('actual fee: ', await transaction.getActualCost())
+    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.None)))
+    // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    // console.log('actual fee: ', await transaction.getActualCost()) // will throw if tx not yet on-chain e.g. If transaction.send uses ConfirmType.None
   } catch (err) {
     console.log(err)
   }

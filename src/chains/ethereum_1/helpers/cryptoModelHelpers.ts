@@ -91,7 +91,7 @@ export function toEthereumTxData(value: string | Buffer): EthereumTxData {
  */
 export function toEthereumPublicKey(value: string): EthereumPublicKey {
   if (isValidEthereumPublicKey(value)) {
-    return ensureHexPrefix(value) as EthereumPublicKey
+    return value as EthereumPublicKey
   }
   throw new Error(`Not a valid ethereum public key:${value}.`)
 }
@@ -101,7 +101,7 @@ export function toEthereumPublicKey(value: string): EthereumPublicKey {
  */
 export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
   if (isValidEthereumPrivateKey(value)) {
-    return ensureHexPrefix(value) as EthereumPrivateKey
+    return value as EthereumPrivateKey
   }
   throw new Error(`Not a valid ethereum private key:${value}.`)
 }

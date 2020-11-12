@@ -31,7 +31,7 @@ export type AlgorandTxChainResponse = {
  */
 export type AlgorandTxResult = {
   transactionId: string
-  chainResponse: AlgorandTxChainResponse
+  chainResponse?: AlgorandTxChainResponse
 }
 
 /** Transaction properties that contain the genesis information and fee required to construct a transaction */

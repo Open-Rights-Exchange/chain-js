@@ -1,4 +1,6 @@
+/* eslint-disable new-cap */
 import * as algosdk from 'algosdk'
+import * as Asymmetric from '../../crypto/asymmetric'
 import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
@@ -12,6 +14,9 @@ import {
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
+import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+
+const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'chainjs.algorand.ed25519'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -26,7 +31,11 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 /** Encrypts a string using a password and a nonce
  *  Nacl requires password to be in a 32 byte array format. Hence we derive a key from the password string using the provided salt
  */
-export function encrypt(unencrypted: string, password: string, options: AlgoEncryptionOptions): EncryptedDataString {
+export function encryptWithPassword(
+  unencrypted: string,
+  password: string,
+  options: AlgoEncryptionOptions,
+): EncryptedDataString {
   const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
   return toEncryptedDataString(encrypted)
@@ -35,7 +44,7 @@ export function encrypt(unencrypted: string, password: string, options: AlgoEncr
 /** Decrypts the encrypted value using nacl
  * Nacl requires password to be in a 32 byte array format
  */
-export function decrypt(
+export function decryptWithPassword(
   encrypted: EncryptedDataString | any,
   password: string,
   options: AlgoEncryptionOptions,
@@ -43,6 +52,38 @@ export function decrypt(
   const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
   const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
   return decrypted
+}
+
+/** Encrypts a string using a public key into a stringified JSON object
+ * The encrypted result can be decrypted with the matching private key */
+export async function encryptWithPublicKey(
+  unencrypted: string,
+  publicKey: AlgorandPublicKey,
+  options: Asymmetric.Options,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
+  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
+  return JSON.stringify(encryptedToReturn)
+}
+
+/** Decrypts the encrypted value using a private key
+ * The encrypted value is a stringified JSON object
+ * ... and must have been encrypted with the public key that matches the private ley provided */
+export async function decryptWithPrivateKey(
+  encrypted: string,
+  privateKey: AlgorandPrivateKey,
+  options: Asymmetric.Options,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
+  // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
+  // so we separate it and take the first half as our secretKey for encryption
+  const sk = privateKey.slice(0, privateKey.length / 2)
+  const privateKeyByteArray = hexStringToByteArray(sk)
+  const encryptedObject = ensureEncryptedValueIsObject(encrypted)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyByteArray, useOptions)
 }
 
 /** Signs a string with a private key
@@ -70,7 +111,7 @@ export function verifySignedWithPublicKey(
 function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, options: AlgoEncryptionOptions) {
   const { privateKey, publicKey } = keys
   const encryptedKeys = {
-    privateKey: encrypt(privateKey, password, options),
+    privateKey: encryptWithPassword(privateKey, password, options),
     publicKey,
   }
   return encryptedKeys as AlgorandKeyPair

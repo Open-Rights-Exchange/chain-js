@@ -164,11 +164,20 @@ class ChainEthereumV1 implements Chain {
 
   /** Decrypts the encrypted value using a password, and optional parameters using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decrypt = ethcrypto.decrypt
+  decryptWithPassword = ethcrypto.decryptWithPassword
 
   /** Encrypts a string using a password and optional parameters using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encrypt = ethcrypto.encrypt
+  encryptWithPassword = ethcrypto.encryptWithPassword
+
+  /** Decrypts the encrypted value using a private key
+   * The encrypted value is either a stringified JSON object or a JSON object
+   * ... and must have been encrypted with the public key that matches the private ley provided */
+  decryptWithPrivateKey = ethcrypto.decryptWithPrivateKey
+
+  /** Encrypts a string using a public key
+   * The encrypted result can be decrypted with the matching private key */
+  encryptWithPublicKey = ethcrypto.encryptWithPublicKey
 
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
@@ -254,6 +263,13 @@ class ChainEthereumV1 implements Chain {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
     }
+  }
+
+  /** Access to underlying web3 sdk
+   *  Warning! You use chainjs functions wherever possible and only use this sdk as an escape hatch
+   */
+  public get web3() {
+    return this._chainState?.web3
   }
 }
 

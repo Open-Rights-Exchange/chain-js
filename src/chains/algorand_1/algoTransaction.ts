@@ -2,7 +2,8 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import { Transaction } from '../../interfaces'
-import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
+import { mapChainError } from './algoErrors'
 import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
@@ -636,9 +637,19 @@ export class AlgorandTransaction implements Transaction {
     return microToAlgoString(microalgos)
   }
 
-  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string) */
+  /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string)
+   * Throws if transaction not found on-chain */
   public async getActualCost(): Promise<string> {
-    const trx = await this._chainState.getTransactionById(this.transactionId)
-    return microToAlgoString(trx?.fee)
+    try {
+      const trx = await this._chainState.getTransactionById(this.transactionId)
+      return trx ? microToAlgoString(trx?.fee) : null
+    } catch (error) {
+      const chainError = mapChainError(error)
+      if (chainError?.errorType === ChainErrorType.TxNotFoundOnChain) {
+        throw new Error('Cant retrieve actual cost - Transaction not found on chain')
+      } else {
+        throw error
+      }
+    }
   }
 }
