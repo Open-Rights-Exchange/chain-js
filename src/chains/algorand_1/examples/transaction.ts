@@ -69,9 +69,9 @@ async function run() {
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
-    // Using ConfirmType.None for transaction.send might make getActualCost return null
-    console.log('actual fee: ', await transaction.getActualCost())
+    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.None)))
+    // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    // console.log('actual fee: ', await transaction.getActualCost()) // will throw if tx not yet on-chain e.g. If transaction.send uses ConfirmType.None
   } catch (err) {
     console.log(err)
   }
