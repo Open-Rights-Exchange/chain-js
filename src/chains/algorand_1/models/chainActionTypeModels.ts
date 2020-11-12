@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-cycle
 import { AlgorandAddress } from './cryptoModels'
 import { ChainActionType } from '../../../models'
 
