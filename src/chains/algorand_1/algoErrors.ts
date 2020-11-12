@@ -21,6 +21,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   TokenBalanceTooLow: 'overflowed account balance|overspend',
   // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg
   TxExceededResources: 'exceeds balance',
+  TxNotFoundOnChain: 'find the required transaction in the required range',
   MiscChainError: 'chain_type_exception',
   MiscBlockValidationError: '(GenesisHash mismatch|GenesisHash required|GenesisID mismatch)',
   MiscTransactionError:

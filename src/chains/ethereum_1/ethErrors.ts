@@ -38,6 +38,7 @@ export const ContractErrorRegExs: { [key: string]: string } = {
 
 export const TransactionErrorRegExs: { [key: string]: string } = {
   TxExceededResources: DefaultChainErrorRegExs.TxExceededResources, // insufficient funds for gas * price + value
+  TxNotFoundOnChain: 'xxx ToDo xxx',
   TransactionDoesNotExist: 'not found',
   MiscTransactionError: '(.*)', // matches anything - this is the catch all if nothing else matches
 }
