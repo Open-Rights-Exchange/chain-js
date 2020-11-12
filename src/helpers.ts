@@ -1,9 +1,7 @@
 import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
-// eslint-disable-next-line import/no-cycle
-import { ChainError } from './errors'
 import { TRANSACTION_ENCODING } from './constants'
-import { ChainEntityName, IndexedObject, ChainEndpoint, ChainErrorDetailCode, ChainErrorType } from './models'
+import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAUint8Array(obj: any) {
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
@@ -289,21 +287,4 @@ export function objectHasProperty(obj: object, propertyName: string) {
 export function nullifyIfEmpty(value: any) {
   if (isNullOrEmpty(value)) return null
   return value
-}
-
-export function resolveAwaitTransaction(resolve: any, transaction: any) {
-  resolve(transaction)
-}
-
-/** All errors are of ErrorType TxConfirmFailure
- *  A more specfic cause of the error is passed via errorDetailCode param
- */
-export function rejectAwaitTransaction(
-  reject: any,
-  errorDetailCode: ChainErrorDetailCode,
-  errorMessage: string,
-  originalError: Error,
-) {
-  const error = new ChainError(ChainErrorType.TxConfirmFailure, errorMessage, { errorDetailCode }, originalError)
-  reject(error)
 }
