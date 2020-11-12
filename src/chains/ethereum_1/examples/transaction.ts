@@ -115,13 +115,13 @@ const { env } = process
     await ropsten.connect()
 
     // ---> Sign and send ethereum transfer with compose Action - using generic (cross-chain) native chain transfer action
-    const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    const transaction = ropsten.new.Transaction(defaultEthTxOptions)
     transaction.actions = [await ropsten.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)]
     console.log('transaction.actions[0]:', JSON.stringify(transaction.actions[0]))
     const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     console.log(JSON.stringify(decomposed))
     const fee = await transaction.getSuggestedFee(TxExecutionPriority.Fast)
-    transaction.setDesiredFee(fee)
+    await transaction.setDesiredFee(fee)
     await transaction.prepareToBeSigned()
     await transaction.validate()
     await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
@@ -133,7 +133,7 @@ const { env } = process
     console.log(`actual cost of tx in ETH - available once tx is processed: ${await transaction.getActualCost()}`)
 
     // ---> Sign and send default transfer Transaction - using generic (cross-chain) token transfer action
-    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    // const transaction = ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [await ropsten.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -149,7 +149,7 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send erc20 transfer Transaction
-    // const transaction = await ropsten.new.Transaction()
+    // const transaction = ropsten.new.Transaction()
     // transaction.actions = [await ropsten.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -165,7 +165,7 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Sign and send erc20 issue Transaction
-    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    // const transaction = ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [await ropsten.composeAction(EthereumChainActionType.ERC20Issue, composeERC20IssueParams)]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -177,7 +177,7 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // // ---> Sign and send ethereum transfer with setFromRaw()
-    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    // const transaction = ropsten.new.Transaction(defaultEthTxOptions)
     // await transaction.setFromRaw(sampleSetFromRawTrx)
     // await transaction.prepareToBeSigned()
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
@@ -189,7 +189,7 @@ const { env } = process
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
     // ---> Compose & Decompose erc721 transferFrom Transaction
-    // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
+    // const transaction = ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [
     //   await ropsten.composeAction(EthereumChainActionType.ERC721TransferFrom, composeERC721TransferFromParams),
     // ]
