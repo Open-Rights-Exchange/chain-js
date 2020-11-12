@@ -1,5 +1,5 @@
 import algosdk from 'algosdk'
-import { throwAndLogError, throwNewError } from '../../errors'
+import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
 import { ChainEndpoint, ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
 import {
   AlgorandAddress,
@@ -11,17 +11,15 @@ import {
   AlgorandChainTransactionParamsStruct,
   AlgorandHeader,
   AlgorandSymbol,
+  AlgorandTxChainResponse,
   AlgorandTxResult,
   AlgorandUnit,
-  AlgorandTxChainResponse,
 } from './models'
 import {
   getHeaderValueFromEndpoint,
   hexStringToByteArray,
   isNullOrEmpty,
   objectHasProperty,
-  rejectAwaitTransaction,
-  resolveAwaitTransaction,
   trimTrailingChars,
 } from '../../helpers'
 import {
@@ -219,8 +217,7 @@ export class AlgorandChainState {
     }
     let sendResult: AlgorandTxResult
     let transactionId
-    // get the head block just before sending the transaction
-    const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
+
     // eslint-disable-next-line no-useless-catch
     try {
       const { txId } = await this._algoClientWithTxHeader.sendRawTransaction(hexStringToByteArray(signedTransaction))
@@ -231,11 +228,13 @@ export class AlgorandChainState {
     }
 
     if (waitForConfirm !== ConfirmType.None) {
+      // get the latest head block
+      const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
       // Since it wont retrieve transaction response from algorand rpc (unlike EOS) it will automatically start with currentHeadBlock
       const startFromBlockNumber = currentHeadBlock
 
       sendResult = await this.awaitTransaction(
-        { transactionId } as AlgorandTxResult,
+        { transactionId },
         waitForConfirm,
         startFromBlockNumber,
         communicationSettings,
