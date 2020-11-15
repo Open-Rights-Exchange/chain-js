@@ -15,7 +15,7 @@ import { Unencrypted, EciesCurveType, ECDHKeyFormat, CipherGCMTypes, EciesOption
 
 export * from './asymmetricModels'
 
-const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
+export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
@@ -198,7 +198,7 @@ export function encryptWithPublicKey(
     Buffer.concat([ciphertext, useOptions.s2], ciphertext.length + useOptions.s2.length),
   )
 
-  const iv = !isNullOrEmpty(useOptions?.iv) ? useOptions?.iv.toString('hex') : null
+  const iv = !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null
 
   return {
     iv,
@@ -217,6 +217,7 @@ export function decryptWithPrivateKey(
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
+  const iv = !isNullOrEmpty(useOptions?.iv) ? useOptions.iv : emptyBuffer
   const mac = Buffer.from(encryptedObject.mac, 'hex')
   const privateKeyBuffer = Buffer.from(privateKey, 'hex')
   const { sharedSecret } = generateSharedSecretUsingPrivateKey(
@@ -250,6 +251,6 @@ export function decryptWithPrivateKey(
 
   // uses symmetric encryption scheme to decrypt the message
   // m = E-1(Ke; c)
-  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, useOptions.iv, encryptionKey, cipherText)
+  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, encryptionKey, cipherText)
   return buffer.toString()
 }
