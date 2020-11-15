@@ -8,15 +8,15 @@ import { EthereumChainEndpoint } from '../models'
 
 require('dotenv').config()
 
-export const { env } = process
+const { env } = process
 
-export const ropstenEndpoints: EthereumChainEndpoint[] = [
+const ropstenEndpoints: EthereumChainEndpoint[] = [
   {
     url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
   },
 ]
 
-export const CreateAccountOptions = {
+const createAccountOptions = {
   newKeysOptions: {
     password: '2233',
     salt: env.EOS_KYLIN_PK_SALT_V0,
@@ -26,12 +26,15 @@ export const CreateAccountOptions = {
   try {
     const ropsten = new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints)
     await ropsten.connect()
-    const createAccount = ropsten.new.CreateAccount(CreateAccountOptions)
+    const createAccount = ropsten.new.CreateAccount(createAccountOptions)
     await createAccount.generateKeysIfNeeded()
     console.log('generatedKeys:', createAccount.generatedKeys)
     console.log('address:', createAccount.accountName)
     const account = await ropsten.new.Account('0x3f0def554abb0107c08237361bba7e2b99906a48')
     console.log('account', account)
+    const { password, salt } = createAccountOptions.newKeysOptions
+    const decryptedPrivateKey = ropsten.decryptWithPassword(createAccount.generatedKeys.privateKey, password, { salt })
+    console.log('decrypted privateKey: ', decryptedPrivateKey)
   } catch (error) {
     console.log(error)
   }
