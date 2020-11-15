@@ -166,13 +166,14 @@ function generateSharedSecretUsingPrivateKey(
 
 /** ECDH encryption using publicKey */
 export function encryptWithPublicKey(
-  publicKey: NodeJS.ArrayBufferView,
+  publicKey: string, // hex string
   plainText: string,
   options?: EciesOptions,
 ): EncryptedAsymmetric {
   const useOptions = composeOptions(options)
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
-    publicKey,
+    publicKeyBuffer,
     useOptions?.curveType,
     useOptions?.keyFormat,
   )
@@ -210,15 +211,16 @@ export function encryptWithPublicKey(
 /** ECDH decryption using privateKey */
 export function decryptWithPrivateKey(
   encrypted: EncryptedAsymmetric,
-  privateKey: NodeJS.ArrayBufferView,
+  privateKey: string, // hex string
   options?: EciesOptions,
 ): string {
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
   const mac = Buffer.from(encryptedObject.mac, 'hex')
+  const privateKeyBuffer = Buffer.from(privateKey, 'hex')
   const { sharedSecret } = generateSharedSecretUsingPrivateKey(
-    privateKey,
+    privateKeyBuffer,
     encryptedObject.ephemPublicKey,
     useOptions?.curveType,
   )
@@ -243,7 +245,7 @@ export function decryptWithPrivateKey(
 
   // outputs failed if d != MAC(Km; c || S2);
   if (!equalConstTime(mac, keyTag)) {
-    throwNewError('decrypt using private key: Bad MAC')
+    throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
   }
 
   // uses symmetric encryption scheme to decrypt the message

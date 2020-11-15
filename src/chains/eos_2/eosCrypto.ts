@@ -57,11 +57,12 @@ export async function encryptWithPublicKey(
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
-  const publicKeyBuffer = eosEcc
+  const publicKeyUncompressed = eosEcc
     .PublicKey(publicKey)
     .toUncompressed()
     .toBuffer()
-  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+    .toString('hex')
+  const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: EOS_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
@@ -71,13 +72,16 @@ export async function encryptWithPublicKey(
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
   encrypted: string,
-  privateKey: string,
+  privateKey: EosPrivateKey,
   options?: Asymmetric.EciesOptions,
 ): Promise<string> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
-  const privateKeyBuffer = eosEcc.PrivateKey(privateKey).toBuffer()
+  const privateKeyHex = eosEcc
+    .PrivateKey(privateKey)
+    .toBuffer()
+    .toString('hex')
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyBuffer, useOptions)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyHex, useOptions)
 }
 
 /** Signs data with private key */

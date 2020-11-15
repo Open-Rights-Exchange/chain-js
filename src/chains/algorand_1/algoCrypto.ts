@@ -62,8 +62,7 @@ export async function encryptWithPublicKey(
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
-  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const response = Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
@@ -80,10 +79,9 @@ export async function decryptWithPrivateKey(
   // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
   // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
   // so we separate it and take the first half as our secretKey for encryption
-  const sk = privateKey.slice(0, privateKey.length / 2)
-  const privateKeyByteArray = hexStringToByteArray(sk)
+  const privateKeyFragment = privateKey.slice(0, privateKey.length / 2)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyByteArray, useOptions)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyFragment, useOptions)
 }
 
 /** Signs a string with a private key
