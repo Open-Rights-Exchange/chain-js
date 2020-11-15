@@ -1,3 +1,7 @@
+export * from '../crypto/eccCryptoModels'
+export * from '../crypto/ed25519CryptoModels'
+export * from '../crypto/asymmetricModels'
+
 /** Brand signifiying a valid value - assigned by using toPublicKey */
 export enum PublicKeyBrand {
   _ = '',

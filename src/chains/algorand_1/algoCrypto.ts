@@ -59,9 +59,9 @@ export function decryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: AlgorandPublicKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
@@ -74,9 +74,9 @@ export async function encryptWithPublicKey(
 export async function decryptWithPrivateKey(
   encrypted: string,
   privateKey: AlgorandPrivateKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
   // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
   // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
   // so we separate it and take the first half as our secretKey for encryption

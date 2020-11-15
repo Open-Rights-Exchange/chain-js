@@ -1,6 +1,5 @@
 // This code from https://github.com/bin-y/standard-ecies
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
-
 import crypto from 'crypto'
 import { decodeBase64 } from 'tweetnacl-util'
 import { isNullOrEmpty } from '../helpers'
@@ -12,51 +11,18 @@ import {
   generateEphemPublicKeyAndSharedSecretEd25519,
   generateSharedSecretEd25519,
 } from './diffieHellman'
+import { Unencrypted, EciesCurveType, ECDHKeyFormat, CipherGCMTypes, EciesOptions } from './asymmetricModels'
+
+export * from './asymmetricModels'
 
 const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 
-type Data =
-  | string
-  | Uint8Array
-  | Uint8ClampedArray
-  | Uint16Array
-  | Uint32Array
-  | Int8Array
-  | Int16Array
-  | Int32Array
-  | Float32Array
-  | Float64Array
-  | DataView
-
-export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
-export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
-export enum CurveType {
-  Secp256k1 = 'secp256k1',
-  Ed25519 = 'ed25519',
-}
-
-// Informational string added to encrypted results - useful when decrypting in determining set of options used
-// e.g. 'chainjs.ethereum.secp256k1.v2'
-export type Scheme = string
-
-export type Options = {
-  hashCypherType?: CipherGCMTypes
-  macCipherType?: CipherGCMTypes // e.g. 'sha256'
-  curveType?: CurveType // e.g. 'secp256k1' or 'ed25519'
-  symmetricCypherType?: CipherGCMTypes
-  keyFormat?: ECDHKeyFormat
-  iv?: Buffer
-  s1?: Buffer
-  s2?: Buffer
-  scheme?: Scheme
-}
-
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
-export const DefaultEciesOptions: Options = {
+export const DefaultEciesOptions: EciesOptions = {
   hashCypherType: 'sha256',
   macCipherType: 'sha256',
-  curveType: CurveType.Secp256k1,
+  curveType: EciesCurveType.Secp256k1,
   symmetricCypherType: 'aes-128-ecb',
   // iv is used in symmetric cipher, set null if the cipher does not need an
   // initialization vector (e.g. a cipher in ecb mode). Set undefined if you
@@ -72,7 +38,7 @@ function symmetricEncrypt(
   cypherName: CipherGCMTypes,
   iv: Buffer,
   key: crypto.CipherKey | crypto.BinaryLike,
-  plaintext: Data,
+  plaintext: Unencrypted,
 ) {
   let cipher
   let useIv = iv
@@ -96,13 +62,13 @@ function symmetricDecrypt(
   iv: Buffer,
   key: crypto.CipherKey | crypto.BinaryLike,
   ciphertext: NodeJS.ArrayBufferView,
-) {
+): Buffer {
   let cipher
   let useIv = iv
   if (iv === undefined) {
     cipher = crypto.createDecipher(cypherName, key as crypto.BinaryLike)
   } else {
-    if (iv == null) {
+    if (iv === null) {
       // to support node 6.x
       useIv = emptyBuffer
     }
@@ -114,7 +80,7 @@ function symmetricDecrypt(
 }
 
 // KDF
-function hashMessage(cypherName: CipherGCMTypes, message: Data) {
+function hashMessage(cypherName: CipherGCMTypes, message: Unencrypted) {
   return crypto
     .createHash(cypherName)
     .update(message)
@@ -122,7 +88,7 @@ function hashMessage(cypherName: CipherGCMTypes, message: Data) {
 }
 
 // MAC
-function macMessage(cypherName: CipherGCMTypes, key: crypto.CipherKey, message: Data) {
+function macMessage(cypherName: CipherGCMTypes, key: crypto.CipherKey, message: Unencrypted) {
   return crypto
     .createHmac(cypherName, key)
     .update(message)
@@ -143,8 +109,8 @@ function equalConstTime(b1: Buffer, b2: Buffer) {
 }
 
 /** Populate missing options with default values */
-function composeOptions(optionsIn: Options) {
-  const options: Options = { ...DefaultEciesOptions, ...(optionsIn || {}) }
+function composeOptions(optionsIn: EciesOptions) {
+  const options: EciesOptions = { ...DefaultEciesOptions, ...(optionsIn || {}) }
   if (options.symmetricCypherType === undefined) {
     options.symmetricCypherType = DefaultEciesOptions.symmetricCypherType
     options.iv = emptyBuffer // use options.iv to determine is the cypher in ecb mode
@@ -156,20 +122,20 @@ function composeOptions(optionsIn: Options) {
 export type EncryptedAsymmetric = {
   iv: string
   ephemPublicKey: string
-  ciphertext: string
+  ciphertext?: string
   mac: string
 }
 
 function generateSharedSecretAndEphemPublicKey(
   publicKey: NodeJS.ArrayBufferView,
-  curveType: CurveType,
+  curveType: EciesCurveType,
   keyFormat?: ECDHKeyFormat,
 ) {
   let result
-  if (curveType === CurveType.Secp256k1) {
+  if (curveType === EciesCurveType.Secp256k1) {
     result = generateEphemPublicKeyAndSharedSecretType1(publicKey, curveType, keyFormat)
   }
-  if (curveType === CurveType.Ed25519) {
+  if (curveType === EciesCurveType.Ed25519) {
     result = generateEphemPublicKeyAndSharedSecretEd25519(publicKey as Uint8Array)
   }
   if (!result) {
@@ -181,15 +147,15 @@ function generateSharedSecretAndEphemPublicKey(
 function generateSharedSecretUsingPrivateKey(
   privateKey: NodeJS.ArrayBufferView,
   ephemPublicKey: string,
-  curveType: CurveType,
+  curveType: EciesCurveType,
 ) {
   let sharedSecret
   let ephemPublicKeyBuffer
-  if (curveType === CurveType.Secp256k1) {
+  if (curveType === EciesCurveType.Secp256k1) {
     ephemPublicKeyBuffer = Buffer.from(ephemPublicKey, 'hex')
     sharedSecret = generateSharedSecretType1(ephemPublicKeyBuffer, privateKey, curveType)
   }
-  if (curveType === CurveType.Ed25519) {
+  if (curveType === EciesCurveType.Ed25519) {
     ephemPublicKeyBuffer = Buffer.from(ephemPublicKey, 'hex')
     const decodedPublicKey = decodeBase64(ephemPublicKeyBuffer.toString())
     sharedSecret = generateSharedSecretEd25519(decodedPublicKey, privateKey as Uint8Array)
@@ -202,7 +168,7 @@ function generateSharedSecretUsingPrivateKey(
 export function encryptWithPublicKey(
   publicKey: NodeJS.ArrayBufferView,
   plainText: string,
-  options?: Options,
+  options?: EciesOptions,
 ): EncryptedAsymmetric {
   const useOptions = composeOptions(options)
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
@@ -245,8 +211,8 @@ export function encryptWithPublicKey(
 export function decryptWithPrivateKey(
   encrypted: EncryptedAsymmetric,
   privateKey: NodeJS.ArrayBufferView,
-  options?: Options,
-) {
+  options?: EciesOptions,
+): string {
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
@@ -282,5 +248,6 @@ export function decryptWithPrivateKey(
 
   // uses symmetric encryption scheme to decrypt the message
   // m = E-1(Ke; c)
-  return symmetricDecrypt(useOptions.symmetricCypherType, useOptions.iv, encryptionKey, cipherText).toString()
+  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, useOptions.iv, encryptionKey, cipherText)
+  return buffer.toString()
 }

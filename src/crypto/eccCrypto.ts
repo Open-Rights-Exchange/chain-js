@@ -1,5 +1,3 @@
-/* eslint-disable new-cap */
-import { SjclCipherEncryptParams } from '@aikon/sjcl'
+export * from './eccCryptoModels'
 
-/** Additional parameters for encryption/decryption - for SHA256 algorithm */
-export type EccEncryptionOptions = SjclCipherEncryptParams
+// No code required here yet

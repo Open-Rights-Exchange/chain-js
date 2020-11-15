@@ -54,9 +54,9 @@ export function encryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EosPublicKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Secp256k1 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
   const publicKeyBuffer = eosEcc
     .PublicKey(publicKey)
     .toUncompressed()
@@ -72,9 +72,9 @@ export async function encryptWithPublicKey(
 export async function decryptWithPrivateKey(
   encrypted: string,
   privateKey: string,
-  options?: Asymmetric.Options,
+  options?: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Secp256k1 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
   const privateKeyBuffer = eosEcc.PrivateKey(privateKey).toBuffer()
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyBuffer, useOptions)
