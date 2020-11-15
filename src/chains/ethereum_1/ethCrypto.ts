@@ -52,7 +52,7 @@ export function encryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EthereumPublicKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
   const encrypted = await EthCrypto.encryptWithPublicKey(publicKey, unencrypted)
   const encryptedToReturn = { ...encrypted, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
