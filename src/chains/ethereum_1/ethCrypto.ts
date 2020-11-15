@@ -5,7 +5,7 @@ import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util
 import EthCrypto from 'eth-crypto'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
-import { toBuffer, notImplemented } from '../../helpers'
+import { toBuffer, notImplemented, removeHexPrefix } from '../../helpers'
 import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { EncryptedDataString } from '../../models'
@@ -54,7 +54,8 @@ export async function encryptWithPublicKey(
   publicKey: EthereumPublicKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const encrypted = await EthCrypto.encryptWithPublicKey(publicKey, unencrypted)
+  const publicKeyWithNoHexPrefix = removeHexPrefix(publicKey)
+  const encrypted = await EthCrypto.encryptWithPublicKey(publicKeyWithNoHexPrefix, unencrypted)
   const encryptedToReturn = { ...encrypted, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
