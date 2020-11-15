@@ -2,10 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Wallet from 'ethereumjs-wallet'
 import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
-import EthCrypto from 'eth-crypto'
+import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
-import { toBuffer, notImplemented, removeHexPrefix } from '../../helpers'
+import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { EncryptedDataString } from '../../models'
@@ -26,6 +26,18 @@ export function isEncryptedDataString(value: string): value is EncryptedDataStri
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
 export function toEncryptedDataString(value: any): EncryptedDataString {
   return CryptoHelpers.toEncryptedDataString(value)
+}
+
+/** get uncompressed public key from EthereumPublicKey */
+export function uncompressPublicKey(publicKey: EthereumPublicKey): string {
+  // if already decompressed an not has trailing 04
+  const cleanedPublicKey = removeHexPrefix(publicKey)
+  const testBuffer = Buffer.from(cleanedPublicKey, 'hex')
+  const prefixedPublicKey = testBuffer.length === 64 ? `04${cleanedPublicKey}` : cleanedPublicKey
+  const uncompressedPublicKey = byteArrayToHexString(
+    secp256k1.publicKeyConvert(hexStringToByteArray(prefixedPublicKey), false),
+  )
+  return uncompressedPublicKey
 }
 
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
@@ -54,18 +66,25 @@ export async function encryptWithPublicKey(
   publicKey: EthereumPublicKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const publicKeyWithNoHexPrefix = removeHexPrefix(publicKey)
-  const encrypted = await EthCrypto.encryptWithPublicKey(publicKeyWithNoHexPrefix, unencrypted)
-  const encryptedToReturn = { ...encrypted, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
+  const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
-export async function decryptWithPrivateKey(encrypted: string, privateKey: EthereumPrivateKey): Promise<string> {
+export async function decryptWithPrivateKey(
+  encrypted: string,
+  privateKey: EthereumPrivateKey,
+  options: Asymmetric.EciesOptions,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const privateKeyHex = removeHexPrefix(privateKey)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return EthCrypto.decryptWithPrivateKey(privateKey, encryptedObject)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyHex, useOptions)
 }
 
 /** Signs data with private key */
