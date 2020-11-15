@@ -11,7 +11,7 @@ import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers
 import { EncryptedDataString } from '../../models'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
-const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'chainjs.ethereum.secp256k1'
+const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ethereum.secp256k1'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter

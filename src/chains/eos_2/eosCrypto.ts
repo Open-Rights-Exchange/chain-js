@@ -13,7 +13,7 @@ import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
 const { Keygen } = require('eosjs-keygen')
 
-const EOS_ASYMMETRIC_SCHEME_NAME = 'chainjs.eos.secp256k1'
+const EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.eos.secp256k1'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
