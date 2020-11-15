@@ -265,9 +265,15 @@ export function hasHexPrefix(value: any): boolean {
 /** Checks that string starts with 0x - appends if not
  *  Also converts hex chars to lowercase for consistency
  */
-export function ensureHexPrefix(key: string) {
-  if (!key) return key
-  return key.startsWith('0x') ? key.toLowerCase() : `${'0x'}${key.toLowerCase()}`
+export function ensureHexPrefix(value: string) {
+  if (!value) return value
+  return value.startsWith('0x') ? value.toLowerCase() : `${'0x'}${value.toLowerCase()}`
+}
+
+/** Checks that string starts with 0x - removes it if it does */
+export function removeHexPrefix(value: string) {
+  if (!value) return value
+  return value.startsWith('0x') ? value.slice(2) : value
 }
 
 /** Converts a decimal string to a hex string
