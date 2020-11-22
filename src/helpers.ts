@@ -376,3 +376,12 @@ export function toBigIntegerString(value: string | number | BN, base: number = 1
   const result = new BigNumber(useValue, base)
   return result.toFixed() // no exponential notation
 }
+
+/** Call the callback once for each item in the array and await for each to finish in turn */
+export async function asyncForEach(array: any[], callback: (item: any, index: number, array: any[]) => Promise<any>) {
+  for (let index = 0; index < array.length; index += 1) {
+    // eslint-disable-next-line @typescript-eslint/semi
+    // eslint-disable-next-line no-await-in-loop
+    await callback(array[index], index, array)
+  }
+}
