@@ -27,3 +27,15 @@ export type EciesOptions = {
   s1?: Buffer
   s2?: Buffer
 }
+
+/** all values are hex strings */
+export type EncryptedAsymmetric = {
+  iv: string
+  publicKey: string
+  ephemPublicKey: string
+  ciphertext?: string
+  mac: string
+}
+
+/** Result of multiple asymmetric encryptions (wrapping) */
+export type WrappedAsymmetricEncrypted = { [order: number]: EncryptedAsymmetric }

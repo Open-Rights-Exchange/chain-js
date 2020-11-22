@@ -11,7 +11,14 @@ import {
   generateEphemPublicKeyAndSharedSecretEd25519,
   generateSharedSecretEd25519,
 } from './diffieHellman'
-import { Unencrypted, EciesCurveType, ECDHKeyFormat, CipherGCMTypes, EciesOptions } from './asymmetricModels'
+import {
+  CipherGCMTypes,
+  ECDHKeyFormat,
+  EciesCurveType,
+  EciesOptions,
+  EncryptedAsymmetric,
+  Unencrypted,
+} from './asymmetricModels'
 
 export * from './asymmetricModels'
 
@@ -24,13 +31,13 @@ export const DefaultEciesOptions: EciesOptions = {
   macCipherType: 'sha256',
   curveType: EciesCurveType.Secp256k1,
   symmetricCypherType: 'aes-128-ecb',
-  // iv is used in symmetric cipher, set null if the cipher does not need an
-  // initialization vector (e.g. a cipher in ecb mode). Set undefined if you
-  // want to use deprecated createCipheriv / createDecipher / EVP_BytesToKey
+  /** iv is used in symmetric cipher
+   * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
+   * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
   iv: emptyBuffer,
   keyFormat: 'uncompressed',
-  s1: emptyBuffer, // optional shared information1
-  s2: emptyBuffer, // optional shared information2
+  s1: emptyBuffer, // optional shared secret 1
+  s2: emptyBuffer, // optional shared secret 2
 }
 
 /** Perform Symetric Encryption */
@@ -118,14 +125,6 @@ function composeOptions(optionsIn: EciesOptions) {
   return options
 }
 
-/** all values are hex strings */
-export type EncryptedAsymmetric = {
-  iv: string
-  ephemPublicKey: string
-  ciphertext?: string
-  mac: string
-}
-
 function generateSharedSecretAndEphemPublicKey(
   publicKey: NodeJS.ArrayBufferView,
   curveType: EciesCurveType,
@@ -198,10 +197,9 @@ export function encryptWithPublicKey(
     Buffer.concat([ciphertext, useOptions.s2], ciphertext.length + useOptions.s2.length),
   )
 
-  const iv = !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null
-
   return {
-    iv,
+    iv: !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null,
+    publicKey,
     ephemPublicKey: Buffer.from(ephemPublicKey).toString('hex'),
     ciphertext: ciphertext.toString('hex'),
     mac: Buffer.from(mac).toString('hex'),
@@ -217,7 +215,7 @@ export function decryptWithPrivateKey(
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
-  const iv = !isNullOrEmpty(useOptions?.iv) ? useOptions.iv : emptyBuffer
+  const iv = !isNullOrEmpty(encryptedObject?.iv) ? Buffer.from(encryptedObject.iv, 'hex') : emptyBuffer
   const mac = Buffer.from(encryptedObject.mac, 'hex')
   const privateKeyBuffer = Buffer.from(privateKey, 'hex')
   const { sharedSecret } = generateSharedSecretUsingPrivateKey(
