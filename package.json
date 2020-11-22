@@ -68,7 +68,7 @@
     "moment": "^2.24.0",
     "node-fetch": "^2.6.1",
     "scrypt-async": "^2.0.1",
-    "secp256k1": "^4.0.0",
+    "secp256k1": "^4.0.2",
     "text-encoding": "^0.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
