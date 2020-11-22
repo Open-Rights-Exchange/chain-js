@@ -1,45 +1,45 @@
-export * from '../crypto/eccCryptoModels'
-export * from '../crypto/ed25519CryptoModels'
-export * from '../crypto/asymmetricModels'
+import * as ModelsCryptoEcc from '../crypto/eccCryptoModels'
+import * as ModelsCryptoEd25519 from '../crypto/ed25519CryptoModels'
+import * as ModelsCryptoAsymmetric from '../crypto/asymmetricModels'
 
 /** Brand signifiying a valid value - assigned by using toPublicKey */
-export enum PublicKeyBrand {
+enum PublicKeyBrand {
   _ = '',
 }
 /** Brand signifiying a valid value - assigned by using toPrivateKey */
-export enum PrivateKeyBrand {
+enum PrivateKeyBrand {
   _ = '',
 }
 /** Brand signifiying a valid value - assigned by using toSignature */
-export enum SignatureBrand {
+enum SignatureBrand {
   _ = '',
 }
 /** Brand signifiying a valid value - assigned by using toEncryptedDataString */
-export enum EncryptedDataStringBrand {
+enum EncryptedDataStringBrand {
   _ = '',
 }
 
 /** Stringified JSON ciphertext (used for private keys) */
-export type EncryptedDataString = string & EncryptedDataStringBrand
+type EncryptedDataString = string & EncryptedDataStringBrand
 /** a public key string - formatted correctly for the chain */
 // TODO: eth public key is of type buffer
-export type PublicKey = (string & PublicKeyBrand) | any
+type PublicKey = (string & PublicKeyBrand) | any
 /** a private key string - formatted correctly for the chain */
-export type PrivateKey = (string & PrivateKeyBrand) | any
+type PrivateKey = (string & PrivateKeyBrand) | any
 /** a signature string - formatted correcly for the chain */
-export type Signature = string & SignatureBrand
+type Signature = string & SignatureBrand
 
-export type KeyPair = {
+type KeyPair = {
   public: PublicKey
   private: PrivateKey
 }
 
-export type KeyPairEncrypted = {
+type KeyPairEncrypted = {
   public: PublicKey
   privateEncrypted: EncryptedDataString
 }
 
-export type AccountKeysStruct = {
+type AccountKeysStruct = {
   publicKeys: {
     active: PublicKey
   }
@@ -48,7 +48,26 @@ export type AccountKeysStruct = {
   }
 }
 
-export enum CryptoCurve {
+enum CryptoCurve {
   Secp256k1 = 'secp256k1',
   Ed25519 = 'ed25519',
+}
+
+// exporting explicity in order to alias Models.. exports
+export {
+  AccountKeysStruct,
+  CryptoCurve,
+  EncryptedDataStringBrand,
+  EncryptedDataString,
+  KeyPair,
+  KeyPairEncrypted,
+  ModelsCryptoEcc,
+  ModelsCryptoEd25519,
+  ModelsCryptoAsymmetric,
+  PrivateKey,
+  PrivateKeyBrand,
+  PublicKey,
+  PublicKeyBrand,
+  Signature,
+  SignatureBrand,
 }
