@@ -265,9 +265,15 @@ export function hasHexPrefix(value: any): boolean {
 /** Checks that string starts with 0x - appends if not
  *  Also converts hex chars to lowercase for consistency
  */
-export function ensureHexPrefix(key: string) {
-  if (!key) return key
-  return key.startsWith('0x') ? key.toLowerCase() : `${'0x'}${key.toLowerCase()}`
+export function ensureHexPrefix(value: string) {
+  if (!value) return value
+  return value.startsWith('0x') ? value.toLowerCase() : `${'0x'}${value.toLowerCase()}`
+}
+
+/** Checks that string starts with 0x - removes it if it does */
+export function removeHexPrefix(value: string) {
+  if (!value) return value
+  return value.startsWith('0x') ? value.slice(2) : value
 }
 
 /** Converts a decimal string to a hex string
@@ -369,4 +375,13 @@ export function toBigIntegerString(value: string | number | BN, base: number = 1
   // Using BigNumber library here because it supports decmials
   const result = new BigNumber(useValue, base)
   return result.toFixed() // no exponential notation
+}
+
+/** Call the callback once for each item in the array and await for each to finish in turn */
+export async function asyncForEach(array: any[], callback: (item: any, index: number, array: any[]) => Promise<any>) {
+  for (let index = 0; index < array.length; index += 1) {
+    // eslint-disable-next-line @typescript-eslint/semi
+    // eslint-disable-next-line no-await-in-loop
+    await callback(array[index], index, array)
+  }
 }

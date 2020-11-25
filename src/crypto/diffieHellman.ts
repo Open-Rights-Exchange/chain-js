@@ -3,11 +3,12 @@ import ed2Curve from 'ed2curve'
 import nacl from 'tweetnacl'
 import { encodeBase64 } from 'tweetnacl-util'
 import { throwNewError } from '../errors'
+import { EciesCurveType } from './asymmetricModels'
 
 /** Generates Ephemeral Keypair and sharedSecret - used for ECC curves and some others supported by Node crypto curveType */
 export function generateEphemPublicKeyAndSharedSecretType1(
   publicKey: NodeJS.ArrayBufferView,
-  curveType: string,
+  curveType: EciesCurveType,
   keyFormat: ECDHKeyFormat,
 ) {
   if ((publicKey as Buffer).length !== 65) {
@@ -23,7 +24,7 @@ export function generateEphemPublicKeyAndSharedSecretType1(
 export function generateSharedSecretType1(
   publicKey: NodeJS.ArrayBufferView,
   secretKey: NodeJS.ArrayBufferView,
-  curveType: string,
+  curveType: EciesCurveType,
 ) {
   if ((publicKey as Buffer).length !== 65) {
     throwNewError('generateSharedSecretType1: publicKey buffer must be 65 bytes')

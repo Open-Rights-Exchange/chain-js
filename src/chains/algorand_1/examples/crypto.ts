@@ -33,19 +33,19 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
-  const encryptedPw = await algoTest.encryptWithPublicKey(
-    'text to encrypt',
+  const payload = 'text to encrypt'
+  const encryptedBlob = await algoTest.encryptWithPublicKey(
+    payload,
     toAlgorandPublicKey('a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45'),
   )
-  console.log(encryptedPw)
-  const decryptedPw = await algoTest.decryptWithPrivateKey(
-    encryptedPw,
+  console.log('encrypted blob:', encryptedBlob)
+  const decryptedPayload = await algoTest.decryptWithPrivateKey(
+    encryptedBlob,
     toAlgorandPrivateKey(
       'b01282f0b33f6cef6d8937066457168fd1d89992ab75de40e13fff845d5016e1a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45',
     ),
   )
-  console.log(decryptedPw)
+  console.log('decrypted payload:', decryptedPayload)
 }
 
 ;(async () => {

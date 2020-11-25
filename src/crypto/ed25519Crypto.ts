@@ -3,31 +3,20 @@ import scrypt from 'scrypt-async'
 import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
 import { EncryptedDataString } from '../models'
 import { isAString, isNullOrEmpty, hexStringToByteArray, byteArrayToHexString } from '../helpers'
+import {
+  Ed25519KeyPair,
+  Ed25519PasswordEncryptionOptions,
+  Ed25519PrivateKey,
+  Ed25519PublicKey,
+  Ed25519Signature,
+} from './ed25519CryptoModels'
+
+export * from './ed25519CryptoModels'
 
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
-export type Ed25519PrivateKey = Uint8Array
-
-export type Ed25519Signature = Uint8Array
-
-export type Ed25519PublicKey = Uint8Array
-
-export type Ed25519KeyPair = {
-  publicKey: Ed25519PublicKey
-  secretKey: Ed25519PrivateKey
-}
-
-export type Ed25519PasswordEncryptionOptions = {
-  salt?: string
-  N?: number
-  r?: number
-  p?: number
-  dkLen?: number
-  encoding?: string
-}
-
 /** Options used by scrypt library to derive a key from password and salt */
-export const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
+const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
   salt: '',
   N: 65536,
   r: 8,

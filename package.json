@@ -1,6 +1,6 @@
 {
   "name": "@open-rights-exchange/chainjs",
-  "version": "0.26.5",
+  "version": "0.26.6",
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "main": "./dist/index.js",
   "scripts": {
@@ -68,7 +68,7 @@
     "moment": "^2.24.0",
     "node-fetch": "^2.6.1",
     "scrypt-async": "^2.0.1",
-    "secp256k1": "^4.0.0",
+    "secp256k1": "^4.0.2",
     "text-encoding": "^0.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",

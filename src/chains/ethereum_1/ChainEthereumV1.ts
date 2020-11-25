@@ -179,6 +179,17 @@ class ChainEthereumV1 implements Chain {
    * The encrypted result can be decrypted with the matching private key */
   encryptWithPublicKey = ethcrypto.encryptWithPublicKey
 
+  /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
+   *  each pass uses a private keys from privateKeys array param
+   *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
+   *  The result is the decrypted string */
+  decryptWithPrivateKeys = ethcrypto.decryptWithPrivateKeys
+
+  /** Use assymmetric encryption with multiple public keys - wrapping with each
+   *  Returns an array of results with the last one including the final cipertext
+   *  Encrypts using publicKeys in the order they appear in the array */
+  encryptWithPublicKeys = ethcrypto.encryptWithPublicKeys
+
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 

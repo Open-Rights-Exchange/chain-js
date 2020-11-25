@@ -2,16 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Wallet from 'ethereumjs-wallet'
 import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
-import EthCrypto from 'eth-crypto'
+import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
-import { toBuffer, notImplemented } from '../../helpers'
+import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { EncryptedDataString } from '../../models'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
-const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'chainjs.ethereum.secp256k1'
+const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ethereum.secp256k1'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -26,6 +27,18 @@ export function isEncryptedDataString(value: string): value is EncryptedDataStri
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
 export function toEncryptedDataString(value: any): EncryptedDataString {
   return CryptoHelpers.toEncryptedDataString(value)
+}
+
+/** get uncompressed public key from EthereumPublicKey */
+export function uncompressPublicKey(publicKey: EthereumPublicKey): string {
+  // if already decompressed an not has trailing 04
+  const cleanedPublicKey = removeHexPrefix(publicKey)
+  const testBuffer = Buffer.from(cleanedPublicKey, 'hex')
+  const prefixedPublicKey = testBuffer.length === 64 ? `04${cleanedPublicKey}` : cleanedPublicKey
+  const uncompressedPublicKey = byteArrayToHexString(
+    secp256k1.publicKeyConvert(hexStringToByteArray(prefixedPublicKey), false),
+  )
+  return uncompressedPublicKey
 }
 
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
@@ -52,19 +65,49 @@ export function encryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EthereumPublicKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const encrypted = await EthCrypto.encryptWithPublicKey(publicKey, unencrypted)
-  const encryptedToReturn = { ...encrypted, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
+  const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
+  const encryptedToReturn = { ...response, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
-export async function decryptWithPrivateKey(encrypted: string, privateKey: EthereumPrivateKey): Promise<string> {
+export async function decryptWithPrivateKey(
+  encrypted: string | Asymmetric.EncryptedAsymmetric,
+  privateKey: EthereumPrivateKey,
+  options: Asymmetric.EciesOptions,
+): Promise<string> {
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const privateKeyHex = removeHexPrefix(privateKey)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return EthCrypto.decryptWithPrivateKey(privateKey, encryptedObject)
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyHex, useOptions)
+}
+
+/** Encrypts a string using multiple assymmetric encryptions with multiple public keys - one after the other
+ *  calls a helper function to perform the iterative wrapping
+ *  the first parameter of the helper is a chain-specific function (in this file) to encryptWithPublicKey
+ *  The result is stringified JSON object including an array of encryption results with the last one including the final cipertext
+ *  Encrypts using publicKeys in the order they appear in the array */
+export async function encryptWithPublicKeys(
+  unencrypted: string,
+  publicKeys: EthereumPublicKey[],
+  options?: Asymmetric.EciesOptions,
+): Promise<string> {
+  return AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options)
+}
+
+/** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
+ *  calls a helper function to perform the iterative unwrapping
+ *  the first parameter of the helper is a chain-specific function (in this file) to decryptWithPrivateKey
+ *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
+ *  The result is the decrypted string */
+export async function decryptWithPrivateKeys(encrypted: string, privateKeys: EthereumPublicKey[]): Promise<string> {
+  return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
 }
 
 /** Signs data with private key */
