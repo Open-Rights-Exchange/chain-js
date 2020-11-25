@@ -1,6 +1,7 @@
 /* eslint-disable new-cap */
 import * as algosdk from 'algosdk'
 import * as Asymmetric from '../../crypto/asymmetric'
+import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EncryptedDataString } from '../../models'
 import {
@@ -16,7 +17,7 @@ import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 
-const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'chainjs.algorand.ed25519'
+const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.algorand.ed25519'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -59,11 +60,10 @@ export function decryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: AlgorandPublicKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
-  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const response = Asymmetric.encryptWithPublicKey(publicKeyBuffer, unencrypted, useOptions)
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
+  const response = Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
   return JSON.stringify(encryptedToReturn)
 }
@@ -72,18 +72,39 @@ export async function encryptWithPublicKey(
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: string,
+  encrypted: string | Asymmetric.EncryptedAsymmetric,
   privateKey: AlgorandPrivateKey,
-  options: Asymmetric.Options,
+  options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.CurveType.Ed25519 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
   // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
   // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
   // so we separate it and take the first half as our secretKey for encryption
-  const sk = privateKey.slice(0, privateKey.length / 2)
-  const privateKeyByteArray = hexStringToByteArray(sk)
-  const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyByteArray, useOptions)
+  const privateKeyFragment = privateKey.slice(0, privateKey.length / 2)
+  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.EncryptedAsymmetric
+  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyFragment, useOptions)
+}
+
+/** Encrypts a string using multiple assymmetric encryptions with multiple public keys - one after the other
+ *  calls a helper function to perform the iterative wrapping
+ *  the first parameter of the helper is a chain-specific function (in this file) to encryptWithPublicKey
+ *  The result is stringified JSON object including an array of encryption results with the last one including the final cipertext
+ *  Encrypts using publicKeys in the order they appear in the array */
+export async function encryptWithPublicKeys(
+  unencrypted: string,
+  publicKeys: AlgorandPublicKey[],
+  options?: Asymmetric.EciesOptions,
+): Promise<string> {
+  return AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options)
+}
+
+/** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
+ *  calls a helper function to perform the iterative unwrapping
+ *  the first parameter of the helper is a chain-specific function (in this file) to decryptWithPrivateKey
+ *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
+ *  The result is the decrypted string */
+export async function decryptWithPrivateKeys(encrypted: string, privateKeys: AlgorandPrivateKey[]): Promise<string> {
+  return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
 }
 
 /** Signs a string with a private key
