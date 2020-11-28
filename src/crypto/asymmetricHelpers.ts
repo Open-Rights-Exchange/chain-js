@@ -1,4 +1,5 @@
-import { asyncForEach } from '../helpers'
+import { throwNewError } from '../errors'
+import { asyncForEach, isNullOrEmpty } from '../helpers'
 import { PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
 import { ensureEncryptedValueIsObject } from './cryptoHelpers'
@@ -12,7 +13,7 @@ export async function encryptWithPublicKeys(
   publicKeys: PublicKey[],
   options?: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const result: Asymmetric.WrappedAsymmetricEncrypted = {}
+  const result: Asymmetric.EncryptedAsymmetric[] = []
   let valueToBeEncrypted = unencrypted
   // loop through the public keys and wrap encrypted text once for each
   await asyncForEach(publicKeys, async (pk: PublicKey, index: number) => {
@@ -22,7 +23,8 @@ export async function encryptWithPublicKeys(
     // for each pass, encrypt the result of the last encryption
     valueToBeEncrypted = lastEncrypted.ciphertext
     if (index !== publicKeys.length - 1) delete lastEncrypted.ciphertext // if not in the last loop, drop the ciphertext from the result
-    result[index] = lastEncrypted
+    lastEncrypted.seq = index
+    result.push(lastEncrypted)
   })
   return JSON.stringify(result)
 }
@@ -41,16 +43,21 @@ export async function decryptWithPrivateKeys(
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
+  if (!Array.isArray(encryptedObject) || isNullOrEmpty(encryptedObject)) {
+    throwNewError('decryptWithPrivateKeys: encryptedItem is not array of type EncryptedAsymmetric')
+  }
   let lastValueDecrypted: string
 
-  // loop through the encrypted blobs in reverse order
-  await asyncForEach(
-    Object.entries(encryptedObject).reverse(),
-    async ([indexString, encryptedItem]: [string, Asymmetric.EncryptedAsymmetric]) => {
-      // eslint-disable-next-line no-param-reassign
-      if (!encryptedItem?.ciphertext) encryptedItem.ciphertext = lastValueDecrypted
-      lastValueDecrypted = await decryptCallback(encryptedItem, privateKeys[parseInt(indexString, 10)], options)
-    },
-  )
+  // sort encrypted blobs - in REVERSE order of seq
+  const blobsReversed = (encryptedObject as Asymmetric.EncryptedAsymmetric[]).sort((a, b) => (a.seq < b.seq ? 1 : -1)) // reverse sort by seq number
+  let index = blobsReversed.length - 1 // start at end
+
+  // loop through blobs in REVERSE order of encryption
+  await asyncForEach(blobsReversed, async encryptedItem => {
+    // eslint-disable-next-line no-param-reassign
+    if (!encryptedItem?.ciphertext) encryptedItem.ciphertext = lastValueDecrypted
+    lastValueDecrypted = await decryptCallback(encryptedItem, privateKeys[index], options)
+    index -= 1 // step in reverse order
+  })
   return lastValueDecrypted
 }
