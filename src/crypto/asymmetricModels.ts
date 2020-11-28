@@ -30,12 +30,11 @@ export type EciesOptions = {
 
 /** all values are hex strings */
 export type EncryptedAsymmetric = {
+  /** 0-based order of encryption - used when 'wrapping' with mulitple asymmetric encryptions in a sequence */
+  seq?: number
   iv: string
   publicKey: string
   ephemPublicKey: string
   ciphertext?: string
   mac: string
 }
-
-/** Result of multiple asymmetric encryptions (wrapping) */
-export type WrappedAsymmetricEncrypted = { [order: number]: EncryptedAsymmetric }
