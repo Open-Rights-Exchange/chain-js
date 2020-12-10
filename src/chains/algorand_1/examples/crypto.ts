@@ -33,6 +33,9 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
+
+  console.log('keyPair:', await algoTest.generateKeyPair())
+
   const payload = 'text to encrypt'
   const encryptedBlob = await algoTest.encryptWithPublicKey(
     payload,
