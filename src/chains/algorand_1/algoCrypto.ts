@@ -148,6 +148,13 @@ export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountS
   }
 }
 
+/** Generates and returns a new public/private key pair */
+export async function generateKeyPair(): Promise<AlgorandKeyPair> {
+  const newAccount = algosdk.generateAccount()
+  const keys = getAlgorandKeyPairFromAccount(newAccount)
+  return keys
+}
+
 /** Gets the algorand keypair (public and private keys) for the privateKey */
 export function getAlgorandKeyPairFromPrivateKey(privateKey: AlgorandPrivateKey): AlgorandKeyPair {
   const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(hexStringToByteArray(privateKey))
@@ -166,9 +173,8 @@ export function getAlgorandPublicKeyFromPrivateKey(privateKey: AlgorandPrivateKe
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
-  const newAccount = algosdk.generateAccount()
-  const keys = getAlgorandKeyPairFromAccount(newAccount)
+export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
+  const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, { salt: options?.salt })
   return encryptedKeys
 }

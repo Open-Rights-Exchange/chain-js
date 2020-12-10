@@ -30,8 +30,8 @@ type PrivateKey = (string & PrivateKeyBrand) | any
 type Signature = string & SignatureBrand
 
 type KeyPair = {
-  public: PublicKey
-  private: PrivateKey
+  publicKey: PublicKey
+  privateKey: PrivateKey
 }
 
 type KeyPairEncrypted = {

@@ -10,6 +10,7 @@ import {
   ChainType,
   CryptoCurve,
   EncryptedDataString,
+  KeyPair,
   PrivateKey,
   PublicKey,
   Signature,
@@ -91,6 +92,8 @@ export interface Chain {
    *  Only the last item has the final, wrapped, ciphertext
    *  The encrypted result can be decrypted with the matching private keys in the inverse order */
   encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<string>
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */

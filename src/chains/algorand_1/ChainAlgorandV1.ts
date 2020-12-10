@@ -5,13 +5,13 @@ import { Chain } from '../../interfaces'
 import {
   AlgorandAddress,
   AlgorandChainActionType,
+  AlgorandChainInfo,
   AlgorandChainSettings,
   AlgorandCreateAccountOptions,
+  AlgorandDecomposeReturn,
   AlgorandSymbol,
   AlgorandTransactionOptions,
   AlgorandTxAction,
-  AlgorandChainInfo,
-  AlgorandDecomposeReturn,
   AlgorandUnit,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
@@ -141,6 +141,9 @@ class ChainAlgorandV1 implements Chain {
    *  Returns an array of results with the last one including the final cipertext
    *  Encrypts using publicKeys in the order they appear in the array */
   encryptWithPublicKeys = algoCrypto.encryptWithPublicKeys
+
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair = algoCrypto.generateKeyPair
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {

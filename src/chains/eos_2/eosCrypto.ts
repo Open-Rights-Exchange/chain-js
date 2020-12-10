@@ -4,8 +4,8 @@ import base58 from 'bs58'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
-import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
-import { KeyPair, KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
+import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey, EosKeyPair } from './models'
+import { KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
@@ -116,6 +116,13 @@ export function sign(
   return eosEcc.sign(data, privateKey, encoding)
 }
 
+/** Generates and returns a new public/private key pair */
+export async function generateKeyPair(): Promise<EosKeyPair> {
+  const privateKey = await eosEcc.randomKey()
+  const publicKey = eosEcc.privateToPublic(privateKey) // EOSkey...
+  return { privateKey, publicKey }
+}
+
 /** Returns public key from signature */
 export function getPublicKeyFromSignature(
   signature: Signature | EosSignature | string | Buffer,
@@ -132,12 +139,6 @@ export function verifySignedWithPublicKey(
   encoding: string = TRANSACTION_ENCODING,
 ): boolean {
   return eosEcc.verify(data, publicKey, encoding)
-}
-
-export async function generateRawKeyPair(): Promise<KeyPair> {
-  const privateKey = await eosEcc.randomKey()
-  const publicKey = eosEcc.privateToPublic(privateKey) // EOSkey...
-  return { private: privateKey, public: publicKey }
 }
 
 /** Replaces unencrypted privateKeys (owner and active) in keys object
@@ -195,10 +196,10 @@ export async function generateKeyPairAndEncryptPrivateKeys(
   encryptionOptions: AesCrypto.AesEncryptionOptions,
 ): Promise<KeyPairEncrypted> {
   if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
-  const keys = await generateRawKeyPair()
+  const keys = await generateKeyPair()
   return {
-    public: toEosPublicKey(keys.public),
-    privateEncrypted: toEncryptedDataString(encryptWithPassword(keys.private, password, encryptionOptions)),
+    public: toEosPublicKey(keys.publicKey),
+    privateEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
   }
 }
 

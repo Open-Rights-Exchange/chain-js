@@ -12,16 +12,16 @@ import { EthereumCreateAccount } from './ethCreateAccount'
 import { EthereumAccount } from './ethAccount'
 import { mapChainError } from './ethErrors'
 import {
+  EthereumAddress,
+  EthereumChainActionType,
   EthereumChainEndpoint,
   EthereumChainSettings,
   EthereumCreateAccountOptions,
-  EthereumPublicKey,
-  EthereumAddress,
   EthereumDate,
-  EthereumTransactionAction,
-  EthereumChainActionType,
   EthereumDecomposeReturn,
+  EthereumPublicKey,
   EthereumSymbol,
+  EthereumTransactionAction,
   EthUnit,
 } from './models'
 import {
@@ -204,6 +204,9 @@ class ChainEthereumV1 implements Chain {
 
   /** Ensures that the value comforms to a well-formed public Key */
   isValidPublicKey = isValidEthereumPublicKey
+
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair = ethcrypto.generateKeyPair
 
   /** Generates new key pairs (public and private)
    *  Encrypts private key with provided password (and optional salt)

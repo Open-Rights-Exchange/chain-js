@@ -36,6 +36,8 @@ async function run() {
   const kylin = new ChainFactory().create(ChainType.EosV2, kylinEndpoints, chainSettings)
   await kylin.connect()
 
+  console.log('keyPair:', await kylin.generateKeyPair())
+
   // crypto
   // encrypt/decrypt with password string
   const encrypted1 = kylin.encryptWithPassword('mystring', '2233', { salt: 'us62bn 2l0df5j' })

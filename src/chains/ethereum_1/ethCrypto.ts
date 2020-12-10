@@ -6,7 +6,7 @@ import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
-import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
+import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { EncryptedDataString } from '../../models'
 import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
@@ -134,29 +134,40 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 
 /** Replaces unencrypted privateKey in keys object
  *  Encrypts key using password and optional salt */
-function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, options: AesCrypto.AesEncryptionOptions) {
-  const { privateKey, publicKey } = keys
-  const encryptedKeys = {
-    privateKey: isEncryptedDataString(privateKey)
-      ? privateKey
-      : encryptWithPassword(privateKey, password, options).toString(),
-    publicKey,
+function encryptAccountPrivateKeysIfNeeded(
+  keys: EthereumKeyPair,
+  password: string,
+  options: AesCrypto.AesEncryptionOptions,
+): EthereumKeyPair {
+  // encrypt if not already encrypted
+  const privateKey = isEncryptedDataString(keys?.privateKey)
+    ? keys?.privateKey
+    : encryptWithPassword(keys?.privateKey, password, options)
+  const encryptedKeys: EthereumKeyPair = {
+    privateKey,
+    publicKey: keys?.publicKey,
   }
   return encryptedKeys
+}
+
+/** Generates and returns a new public/private key pair */
+export async function generateKeyPair(): Promise<EthereumKeyPair> {
+  const wallet = Wallet.generate()
+  const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
+  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
+  const keys: EthereumKeyPair = { privateKey, publicKey }
+  return keys
 }
 
 /** Generates new public and private key pair
  * Encrypts the private key using password and optional salt
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(
+export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
   options: AesCrypto.AesEncryptionOptions,
-): any {
-  const wallet = Wallet.generate()
-  const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
-  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
-  const keys = { privateKey, publicKey }
+): Promise<EthereumKeyPair> {
+  const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }
