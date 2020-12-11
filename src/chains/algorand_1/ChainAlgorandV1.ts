@@ -1,10 +1,11 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
+import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
   AlgorandAddress,
   AlgorandChainActionType,
+  AlgorandChainEndpoint,
   AlgorandChainInfo,
   AlgorandChainSettings,
   AlgorandCreateAccountOptions,
@@ -33,13 +34,13 @@ import {
 } from './helpers'
 
 class ChainAlgorandV1 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: AlgorandChainEndpoint[]
 
   private _settings: AlgorandChainSettings
 
   private _chainState: AlgorandChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
+  constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new AlgorandChainState(endpoints, settings)
