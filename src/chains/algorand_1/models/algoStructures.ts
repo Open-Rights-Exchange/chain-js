@@ -118,6 +118,7 @@ export type AlgorandTxActionStruct = {
   appArgs?: Uint8Array[]
   appAccounts?: AlgorandAddressStruct[]
   appForeignApps?: number[]
+  appForeignAssets?: number[]
   reKeyTo?: AlgorandAddressStruct
   genesisID?: string
   genesisHash?: Buffer
@@ -173,6 +174,7 @@ export type AlgorandTxEncodedForChain = {
     nbs?: number // appGlobalByteSlices
   }
   apfa?: number[] // appForeignApps,
+  apas?: number[] // appForeignAssets,
   apap?: Buffer // Buffer.from(appApprovalProgram)
   apsu?: Buffer // Buffer.from(appClearProgram)
   apaa?: Buffer[] // appArgs.forEach((arg) => { txn.apaa.push(Buffer.from(arg))

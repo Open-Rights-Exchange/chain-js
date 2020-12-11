@@ -146,6 +146,7 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   appArgs?: string[]
   appAccounts?: AlgorandAddress[]
   appForeignApps?: number[]
+  appForeignAssets?: number[]
   reKeyTo?: AlgorandAddress
 }
 
