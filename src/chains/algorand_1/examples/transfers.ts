@@ -8,14 +8,14 @@
 import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
-import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams, AlgorandTransactionOptions } from '../models'
+import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 
 require('dotenv').config()
 
 const { env } = process
 
-const algoApiKey = env.AGLORAND_API_KEY
+const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
 const algoMainnetEndpoints = [{ 
   url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
   options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
