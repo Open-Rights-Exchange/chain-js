@@ -7,6 +7,12 @@ export type EosPrivateKey = string & PrivateKeyBrand
 /** a signature string - formatted correcly for EOS */
 export type EosSignature = string & SignatureBrand
 
+/** key pair - in the format returned from algosdk */
+export type EosKeyPair = {
+  publicKey: EosPublicKey
+  privateKey: EosPrivateKey | EncryptedDataString
+}
+
 /** An object containing public and private keys for owner and active permissions */
 export type EosAccountKeys = {
   publicKeys: {

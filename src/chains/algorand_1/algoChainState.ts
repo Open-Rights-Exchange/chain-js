@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainEndpoint, ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
+import { ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
 import {
   AlgorandAddress,
   AlgoClient,
@@ -33,13 +33,13 @@ import { toAlgo } from './helpers'
 import { mapChainError } from './algoErrors'
 
 export class AlgorandChainState {
-  private _activeEndpoint: ChainEndpoint
+  private _activeEndpoint: AlgorandChainEndpoint
 
   private _chainInfo: AlgorandChainInfo
 
   private _chainSettings: AlgorandChainSettings
 
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: AlgorandChainEndpoint[]
 
   private _isConnected: boolean = false
 
@@ -47,13 +47,13 @@ export class AlgorandChainState {
 
   private _algoClientWithTxHeader: AlgoClient
 
-  constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
+  constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
     this._chainSettings = settings
   }
 
   /** Return chain URL endpoints */
-  public get activeEndpoint(): ChainEndpoint {
+  public get activeEndpoint(): AlgorandChainEndpoint {
     return this._activeEndpoint
   }
 
@@ -75,7 +75,7 @@ export class AlgorandChainState {
   }
 
   /** Return chain URL endpoints */
-  public get endpoints(): ChainEndpoint[] {
+  public get endpoints(): AlgorandChainEndpoint[] {
     return this._endpoints
   }
 

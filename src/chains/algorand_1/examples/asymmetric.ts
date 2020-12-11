@@ -6,7 +6,7 @@ require('dotenv').config()
 
 const { env } = process
 
-const algoApiKey = env.AGLORAND_API_KEY
+const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
 const algoMainnetEndpoints = [
   {
     url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),

@@ -213,10 +213,10 @@ export function arrayToObject(array: IndexedObject[]) {
 }
 
 /** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'X-API-Key': '...'}]  */
-export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, key: string) {
+export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, headerName: string) {
   const { headers } = endpoint?.options
-  const header = headers.find((val: {}) => Object.keys(val).includes(key))
-  return header
+  const matchingHeader = (headers || []).find((val: {}) => val && Object.keys(val || {}).includes(headerName))
+  return matchingHeader
 }
 
 /** returns the number of decimal places in a number (expressed as a string) - supports exponential notiation

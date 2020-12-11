@@ -27,7 +27,7 @@ export function throwNewError(message: string, code?: string, parentError?: Erro
   let messageToReturn = message
   if (parentError) {
     // add parentError to message
-    messageToReturn = `${message} - Parent Error: ${stringifySafe(parentError)}`
+    messageToReturn = `${message} - Parent Error: ${parentError?.message} ${stringifySafe(parentError)}`
   }
   const error = new Error(messageToReturn)
   error.name = code

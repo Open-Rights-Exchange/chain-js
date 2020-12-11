@@ -6,7 +6,7 @@ require('dotenv').config()
 
 const { env } = process
 
-const algoApiKey = env.AGLORAND_API_KEY
+const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
 const algoMainnetEndpoints = [
   {
     url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
@@ -33,6 +33,9 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
+
+  console.log('keyPair:', await algoTest.generateKeyPair())
+
   const payload = 'text to encrypt'
   const encryptedBlob = await algoTest.encryptWithPublicKey(
     payload,
