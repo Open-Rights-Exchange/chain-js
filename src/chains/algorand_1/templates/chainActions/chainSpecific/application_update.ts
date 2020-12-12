@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
-  AlgorandActionApplicationUpdateTxn,
+  AlgorandActionAppUpdate,
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
   AlgorandSuggestedParams,
@@ -13,7 +13,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = (args: AlgorandActionApplicationUpdateTxn, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = (args: AlgorandActionAppUpdate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
@@ -61,7 +61,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
       ...actionParams,
     }
     return {
-      chainActionType: AlgorandChainActionType.ApplicationUpdate,
+      chainActionType: AlgorandChainActionType.AppUpdate,
       args: returnData,
     }
   }

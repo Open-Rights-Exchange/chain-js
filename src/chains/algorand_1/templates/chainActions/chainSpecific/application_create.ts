@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
-  AlgorandActionApplicationCreateTxn,
+  AlgorandActionAppCreate,
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
   AlgorandSuggestedParams,
@@ -12,7 +12,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = (args: AlgorandActionApplicationCreateTxn, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
@@ -68,7 +68,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
       ...actionParams,
     }
     return {
-      chainActionType: AlgorandChainActionType.ApplicationCreate,
+      chainActionType: AlgorandChainActionType.AppCreate,
       args: returnData,
     }
   }

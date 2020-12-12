@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
-  AlgorandActionApplicationMultiPurposeTxn,
+  AlgorandActionAppMultiPurpose,
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
   AlgorandSuggestedParams,
@@ -13,10 +13,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that opts in to use an application */
-export const composeAction = (
-  args: AlgorandActionApplicationMultiPurposeTxn,
-  suggestedParams: AlgorandSuggestedParams,
-) => {
+export const composeAction = (args: AlgorandActionAppMultiPurpose, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
@@ -59,7 +56,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
       ...actionParams,
     }
     return {
-      chainActionType: AlgorandChainActionType.ApplicationNoOp,
+      chainActionType: AlgorandChainActionType.AppNoOp,
       args: returnData,
     }
   }
