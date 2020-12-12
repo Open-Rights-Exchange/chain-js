@@ -63,11 +63,38 @@ export type AlgorandGeneratedAccountStruct = {
 
 /** Algorand's on-chain transaction type codes */
 export enum AlgorandTransactionTypeCode {
+  Application = 'appl',
   AssetConfig = 'acfg',
   AssetFreeze = 'afrz',
   AssetTransfer = 'axfer',
   KeyRegistration = 'keyreg',
   Payment = 'pay',
+}
+
+/*
+ * Enums for application transactions on-transaction-complete behavior
+ */
+export enum AlgorandOnApplicationComplete {
+  // NoOpOC indicates that an application transaction will simply call its
+  // ApprovalProgram
+  NoOp = 0,
+  // OptInOC indicates that an application transaction will allocate some
+  // LocalState for the application in the sender's account
+  OptIn = 1,
+  // CloseOutOC indicates that an application transaction will deallocate
+  // some LocalState for the application from the user's account
+  CloseOut = 2,
+  // ClearStateOC is similar to CloseOutOC, but may never fail. This
+  // allows users to reclaim their minimum balance from an application
+  // they no longer wish to opt in to.
+  Clear = 3,
+  // UpdateApplicationOC indicates that an application transaction will
+  // update the ApprovalProgram and ClearStateProgram for the application
+  Update = 4,
+  // DeleteApplicationOC indicates that an application transaction will
+  // delete the AppParams for the application from the creator's balance
+  // record
+  Delete = 5,
 }
 
 export type AlgorandAddressStruct = {
