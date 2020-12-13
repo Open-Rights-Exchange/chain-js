@@ -23,8 +23,25 @@ export type EciesOptions = {
   curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
   symmetricCypherType?: CipherGCMTypes
   keyFormat?: ECDHKeyFormat
+  /** Optional Initialization Vector (as Hex string) */
+  iv?: string
+  /** Optional message/secret to share in encrypted payload (as Utf8 string) */
+  s1?: string
+  /** Optional message/secret to share in encrypted payload (as Utf8 string) */
+  s2?: string
+}
+
+export type EciesOptionsAsBuffers = {
+  hashCypherType?: CipherGCMTypes
+  macCipherType?: CipherGCMTypes // e.g. 'sha256'
+  curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
+  symmetricCypherType?: CipherGCMTypes
+  keyFormat?: ECDHKeyFormat
+  /** Optional Initialization Vector (as Hex string) */
   iv?: Buffer
+  /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s1?: Buffer
+  /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s2?: Buffer
 }
 

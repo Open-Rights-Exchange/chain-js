@@ -16,6 +16,7 @@ import {
   ECDHKeyFormat,
   EciesCurveType,
   EciesOptions,
+  EciesOptionsAsBuffers,
   EncryptedAsymmetric,
   Unencrypted,
 } from './asymmetricModels'
@@ -26,7 +27,7 @@ export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.f
 
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
-export const DefaultEciesOptions: EciesOptions = {
+export const DefaultEciesOptions: any = {
   hashCypherType: 'sha256',
   macCipherType: 'sha256',
   curveType: EciesCurveType.Secp256k1,
@@ -34,10 +35,7 @@ export const DefaultEciesOptions: EciesOptions = {
   /** iv is used in symmetric cipher
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
-  iv: emptyBuffer,
   keyFormat: 'uncompressed',
-  s1: emptyBuffer, // optional shared secret 1
-  s2: emptyBuffer, // optional shared secret 2
 }
 
 /** Perform Symetric Encryption */
@@ -115,14 +113,39 @@ function equalConstTime(b1: Buffer, b2: Buffer) {
   return result === 0
 }
 
-/** Populate missing options with default values */
-function composeOptions(optionsIn: EciesOptions) {
-  const options: EciesOptions = { ...DefaultEciesOptions, ...(optionsIn || {}) }
-  if (options.symmetricCypherType === undefined) {
-    options.symmetricCypherType = DefaultEciesOptions.symmetricCypherType
-    options.iv = emptyBuffer // use options.iv to determine is the cypher in ecb mode
+/** Populate missing options with default values
+ *  Convert iv, s1, s2 from strings to buffers */
+function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
+  const { s1: s1In, s2: s2In, ...otherOptions } = optionsIn
+  let { iv: ivIn } = optionsIn
+
+  const newOptions: Partial<EciesOptionsAsBuffers> = {
+    ...DefaultEciesOptions,
+    ...(otherOptions || {}),
   }
-  return options
+
+  if (newOptions.symmetricCypherType === undefined) {
+    newOptions.symmetricCypherType = DefaultEciesOptions.symmetricCypherType
+    ivIn = undefined // use options.iv to determine is the cypher in ecb mode
+  }
+
+  // iv should be a Buffer or null or undefined - retain either undefined or null - used in symmetricEncrypt for diff examples
+  let iv: Buffer
+  if (!isNullOrEmpty(ivIn)) {
+    iv = Buffer.from(ivIn, 'hex')
+  } else if (ivIn === undefined) {
+    iv = emptyBuffer
+  } else if (ivIn === null) {
+    iv = null
+  }
+  const s1: Buffer = !isNullOrEmpty(s1In) ? Buffer.from(s1In, 'utf8') : emptyBuffer
+  const s2: Buffer = !isNullOrEmpty(s2In) ? Buffer.from(s2In, 'utf8') : emptyBuffer
+
+  newOptions.iv = iv
+  newOptions.s1 = s1
+  newOptions.s2 = s2
+
+  return newOptions
 }
 
 function generateSharedSecretAndEphemPublicKey(
