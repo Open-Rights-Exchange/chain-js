@@ -3,7 +3,7 @@ import * as algosdk from 'algosdk'
 import * as Asymmetric from '../../crypto/asymmetric'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
-import { EncryptedDataString } from '../../models'
+import { AsymEncryptedDataString, EncryptedDataString } from '../../models'
 import {
   AlgoEncryptionOptions,
   AlgorandGeneratedAccountStruct,
@@ -15,7 +15,7 @@ import {
 } from './models'
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
-import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 
 const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.algorand.ed25519'
 
@@ -61,11 +61,11 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: AlgorandPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<string> {
+): Promise<AsymEncryptedDataString> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
   const response = Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
-  return JSON.stringify(encryptedToReturn)
+  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
 }
 
 /** Decrypts the encrypted value using a private key
@@ -94,8 +94,10 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: AlgorandPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<string> {
-  return AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options)
+): Promise<AsymEncryptedDataString> {
+  return toAsymEncryptedDataString(
+    await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
+  )
 }
 
 /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string

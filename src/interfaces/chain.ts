@@ -3,6 +3,7 @@ import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import {
+  AsymEncryptedDataString,
   ChainDate,
   ChainEntityName,
   ChainInfo,
@@ -81,17 +82,17 @@ export interface Chain {
   decryptWithPrivateKey(encrypted: string, privateKey: PrivateKey, options?: any): Promise<string>
   /** Encrypts a string using a public key into a stringified JSON object
    * The encrypted result can be decrypted with the matching private key */
-  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<string>
+  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<AsymEncryptedDataString>
+  /** Encrypts a string by wrapping it with successive asymmetric encryptions with multiple public key
+   *  Operations are performed in the order that the public keys appear in the array
+   *  Only the last item has the final, wrapped, ciphertext
+   *  The encrypted result can be decrypted with the matching private keys in the inverse order */
+  encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<AsymEncryptedDataString>
   /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
    *  each pass uses a private keys from privateKeys array param
    *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
    *  The result is the decrypted string */
   decryptWithPrivateKeys(encrypted: string, privateKeys: PrivateKey[]): Promise<string>
-  /** Encrypts a string by wrapping it with successive asymmetric encryptions with multiple public key
-   *  Operations are performed in the order that the public keys appear in the array
-   *  Only the last item has the final, wrapped, ciphertext
-   *  The encrypted result can be decrypted with the matching private keys in the inverse order */
-  encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<string>
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
