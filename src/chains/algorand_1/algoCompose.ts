@@ -1,7 +1,14 @@
 import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
-import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
+import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
+import { composeAction as ApplicationCloseOutTemplate } from './templates/chainActions/chainSpecific/application_closeout'
+import { composeAction as AApplicationCreateTemplate } from './templates/chainActions/chainSpecific/application_create'
+import { composeAction as ApplicationDeleteTemplate } from './templates/chainActions/chainSpecific/application_delete'
+import { composeAction as ApplicationNoOpTemplate } from './templates/chainActions/chainSpecific/application_noOp'
+import { composeAction as ApplicationOptInTemplate } from './templates/chainActions/chainSpecific/application_optIn'
+import { composeAction as ApplicationUpdateTemplate } from './templates/chainActions/chainSpecific/application_update'
 import { composeAction as AssetConfigTemplate } from './templates/chainActions/chainSpecific/asset_config'
 import { composeAction as AssetCreateTemplate } from './templates/chainActions/chainSpecific/asset_create'
 import { composeAction as AssetDestroyTemplate } from './templates/chainActions/chainSpecific/asset_destroy'
@@ -30,6 +37,13 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
+  ApplicationClear: ApplicationClearTemplate,
+  ApplicationCloseOut: ApplicationCloseOutTemplate,
+  ApplicationCreate: AApplicationCreateTemplate,
+  ApplicationDelete: ApplicationDeleteTemplate,
+  ApplicationNoOp: ApplicationNoOpTemplate,
+  ApplicationOptIn: ApplicationOptInTemplate,
+  ApplicationUpdate: ApplicationUpdateTemplate,
   KeyRegistration: KeyRegistrationTemplate,
   Payment: PaymentTemplate,
 }

@@ -1,8 +1,8 @@
 import { throwNewError } from '../errors'
 import { asyncForEach, isNullOrEmpty } from '../helpers'
-import { PrivateKey, PublicKey } from '../models'
+import { AsymEncryptedDataString, PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
-import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from './cryptoHelpers'
 
 /** Use assymmetric encryption with multiple public keys - wrapping with each
  *  Returns an array of results with the last one including the final cipertext
@@ -12,7 +12,7 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: PublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<string> {
+): Promise<AsymEncryptedDataString> {
   const result: Asymmetric.EncryptedAsymmetric[] = []
   let valueToBeEncrypted = unencrypted
   // loop through the public keys and wrap encrypted text once for each
@@ -26,7 +26,7 @@ export async function encryptWithPublicKeys(
     lastEncrypted.seq = index
     result.push(lastEncrypted)
   })
-  return JSON.stringify(result)
+  return toAsymEncryptedDataString(JSON.stringify(result))
 }
 
 /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string

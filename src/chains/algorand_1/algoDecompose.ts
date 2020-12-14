@@ -1,6 +1,14 @@
 import { AlgorandTxAction, AlgorandTxActionRaw, AlgorandTxActionSdkEncoded, AlgorandDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
+import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
+import { decomposeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
+import { decomposeAction as ApplicationCloseOutTemplate } from './templates/chainActions/chainSpecific/application_closeout'
+import { decomposeAction as ApplicationCreateTemplate } from './templates/chainActions/chainSpecific/application_create'
+import { decomposeAction as ApplicationDeleteTemplate } from './templates/chainActions/chainSpecific/application_delete'
+import { decomposeAction as ApplicationNoOpTemplate } from './templates/chainActions/chainSpecific/application_noOp'
+import { decomposeAction as ApplicationOptInTemplate } from './templates/chainActions/chainSpecific/application_optIn'
+import { decomposeAction as ApplicationUpdateTemplate } from './templates/chainActions/chainSpecific/application_update'
 import { decomposeAction as AssetConfigTemplate } from './templates/chainActions/chainSpecific/asset_config'
 import { decomposeAction as AssetCreateTemplate } from './templates/chainActions/chainSpecific/asset_create'
 import { decomposeAction as AssetDestroyTemplate } from './templates/chainActions/chainSpecific/asset_destroy'
@@ -12,6 +20,7 @@ import { decomposeAction as PaymentTemplate } from './templates/chainActions/cha
 // map a key name to a function that returns an object
 const DecomposeAction: { [key: string]: (args: any) => any } = {
   // Standard actions
+  TokenTransfer: TokenTransferTemplate,
   ValueTransfer: ValueTransferTemplate,
   // Algorand actions
   AssetConfig: AssetConfigTemplate,
@@ -19,6 +28,13 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
+  ApplicationClear: ApplicationClearTemplate,
+  ApplicationCloseOut: ApplicationCloseOutTemplate,
+  ApplicationCreate: ApplicationCreateTemplate,
+  ApplicationDelete: ApplicationDeleteTemplate,
+  ApplicationNoOp: ApplicationNoOpTemplate,
+  ApplicationOptIn: ApplicationOptInTemplate,
+  ApplicationUpdate: ApplicationUpdateTemplate,
   KeyRegistration: KeyRegistrationTemplate,
   Payment: PaymentTemplate,
 }

@@ -1,5 +1,5 @@
 import sjcl, { BitArray } from '@aikon/sjcl'
-import { EncryptedDataString } from '../models'
+import { AsymEncryptedDataString, EncryptedDataString } from '../models'
 import { isAString, isAnObject } from '../helpers'
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
@@ -15,6 +15,21 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
     return value
   }
   throw new Error(`Not valid encrypted data string:${value}`)
+}
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isAsymEncryptedDataString(value: string): value is AsymEncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+scheme.+$/i) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toAsymEncryptedDataString(value: any): AsymEncryptedDataString {
+  if (isAsymEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid asymmetric encrypted data string:${value}`)
 }
 
 /** Convert a base64 string to a sjcl.BitArray */

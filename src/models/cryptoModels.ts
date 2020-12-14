@@ -20,6 +20,13 @@ enum EncryptedDataStringBrand {
 }
 
 /** Stringified JSON ciphertext (used for private keys) */
+type AsymEncryptedDataString = string & AsymEncryptedDataStringBrand
+/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+enum AsymEncryptedDataStringBrand {
+  _ = '',
+}
+
+/** Stringified JSON ciphertext (used for private keys) */
 type EncryptedDataString = string & EncryptedDataStringBrand
 /** a public key string - formatted correctly for the chain */
 // TODO: eth public key is of type buffer
@@ -56,6 +63,8 @@ enum CryptoCurve {
 // exporting explicity in order to alias Models.. exports
 export {
   AccountKeysStruct,
+  AsymEncryptedDataStringBrand,
+  AsymEncryptedDataString,
   CryptoCurve,
   EncryptedDataStringBrand,
   EncryptedDataString,
