@@ -78,7 +78,7 @@ export async function encryptWithPublicKey(
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: string | Asymmetric.EncryptedAsymmetric,
+  encrypted: AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
   privateKey: EthereumPrivateKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -108,7 +108,10 @@ export async function encryptWithPublicKeys(
  *  the first parameter of the helper is a chain-specific function (in this file) to decryptWithPrivateKey
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
-export async function decryptWithPrivateKeys(encrypted: string, privateKeys: EthereumPublicKey[]): Promise<string> {
+export async function decryptWithPrivateKeys(
+  encrypted: AsymEncryptedDataString,
+  privateKeys: EthereumPublicKey[],
+): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
 }
 
