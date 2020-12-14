@@ -4,12 +4,12 @@ import base58 from 'bs58'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
-import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey } from './models'
-import { KeyPair, KeyPairEncrypted, Signature, EncryptedDataString } from '../../models'
+import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey, EosKeyPair } from './models'
+import { KeyPairEncrypted, Signature, EncryptedDataString, AsymEncryptedDataString } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
-import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const { Keygen } = require('eosjs-keygen')
@@ -56,7 +56,7 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EosPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<string> {
+): Promise<AsymEncryptedDataString> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
   const publicKeyUncompressed = eosEcc
     .PublicKey(publicKey)
@@ -65,14 +65,14 @@ export async function encryptWithPublicKey(
     .toString('hex')
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: EOS_ASYMMETRIC_SCHEME_NAME } }
-  return JSON.stringify(encryptedToReturn)
+  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: string | Asymmetric.EncryptedAsymmetric,
+  encrypted: AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
   privateKey: EosPrivateKey,
   options?: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -94,8 +94,10 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: EosPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<string> {
-  return AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options)
+): Promise<AsymEncryptedDataString> {
+  return toAsymEncryptedDataString(
+    await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
+  )
 }
 
 /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
@@ -103,7 +105,10 @@ export async function encryptWithPublicKeys(
  *  the first parameter of the helper is a chain-specific function (in this file) to decryptWithPrivateKey
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
-export async function decryptWithPrivateKeys(encrypted: string, privateKeys: EosPublicKey[]): Promise<string> {
+export async function decryptWithPrivateKeys(
+  encrypted: AsymEncryptedDataString,
+  privateKeys: EosPublicKey[],
+): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
 }
 
@@ -114,6 +119,13 @@ export function sign(
   encoding: string = TRANSACTION_ENCODING,
 ): EosSignature {
   return eosEcc.sign(data, privateKey, encoding)
+}
+
+/** Generates and returns a new public/private key pair */
+export async function generateKeyPair(): Promise<EosKeyPair> {
+  const privateKey = await eosEcc.randomKey()
+  const publicKey = eosEcc.privateToPublic(privateKey) // EOSkey...
+  return { privateKey, publicKey }
 }
 
 /** Returns public key from signature */
@@ -132,12 +144,6 @@ export function verifySignedWithPublicKey(
   encoding: string = TRANSACTION_ENCODING,
 ): boolean {
   return eosEcc.verify(data, publicKey, encoding)
-}
-
-export async function generateRawKeyPair(): Promise<KeyPair> {
-  const privateKey = await eosEcc.randomKey()
-  const publicKey = eosEcc.privateToPublic(privateKey) // EOSkey...
-  return { private: privateKey, public: publicKey }
 }
 
 /** Replaces unencrypted privateKeys (owner and active) in keys object
@@ -195,10 +201,10 @@ export async function generateKeyPairAndEncryptPrivateKeys(
   encryptionOptions: AesCrypto.AesEncryptionOptions,
 ): Promise<KeyPairEncrypted> {
   if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
-  const keys = await generateRawKeyPair()
+  const keys = await generateKeyPair()
   return {
-    public: toEosPublicKey(keys.public),
-    privateEncrypted: toEncryptedDataString(encryptWithPassword(keys.private, password, encryptionOptions)),
+    public: toEosPublicKey(keys.publicKey),
+    privateEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
   }
 }
 

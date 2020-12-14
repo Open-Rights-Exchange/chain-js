@@ -3,6 +3,7 @@ import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import {
+  AsymEncryptedDataString,
   ChainDate,
   ChainEntityName,
   ChainInfo,
@@ -10,6 +11,7 @@ import {
   ChainType,
   CryptoCurve,
   EncryptedDataString,
+  KeyPair,
   PrivateKey,
   PublicKey,
   Signature,
@@ -77,20 +79,22 @@ export interface Chain {
   /** Decrypts the encrypted value using a private key
    * The encrypted value is a stringified JSON object
    * ... and must have been encrypted with the public key that matches the private ley provided */
-  decryptWithPrivateKey(encrypted: string, privateKey: PrivateKey, options?: any): Promise<string>
+  decryptWithPrivateKey(encrypted: AsymEncryptedDataString, privateKey: PrivateKey, options?: any): Promise<string>
   /** Encrypts a string using a public key into a stringified JSON object
    * The encrypted result can be decrypted with the matching private key */
-  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<string>
-  /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
-   *  each pass uses a private keys from privateKeys array param
-   *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
-   *  The result is the decrypted string */
-  decryptWithPrivateKeys(encrypted: string, privateKeys: PrivateKey[]): Promise<string>
+  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<AsymEncryptedDataString>
   /** Encrypts a string by wrapping it with successive asymmetric encryptions with multiple public key
    *  Operations are performed in the order that the public keys appear in the array
    *  Only the last item has the final, wrapped, ciphertext
    *  The encrypted result can be decrypted with the matching private keys in the inverse order */
-  encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<string>
+  encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<AsymEncryptedDataString>
+  /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
+   *  each pass uses a private keys from privateKeys array param
+   *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
+   *  The result is the decrypted string */
+  decryptWithPrivateKeys(encrypted: AsymEncryptedDataString, privateKeys: PrivateKey[]): Promise<string>
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON ciphertext */

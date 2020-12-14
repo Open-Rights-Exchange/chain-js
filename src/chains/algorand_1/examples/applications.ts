@@ -6,12 +6,15 @@
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TxExecutionPriority, ConfirmType } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
-import { toAlgorandPrivateKey } from '../helpers'
-import { AlgorandTransaction } from '../algoTransaction'
-import { AlgorandChainState } from '../algoChainState'
-import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+import { ChainActionType, ChainEndpoint, TokenTransferParams } from '../../../models'
+import {
+  AlgorandActionAppCreate,
+  AlgorandActionAppMultiPurpose,
+  AlgorandActionAppUpdate,
+  AlgorandChainActionType,
+} from '../models'
+import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 
 require('dotenv').config()
 
@@ -31,20 +34,10 @@ const algoBetanetEndpoints = [{
   options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
 }]
 
-interface valueTransferParams {
-  fromAccountName?: AlgorandAddress
-  toAccountName: AlgorandAddress
-  amount: number
-  symbol?: AlgorandUnit
-  memo: AlgorandValue
-}
-
-const composeValueTransferParams: valueTransferParams = {
-  fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  toAccountName: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-  amount: 1000000,
-  symbol: AlgorandUnit.Microalgo,
-  memo: 'Hello World',
+const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  note: 'test optIn',
+  appIndex: 13258116,
 }
 
 async function run() {
@@ -54,27 +47,20 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
+
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
+
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
-  const suggestedFee = await transaction.getSuggestedFee(TxExecutionPriority.Average)
-  console.log('suggestedFee: ', suggestedFee)
-  await transaction.setDesiredFee(suggestedFee)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
-  try {
-    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.None)))
-    // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
-    // console.log('actual fee: ', await transaction.getActualCost()) // will throw if tx not yet on-chain e.g. If transaction.send uses ConfirmType.None
-  } catch (err) {
-    console.log(err)
-  }
+  console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
 ;(async () => {
@@ -85,3 +71,34 @@ async function run() {
   }
   process.exit()
 })()
+
+// ... For OptIn Test ...
+// transaction actions:  {
+//   name: 'Transaction',
+//   tag: 'TX',
+//   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+//   fee: 1000,
+//   firstRound: 11047681,
+//   lastRound: 11048681,
+//   note: 'test optIn',
+//   genesisID: 'testnet-v1.0',
+//   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+//   appIndex: 13258116,
+//   appOnComplete: 1,
+//   type: 'appl',
+//   flatFee: true
+// }
+// decomposed actions:  [
+//   {
+//     chainActionType: 'AppOptIn',
+//     args: {
+//       name: 'Transaction',
+//       tag: 'TX',
+//       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+//       note: 'test optIn',
+//       appIndex: 13258116,
+//       appOnComplete: 1,
+//       type: 'appl'
+//     }
+//   }
+// ]

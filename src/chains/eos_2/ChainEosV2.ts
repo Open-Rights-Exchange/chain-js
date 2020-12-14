@@ -215,6 +215,9 @@ class ChainEosV2 implements Chain {
     return eoscrypto.getPublicKeyFromSignature(signature, data, encoding) as PublicKey
   }
 
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair = eoscrypto.generateKeyPair
+
   /** Verifies that the value is a valid, stringified JSON ciphertext */
   isValidEncryptedData = eoscrypto.isEncryptedDataString
 

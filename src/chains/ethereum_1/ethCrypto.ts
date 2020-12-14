@@ -6,10 +6,10 @@ import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
 import { AesCrypto, CryptoHelpers } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
-import { EthereumAddress, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
+import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
-import { EncryptedDataString } from '../../models'
-import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import { AsymEncryptedDataString, EncryptedDataString } from '../../models'
+import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ethereum.secp256k1'
@@ -66,19 +66,19 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EthereumPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<string> {
+): Promise<AsymEncryptedDataString> {
   const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   const encryptedToReturn = { ...response, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
-  return JSON.stringify(encryptedToReturn)
+  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: string | Asymmetric.EncryptedAsymmetric,
+  encrypted: AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
   privateKey: EthereumPrivateKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -97,8 +97,10 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: EthereumPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<string> {
-  return AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options)
+): Promise<AsymEncryptedDataString> {
+  return toAsymEncryptedDataString(
+    await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
+  )
 }
 
 /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
@@ -106,7 +108,10 @@ export async function encryptWithPublicKeys(
  *  the first parameter of the helper is a chain-specific function (in this file) to decryptWithPrivateKey
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
-export async function decryptWithPrivateKeys(encrypted: string, privateKeys: EthereumPublicKey[]): Promise<string> {
+export async function decryptWithPrivateKeys(
+  encrypted: AsymEncryptedDataString,
+  privateKeys: EthereumPublicKey[],
+): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
 }
 
@@ -134,29 +139,40 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 
 /** Replaces unencrypted privateKey in keys object
  *  Encrypts key using password and optional salt */
-function encryptAccountPrivateKeysIfNeeded(keys: any, password: string, options: AesCrypto.AesEncryptionOptions) {
-  const { privateKey, publicKey } = keys
-  const encryptedKeys = {
-    privateKey: isEncryptedDataString(privateKey)
-      ? privateKey
-      : encryptWithPassword(privateKey, password, options).toString(),
-    publicKey,
+function encryptAccountPrivateKeysIfNeeded(
+  keys: EthereumKeyPair,
+  password: string,
+  options: AesCrypto.AesEncryptionOptions,
+): EthereumKeyPair {
+  // encrypt if not already encrypted
+  const privateKey = isEncryptedDataString(keys?.privateKey)
+    ? keys?.privateKey
+    : encryptWithPassword(keys?.privateKey, password, options)
+  const encryptedKeys: EthereumKeyPair = {
+    privateKey,
+    publicKey: keys?.publicKey,
   }
   return encryptedKeys
+}
+
+/** Generates and returns a new public/private key pair */
+export async function generateKeyPair(): Promise<EthereumKeyPair> {
+  const wallet = Wallet.generate()
+  const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
+  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
+  const keys: EthereumKeyPair = { privateKey, publicKey }
+  return keys
 }
 
 /** Generates new public and private key pair
  * Encrypts the private key using password and optional salt
  */
-export function generateNewAccountKeysAndEncryptPrivateKeys(
+export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
   options: AesCrypto.AesEncryptionOptions,
-): any {
-  const wallet = Wallet.generate()
-  const privateKey: EthereumPrivateKey = wallet.getPrivateKeyString()
-  const publicKey: EthereumPublicKey = wallet.getPublicKeyString()
-  const keys = { privateKey, publicKey }
+): Promise<EthereumKeyPair> {
+  const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }

@@ -1,17 +1,18 @@
 import { notImplemented } from '../../helpers'
-import { ChainEndpoint, ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
+import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
   AlgorandAddress,
   AlgorandChainActionType,
+  AlgorandChainEndpoint,
+  AlgorandChainInfo,
   AlgorandChainSettings,
   AlgorandCreateAccountOptions,
+  AlgorandDecomposeReturn,
   AlgorandSymbol,
   AlgorandTransactionOptions,
   AlgorandTxAction,
-  AlgorandChainInfo,
-  AlgorandDecomposeReturn,
   AlgorandUnit,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
@@ -33,13 +34,13 @@ import {
 } from './helpers'
 
 class ChainAlgorandV1 implements Chain {
-  private _endpoints: ChainEndpoint[]
+  private _endpoints: AlgorandChainEndpoint[]
 
   private _settings: AlgorandChainSettings
 
   private _chainState: AlgorandChainState
 
-  constructor(endpoints: ChainEndpoint[], settings?: AlgorandChainSettings) {
+  constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
     this._settings = settings
     this._chainState = new AlgorandChainState(endpoints, settings)
@@ -141,6 +142,9 @@ class ChainAlgorandV1 implements Chain {
    *  Returns an array of results with the last one including the final cipertext
    *  Encrypts using publicKeys in the order they appear in the array */
   encryptWithPublicKeys = algoCrypto.encryptWithPublicKeys
+
+  /** Generates and returns a new public/private key pair */
+  generateKeyPair = algoCrypto.generateKeyPair
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {

@@ -29,6 +29,9 @@ async function run() {
   await ropsten.connect()
 
   // crypto
+
+  console.log('keyPair:', await ropsten.generateKeyPair())
+
   // encrypt/decrypt with password string
   const encrypted1 = ropsten.encryptWithPassword('mystring', 'password', { salt: 'mysalt' })
   console.log('encrypted text 1:', encrypted1)
