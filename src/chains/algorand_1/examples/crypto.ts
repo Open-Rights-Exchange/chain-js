@@ -37,17 +37,14 @@ async function run() {
   console.log('keyPair:', await algoTest.generateKeyPair())
 
   const payload = 'text to encrypt'
-  const encryptedBlob = await algoTest.encryptWithPublicKey(
-    payload,
-    toAlgorandPublicKey('a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45'),
-  )
+  const encryptedBlob = await algoTest.encryptWithPassword(payload, 'mypassword', {
+    salt: 'mysalt',
+  })
   console.log('encrypted blob:', encryptedBlob)
-  const decryptedPayload = await algoTest.decryptWithPrivateKey(
-    encryptedBlob,
-    toAlgorandPrivateKey(
-      'b01282f0b33f6cef6d8937066457168fd1d89992ab75de40e13fff845d5016e1a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45',
-    ),
-  )
+
+  const decryptedPayload = await algoTest.decryptWithPassword(encryptedBlob, 'mypassword', {
+    salt: 'mysalt',
+  })
   console.log('decrypted payload:', decryptedPayload)
 }
 
