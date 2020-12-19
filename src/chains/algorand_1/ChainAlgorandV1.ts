@@ -32,6 +32,7 @@ import {
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
+import { CryptoHelpers } from '../../crypto'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
@@ -151,11 +152,17 @@ class ChainAlgorandV1 implements Chain {
     notImplemented()
   }
 
-  /** Verifies that the value is a valid, stringified JSON ciphertext */
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isValidEncryptedData = algoCrypto.isEncryptedDataString
 
-  /** Ensures that the value comforms to a well-formed private Key */
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toEncryptedDataString = algoCrypto.toEncryptedDataString
+
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
+  isAsymEncryptedDataString = CryptoHelpers.isAsymEncryptedDataString
+
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
+  toAsymEncryptedDataString = CryptoHelpers.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {

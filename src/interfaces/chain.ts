@@ -97,8 +97,10 @@ export interface Chain {
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
-  /** Verifies that the value is a valid, stringified JSON ciphertext */
+  /** Verifies that the value is a valid, stringified JSON encryption result */
   isValidEncryptedData(value: string): boolean
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
+  isAsymEncryptedDataString(value: string): boolean
   /** Generate a signature given some data and a private key */
   isValidPrivateKey(value: string | Buffer): boolean
   /** Verifies that the value is a valid public key for the chain */
@@ -124,6 +126,8 @@ export interface Chain {
   toPrivateKey(value: string): PrivateKey
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
   toEncryptedDataString(value: any): EncryptedDataString
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
+  toAsymEncryptedDataString(value: any): AsymEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */
   toSignature(value: string): Signature
 
