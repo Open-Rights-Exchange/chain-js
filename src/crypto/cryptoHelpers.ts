@@ -6,7 +6,7 @@ import { isAString, isAnObject } from '../helpers'
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/i) !== null
+  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
@@ -21,7 +21,7 @@ export function toEncryptedDataString(value: any): EncryptedDataString {
 export function isAsymEncryptedDataString(value: string): value is AsymEncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+scheme.+$/i) !== null
+  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+$/is) !== null
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
