@@ -29,6 +29,9 @@ export type EciesOptions = {
   s1?: string
   /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s2?: string
+  // Informational string added to encrypted results - useful when decrypting in determining set of options used
+  // e.g. 'chainjs.ethereum.secp256k1.v2'
+  scheme?: Scheme
 }
 
 export type EciesOptionsAsBuffers = {
@@ -43,6 +46,9 @@ export type EciesOptionsAsBuffers = {
   s1?: Buffer
   /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s2?: Buffer
+  // Informational string added to encrypted results - useful when decrypting in determining set of options used
+  // e.g. 'chainjs.ethereum.secp256k1.v2'
+  scheme?: Scheme
 }
 
 /** all values are hex strings */
@@ -54,4 +60,5 @@ export type EncryptedAsymmetric = {
   ephemPublicKey: string
   ciphertext?: string
   mac: string
+  scheme?: Scheme
 }

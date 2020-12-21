@@ -14,7 +14,7 @@ import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const { Keygen } = require('eosjs-keygen')
 
-const EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.eos.secp256k1'
+const EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.eos'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -57,15 +57,14 @@ export async function encryptWithPublicKey(
   publicKey: EosPublicKey,
   options: Asymmetric.EciesOptions,
 ): Promise<AsymEncryptedDataString> {
-  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1, scheme: EOS_ASYMMETRIC_SCHEME_NAME }
   const publicKeyUncompressed = eosEcc
     .PublicKey(publicKey)
     .toUncompressed()
     .toBuffer()
     .toString('hex')
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
-  const encryptedToReturn = { ...response, ...{ scheme: EOS_ASYMMETRIC_SCHEME_NAME } }
-  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
+  return toAsymEncryptedDataString(JSON.stringify(response))
 }
 
 /** Decrypts the encrypted value using a private key

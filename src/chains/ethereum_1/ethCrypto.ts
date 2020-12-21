@@ -12,7 +12,7 @@ import { AsymEncryptedDataString, EncryptedDataString } from '../../models'
 import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
-const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ethereum.secp256k1'
+const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -68,10 +68,13 @@ export async function encryptWithPublicKey(
   options: Asymmetric.EciesOptions,
 ): Promise<AsymEncryptedDataString> {
   const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
-  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
+  const useOptions = {
+    ...options,
+    curveType: Asymmetric.EciesCurveType.Secp256k1,
+    scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME,
+  }
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
-  const encryptedToReturn = { ...response, ...{ scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME } }
-  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
+  return toAsymEncryptedDataString(JSON.stringify(response))
 }
 
 /** Decrypts the encrypted value using a private key

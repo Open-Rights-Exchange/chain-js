@@ -25,6 +25,9 @@ export * from './asymmetricModels'
 
 export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 
+const DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1'
+const DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519'
+
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
 export const DefaultEciesOptions: any = {
@@ -116,8 +119,8 @@ function equalConstTime(b1: Buffer, b2: Buffer) {
 /** Populate missing options with default values
  *  Convert iv, s1, s2 from strings to buffers */
 function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
-  const { s1: s1In, s2: s2In, ...otherOptions } = optionsIn
-  let { iv: ivIn } = optionsIn
+  const { s1: s1In, s2: s2In, ...otherOptions } = optionsIn || {}
+  let { iv: ivIn } = optionsIn || {}
 
   const newOptions: Partial<EciesOptionsAsBuffers> = {
     ...DefaultEciesOptions,
@@ -146,6 +149,13 @@ function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
   newOptions.s2 = s2
 
   return newOptions
+}
+
+/** return default asymmetric encryption scheme notation for a given curve */
+function getDefaultScheme(curveType: EciesCurveType): string {
+  if (curveType === EciesCurveType.Ed25519) return DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME
+  if (curveType === EciesCurveType.Secp256k1) return DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME
+  return null
 }
 
 function generateSharedSecretAndEphemPublicKey(
@@ -220,13 +230,18 @@ export function encryptWithPublicKey(
     Buffer.concat([ciphertext, useOptions.s2], ciphertext.length + useOptions.s2.length),
   )
 
-  return {
+  const result: EncryptedAsymmetric = {
     iv: !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null,
     publicKey,
     ephemPublicKey: Buffer.from(ephemPublicKey).toString('hex'),
     ciphertext: ciphertext.toString('hex'),
     mac: Buffer.from(mac).toString('hex'),
   }
+
+  const scheme = useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
+  if (scheme) result.scheme = scheme
+
+  return result
 }
 
 /** ECDH decryption using privateKey */
@@ -270,7 +285,7 @@ export function decryptWithPrivateKey(
     throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
   }
 
-  // uses symmetric encryption scheme to decrypt the message
+  // uses symmetric encryption to decrypt the message
   // m = E-1(Ke; c)
   const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, encryptionKey, cipherText)
   return buffer.toString()

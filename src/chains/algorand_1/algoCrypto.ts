@@ -17,7 +17,7 @@ import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
 import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 
-const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.algorand.ed25519'
+const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519.algorand'
 
 /** Verifies that the value is a valid encrypted string */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -62,10 +62,13 @@ export async function encryptWithPublicKey(
   publicKey: AlgorandPublicKey,
   options: Asymmetric.EciesOptions,
 ): Promise<AsymEncryptedDataString> {
-  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
+  const useOptions = {
+    ...options,
+    curveType: Asymmetric.EciesCurveType.Ed25519,
+    scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME,
+  }
   const response = Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
-  const encryptedToReturn = { ...response, ...{ scheme: ALGORAND_ASYMMETRIC_SCHEME_NAME } }
-  return toAsymEncryptedDataString(JSON.stringify(encryptedToReturn))
+  return toAsymEncryptedDataString(JSON.stringify(response))
 }
 
 /** Decrypts the encrypted value using a private key
