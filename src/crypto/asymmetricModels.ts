@@ -6,6 +6,13 @@ import crypto from 'crypto'
 /** data to encrypt (or result of decrypt) */
 export type Unencrypted = string | NodeJS.ArrayBufferView
 
+/** Stringified JSON ciphertext (used for private keys) */
+export type AsymEncryptedDataString = string & AsymEncryptedDataStringBrand
+/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+export enum AsymEncryptedDataStringBrand {
+  _ = '',
+}
+
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
 export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
 export enum EciesCurveType {

@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl'
 import scrypt from 'scrypt-async'
 import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
-import { EncryptedDataString } from '../models'
+import { ModelsCryptoSymmetric } from '../models'
 import { isAString, isNullOrEmpty, hexStringToByteArray, byteArrayToHexString } from '../helpers'
 import {
   Ed25519KeyPair,
@@ -26,14 +26,14 @@ const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
 }
 
 /** Verifies that the value is a valid, stringified encrypted object */
-export function isEncryptedDataString(value: string): value is EncryptedDataString {
+export function isEncryptedDataString(value: string): value is ModelsCryptoSymmetric.EncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
   return value !== null
 }
 
 /** Ensures that the value confirms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): EncryptedDataString {
+export function toEncryptedDataString(value: any): ModelsCryptoSymmetric.EncryptedDataString {
   if (isEncryptedDataString(value)) {
     return value
   }
@@ -80,7 +80,7 @@ export function encrypt(unencrypted: string, passwordKey: string): string {
 /** Decrypts the encrypted value using a password
  * Password is a base64 encoded string
  */
-export function decrypt(encrypted: EncryptedDataString | any, passwordKey: string): string {
+export function decrypt(encrypted: ModelsCryptoSymmetric.EncryptedDataString | any, passwordKey: string): string {
   const keyUint8Array = hexStringToByteArray(passwordKey)
   const messageWithNonceAsUint8Array = decodeBase64(encrypted)
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength)

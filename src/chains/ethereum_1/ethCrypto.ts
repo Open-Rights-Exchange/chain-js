@@ -4,12 +4,11 @@ import Wallet from 'ethereumjs-wallet'
 import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
 import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
-import { Symmetric, CryptoHelpers } from '../../crypto'
+import { Symmetric } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
-import { AsymEncryptedDataString, EncryptedDataString, ModelsCryptoSymmetric } from '../../models'
-import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
+import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
@@ -20,13 +19,13 @@ export const defaultIter = Symmetric.defaultIter
 export const defaultMode = Symmetric.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is EncryptedDataString {
-  return CryptoHelpers.isEncryptedDataString(value)
+export function isEncryptedDataString(value: string): value is Symmetric.EncryptedDataString {
+  return Symmetric.isEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): EncryptedDataString {
-  return CryptoHelpers.toEncryptedDataString(value)
+export function toEncryptedDataString(value: any): Symmetric.EncryptedDataString {
+  return Symmetric.toEncryptedDataString(value)
 }
 
 /** get uncompressed public key from EthereumPublicKey */
@@ -44,9 +43,9 @@ export function uncompressPublicKey(publicKey: EthereumPublicKey): string {
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
 export function decryptWithPassword(
-  encrypted: EncryptedDataString | any,
+  encrypted: Symmetric.EncryptedDataString | any,
   password: string,
-  options: ModelsCryptoSymmetric.EncryptionOptions,
+  options: Symmetric.EncryptionOptions,
 ): string {
   return Symmetric.decryptWithPassword(encrypted, password, options)
 }
@@ -55,8 +54,8 @@ export function decryptWithPassword(
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options: ModelsCryptoSymmetric.EncryptionOptions,
-): EncryptedDataString {
+  options: Symmetric.EncryptionOptions,
+): Symmetric.EncryptedDataString {
   return Symmetric.encryptWithPassword(unencrypted, password, options)
 }
 
@@ -66,7 +65,7 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EthereumPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymEncryptedDataString> {
   const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
   const useOptions = {
     ...options,
@@ -74,14 +73,14 @@ export async function encryptWithPublicKey(
     scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME,
   }
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
-  return toAsymEncryptedDataString(JSON.stringify(response))
+  return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
+  encrypted: Asymmetric.AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
   privateKey: EthereumPrivateKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -100,8 +99,8 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: EthereumPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<AsymEncryptedDataString> {
-  return toAsymEncryptedDataString(
+): Promise<Asymmetric.AsymEncryptedDataString> {
+  return Asymmetric.toAsymEncryptedDataString(
     await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
   )
 }
@@ -112,7 +111,7 @@ export async function encryptWithPublicKeys(
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
-  encrypted: AsymEncryptedDataString,
+  encrypted: Asymmetric.AsymEncryptedDataString,
   privateKeys: EthereumPublicKey[],
 ): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
@@ -145,7 +144,7 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 function encryptAccountPrivateKeysIfNeeded(
   keys: EthereumKeyPair,
   password: string,
-  options: ModelsCryptoSymmetric.EncryptionOptions,
+  options: Symmetric.EncryptionOptions,
 ): EthereumKeyPair {
   // encrypt if not already encrypted
   const privateKey = isEncryptedDataString(keys?.privateKey)
@@ -173,7 +172,7 @@ export async function generateKeyPair(): Promise<EthereumKeyPair> {
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
-  options: ModelsCryptoSymmetric.EncryptionOptions,
+  options: Symmetric.EncryptionOptions,
 ): Promise<EthereumKeyPair> {
   const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)

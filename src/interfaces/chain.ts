@@ -2,15 +2,14 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
+import { Asymmetric, Symmetric } from '../crypto'
 import {
-  AsymEncryptedDataString,
   ChainDate,
   ChainEntityName,
   ChainInfo,
   ChainSymbol,
   ChainType,
   CryptoCurve,
-  EncryptedDataString,
   KeyPair,
   PrivateKey,
   PublicKey,
@@ -72,27 +71,39 @@ export interface Chain {
   cryptoCurve: CryptoCurve
   /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decryptWithPassword(encrypted: EncryptedDataString, password: string, options?: any): string
+  decryptWithPassword(encrypted: Symmetric.EncryptedDataString, password: string, options?: any): string
   /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encryptWithPassword(unencrypted: string, password: string, options?: any): EncryptedDataString
+  encryptWithPassword(unencrypted: string, password: string, options?: any): Symmetric.EncryptedDataString
   /** Decrypts the encrypted value using a private key
    * The encrypted value is a stringified JSON object
    * ... and must have been encrypted with the public key that matches the private ley provided */
-  decryptWithPrivateKey(encrypted: AsymEncryptedDataString, privateKey: PrivateKey, options?: any): Promise<string>
+  decryptWithPrivateKey(
+    encrypted: Asymmetric.AsymEncryptedDataString,
+    privateKey: PrivateKey,
+    options?: any,
+  ): Promise<string>
   /** Encrypts a string using a public key into a stringified JSON object
    * The encrypted result can be decrypted with the matching private key */
-  encryptWithPublicKey(unencrypted: string, publicKey: PublicKey, options?: any): Promise<AsymEncryptedDataString>
+  encryptWithPublicKey(
+    unencrypted: string,
+    publicKey: PublicKey,
+    options?: any,
+  ): Promise<Asymmetric.AsymEncryptedDataString>
   /** Encrypts a string by wrapping it with successive asymmetric encryptions with multiple public key
    *  Operations are performed in the order that the public keys appear in the array
    *  Only the last item has the final, wrapped, ciphertext
    *  The encrypted result can be decrypted with the matching private keys in the inverse order */
-  encryptWithPublicKeys(unencrypted: string, publicKeys: PublicKey[], options?: any): Promise<AsymEncryptedDataString>
+  encryptWithPublicKeys(
+    unencrypted: string,
+    publicKeys: PublicKey[],
+    options?: any,
+  ): Promise<Asymmetric.AsymEncryptedDataString>
   /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
    *  each pass uses a private keys from privateKeys array param
    *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
    *  The result is the decrypted string */
-  decryptWithPrivateKeys(encrypted: AsymEncryptedDataString, privateKeys: PrivateKey[]): Promise<string>
+  decryptWithPrivateKeys(encrypted: Asymmetric.AsymEncryptedDataString, privateKeys: PrivateKey[]): Promise<string>
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
@@ -125,9 +136,9 @@ export interface Chain {
   /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
-  toEncryptedDataString(value: any): EncryptedDataString
+  toEncryptedDataString(value: any): Symmetric.EncryptedDataString
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toAsymEncryptedDataString(value: any): AsymEncryptedDataString
+  toAsymEncryptedDataString(value: any): Asymmetric.AsymEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */
   toSignature(value: string): Signature
 

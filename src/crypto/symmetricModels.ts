@@ -1,3 +1,11 @@
+/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+export enum EncryptedDataStringBrand {
+  _ = '',
+}
+
+/** Stringified JSON ciphertext (used for private keys) */
+export type EncryptedDataString = string & EncryptedDataStringBrand
+
 /** Encryption modes supported by crypto library (default is gcm) */
 export enum EncryptionMode {
   Gcm = 'gcm',

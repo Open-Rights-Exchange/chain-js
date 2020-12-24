@@ -46,7 +46,7 @@ import {
   EosChainEndpoint,
   EosSymbol,
 } from './models'
-import { CryptoHelpers } from '../../crypto'
+import { Asymmetric } from '../../crypto'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -226,10 +226,10 @@ class ChainEosV2 implements Chain {
   toEncryptedDataString = eoscrypto.toEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isAsymEncryptedDataString = CryptoHelpers.isAsymEncryptedDataString
+  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toAsymEncryptedDataString = CryptoHelpers.toAsymEncryptedDataString
+  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {

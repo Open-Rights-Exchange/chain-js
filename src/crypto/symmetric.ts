@@ -1,10 +1,27 @@
 import sjcl, { SjclCipherEncryptParams } from '@aikon/sjcl'
-import { EncryptionMode, EncryptionOptions } from './symmetricModels'
-import { EncryptedDataString } from '../models'
-import { ensureEncryptedValueIsObject, toEncryptedDataString } from './cryptoHelpers'
+import { EncryptedDataString, EncryptionMode, EncryptionOptions } from './symmetricModels'
+import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { isAString } from '../helpers'
+
+export * from './symmetricModels'
 
 export const defaultIter = 1000000
 export const defaultMode = EncryptionMode.Gcm
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toEncryptedDataString(value: any): EncryptedDataString {
+  if (isEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid encrypted data string:${value}`)
+}
 
 // decrypt and encrypt
 

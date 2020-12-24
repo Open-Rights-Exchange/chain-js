@@ -37,7 +37,7 @@ import {
   toEthereumSymbol,
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
-import { CryptoHelpers } from '../../crypto'
+import { Asymmetric } from '../../crypto'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -201,10 +201,10 @@ class ChainEthereumV1 implements Chain {
   toEncryptedDataString = ethcrypto.toEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isAsymEncryptedDataString = CryptoHelpers.isAsymEncryptedDataString
+  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toAsymEncryptedDataString = CryptoHelpers.toAsymEncryptedDataString
+  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed Eos private Key */
   isValidPrivateKey = isValidEthereumPrivateKey

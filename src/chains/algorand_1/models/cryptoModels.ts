@@ -1,10 +1,10 @@
 import { Ed25519PasswordEncryptionOptions } from '../../../crypto/ed25519Crypto'
 import {
+  ChainEntityNameBrand,
+  ModelsCryptoSymmetric,
   PrivateKeyBrand,
   PublicKeyBrand,
   SignatureBrand,
-  EncryptedDataString,
-  ChainEntityNameBrand,
 } from '../../../models'
 
 /** an address string - formatted correctly for algorand */
@@ -14,7 +14,7 @@ export type AlgorandEntityName = string & ChainEntityNameBrand
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
-  privateKey: AlgorandPrivateKey | EncryptedDataString
+  privateKey: AlgorandPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
 }
 
 /** a private key string - formatted correctly for algorand */
