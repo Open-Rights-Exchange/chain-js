@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ConfirmType } from '../../../models'
-import { Chain, ChainFactory, ChainType } from '../../../index'
+import { Chain, ChainFactory, ChainType, CreateAccount, Crypto, Models } from '../../../index'
+import { Symmetric } from '../../../crypto'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -138,7 +139,7 @@ export const createAccountOptions_virtualNested = {
 
 export const createAccountOptions_EosNative = {
   accountNamePrefix: 'ore',
-  accountName: 'ore1qcfacksc',
+  // accountName: 'ore1qcfacksc',
   creatorAccountName: 'proppropprop',
   creatorPermission: 'active',
   newKeysOptions: {
@@ -234,6 +235,23 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
     action: toEosEntityName('define'),
   },
 ]
+
+const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) => {
+  console.log(createAccount)
+  const { password, salt } = createAccount.options.newKeysOptions
+  console.log('salt, password:', salt, password)
+  const { owner, active } = createAccount.generatedKeys.accountKeys.privateKeys
+  console.log(
+    'createAccount.generatedKeys.accountKeys.privateKeys:',
+    createAccount.generatedKeys.accountKeys.privateKeys,
+  )
+  // const decryptedOwnerPrivateKey = await chain.decryptWithPassword(toEncryptedDataString(owner), password, { salt })
+  const decryptedActivePrivateKey = await chain.decryptWithPassword(Symmetric.toEncryptedDataString(active), password, {
+    salt,
+  })
+  // console.log('decrypted owner privateKey: ', decryptedOwnerPrivateKey)
+  console.log('decrypted active privateKey: ', decryptedActivePrivateKey)
+}
 ;(async () => {
   //
   // Example funcions - uncomment and run
@@ -269,15 +287,15 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
 
   // -----> CreateAccount - create native kylin account
-  // const createAccount = kylin.new.CreateAccount(createAccountOptions_EosNative)
-  // createAccount.generateKeysIfNeeded()
-  // if (createAccount.supportsTransactionToCreateAccount) {
-  //   await createAccount.composeTransaction(EosNewAccountType.Native)
-  //   await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-  //   const txResponse = await createAccount.transaction.send()
-  //   console.log('createAccount response: ', JSON.stringify(txResponse))
-  // }
-  // console.log(createAccount.generatedKeys)
+  const createAccount = kylin.new.CreateAccount(createAccountOptions_EosNative)
+  createAccount.generateKeysIfNeeded()
+  if (createAccount.supportsTransactionToCreateAccount) {
+    await createAccount.composeTransaction(EosNewAccountType.Native)
+    await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
+    // const txResponse = await createAccount.transaction.send()
+    // console.log('createAccount response: ', JSON.stringify(txResponse))
+  }
+  await logOutGeneratedKeys(kylin, createAccount)
 
   // -----> CreateAccount - create native ore-staging account
   // const createAccount = oreStaging.new.CreateAccount(createAccountOptions_OreNative)

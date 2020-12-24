@@ -2,7 +2,7 @@
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 import crypto from 'crypto'
 import { decodeBase64 } from 'tweetnacl-util'
-import { isNullOrEmpty } from '../helpers'
+import { isAString, isNullOrEmpty } from '../helpers'
 import { throwNewError } from '../errors'
 import { ensureEncryptedValueIsObject } from './cryptoHelpers'
 import {
@@ -12,6 +12,7 @@ import {
   generateSharedSecretEd25519,
 } from './diffieHellman'
 import {
+  AsymEncryptedDataString,
   CipherGCMTypes,
   ECDHKeyFormat,
   EciesCurveType,
@@ -39,6 +40,21 @@ export const DefaultEciesOptions: any = {
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
   keyFormat: 'uncompressed',
+}
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isAsymEncryptedDataString(value: string): value is AsymEncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+$/is) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toAsymEncryptedDataString(value: any): AsymEncryptedDataString {
+  if (isAsymEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid asymmetric encrypted data string:${value}`)
 }
 
 /** Perform Symetric Encryption */

@@ -1,36 +1,6 @@
 import sjcl, { BitArray } from '@aikon/sjcl'
-import { AsymEncryptedDataString, EncryptedDataString } from '../models'
+import { ModelsCryptoSymmetric } from '../models'
 import { isAString, isAnObject } from '../helpers'
-
-/** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is EncryptedDataString {
-  if (!isAString(value)) return false
-  // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
-}
-
-/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): EncryptedDataString {
-  if (isEncryptedDataString(value)) {
-    return value
-  }
-  throw new Error(`Not valid encrypted data string:${value}`)
-}
-
-/** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isAsymEncryptedDataString(value: string): value is AsymEncryptedDataString {
-  if (!isAString(value)) return false
-  // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+$/is) !== null
-}
-
-/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toAsymEncryptedDataString(value: any): AsymEncryptedDataString {
-  if (isAsymEncryptedDataString(value)) {
-    return value
-  }
-  throw new Error(`Not valid asymmetric encrypted data string:${value}`)
-}
 
 /** Convert a base64 string to a sjcl.BitArray */
 export function base64StringToBitArray(value: string | BitArray): sjcl.BitArray {
@@ -82,7 +52,7 @@ export function bitArrayToUtf8String(value: sjcl.BitArray | string): string {
 
 /** If the encrypted param isn't already a JSON object, parse the stringfied value into one
  *  Returns a JSON object */
-export function ensureEncryptedValueIsObject(encrypted: EncryptedDataString | any) {
+export function ensureEncryptedValueIsObject(encrypted: ModelsCryptoSymmetric.EncryptedDataString | any) {
   if (isAnObject(encrypted)) {
     return encrypted
   }

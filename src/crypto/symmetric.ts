@@ -1,25 +1,27 @@
 import sjcl, { SjclCipherEncryptParams } from '@aikon/sjcl'
-import { EncryptedDataString } from '../models'
-import { ensureEncryptedValueIsObject, toEncryptedDataString } from './cryptoHelpers'
+import { EncryptedDataString, EncryptionMode, EncryptionOptions } from './symmetricModels'
+import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { isAString } from '../helpers'
 
-/** Encryption modes supported by crypto library (default is gcm) */
-export enum EncryptionMode {
-  Gcm = 'gcm',
-  Ccm = 'ccm',
-  Ocb2 = 'ocb2',
-  Cbc = 'cbc',
-}
-
-/** Additional parameters for encryption/decryption - for SHA256 algorithm */
-export type AesEncryptionOptions = {
-  salt?: string
-  iter?: number
-  mode?: EncryptionMode
-  iv?: string
-}
+export * from './symmetricModels'
 
 export const defaultIter = 1000000
 export const defaultMode = EncryptionMode.Gcm
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isEncryptedDataString(value: string): value is EncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toEncryptedDataString(value: any): EncryptedDataString {
+  if (isEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid encrypted data string:${value}`)
+}
 
 // decrypt and encrypt
 
@@ -43,7 +45,7 @@ export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey:
 export function decryptWithPassword(
   encrypted: EncryptedDataString | any,
   password: string,
-  options?: AesEncryptionOptions,
+  options?: EncryptionOptions,
 ): string {
   const { salt } = options || {}
   const parsedObject = ensureEncryptedValueIsObject(encrypted)
@@ -69,7 +71,7 @@ export function encryptWithKey(
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options?: AesEncryptionOptions,
+  options?: EncryptionOptions,
 ): EncryptedDataString {
   const { iter = defaultIter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherEncryptParams

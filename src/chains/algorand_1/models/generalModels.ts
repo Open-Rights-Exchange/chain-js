@@ -1,4 +1,4 @@
-import { EncryptedDataString, ChainSymbolBrand } from '../../../models'
+import { ChainSymbolBrand, ModelsCryptoSymmetric } from '../../../models'
 import { AlgorandAddress, AlgorandPublicKey, AlgorandPrivateKey } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
@@ -58,7 +58,7 @@ export type AlgorandMultiSigAccount = AlgorandAddress
 /**  Algorand generated keys  after an account is created */
 export type AlgorandGeneratedKeys = {
   publicKey: AlgorandPublicKey
-  privateKey?: AlgorandPrivateKey | EncryptedDataString
+  privateKey?: AlgorandPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
 }
 
 /**  Algorand new keys options including password and optional multisig parameters */
