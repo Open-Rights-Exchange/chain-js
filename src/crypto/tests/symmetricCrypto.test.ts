@@ -1,5 +1,6 @@
 /* eslint-disable quotes */
-import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions, decryptWithPassword, encryptWithPassword } from '../aesCrypto'
+import { deriveKey, decryptWithKey, decryptWithPassword, encryptWithPassword } from '../symmetric'
+import { EncryptionOptions } from '../symmetricModels'
 import { timed } from './utils'
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
@@ -9,7 +10,7 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
   let walletPassword: string
   let encrypted: string
   let encrypted2: string
-  let encryptionOptions: AesEncryptionOptions
+  let encryptionOptions: EncryptionOptions
 
   beforeAll(() => {
     iter = 1000000

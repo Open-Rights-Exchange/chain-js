@@ -1,22 +1,7 @@
 import sjcl, { SjclCipherEncryptParams } from '@aikon/sjcl'
+import { EncryptionMode, EncryptionOptions } from './symmetricModels'
 import { EncryptedDataString } from '../models'
 import { ensureEncryptedValueIsObject, toEncryptedDataString } from './cryptoHelpers'
-
-/** Encryption modes supported by crypto library (default is gcm) */
-export enum EncryptionMode {
-  Gcm = 'gcm',
-  Ccm = 'ccm',
-  Ocb2 = 'ocb2',
-  Cbc = 'cbc',
-}
-
-/** Additional parameters for encryption/decryption - for SHA256 algorithm */
-export type AesEncryptionOptions = {
-  salt?: string
-  iter?: number
-  mode?: EncryptionMode
-  iv?: string
-}
 
 export const defaultIter = 1000000
 export const defaultMode = EncryptionMode.Gcm
@@ -43,7 +28,7 @@ export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey:
 export function decryptWithPassword(
   encrypted: EncryptedDataString | any,
   password: string,
-  options?: AesEncryptionOptions,
+  options?: EncryptionOptions,
 ): string {
   const { salt } = options || {}
   const parsedObject = ensureEncryptedValueIsObject(encrypted)
@@ -69,7 +54,7 @@ export function encryptWithKey(
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options?: AesEncryptionOptions,
+  options?: EncryptionOptions,
 ): EncryptedDataString {
   const { iter = defaultIter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherEncryptParams

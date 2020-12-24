@@ -1,6 +1,7 @@
 import * as ModelsCryptoEcc from '../crypto/eccCryptoModels'
 import * as ModelsCryptoEd25519 from '../crypto/ed25519CryptoModels'
 import * as ModelsCryptoAsymmetric from '../crypto/asymmetricModels'
+import * as ModelsCryptoSymmetric from '../crypto/symmetricModels'
 
 /** Brand signifiying a valid value - assigned by using toPublicKey */
 enum PublicKeyBrand {
@@ -70,9 +71,10 @@ export {
   EncryptedDataString,
   KeyPair,
   KeyPairEncrypted,
+  ModelsCryptoAsymmetric,
   ModelsCryptoEcc,
   ModelsCryptoEd25519,
-  ModelsCryptoAsymmetric,
+  ModelsCryptoSymmetric,
   PrivateKey,
   PrivateKeyBrand,
   PublicKey,

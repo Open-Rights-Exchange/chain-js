@@ -5,10 +5,10 @@ import {
   ChainEntityNameBrand,
   ChainSymbolBrand,
   EncryptedDataString,
+  ModelsCryptoSymmetric,
   TxExecutionPriority,
 } from '../../../models'
 import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
-import { AesCrypto } from '../../../crypto'
 
 /** Category of chain functions - useful in error mapping */
 export enum ChainFunctionCategory {
@@ -93,7 +93,7 @@ export type EthereumGeneratedKeys = {
 
 export type EthereumNewKeysOptions = {
   password: string
-  encryptionOptions?: AesCrypto.AesEncryptionOptions
+  encryptionOptions?: ModelsCryptoSymmetric.EncryptionOptions
 }
 
 export type EthereumString = {

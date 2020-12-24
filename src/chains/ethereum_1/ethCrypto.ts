@@ -4,20 +4,20 @@ import Wallet from 'ethereumjs-wallet'
 import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
 import secp256k1 from 'secp256k1'
 import * as Asymmetric from '../../crypto/asymmetric'
-import { AesCrypto, CryptoHelpers } from '../../crypto'
+import { Symmetric, CryptoHelpers } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
-import { AsymEncryptedDataString, EncryptedDataString } from '../../models'
+import { AsymEncryptedDataString, EncryptedDataString, ModelsCryptoSymmetric } from '../../models'
 import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from '../../crypto/cryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
 
 // eslint-disable-next-line prefer-destructuring
-export const defaultIter = AesCrypto.defaultIter
+export const defaultIter = Symmetric.defaultIter
 // eslint-disable-next-line prefer-destructuring
-export const defaultMode = AesCrypto.defaultMode
+export const defaultMode = Symmetric.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
 export function isEncryptedDataString(value: string): value is EncryptedDataString {
@@ -46,18 +46,18 @@ export function uncompressPublicKey(publicKey: EthereumPublicKey): string {
 export function decryptWithPassword(
   encrypted: EncryptedDataString | any,
   password: string,
-  options: AesCrypto.AesEncryptionOptions,
+  options: ModelsCryptoSymmetric.EncryptionOptions,
 ): string {
-  return AesCrypto.decryptWithPassword(encrypted, password, options)
+  return Symmetric.decryptWithPassword(encrypted, password, options)
 }
 
 /** Encrypts a string using a password and optional salt */
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options: AesCrypto.AesEncryptionOptions,
+  options: ModelsCryptoSymmetric.EncryptionOptions,
 ): EncryptedDataString {
-  return AesCrypto.encryptWithPassword(unencrypted, password, options)
+  return Symmetric.encryptWithPassword(unencrypted, password, options)
 }
 
 /** Encrypts a string using a public key into a stringified JSON object
@@ -145,7 +145,7 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 function encryptAccountPrivateKeysIfNeeded(
   keys: EthereumKeyPair,
   password: string,
-  options: AesCrypto.AesEncryptionOptions,
+  options: ModelsCryptoSymmetric.EncryptionOptions,
 ): EthereumKeyPair {
   // encrypt if not already encrypted
   const privateKey = isEncryptedDataString(keys?.privateKey)
@@ -173,7 +173,7 @@ export async function generateKeyPair(): Promise<EthereumKeyPair> {
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
-  options: AesCrypto.AesEncryptionOptions,
+  options: ModelsCryptoSymmetric.EncryptionOptions,
 ): Promise<EthereumKeyPair> {
   const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
