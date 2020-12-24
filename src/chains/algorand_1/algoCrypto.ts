@@ -118,7 +118,7 @@ export async function decryptWithPrivateKeys(
 /** Signs a string with a private key
  *  Returns signature as a Buffer from a UInt8Array */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = Buffer.from(ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey)))
+  const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
   return toAlgorandSignatureFromRawSig(signature)
 }
 
