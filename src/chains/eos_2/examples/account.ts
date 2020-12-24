@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ConfirmType } from '../../../models'
-import { Chain, ChainFactory, ChainType, CreateAccount, Models } from '../../../index'
+import { Chain, ChainFactory, ChainType, CreateAccount, Crypto, Models } from '../../../index'
+import { Symmetric } from '../../../crypto'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -15,7 +16,6 @@ import {
 import { EosAccount } from '../eosAccount'
 import { ChainEosV2 } from '../ChainEosV2'
 import { toEosEntityName, toEosAsset, toEosPublicKey } from '../helpers'
-import { toEncryptedDataString } from '../../../crypto/cryptoHelpers'
 
 require('dotenv').config()
 
@@ -246,7 +246,9 @@ const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) =
     createAccount.generatedKeys.accountKeys.privateKeys,
   )
   // const decryptedOwnerPrivateKey = await chain.decryptWithPassword(toEncryptedDataString(owner), password, { salt })
-  const decryptedActivePrivateKey = await chain.decryptWithPassword(toEncryptedDataString(active), password, { salt })
+  const decryptedActivePrivateKey = await chain.decryptWithPassword(Symmetric.toEncryptedDataString(active), password, {
+    salt,
+  })
   // console.log('decrypted owner privateKey: ', decryptedOwnerPrivateKey)
   console.log('decrypted active privateKey: ', decryptedActivePrivateKey)
 }
