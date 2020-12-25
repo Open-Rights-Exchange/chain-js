@@ -1,14 +1,14 @@
 /* eslint-disable new-cap */
 import * as eosEcc from 'eosjs-ecc'
 import base58 from 'bs58'
-import { Asymmetric, Symmetric } from '../../crypto'
+import { AesCrypto, Asymmetric } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey, EosKeyPair } from './models'
 import { KeyPairEncrypted, Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
-import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const { Keygen } = require('eosjs-keygen')
@@ -16,37 +16,37 @@ const { Keygen } = require('eosjs-keygen')
 const EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.eos'
 
 // eslint-disable-next-line prefer-destructuring
-export const defaultIter = Symmetric.defaultIter
+export const defaultIter = AesCrypto.defaultIter
 // eslint-disable-next-line prefer-destructuring
-export const defaultMode = Symmetric.defaultMode
+export const defaultMode = AesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is Symmetric.EncryptedDataString {
-  return Symmetric.isEncryptedDataString(value)
+export function isEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
+  return AesCrypto.isAesEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): Symmetric.EncryptedDataString {
-  return Symmetric.toEncryptedDataString(value)
+export function toEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
+  return AesCrypto.toAesEncryptedDataString(value)
 }
 
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
 export function decryptWithPassword(
-  encrypted: Symmetric.EncryptedDataString | any,
+  encrypted: AesCrypto.AesEncryptedDataString | any,
   password: string,
-  options: Symmetric.EncryptionOptions,
+  options: AesCrypto.AesEncryptionOptions,
 ): string {
-  return Symmetric.decryptWithPassword(encrypted, password, options)
+  return AesCrypto.decryptWithPassword(encrypted, password, options)
 }
 
 /** Encrypts a string using a password and optional salt */
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options: Symmetric.EncryptionOptions,
-): Symmetric.EncryptedDataString {
-  return Symmetric.encryptWithPassword(unencrypted, password, options)
+  options: AesCrypto.AesEncryptionOptions,
+): AesCrypto.AesEncryptedDataString {
+  return AesCrypto.encryptWithPassword(unencrypted, password, options)
 }
 
 /** Encrypts a string using a public key into a stringified JSON object
@@ -149,7 +149,7 @@ export function verifySignedWithPublicKey(
 function encryptAccountPrivateKeysIfNeeded(
   keys: any,
   password: string,
-  encryptionOptions: Symmetric.EncryptionOptions,
+  encryptionOptions: AesCrypto.AesEncryptionOptions,
 ) {
   const { privateKeys, publicKeys } = keys
   const encryptedKeys = {
@@ -172,7 +172,7 @@ function encryptAccountPrivateKeysIfNeeded(
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any = {},
-  encryptionOptions: Symmetric.EncryptionOptions,
+  encryptionOptions: AesCrypto.AesEncryptionOptions,
 ) {
   // remove any empty values passed-in (e.g. active=undefined or '' )
   removeEmptyValuesInJsonObject(overrideKeys)
@@ -196,7 +196,7 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
 /** Generate a random private/public key pair and encrypt using provided password and optional salt */
 export async function generateKeyPairAndEncryptPrivateKeys(
   password: string,
-  encryptionOptions: Symmetric.EncryptionOptions,
+  encryptionOptions: AesCrypto.AesEncryptionOptions,
 ): Promise<KeyPairEncrypted> {
   if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
   const keys = await generateKeyPair()

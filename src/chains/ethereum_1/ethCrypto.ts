@@ -3,29 +3,28 @@
 import Wallet from 'ethereumjs-wallet'
 import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
 import secp256k1 from 'secp256k1'
-import * as Asymmetric from '../../crypto/asymmetric'
-import { Symmetric } from '../../crypto'
+import { AesCrypto, Asymmetric } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
-import { ensureEncryptedValueIsObject } from '../../crypto/cryptoHelpers'
+import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 
 const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
 
 // eslint-disable-next-line prefer-destructuring
-export const defaultIter = Symmetric.defaultIter
+export const defaultIter = AesCrypto.defaultIter
 // eslint-disable-next-line prefer-destructuring
-export const defaultMode = Symmetric.defaultMode
+export const defaultMode = AesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is Symmetric.EncryptedDataString {
-  return Symmetric.isEncryptedDataString(value)
+export function isEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
+  return AesCrypto.isAesEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): Symmetric.EncryptedDataString {
-  return Symmetric.toEncryptedDataString(value)
+export function toEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
+  return AesCrypto.toAesEncryptedDataString(value)
 }
 
 /** get uncompressed public key from EthereumPublicKey */
@@ -43,20 +42,20 @@ export function uncompressPublicKey(publicKey: EthereumPublicKey): string {
 /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
 export function decryptWithPassword(
-  encrypted: Symmetric.EncryptedDataString | any,
+  encrypted: AesCrypto.AesEncryptedDataString | any,
   password: string,
-  options: Symmetric.EncryptionOptions,
+  options: AesCrypto.AesEncryptionOptions,
 ): string {
-  return Symmetric.decryptWithPassword(encrypted, password, options)
+  return AesCrypto.decryptWithPassword(encrypted, password, options)
 }
 
 /** Encrypts a string using a password and optional salt */
 export function encryptWithPassword(
   unencrypted: string,
   password: string,
-  options: Symmetric.EncryptionOptions,
-): Symmetric.EncryptedDataString {
-  return Symmetric.encryptWithPassword(unencrypted, password, options)
+  options: AesCrypto.AesEncryptionOptions,
+): AesCrypto.AesEncryptedDataString {
+  return AesCrypto.encryptWithPassword(unencrypted, password, options)
 }
 
 /** Encrypts a string using a public key into a stringified JSON object
@@ -144,7 +143,7 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
 function encryptAccountPrivateKeysIfNeeded(
   keys: EthereumKeyPair,
   password: string,
-  options: Symmetric.EncryptionOptions,
+  options: AesCrypto.AesEncryptionOptions,
 ): EthereumKeyPair {
   // encrypt if not already encrypted
   const privateKey = isEncryptedDataString(keys?.privateKey)
@@ -172,7 +171,7 @@ export async function generateKeyPair(): Promise<EthereumKeyPair> {
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any,
-  options: Symmetric.EncryptionOptions,
+  options: AesCrypto.AesEncryptionOptions,
 ): Promise<EthereumKeyPair> {
   const keys = await generateKeyPair()
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)

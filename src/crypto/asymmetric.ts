@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import { decodeBase64 } from 'tweetnacl-util'
 import { isAString, isNullOrEmpty } from '../helpers'
 import { throwNewError } from '../errors'
-import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 import {
   generateEphemPublicKeyAndSharedSecretType1,
   generateSharedSecretType1,

@@ -1,4 +1,4 @@
-import { ModelsCryptoSymmetric, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
+import { ModelsCryptoAes, PublicKeyBrand, PrivateKeyBrand, SignatureBrand } from '../../../models'
 
 /** a public key string - formatted correctly for EOS */
 export type EosPublicKey = string & PublicKeyBrand
@@ -10,7 +10,7 @@ export type EosSignature = string & SignatureBrand
 /** key pair - in the format returned from algosdk */
 export type EosKeyPair = {
   publicKey: EosPublicKey
-  privateKey: EosPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
+  privateKey: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
 }
 
 /** An object containing public and private keys for owner and active permissions */
@@ -20,7 +20,7 @@ export type EosAccountKeys = {
     active: EosPublicKey
   }
   privateKeys: {
-    owner: EosPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
-    active: EosPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
+    owner: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
+    active: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
   }
 }

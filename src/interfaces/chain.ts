@@ -2,7 +2,7 @@ import { ChainError } from '../errors'
 import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
-import { Asymmetric, Symmetric } from '../crypto'
+import { Asymmetric, Generic } from '../crypto'
 import {
   ChainDate,
   ChainEntityName,
@@ -71,10 +71,10 @@ export interface Chain {
   cryptoCurve: CryptoCurve
   /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decryptWithPassword(encrypted: Symmetric.EncryptedDataString, password: string, options?: any): string
+  decryptWithPassword(encrypted: Generic.EncryptedDataString, password: string, options?: any): string
   /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encryptWithPassword(unencrypted: string, password: string, options?: any): Symmetric.EncryptedDataString
+  encryptWithPassword(unencrypted: string, password: string, options?: any): Generic.EncryptedDataString
   /** Decrypts the encrypted value using a private key
    * The encrypted value is a stringified JSON object
    * ... and must have been encrypted with the public key that matches the private ley provided */
@@ -136,7 +136,7 @@ export interface Chain {
   /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
-  toEncryptedDataString(value: any): Symmetric.EncryptedDataString
+  toEncryptedDataString(value: any): Generic.EncryptedDataString
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toAsymEncryptedDataString(value: any): Asymmetric.AsymEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */

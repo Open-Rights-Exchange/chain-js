@@ -4,7 +4,7 @@ import {
   ChainDateBrand,
   ChainEntityNameBrand,
   ChainSymbolBrand,
-  ModelsCryptoSymmetric,
+  ModelsCryptoAes,
   TxExecutionPriority,
 } from '../../../models'
 import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
@@ -87,12 +87,12 @@ export type EthereumSymbol = string & ChainSymbolBrand
 
 export type EthereumGeneratedKeys = {
   publicKey: EthereumPublicKey
-  privateKey: EthereumPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
+  privateKey: EthereumPrivateKey | ModelsCryptoAes.AesEncryptedDataString
 }
 
 export type EthereumNewKeysOptions = {
   password: string
-  encryptionOptions?: ModelsCryptoSymmetric.EncryptionOptions
+  encryptionOptions?: ModelsCryptoAes.AesEncryptionOptions
 }
 
 export type EthereumString = {

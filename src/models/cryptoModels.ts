@@ -1,7 +1,8 @@
 import * as ModelsCryptoEcc from '../crypto/eccCryptoModels'
 import * as ModelsCryptoEd25519 from '../crypto/ed25519CryptoModels'
 import * as ModelsCryptoAsymmetric from '../crypto/asymmetricModels'
-import * as ModelsCryptoSymmetric from '../crypto/symmetricModels'
+import * as ModelsCryptoAes from '../crypto/aesCryptoModels'
+import * as ModelsCryptoGeneric from '../crypto/genericCryptoModels'
 
 /** Brand signifiying a valid value - assigned by using toPublicKey */
 enum PublicKeyBrand {
@@ -31,7 +32,7 @@ type KeyPair = {
 
 type KeyPairEncrypted = {
   public: PublicKey
-  privateEncrypted: ModelsCryptoSymmetric.EncryptedDataString
+  privateEncrypted: ModelsCryptoGeneric.EncryptedDataString
 }
 
 type AccountKeysStruct = {
@@ -39,7 +40,7 @@ type AccountKeysStruct = {
     active: PublicKey
   }
   privateKeys: {
-    active: PrivateKey | ModelsCryptoSymmetric.EncryptedDataString
+    active: PrivateKey | ModelsCryptoGeneric.EncryptedDataString
   }
 }
 
@@ -54,10 +55,11 @@ export {
   CryptoCurve,
   KeyPair,
   KeyPairEncrypted,
+  ModelsCryptoAes,
   ModelsCryptoAsymmetric,
   ModelsCryptoEcc,
   ModelsCryptoEd25519,
-  ModelsCryptoSymmetric,
+  ModelsCryptoGeneric,
   PrivateKey,
   PrivateKeyBrand,
   PublicKey,

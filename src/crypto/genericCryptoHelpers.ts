@@ -1,5 +1,5 @@
 import sjcl, { BitArray } from '@aikon/sjcl'
-import { ModelsCryptoSymmetric } from '../models'
+import { EncryptedDataString } from './genericCryptoModels'
 import { isAString, isAnObject } from '../helpers'
 
 /** Convert a base64 string to a sjcl.BitArray */
@@ -52,7 +52,7 @@ export function bitArrayToUtf8String(value: sjcl.BitArray | string): string {
 
 /** If the encrypted param isn't already a JSON object, parse the stringfied value into one
  *  Returns a JSON object */
-export function ensureEncryptedValueIsObject(encrypted: ModelsCryptoSymmetric.EncryptedDataString | any) {
+export function ensureEncryptedValueIsObject(encrypted: EncryptedDataString | any) {
   if (isAnObject(encrypted)) {
     return encrypted
   }
