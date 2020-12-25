@@ -25,3 +25,6 @@ export type Ed25519PasswordEncryptionOptions = {
   dkLen?: number
   encoding?: string
 }
+
+/** Ed25519 encypted data object - just a string */
+export type Ed25519EncryptedData = string

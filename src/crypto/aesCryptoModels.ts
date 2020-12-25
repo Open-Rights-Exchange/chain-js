@@ -26,7 +26,8 @@ export type AesEncryptionOptions = {
   iv?: string
 }
 
-export type EncryptedAes = {
+/** Aes encypted data object */
+export type AesEncryptedData = {
   iv?: string
   iter: number
   v: number

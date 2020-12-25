@@ -79,7 +79,7 @@ export interface Chain {
    * The encrypted value is a stringified JSON object
    * ... and must have been encrypted with the public key that matches the private ley provided */
   decryptWithPrivateKey(
-    encrypted: Asymmetric.AsymEncryptedDataString,
+    encrypted: Asymmetric.AsymmetricEncryptedDataString,
     privateKey: PrivateKey,
     options?: any,
   ): Promise<string>
@@ -89,7 +89,7 @@ export interface Chain {
     unencrypted: string,
     publicKey: PublicKey,
     options?: any,
-  ): Promise<Asymmetric.AsymEncryptedDataString>
+  ): Promise<Asymmetric.AsymmetricEncryptedDataString>
   /** Encrypts a string by wrapping it with successive asymmetric encryptions with multiple public key
    *  Operations are performed in the order that the public keys appear in the array
    *  Only the last item has the final, wrapped, ciphertext
@@ -98,12 +98,15 @@ export interface Chain {
     unencrypted: string,
     publicKeys: PublicKey[],
     options?: any,
-  ): Promise<Asymmetric.AsymEncryptedDataString>
+  ): Promise<Asymmetric.AsymmetricEncryptedDataString>
   /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
    *  each pass uses a private keys from privateKeys array param
    *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
    *  The result is the decrypted string */
-  decryptWithPrivateKeys(encrypted: Asymmetric.AsymEncryptedDataString, privateKeys: PrivateKey[]): Promise<string>
+  decryptWithPrivateKeys(
+    encrypted: Asymmetric.AsymmetricEncryptedDataString,
+    privateKeys: PrivateKey[],
+  ): Promise<string>
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
@@ -138,7 +141,7 @@ export interface Chain {
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
   toEncryptedDataString(value: any): Generic.EncryptedDataString
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toAsymEncryptedDataString(value: any): Asymmetric.AsymEncryptedDataString
+  toAsymEncryptedDataString(value: any): Asymmetric.AsymmetricEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */
   toSignature(value: string): Signature
 

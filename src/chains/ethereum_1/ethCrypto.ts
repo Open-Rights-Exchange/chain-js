@@ -64,7 +64,7 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EthereumPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   const publicKeyUncompressed = uncompressPublicKey(publicKey) // should be hex string
   const useOptions = {
     ...options,
@@ -79,7 +79,7 @@ export async function encryptWithPublicKey(
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: Asymmetric.AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString | Asymmetric.AsymmetricEncryptedData,
   privateKey: EthereumPrivateKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -98,7 +98,7 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: EthereumPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   return Asymmetric.toAsymEncryptedDataString(
     await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
   )
@@ -110,7 +110,7 @@ export async function encryptWithPublicKeys(
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
-  encrypted: Asymmetric.AsymEncryptedDataString,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: EthereumPublicKey[],
 ): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})

@@ -55,7 +55,7 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: EosPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1, scheme: EOS_ASYMMETRIC_SCHEME_NAME }
   const publicKeyUncompressed = eosEcc
     .PublicKey(publicKey)
@@ -70,7 +70,7 @@ export async function encryptWithPublicKey(
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: Asymmetric.AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString | Asymmetric.AsymmetricEncryptedData,
   privateKey: EosPrivateKey,
   options?: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -79,7 +79,7 @@ export async function decryptWithPrivateKey(
     .PrivateKey(privateKey)
     .toBuffer()
     .toString('hex')
-  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.EncryptedAsymmetric
+  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.AsymmetricEncryptedData
   return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyHex, useOptions)
 }
 
@@ -92,7 +92,7 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: EosPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   return Asymmetric.toAsymEncryptedDataString(
     await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
   )
@@ -104,7 +104,7 @@ export async function encryptWithPublicKeys(
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
-  encrypted: Asymmetric.AsymEncryptedDataString,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: EosPublicKey[],
 ): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
