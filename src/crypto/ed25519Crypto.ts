@@ -1,10 +1,10 @@
 import nacl from 'tweetnacl'
 import scrypt from 'scrypt-async'
 import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
-import { ModelsCryptoSymmetric } from '../models'
 import { isAString, isNullOrEmpty, hexStringToByteArray, byteArrayToHexString } from '../helpers'
 import {
   Ed25519KeyPair,
+  Ed25519EncryptedDataString,
   Ed25519PasswordEncryptionOptions,
   Ed25519PrivateKey,
   Ed25519PublicKey,
@@ -16,7 +16,7 @@ export * from './ed25519CryptoModels'
 const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength)
 
 /** Options used by scrypt library to derive a key from password and salt */
-const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
+export const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
   salt: '',
   N: 65536,
   r: 8,
@@ -26,15 +26,16 @@ const passwordEncryptionDefaults: Ed25519PasswordEncryptionOptions = {
 }
 
 /** Verifies that the value is a valid, stringified encrypted object */
-export function isEncryptedDataString(value: string): value is ModelsCryptoSymmetric.EncryptedDataString {
+export function isEd25519EncryptedDataString(value: string): value is Ed25519EncryptedDataString {
   if (!isAString(value)) return false
-  // this is an oversimplified check just to prevent assigning a wrong string
+  // TODO Add valid check for encypted Ed25519EncryptedDataString
+  // this is an oversimplified check just to prevent assigning an empty string
   return value !== null
 }
 
 /** Ensures that the value confirms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): ModelsCryptoSymmetric.EncryptedDataString {
-  if (isEncryptedDataString(value)) {
+export function toEd25519EncryptedDataString(value: any): Ed25519EncryptedDataString {
+  if (isEd25519EncryptedDataString(value)) {
     return value
   }
   throw new Error(`Not valid encrypted data string:${value}`)
@@ -80,7 +81,7 @@ export function encrypt(unencrypted: string, passwordKey: string): string {
 /** Decrypts the encrypted value using a password
  * Password is a base64 encoded string
  */
-export function decrypt(encrypted: ModelsCryptoSymmetric.EncryptedDataString | any, passwordKey: string): string {
+export function decrypt(encrypted: Ed25519EncryptedDataString | any, passwordKey: string): string {
   const keyUint8Array = hexStringToByteArray(passwordKey)
   const messageWithNonceAsUint8Array = decodeBase64(encrypted)
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength)

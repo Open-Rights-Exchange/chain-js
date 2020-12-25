@@ -4,7 +4,7 @@
 /* eslint-disable no-console */
 import { ConfirmType } from '../../../models'
 import { Chain, ChainFactory, ChainType, CreateAccount, Crypto, Models } from '../../../index'
-import { Symmetric } from '../../../crypto'
+import { AesCrypto } from '../../../crypto'
 import {
   EosPrivateKey,
   EosNewAccountType,
@@ -246,9 +246,7 @@ const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) =
     createAccount.generatedKeys.accountKeys.privateKeys,
   )
   // const decryptedOwnerPrivateKey = await chain.decryptWithPassword(toEncryptedDataString(owner), password, { salt })
-  const decryptedActivePrivateKey = await chain.decryptWithPassword(Symmetric.toEncryptedDataString(active), password, {
-    salt,
-  })
+  const decryptedActivePrivateKey = await chain.decryptWithPassword(AesCrypto.toAesEncryptedDataString(active), password, { salt })
   // console.log('decrypted owner privateKey: ', decryptedOwnerPrivateKey)
   console.log('decrypted active privateKey: ', decryptedActivePrivateKey)
 }

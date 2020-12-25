@@ -1,4 +1,4 @@
-import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand, ModelsCryptoSymmetric } from '../../../models'
+import { SignatureBrand, PrivateKeyBrand, PublicKeyBrand, ModelsCryptoAes } from '../../../models'
 
 /** an ethereum transaction signature */
 export interface ECDSASignature {
@@ -19,5 +19,5 @@ export type EthereumSignature = ECDSASignature & SignatureBrand
 /** key pair - in the format returned from algosdk */
 export type EthereumKeyPair = {
   publicKey: EthereumPublicKey
-  privateKey: EthereumPrivateKey | ModelsCryptoSymmetric.EncryptedDataString
+  privateKey: EthereumPrivateKey | ModelsCryptoAes.AesEncryptedDataString
 }

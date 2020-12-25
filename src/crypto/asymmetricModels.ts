@@ -8,6 +8,7 @@ export type Unencrypted = string | NodeJS.ArrayBufferView
 
 /** Stringified JSON ciphertext (used for private keys) */
 export type AsymEncryptedDataString = string & AsymEncryptedDataStringBrand
+
 /** Brand signifiying a valid value - assigned by using toEncryptedDataString */
 export enum AsymEncryptedDataStringBrand {
   _ = '',

@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { Asymmetric, Symmetric } from '../../../crypto'
+import { Asymmetric, AesCrypto } from '../../../crypto'
 import { toEosPrivateKey, toEosPublicKey } from '../helpers'
 import { eosPrivateKeyToEccPrivateKey, eosPublicKeyToEccPublicKey } from '../eosCrypto'
 

@@ -2,7 +2,7 @@ import { throwNewError } from '../errors'
 import { asyncForEach, isNullOrEmpty } from '../helpers'
 import { PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
-import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 
 /** Use assymmetric encryption with multiple public keys - wrapping with each
  *  Returns an array of results with the last one including the final cipertext

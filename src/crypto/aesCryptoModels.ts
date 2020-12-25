@@ -1,10 +1,10 @@
 /** Brand signifiying a valid value - assigned by using toEncryptedDataString */
-export enum EncryptedDataStringBrand {
+export enum AesEncryptedDataStringBrand {
   _ = '',
 }
 
 /** Stringified JSON ciphertext (used for private keys) */
-export type EncryptedDataString = string & EncryptedDataStringBrand
+export type AesEncryptedDataString = string & AesEncryptedDataStringBrand
 
 /** Encryption modes supported by crypto library (default is gcm) */
 export enum EncryptionMode {
@@ -19,14 +19,14 @@ export enum EncryptionCipher {
 }
 
 /** Parameters for encryption/decryption - for SHA256 algorithm */
-export type EncryptionOptions = {
+export type AesEncryptionOptions = {
   salt?: string
   iter?: number
   mode?: EncryptionMode
   iv?: string
 }
 
-export type EncryptedSymmetric = {
+export type EncryptedAes = {
   iv?: string
   iter: number
   v: number

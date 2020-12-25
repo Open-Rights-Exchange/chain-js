@@ -5,7 +5,7 @@ import {
   ChainEntityNameBrand,
   ChainSymbolBrand,
   KeyPairEncrypted,
-  ModelsCryptoSymmetric,
+  ModelsCryptoAes,
 } from '../../../models'
 
 // using Enum 'brands' to force a string type to have a particular format
@@ -88,7 +88,7 @@ export type EosGeneratedPermissionKeys = {
 
 export type EosNewKeysOptions = {
   password: string
-  encryptionOptions?: ModelsCryptoSymmetric.EncryptionOptions
+  encryptionOptions?: ModelsCryptoAes.AesEncryptionOptions
 }
 
 export type EosPermission = {
