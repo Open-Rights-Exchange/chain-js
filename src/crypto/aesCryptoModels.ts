@@ -1,4 +1,4 @@
-/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+/** Brand signifiying a valid value - assigned by using toSymEncryptedDataString */
 export enum AesEncryptedDataStringBrand {
   _ = '',
 }

@@ -153,10 +153,10 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isValidEncryptedData = algoCrypto.isEncryptedDataString
+  isSymEncryptedDataString = algoCrypto.isSymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toEncryptedDataString = algoCrypto.toEncryptedDataString
+  toSymEncryptedDataString = algoCrypto.toSymEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
