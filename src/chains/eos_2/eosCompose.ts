@@ -68,3 +68,15 @@ export async function composeAction(
   }
   return composerFunction(args)
 }
+
+/** Compose an an array of objects for a chain contract action */
+export async function composeActions(
+  chainActionType: ChainActionType | EosChainActionType,
+  args: any,
+): Promise<EosActionStruct[]> {
+  const composerFunction = ComposeAction[chainActionType as string]
+  if (!composerFunction) {
+    notSupported(`ComposeAction:${chainActionType}`)
+  }
+  return composerFunction(args)
+}

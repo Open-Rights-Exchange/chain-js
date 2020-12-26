@@ -5,12 +5,12 @@
 /* eslint-disable no-console */
 import { RpcError } from 'eosjs'
 import { Chain, ChainFactory, ChainType } from '../../../index'
+import { Asymmetric, AesCrypto } from '../../../crypto'
 import { ChainActionType, ConfirmType } from '../../../models'
 import { toEosEntityName, toEosPrivateKey, toEosPublicKey, toEosAsset, toEosSymbol } from '../helpers'
 import { EosAccount } from '../eosAccount'
 import { EosTransaction } from '../eosTransaction'
 import { ChainEosV2 } from '../ChainEosV2'
-import { toEncryptedDataString } from '../../../crypto/cryptoHelpers'
 
 require('dotenv').config()
 
@@ -78,7 +78,7 @@ const { env } = process
   const { serializedTransaction, signatures } = JSON.parse(sampleSerializedTransaction)
 
   // privateKeyEncryptionMethod salt - eks0
-  const ore1qctfkfhw_privateKeyEncrypted = toEncryptedDataString(
+  const ore1qctfkfhw_privateKeyEncrypted = AesCrypto.toAesEncryptedDataString(
     '{"iv":"hc3XuKumuzYchpF2Rfa5bw==","v":1,"iter":10000,"ks":128,"ts":64,"mode":"gcm","adata":"","cipher":"aes","salt":"gZ3SFYyR6ZU=","ct":"/0dtw1W3L2fekTZl5/mQ6Ulx7acSHZ0GOfv3vvdE8OgwuRD9KwsWKJbQhKizwsQoMyoyGiIXsXasB7o="}',
   )
   const ore1qctfkfhw_salt = env.EOS_KYLIN_PW_SALT_V0

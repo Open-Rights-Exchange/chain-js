@@ -1,6 +1,8 @@
 import * as ModelsCryptoEcc from '../crypto/eccCryptoModels'
 import * as ModelsCryptoEd25519 from '../crypto/ed25519CryptoModels'
 import * as ModelsCryptoAsymmetric from '../crypto/asymmetricModels'
+import * as ModelsCryptoAes from '../crypto/aesCryptoModels'
+import * as ModelsCryptoGeneric from '../crypto/genericCryptoModels'
 
 /** Brand signifiying a valid value - assigned by using toPublicKey */
 enum PublicKeyBrand {
@@ -14,20 +16,7 @@ enum PrivateKeyBrand {
 enum SignatureBrand {
   _ = '',
 }
-/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
-enum EncryptedDataStringBrand {
-  _ = '',
-}
 
-/** Stringified JSON ciphertext (used for private keys) */
-type AsymEncryptedDataString = string & AsymEncryptedDataStringBrand
-/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
-enum AsymEncryptedDataStringBrand {
-  _ = '',
-}
-
-/** Stringified JSON ciphertext (used for private keys) */
-type EncryptedDataString = string & EncryptedDataStringBrand
 /** a public key string - formatted correctly for the chain */
 // TODO: eth public key is of type buffer
 type PublicKey = (string & PublicKeyBrand) | any
@@ -39,11 +28,7 @@ type Signature = string & SignatureBrand
 type KeyPair = {
   publicKey: PublicKey
   privateKey: PrivateKey
-}
-
-type KeyPairEncrypted = {
-  public: PublicKey
-  privateEncrypted: EncryptedDataString
+  privateKeyEncrypted?: ModelsCryptoGeneric.EncryptedDataString
 }
 
 type AccountKeysStruct = {
@@ -51,7 +36,7 @@ type AccountKeysStruct = {
     active: PublicKey
   }
   privateKeys: {
-    active: PrivateKey | EncryptedDataString
+    active: PrivateKey | ModelsCryptoGeneric.EncryptedDataString
   }
 }
 
@@ -63,16 +48,13 @@ enum CryptoCurve {
 // exporting explicity in order to alias Models.. exports
 export {
   AccountKeysStruct,
-  AsymEncryptedDataStringBrand,
-  AsymEncryptedDataString,
   CryptoCurve,
-  EncryptedDataStringBrand,
-  EncryptedDataString,
   KeyPair,
-  KeyPairEncrypted,
+  ModelsCryptoAes,
+  ModelsCryptoAsymmetric,
   ModelsCryptoEcc,
   ModelsCryptoEd25519,
-  ModelsCryptoAsymmetric,
+  ModelsCryptoGeneric,
   PrivateKey,
   PrivateKeyBrand,
   PublicKey,

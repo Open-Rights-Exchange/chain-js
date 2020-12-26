@@ -2,9 +2,9 @@
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 import crypto from 'crypto'
 import { decodeBase64 } from 'tweetnacl-util'
-import { isNullOrEmpty } from '../helpers'
+import { isAString, isNullOrEmpty } from '../helpers'
 import { throwNewError } from '../errors'
-import { ensureEncryptedValueIsObject } from './cryptoHelpers'
+import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 import {
   generateEphemPublicKeyAndSharedSecretType1,
   generateSharedSecretType1,
@@ -12,18 +12,22 @@ import {
   generateSharedSecretEd25519,
 } from './diffieHellman'
 import {
+  AsymmetricEncryptedData,
+  AsymmetricEncryptedDataString,
   CipherGCMTypes,
   ECDHKeyFormat,
   EciesCurveType,
   EciesOptions,
   EciesOptionsAsBuffers,
-  EncryptedAsymmetric,
   Unencrypted,
 } from './asymmetricModels'
 
 export * from './asymmetricModels'
 
 export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
+
+const DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1'
+const DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519'
 
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
@@ -36,6 +40,21 @@ export const DefaultEciesOptions: any = {
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
   keyFormat: 'uncompressed',
+}
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isAsymEncryptedDataString(value: string): value is AsymmetricEncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+$/is) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toAsymEncryptedDataString(value: any): AsymmetricEncryptedDataString {
+  if (isAsymEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid asymmetric encrypted data string:${value}`)
 }
 
 /** Perform Symetric Encryption */
@@ -116,8 +135,8 @@ function equalConstTime(b1: Buffer, b2: Buffer) {
 /** Populate missing options with default values
  *  Convert iv, s1, s2 from strings to buffers */
 function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
-  const { s1: s1In, s2: s2In, ...otherOptions } = optionsIn
-  let { iv: ivIn } = optionsIn
+  const { s1: s1In, s2: s2In, ...otherOptions } = optionsIn || {}
+  let { iv: ivIn } = optionsIn || {}
 
   const newOptions: Partial<EciesOptionsAsBuffers> = {
     ...DefaultEciesOptions,
@@ -146,6 +165,13 @@ function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
   newOptions.s2 = s2
 
   return newOptions
+}
+
+/** return default asymmetric encryption scheme notation for a given curve */
+function getDefaultScheme(curveType: EciesCurveType): string {
+  if (curveType === EciesCurveType.Ed25519) return DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME
+  if (curveType === EciesCurveType.Secp256k1) return DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME
+  return null
 }
 
 function generateSharedSecretAndEphemPublicKey(
@@ -191,7 +217,7 @@ export function encryptWithPublicKey(
   publicKey: string, // hex string
   plainText: string,
   options?: EciesOptions,
-): EncryptedAsymmetric {
+): AsymmetricEncryptedData {
   const useOptions = composeOptions(options)
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
@@ -220,18 +246,23 @@ export function encryptWithPublicKey(
     Buffer.concat([ciphertext, useOptions.s2], ciphertext.length + useOptions.s2.length),
   )
 
-  return {
+  const result: AsymmetricEncryptedData = {
     iv: !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null,
     publicKey,
     ephemPublicKey: Buffer.from(ephemPublicKey).toString('hex'),
     ciphertext: ciphertext.toString('hex'),
     mac: Buffer.from(mac).toString('hex'),
   }
+
+  const scheme = useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
+  if (scheme) result.scheme = scheme
+
+  return result
 }
 
 /** ECDH decryption using privateKey */
 export function decryptWithPrivateKey(
-  encrypted: EncryptedAsymmetric,
+  encrypted: AsymmetricEncryptedData,
   privateKey: string, // hex string
   options?: EciesOptions,
 ): string {
@@ -270,7 +301,7 @@ export function decryptWithPrivateKey(
     throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
   }
 
-  // uses symmetric encryption scheme to decrypt the message
+  // uses symmetric encryption to decrypt the message
   // m = E-1(Ke; c)
   const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, encryptionKey, cipherText)
   return buffer.toString()

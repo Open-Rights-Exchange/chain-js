@@ -37,6 +37,7 @@ import {
   toEthereumSymbol,
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
+import { Asymmetric } from '../../crypto'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -193,11 +194,17 @@ class ChainEthereumV1 implements Chain {
   /** Returns a public key given a signature and the original data was signed */
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
-  /** Verifies that the value is a valid, stringified JSON ciphertext */
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isValidEncryptedData = ethcrypto.isEncryptedDataString
 
-  /** Ensures that the value comforms to a well-formed private Key */
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toEncryptedDataString = ethcrypto.toEncryptedDataString
+
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
+  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
+
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
+  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed Eos private Key */
   isValidPrivateKey = isValidEthereumPrivateKey
@@ -210,7 +217,7 @@ class ChainEthereumV1 implements Chain {
 
   /** Generates new key pairs (public and private)
    *  Encrypts private key with provided password (and optional salt)
-   *  Returns: { privateKey, publicKey } */
+   *  Returns: { privateKey, publicKey, encryptedPrivateKey } */
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Generate a signature given some data and a private key */

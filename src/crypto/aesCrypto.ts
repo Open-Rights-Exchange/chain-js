@@ -1,25 +1,27 @@
 import sjcl, { SjclCipherEncryptParams } from '@aikon/sjcl'
-import { EncryptedDataString } from '../models'
-import { ensureEncryptedValueIsObject, toEncryptedDataString } from './cryptoHelpers'
+import { AesEncryptedDataString, EncryptionMode, AesEncryptionOptions } from './aesCryptoModels'
+import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
+import { isAString } from '../helpers'
 
-/** Encryption modes supported by crypto library (default is gcm) */
-export enum EncryptionMode {
-  Gcm = 'gcm',
-  Ccm = 'ccm',
-  Ocb2 = 'ocb2',
-  Cbc = 'cbc',
-}
-
-/** Additional parameters for encryption/decryption - for SHA256 algorithm */
-export type AesEncryptionOptions = {
-  salt?: string
-  iter?: number
-  mode?: EncryptionMode
-  iv?: string
-}
+export * from './aesCryptoModels'
 
 export const defaultIter = 1000000
 export const defaultMode = EncryptionMode.Gcm
+
+/** Verifies that the value is a valid, stringified JSON Encrypted object */
+export function isAesEncryptedDataString(value: string): value is AesEncryptedDataString {
+  if (!isAString(value)) return false
+  // this is an oversimplified check just to prevent assigning a wrong string
+  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
+}
+
+/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
+export function toAesEncryptedDataString(value: any): AesEncryptedDataString {
+  if (isAesEncryptedDataString(value)) {
+    return value
+  }
+  throw new Error(`Not valid encrypted data string:${value}`)
+}
 
 // decrypt and encrypt
 
@@ -31,7 +33,7 @@ export function deriveKey(password: string, iter: number, salt: string = ''): sj
 }
 
 /** Decrypts the encrypted value with the derived key */
-export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey: sjcl.BitArray): string {
+export function decryptWithKey(encrypted: AesEncryptedDataString | any, derivedKey: sjcl.BitArray): string {
   const encryptedAsObject = ensureEncryptedValueIsObject(encrypted)
   const encryptedDataString = JSON.stringify(encryptedAsObject)
   return sjcl.decrypt(derivedKey, encryptedDataString)
@@ -41,7 +43,7 @@ export function decryptWithKey(encrypted: EncryptedDataString | any, derivedKey:
  * Uses AES algorithm and SHA256 hash function
  * The encrypted value is either a stringified JSON object or a JSON object */
 export function decryptWithPassword(
-  encrypted: EncryptedDataString | any,
+  encrypted: AesEncryptedDataString | any,
   password: string,
   options?: AesEncryptionOptions,
 ): string {
@@ -70,10 +72,10 @@ export function encryptWithPassword(
   unencrypted: string,
   password: string,
   options?: AesEncryptionOptions,
-): EncryptedDataString {
+): AesEncryptedDataString {
   const { iter = defaultIter, mode = defaultMode, salt } = options || {}
   const cryptoParams = { mode, iter } as SjclCipherEncryptParams
-  return toEncryptedDataString(
+  return toAesEncryptedDataString(
     JSON.stringify(encryptWithKey(unencrypted, cryptoParams, deriveKey(password, iter, salt))),
   )
 }

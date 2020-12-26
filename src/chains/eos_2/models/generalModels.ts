@@ -1,11 +1,10 @@
-import { EosPublicKey, EosAccountKeys } from './cryptoModels'
-import { AesCrypto } from '../../../crypto'
+import { EosPublicKey, EosAccountKeys, EosKeyPair } from './cryptoModels'
 import {
   ChainAssetBrand,
   ChainDateBrand,
   ChainEntityNameBrand,
-  KeyPairEncrypted,
   ChainSymbolBrand,
+  ModelsCryptoAes,
 } from '../../../models'
 
 // using Enum 'brands' to force a string type to have a particular format
@@ -83,12 +82,12 @@ export type EosGeneratedKeys = {
 
 export type EosGeneratedPermissionKeys = {
   permissionName: EosEntityName
-  keyPair: KeyPairEncrypted
+  keyPair: EosKeyPair
 }
 
 export type EosNewKeysOptions = {
   password: string
-  encryptionOptions?: AesCrypto.AesEncryptionOptions
+  encryptionOptions?: ModelsCryptoAes.AesEncryptionOptions
 }
 
 export type EosPermission = {

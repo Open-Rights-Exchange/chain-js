@@ -1,6 +1,9 @@
 /* eslint-disable quotes */
-import { encrypt, decrypt, deriveKey, decryptWithKey, AesEncryptionOptions, decryptWithPassword, encryptWithPassword } from '../aesCrypto'
+import { deriveKey, decryptWithKey, decryptWithPassword, encryptWithPassword } from '../aesCrypto'
+import { AesEncryptionOptions } from '../aesCryptoModels'
 import { timed } from './utils'
+
+declare let global: any
 
 describe('encryption/decryption of private keys with wallet passwords', () => {
   let privateKey: string
@@ -13,9 +16,9 @@ describe('encryption/decryption of private keys with wallet passwords', () => {
 
   beforeAll(() => {
     iter = 1000000
-    salt = USER_ACCOUNT_ENCRYPTION_SALT
-    privateKey = ORE_TESTA_ACCOUNT_KEY
-    walletPassword = WALLET_PASSWORD
+    salt = global.USER_ACCOUNT_ENCRYPTION_SALT
+    privateKey = global.ORE_TESTA_ACCOUNT_KEY
+    walletPassword = global.WALLET_PASSWORD
     encryptionOptions = {
       salt,
       iter,

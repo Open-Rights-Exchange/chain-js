@@ -6,6 +6,14 @@ import crypto from 'crypto'
 /** data to encrypt (or result of decrypt) */
 export type Unencrypted = string | NodeJS.ArrayBufferView
 
+/** Stringified JSON ciphertext (used for private keys) */
+export type AsymmetricEncryptedDataString = string & AsymmetricEncryptedDataStringBrand
+
+/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+export enum AsymmetricEncryptedDataStringBrand {
+  _ = '',
+}
+
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
 export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
 export enum EciesCurveType {
@@ -13,8 +21,8 @@ export enum EciesCurveType {
   Ed25519 = 'ed25519',
 }
 
-// Informational string added to encrypted results - useful when decrypting in determining set of options used
-// e.g. 'chainjs.ethereum.secp256k1.v2'
+/** Informational string added to encrypted results - useful when decrypting in determining set of options used
+ * e.g. 'chainjs.ethereum.secp256k1.v2' */
 export type Scheme = string
 
 export type EciesOptions = {
@@ -29,6 +37,9 @@ export type EciesOptions = {
   s1?: string
   /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s2?: string
+  // Informational string added to encrypted results - useful when decrypting in determining set of options used
+  // e.g. 'chainjs.ethereum.secp256k1.v2'
+  scheme?: Scheme
 }
 
 export type EciesOptionsAsBuffers = {
@@ -43,10 +54,14 @@ export type EciesOptionsAsBuffers = {
   s1?: Buffer
   /** Optional message/secret to share in encrypted payload (as Utf8 string) */
   s2?: Buffer
+  // Informational string added to encrypted results - useful when decrypting in determining set of options used
+  // e.g. 'chainjs.ethereum.secp256k1.v2'
+  scheme?: Scheme
 }
 
-/** all values are hex strings */
-export type EncryptedAsymmetric = {
+/** Asymmetric encypted data object
+ * all values are hex strings */
+export type AsymmetricEncryptedData = {
   /** 0-based order of encryption - used when 'wrapping' with mulitple asymmetric encryptions in a sequence */
   seq?: number
   iv: string
@@ -54,4 +69,5 @@ export type EncryptedAsymmetric = {
   ephemPublicKey: string
   ciphertext?: string
   mac: string
+  scheme?: Scheme
 }

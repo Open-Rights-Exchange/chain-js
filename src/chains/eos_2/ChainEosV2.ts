@@ -46,6 +46,7 @@ import {
   EosChainEndpoint,
   EosSymbol,
 } from './models'
+import { Asymmetric } from '../../crypto'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -218,11 +219,17 @@ class ChainEosV2 implements Chain {
   /** Generates and returns a new public/private key pair */
   generateKeyPair = eoscrypto.generateKeyPair
 
-  /** Verifies that the value is a valid, stringified JSON ciphertext */
+  /** Verifies that the value is a valid, stringified JSON encryption result */
   isValidEncryptedData = eoscrypto.isEncryptedDataString
 
-  /** Ensures that the value comforms to a well-formed private Key */
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toEncryptedDataString = eoscrypto.toEncryptedDataString
+
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
+  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
+
+  /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
+  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {
@@ -245,7 +252,7 @@ class ChainEosV2 implements Chain {
 
   /** Generates new owner and active key pairs (public and private)
    *  Encrypts private keys with provided password and optional params
-   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
+   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active}, privateKeysEncrypted:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */

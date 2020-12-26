@@ -4,11 +4,10 @@ import {
   ChainDateBrand,
   ChainEntityNameBrand,
   ChainSymbolBrand,
-  EncryptedDataString,
+  ModelsCryptoAes,
   TxExecutionPriority,
 } from '../../../models'
-import { EthereumPrivateKey, EthereumPublicKey } from './cryptoModels'
-import { AesCrypto } from '../../../crypto'
+import { EthereumKeyPair } from './cryptoModels'
 
 /** Category of chain functions - useful in error mapping */
 export enum ChainFunctionCategory {
@@ -86,14 +85,11 @@ export type EthereumDate = string & ChainDateBrand // Datetime string in the for
 export type EthereumEntityName = string & ChainEntityNameBrand
 export type EthereumSymbol = string & ChainSymbolBrand
 
-export type EthereumGeneratedKeys = {
-  publicKey: EthereumPublicKey
-  privateKey: EthereumPrivateKey | EncryptedDataString
-}
+export type EthereumGeneratedKeys = EthereumKeyPair
 
 export type EthereumNewKeysOptions = {
   password: string
-  encryptionOptions?: AesCrypto.AesEncryptionOptions
+  encryptionOptions?: ModelsCryptoAes.AesEncryptionOptions
 }
 
 export type EthereumString = {

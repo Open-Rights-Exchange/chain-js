@@ -1,11 +1,5 @@
-import { Ed25519PasswordEncryptionOptions } from '../../../crypto/ed25519Crypto'
-import {
-  PrivateKeyBrand,
-  PublicKeyBrand,
-  SignatureBrand,
-  EncryptedDataString,
-  ChainEntityNameBrand,
-} from '../../../models'
+import { Ed25519Crypto } from '../../../crypto'
+import { ChainEntityNameBrand, PrivateKeyBrand, PublicKeyBrand, SignatureBrand } from '../../../models'
 
 /** an address string - formatted correctly for algorand */
 export type AlgorandAddress = string
@@ -14,7 +8,8 @@ export type AlgorandEntityName = string & ChainEntityNameBrand
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
-  privateKey: AlgorandPrivateKey | EncryptedDataString
+  privateKey: AlgorandPrivateKey
+  privateKeyEncrypted?: Ed25519Crypto.Ed25519EncryptedDataString
 }
 
 /** a private key string - formatted correctly for algorand */
@@ -27,7 +22,7 @@ export type AlgorandPublicKey = string & PublicKeyBrand
 export type AlgorandSignature = string & SignatureBrand
 
 /** options used to convert a password and salt into a passowrd key */
-export type AlgoEncryptionOptions = Ed25519PasswordEncryptionOptions
+export type AlgoEncryptionOptions = Ed25519Crypto.Ed25519PasswordEncryptionOptions
 
 /** Additional parameters for encryption/decryption - for SHA256 algorithm */
 export type EncryptionOptions = AlgoEncryptionOptions

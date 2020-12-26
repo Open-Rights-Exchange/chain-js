@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { timed } from './utils'
 
 import { encrypt, decrypt, calculatePasswordByteArray, passwordEncryptionDefaults } from '../ed25519Crypto'

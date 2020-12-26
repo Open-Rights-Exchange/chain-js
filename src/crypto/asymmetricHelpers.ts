@@ -1,8 +1,8 @@
 import { throwNewError } from '../errors'
 import { asyncForEach, isNullOrEmpty } from '../helpers'
-import { AsymEncryptedDataString, PrivateKey, PublicKey } from '../models'
+import { PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
-import { ensureEncryptedValueIsObject, toAsymEncryptedDataString } from './cryptoHelpers'
+import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 
 /** Use assymmetric encryption with multiple public keys - wrapping with each
  *  Returns an array of results with the last one including the final cipertext
@@ -12,12 +12,12 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: PublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<AsymEncryptedDataString> {
-  const result: Asymmetric.EncryptedAsymmetric[] = []
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
+  const result: Asymmetric.AsymmetricEncryptedData[] = []
   let valueToBeEncrypted = unencrypted
   // loop through the public keys and wrap encrypted text once for each
   await asyncForEach(publicKeys, async (pk: PublicKey, index: number) => {
-    const lastEncrypted: Asymmetric.EncryptedAsymmetric = JSON.parse(
+    const lastEncrypted: Asymmetric.AsymmetricEncryptedData = JSON.parse(
       await encryptCallback(valueToBeEncrypted, pk, options),
     )
     // for each pass, encrypt the result of the last encryption
@@ -26,7 +26,7 @@ export async function encryptWithPublicKeys(
     lastEncrypted.seq = index
     result.push(lastEncrypted)
   })
-  return toAsymEncryptedDataString(JSON.stringify(result))
+  return Asymmetric.toAsymEncryptedDataString(JSON.stringify(result))
 }
 
 /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
@@ -34,7 +34,7 @@ export async function encryptWithPublicKeys(
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
   decryptCallback: (
-    encryptedItem: Asymmetric.EncryptedAsymmetric,
+    encryptedItem: Asymmetric.AsymmetricEncryptedData,
     privateKey: PrivateKey,
     options: Asymmetric.EciesOptions,
   ) => Promise<string>,
@@ -49,7 +49,9 @@ export async function decryptWithPrivateKeys(
   let lastValueDecrypted: string
 
   // sort encrypted blobs - in REVERSE order of seq
-  const blobsReversed = (encryptedObject as Asymmetric.EncryptedAsymmetric[]).sort((a, b) => (a.seq < b.seq ? 1 : -1)) // reverse sort by seq number
+  const blobsReversed = (encryptedObject as Asymmetric.AsymmetricEncryptedData[]).sort((a, b) =>
+    a.seq < b.seq ? 1 : -1,
+  ) // reverse sort by seq number
   let index = blobsReversed.length - 1 // start at end
 
   // loop through blobs in REVERSE order of encryption
