@@ -60,7 +60,7 @@ export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: AlgorandPublicKey,
   options: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   const useOptions = {
     ...options,
     curveType: Asymmetric.EciesCurveType.Ed25519,
@@ -74,7 +74,7 @@ export async function encryptWithPublicKey(
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: Asymmetric.AsymEncryptedDataString | Asymmetric.EncryptedAsymmetric,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString | Asymmetric.AsymmetricEncryptedData,
   privateKey: AlgorandPrivateKey,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
@@ -83,7 +83,7 @@ export async function decryptWithPrivateKey(
   // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
   // so we separate it and take the first half as our secretKey for encryption
   const privateKeyFragment = privateKey.slice(0, privateKey.length / 2)
-  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.EncryptedAsymmetric
+  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.AsymmetricEncryptedData
   return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyFragment, useOptions)
 }
 
@@ -96,7 +96,7 @@ export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: AlgorandPublicKey[],
   options?: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymEncryptedDataString> {
+): Promise<Asymmetric.AsymmetricEncryptedDataString> {
   return Asymmetric.toAsymEncryptedDataString(
     await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
   )
@@ -108,7 +108,7 @@ export async function encryptWithPublicKeys(
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
-  encrypted: Asymmetric.AsymEncryptedDataString,
+  encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: AlgorandPrivateKey[],
 ): Promise<string> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})

@@ -12,13 +12,13 @@ import {
   generateSharedSecretEd25519,
 } from './diffieHellman'
 import {
-  AsymEncryptedDataString,
+  AsymmetricEncryptedData,
+  AsymmetricEncryptedDataString,
   CipherGCMTypes,
   ECDHKeyFormat,
   EciesCurveType,
   EciesOptions,
   EciesOptionsAsBuffers,
-  EncryptedAsymmetric,
   Unencrypted,
 } from './asymmetricModels'
 
@@ -43,14 +43,14 @@ export const DefaultEciesOptions: any = {
 }
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isAsymEncryptedDataString(value: string): value is AsymEncryptedDataString {
+export function isAsymEncryptedDataString(value: string): value is AsymmetricEncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
   return value.match(/^.+publicKey.+ephemPublicKey.+ciphertext.+mac.+$/is) !== null
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toAsymEncryptedDataString(value: any): AsymEncryptedDataString {
+export function toAsymEncryptedDataString(value: any): AsymmetricEncryptedDataString {
   if (isAsymEncryptedDataString(value)) {
     return value
   }
@@ -217,7 +217,7 @@ export function encryptWithPublicKey(
   publicKey: string, // hex string
   plainText: string,
   options?: EciesOptions,
-): EncryptedAsymmetric {
+): AsymmetricEncryptedData {
   const useOptions = composeOptions(options)
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
@@ -246,7 +246,7 @@ export function encryptWithPublicKey(
     Buffer.concat([ciphertext, useOptions.s2], ciphertext.length + useOptions.s2.length),
   )
 
-  const result: EncryptedAsymmetric = {
+  const result: AsymmetricEncryptedData = {
     iv: !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null,
     publicKey,
     ephemPublicKey: Buffer.from(ephemPublicKey).toString('hex'),
@@ -262,7 +262,7 @@ export function encryptWithPublicKey(
 
 /** ECDH decryption using privateKey */
 export function decryptWithPrivateKey(
-  encrypted: EncryptedAsymmetric,
+  encrypted: AsymmetricEncryptedData,
   privateKey: string, // hex string
   options?: EciesOptions,
 ): string {

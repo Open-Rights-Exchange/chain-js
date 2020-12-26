@@ -7,10 +7,10 @@ import crypto from 'crypto'
 export type Unencrypted = string | NodeJS.ArrayBufferView
 
 /** Stringified JSON ciphertext (used for private keys) */
-export type AsymEncryptedDataString = string & AsymEncryptedDataStringBrand
+export type AsymmetricEncryptedDataString = string & AsymmetricEncryptedDataStringBrand
 
 /** Brand signifiying a valid value - assigned by using toEncryptedDataString */
-export enum AsymEncryptedDataStringBrand {
+export enum AsymmetricEncryptedDataStringBrand {
   _ = '',
 }
 
@@ -21,8 +21,8 @@ export enum EciesCurveType {
   Ed25519 = 'ed25519',
 }
 
-// Informational string added to encrypted results - useful when decrypting in determining set of options used
-// e.g. 'chainjs.ethereum.secp256k1.v2'
+/** Informational string added to encrypted results - useful when decrypting in determining set of options used
+ * e.g. 'chainjs.ethereum.secp256k1.v2' */
 export type Scheme = string
 
 export type EciesOptions = {
@@ -59,8 +59,9 @@ export type EciesOptionsAsBuffers = {
   scheme?: Scheme
 }
 
-/** all values are hex strings */
-export type EncryptedAsymmetric = {
+/** Asymmetric encypted data object
+ * all values are hex strings */
+export type AsymmetricEncryptedData = {
   /** 0-based order of encryption - used when 'wrapping' with mulitple asymmetric encryptions in a sequence */
   seq?: number
   iv: string
