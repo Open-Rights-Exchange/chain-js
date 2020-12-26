@@ -30,7 +30,7 @@ import {
 } from './eosConstants'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty, isANumber } from '../../helpers'
-import { composeAction } from './eosCompose'
+import { composeAction, composeActions } from './eosCompose'
 import { PermissionsHelper } from './eosPermissionsHelper'
 import { ChainActionType, ChainErrorType } from '../../models'
 
@@ -79,7 +79,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** The keys that were generated as part of the account creation process
-   *  IMPORTANT: Bes ure to always read and store these keys after creating an account
+   *  IMPORTANT: Be sure to always read and store these keys after creating an account
    *  This is the only way to retrieve the auto-generated private keys after an account is created */
   get generatedKeys() {
     if (this._generatedKeys) {
@@ -150,7 +150,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // compose action - call the composeAction type to generate the right transaction action
-    let createAccountActions
+    let createAccountActions: EosActionStruct[]
     const { active: publicKeyActive, owner: publicKeyOwner } = publicKeys || {}
     const params = {
       accountName: newAccountName,
@@ -191,7 +191,8 @@ export class EosCreateAccount implements CreateAccount {
     } else {
       switch (accountType) {
         case EosNewAccountType.Native:
-          createAccountActions = await composeAction(ChainActionType.AccountCreate, params)
+          // composeAction(s) retruns an array of actions - so we dont need to include it in an array here
+          createAccountActions = await composeActions(ChainActionType.AccountCreate, params)
           break
         case EosNewAccountType.NativeOre:
           createAccountActions = [await composeAction(EosChainActionType.OreCreateAccount, params)]

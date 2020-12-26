@@ -138,20 +138,20 @@ export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): E
   return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
 }
 
-/** Replaces unencrypted privateKey in keys object
- *  Encrypts key using password and optional salt */
+/** Adds privateKeyEncrypted if missing by encrypting privateKey (using password) */
 function encryptAccountPrivateKeysIfNeeded(
   keys: EthereumKeyPair,
   password: string,
   options: AesCrypto.AesEncryptionOptions,
 ): EthereumKeyPair {
   // encrypt if not already encrypted
-  const privateKey = isEncryptedDataString(keys?.privateKey)
-    ? keys?.privateKey
+  const privateKeyEncrypted = keys?.privateKeyEncrypted
+    ? keys.privateKeyEncrypted
     : encryptWithPassword(keys?.privateKey, password, options)
   const encryptedKeys: EthereumKeyPair = {
-    privateKey,
+    privateKey: keys?.privateKey,
     publicKey: keys?.publicKey,
+    privateKeyEncrypted,
   }
   return encryptedKeys
 }

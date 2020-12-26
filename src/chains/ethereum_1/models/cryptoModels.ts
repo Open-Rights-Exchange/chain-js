@@ -19,5 +19,6 @@ export type EthereumSignature = ECDSASignature & SignatureBrand
 /** key pair - in the format returned from algosdk */
 export type EthereumKeyPair = {
   publicKey: EthereumPublicKey
-  privateKey: EthereumPrivateKey | ModelsCryptoAes.AesEncryptedDataString
+  privateKey: EthereumPrivateKey
+  privateKeyEncrypted?: ModelsCryptoAes.AesEncryptedDataString
 }

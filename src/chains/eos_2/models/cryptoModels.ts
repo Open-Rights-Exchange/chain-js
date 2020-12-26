@@ -10,7 +10,8 @@ export type EosSignature = string & SignatureBrand
 /** key pair - in the format returned from algosdk */
 export type EosKeyPair = {
   publicKey: EosPublicKey
-  privateKey: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
+  privateKey: EosPrivateKey
+  privateKeyEncrypted?: ModelsCryptoAes.AesEncryptedDataString
 }
 
 /** An object containing public and private keys for owner and active permissions */
@@ -20,7 +21,11 @@ export type EosAccountKeys = {
     active: EosPublicKey
   }
   privateKeys: {
-    owner: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
-    active: EosPrivateKey | ModelsCryptoAes.AesEncryptedDataString
+    owner: EosPrivateKey
+    active: EosPrivateKey
+  }
+  privateKeysEncrypted?: {
+    owner: ModelsCryptoAes.AesEncryptedDataString
+    active: ModelsCryptoAes.AesEncryptedDataString
   }
 }

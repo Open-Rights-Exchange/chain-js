@@ -1,5 +1,5 @@
-import { ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
-import { AlgorandAddress, AlgorandPublicKey, AlgorandPrivateKey } from './cryptoModels'
+import { ChainSymbolBrand } from '../../../models'
+import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
 export type AlgoClient = any
@@ -55,11 +55,8 @@ export type AlgorandMultiSigOptions = {
 /**  Algorand multisig account is similar to a native algorand address */
 export type AlgorandMultiSigAccount = AlgorandAddress
 
-/**  Algorand generated keys  after an account is created */
-export type AlgorandGeneratedKeys = {
-  publicKey: AlgorandPublicKey
-  privateKey?: AlgorandPrivateKey | ModelsCryptoEd25519.Ed25519EncryptedDataString
-}
+/**  Algorand keys generated for a new account */
+export type AlgorandGeneratedKeys = AlgorandKeyPair
 
 /**  Algorand new keys options including password and optional multisig parameters */
 export type AlgorandNewKeysOptions = {

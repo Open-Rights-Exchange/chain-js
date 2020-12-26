@@ -4,7 +4,7 @@ import base58 from 'bs58'
 import { AesCrypto, Asymmetric } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey, EosKeyPair } from './models'
-import { KeyPairEncrypted, Signature } from '../../models'
+import { Signature } from '../../models'
 import { throwNewError } from '../../errors'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
@@ -144,23 +144,23 @@ export function verifySignedWithPublicKey(
   return eosEcc.verify(data, publicKey, encoding)
 }
 
-/** Replaces unencrypted privateKeys (owner and active) in keys object
- *  Encrypts keys using password and optional salt */
+/** Adds privateKeyEncrypted (owner and/or active) if missing by encrypting privateKey (using password) */
 function encryptAccountPrivateKeysIfNeeded(
-  keys: any,
+  keys: EosAccountKeys,
   password: string,
   encryptionOptions: AesCrypto.AesEncryptionOptions,
-) {
+): EosAccountKeys {
   const { privateKeys, publicKeys } = keys
-  const encryptedKeys = {
-    privateKeys: {
-      owner: isEncryptedDataString(privateKeys.owner)
-        ? privateKeys.owner
-        : encryptWithPassword(privateKeys.owner, password, encryptionOptions).toString(),
-      active: isEncryptedDataString(privateKeys.active)
-        ? privateKeys.active
-        : encryptWithPassword(privateKeys.active, password, encryptionOptions).toString(),
+  const encryptedKeys: EosAccountKeys = {
+    privateKeysEncrypted: {
+      owner: keys?.privateKeysEncrypted?.owner
+        ? keys?.privateKeysEncrypted.owner
+        : encryptWithPassword(privateKeys.owner, password, encryptionOptions),
+      active: keys?.privateKeysEncrypted?.active
+        ? keys?.privateKeysEncrypted.active
+        : encryptWithPassword(privateKeys.active, password, encryptionOptions),
     },
+    privateKeys: { ...privateKeys },
     publicKeys: { ...publicKeys },
   }
   return encryptedKeys
@@ -168,12 +168,12 @@ function encryptAccountPrivateKeysIfNeeded(
 
 /** Generates new owner and active key pairs (public and private)
  *  Encrypts private keys with provided password and optional salt
- *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
+ *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active}, privateKeysEncrypted:{owner, active} } */
 export async function generateNewAccountKeysAndEncryptPrivateKeys(
   password: string,
   overrideKeys: any = {},
   encryptionOptions: AesCrypto.AesEncryptionOptions,
-) {
+): Promise<EosAccountKeys> {
   // remove any empty values passed-in (e.g. active=undefined or '' )
   removeEmptyValuesInJsonObject(overrideKeys)
 
@@ -197,12 +197,13 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
 export async function generateKeyPairAndEncryptPrivateKeys(
   password: string,
   encryptionOptions: AesCrypto.AesEncryptionOptions,
-): Promise<KeyPairEncrypted> {
+): Promise<EosKeyPair> {
   if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
   const keys = await generateKeyPair()
   return {
-    public: toEosPublicKey(keys.publicKey),
-    privateEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
+    publicKey: toEosPublicKey(keys.publicKey),
+    privateKey: keys.privateKey,
+    privateKeyEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
   }
 }
 

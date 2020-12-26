@@ -217,7 +217,7 @@ class ChainEthereumV1 implements Chain {
 
   /** Generates new key pairs (public and private)
    *  Encrypts private key with provided password (and optional salt)
-   *  Returns: { privateKey, publicKey } */
+   *  Returns: { privateKey, publicKey, encryptedPrivateKey } */
   generateNewAccountKeysWithEncryptedPrivateKeys = ethcrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Generate a signature given some data and a private key */

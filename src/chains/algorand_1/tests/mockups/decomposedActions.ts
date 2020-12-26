@@ -51,6 +51,25 @@ export const decomposedAssetFreeze = [
 
 export const decomposedAssetTransfer = [
   {
+    chainActionType: 'TokenTransfer',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      amount: 1000,
+      note: 'create',
+      closeRemainderTo: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      assetIndex: 12345,
+      assetRevocationTarget: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      type: 'axfer',
+      fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      memo: 'create',
+      contractName: 12345,
+    },
+  },
+  {
     chainActionType: 'AssetTransfer',
     args: {
       name: 'Transaction',
