@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ChainFactory, ChainType } from '../../../index'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
