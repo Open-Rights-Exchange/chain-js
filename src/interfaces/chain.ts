@@ -71,10 +71,10 @@ export interface Chain {
   cryptoCurve: CryptoCurve
   /** Decrypts the encrypted value using a password, and optional salt using AES algorithm and SHA256 hash function
    * Expects the encrypted value to be a stringified JSON object */
-  decryptWithPassword(encrypted: Generic.EncryptedDataString, password: string, options?: any): string
+  decryptWithPassword(encrypted: Generic.SymmetricEncryptedDataString, password: string, options?: any): string
   /** Encrypts a string using a password and optional salt using AES algorithm and SHA256 hash function
    * The returned, encrypted value is a stringified JSON object */
-  encryptWithPassword(unencrypted: string, password: string, options?: any): Generic.EncryptedDataString
+  encryptWithPassword(unencrypted: string, password: string, options?: any): Generic.SymmetricEncryptedDataString
   /** Decrypts the encrypted value using a private key
    * The encrypted value is a stringified JSON object
    * ... and must have been encrypted with the public key that matches the private ley provided */
@@ -139,7 +139,7 @@ export interface Chain {
   /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
   /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
-  toEncryptedDataString(value: any): Generic.EncryptedDataString
+  toEncryptedDataString(value: any): Generic.SymmetricEncryptedDataString
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toAsymEncryptedDataString(value: any): Asymmetric.AsymmetricEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */
