@@ -139,7 +139,7 @@ export const createAccountOptions_virtualNested = {
 
 export const createAccountOptions_EosNative = {
   accountNamePrefix: 'ore',
-  // accountName: 'ore1qcfacksc',
+  // accountName: 'ore1qcfadksc',
   creatorAccountName: 'proppropprop',
   creatorPermission: 'active',
   newKeysOptions: {
@@ -192,10 +192,10 @@ export const accountNewPermissions = [
     name: toEosEntityName('n2permission'),
     parent: toEosEntityName('active'),
   },
-  {
-    name: toEosEntityName('n3permission'),
-    parent: toEosEntityName('nwpermission'),
-  },
+  // {
+  //   name: toEosEntityName('n3permission'),
+  //   parent: toEosEntityName('nwpermission'),
+  // },
 ]
 
 export const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
@@ -205,9 +205,9 @@ export const accountDeletePermissions: Partial<DeletePermissionsParams>[] = [
   {
     permissionName: toEosEntityName('n2permission'),
   },
-  {
-    permissionName: toEosEntityName('n3permission'),
-  },
+  // {
+  //   permissionName: toEosEntityName('n3permission'),
+  // },
 ]
 
 export const accountDeleteDemoPermissions: Partial<DeletePermissionsParams>[] = [
@@ -235,22 +235,7 @@ export const accountLinkPermissions: LinkPermissionsParams[] = [
     action: toEosEntityName('define'),
   },
 ]
-
-const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) => {
-  console.log(createAccount)
-  const { password, salt } = createAccount.options.newKeysOptions
-  console.log('salt, password:', salt, password)
-  const { owner, active } = createAccount.generatedKeys.accountKeys.privateKeys
-  console.log(
-    'createAccount.generatedKeys.accountKeys.privateKeys:',
-    createAccount.generatedKeys.accountKeys.privateKeys,
-  )
-  // const decryptedOwnerPrivateKey = await chain.decryptWithPassword(toEncryptedDataString(owner), password, { salt })
-  const decryptedActivePrivateKey = await chain.decryptWithPassword(AesCrypto.toAesEncryptedDataString(active), password, { salt })
-  // console.log('decrypted owner privateKey: ', decryptedOwnerPrivateKey)
-  console.log('decrypted active privateKey: ', decryptedActivePrivateKey)
-}
-;(async () => {
+async function run() {
   //
   // Example funcions - uncomment and run
   // You must first create an .env file in the root of the examples folder with the private keys and other secrets
@@ -290,10 +275,10 @@ const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) =
   if (createAccount.supportsTransactionToCreateAccount) {
     await createAccount.composeTransaction(EosNewAccountType.Native)
     await prepTransaction(kylin, createAccount.transaction, env.KYLIN_proppropprop_PRIVATE_KEY)
-    // const txResponse = await createAccount.transaction.send()
-    // console.log('createAccount response: ', JSON.stringify(txResponse))
+    console.log('createAccount.generatedKeys: ', createAccount.generatedKeys.accountKeys)
+    const txResponse = await createAccount.transaction.send()
+    console.log('createAccount response: ', JSON.stringify(txResponse))
   }
-  await logOutGeneratedKeys(kylin, createAccount)
 
   // -----> CreateAccount - create native ore-staging account
   // const createAccount = oreStaging.new.CreateAccount(createAccountOptions_OreNative)
@@ -341,15 +326,15 @@ const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) =
 
   // -------------------- Permissions -----------------------
 
-  // // ------> AddPermissions to account
-  // const account = (await kylin.new.Account('ore1qbmd2nvu')) as EosAccount
+  // ------> AddPermissions to account
+  // const account = (await kylin.new.Account('ore1retmquy2')) as EosAccount
   // console.log('ore1qbmd2nvu account permissions:', account.permissions)
   // const { generatedKeys, actions } = await account.composeAddPermissionsActions(
   //   toEosEntityName('owner'),
   //   accountNewPermissions,
   //   permissionNewKeysOptions,
   // )
-  // console.log('createAccount.generatedKeys:', JSON.stringify(generatedKeys))
+  // console.log('generatedKeys:', JSON.stringify(generatedKeys))
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
   // const txResponse = await transaction.send()
   // console.log('send response:', JSON.stringify(txResponse))
@@ -383,4 +368,13 @@ const logOutGeneratedKeys = async (chain: Chain, createAccount: CreateAccount) =
   // const transaction = await prepTransactionFromActions(kylin, actions, env.KYLIN_proppropprop_PRIVATE_KEY)
   // const txResponse = await transaction.send()
   // console.log('send response:', JSON.stringify(txResponse))
+}
+
+;(async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log('Error:', error)
+  }
+  process.exit()
 })()

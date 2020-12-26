@@ -252,7 +252,7 @@ class ChainEosV2 implements Chain {
 
   /** Generates new owner and active key pairs (public and private)
    *  Encrypts private keys with provided password and optional params
-   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active} } */
+   *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active}, privateKeysEncrypted:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */

@@ -262,7 +262,7 @@ export class PermissionsHelper {
       if (!p.publicKey) {
         const updatedPerm = p
         const keys = await generateKeyPairAndEncryptPrivateKeys(password, encryptionOptions)
-        updatedPerm.publicKey = keys.public
+        updatedPerm.publicKey = keys.publicKey
         updatedPerm.publicKeyWeight = 1
         generatedKeys.push({ permissionName: updatedPerm.name, keyPair: keys })
       }

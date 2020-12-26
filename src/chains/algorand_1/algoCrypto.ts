@@ -134,14 +134,18 @@ export function verifySignedWithPublicKey(
   )
 }
 
-/** Replaces unencrypted privateKey in keys object
- *  Encrypts key using password */
+/** Adds privateKeyEncrypted if missing by encrypting privateKey (using password) */
 function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, options: AlgoEncryptionOptions) {
-  const { privateKey, publicKey } = keys
+  // encrypt if not already encrypted
+  const privateKeyEncrypted = keys?.privateKeyEncrypted
+    ? keys.privateKeyEncrypted
+    : encryptWithPassword(keys?.privateKey, password, options)
   const encryptedKeys = {
-    privateKey: encryptWithPassword(privateKey, password, options),
-    publicKey,
+    privateKey: keys?.privateKey,
+    publicKey: keys?.publicKey,
+    privateKeyEncrypted,
   }
+
   return encryptedKeys as AlgorandKeyPair
 }
 

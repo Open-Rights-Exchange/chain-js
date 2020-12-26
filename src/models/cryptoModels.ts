@@ -28,11 +28,7 @@ type Signature = string & SignatureBrand
 type KeyPair = {
   publicKey: PublicKey
   privateKey: PrivateKey
-}
-
-type KeyPairEncrypted = {
-  public: PublicKey
-  privateEncrypted: ModelsCryptoGeneric.EncryptedDataString
+  privateKeyEncrypted?: ModelsCryptoGeneric.EncryptedDataString
 }
 
 type AccountKeysStruct = {
@@ -54,7 +50,6 @@ export {
   AccountKeysStruct,
   CryptoCurve,
   KeyPair,
-  KeyPairEncrypted,
   ModelsCryptoAes,
   ModelsCryptoAsymmetric,
   ModelsCryptoEcc,

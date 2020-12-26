@@ -179,7 +179,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Generates new key pairs (public and private)
    *  Encrypts private key with provided password
-   *  Returns: { privateKey, publicKey } */
+   *  Returns: { privateKey, publicKey, encryptedPrivateKey } */
   generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */

@@ -8,7 +8,8 @@ export type AlgorandEntityName = string & ChainEntityNameBrand
 /** key pair - in the format returned from algosdk */
 export type AlgorandKeyPair = {
   publicKey: AlgorandPublicKey
-  privateKey: AlgorandPrivateKey | Ed25519Crypto.Ed25519EncryptedDataString
+  privateKey: AlgorandPrivateKey
+  privateKeyEncrypted?: Ed25519Crypto.Ed25519EncryptedDataString
 }
 
 /** a private key string - formatted correctly for algorand */

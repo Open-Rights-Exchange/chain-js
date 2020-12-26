@@ -62,8 +62,6 @@ async function run() {
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
   console.log('generatedKeys: %o', generatedKeys)
-  const decryptedPrivateKey = algoTest.decryptWithPassword(generatedKeys.privateKey, createAccountOptions.newKeysOptions.password, { salt: createAccountOptions.newKeysOptions.salt})
-  console.log('decrypted privateKey: ', decryptedPrivateKey)
   console.log('account name: %o', accountName)
   const account = await algoTest.new.Account(accountName)
   console.log('account: %o', account.name)
