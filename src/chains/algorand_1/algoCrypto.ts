@@ -19,12 +19,12 @@ import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 const ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519.algorand'
 
 /** Verifies that the value is a valid encrypted string */
-export function isEncryptedDataString(value: string): value is Ed25519Crypto.Ed25519EncryptedDataString {
+export function isSymEncryptedDataString(value: string): value is Ed25519Crypto.Ed25519EncryptedDataString {
   return ed25519Crypto.isEd25519EncryptedDataString(value)
 }
 
 /** Ensures that the value confirms to a well-formed and encrypted string */
-export function toEncryptedDataString(value: any): Ed25519Crypto.Ed25519EncryptedDataString {
+export function toSymEncryptedDataString(value: any): Ed25519Crypto.Ed25519EncryptedDataString {
   return ed25519Crypto.toEd25519EncryptedDataString(value)
 }
 
@@ -38,7 +38,7 @@ export function encryptWithPassword(
 ): Ed25519Crypto.Ed25519EncryptedDataString {
   const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
   const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
-  return toEncryptedDataString(encrypted)
+  return toSymEncryptedDataString(encrypted)
 }
 
 /** Decrypts the encrypted value using nacl

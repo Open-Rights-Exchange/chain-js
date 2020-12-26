@@ -21,12 +21,12 @@ export const defaultIter = AesCrypto.defaultIter
 export const defaultMode = AesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
+export function isSymEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
   return AesCrypto.isAesEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
+export function toSymEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
   return AesCrypto.toAesEncryptedDataString(value)
 }
 
@@ -203,7 +203,7 @@ export async function generateKeyPairAndEncryptPrivateKeys(
   return {
     publicKey: toEosPublicKey(keys.publicKey),
     privateKey: keys.privateKey,
-    privateKeyEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
+    privateKeyEncrypted: encryptWithPassword(keys.privateKey, password, encryptionOptions),
   }
 }
 
