@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js'
 import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
+import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
@@ -251,6 +252,10 @@ export function bufferToHexString(value: Buffer): string {
   return value.toString('hex')
 }
 
+export function utf8StringToHexString(value: string): string {
+  return Buffer.from(value, 'utf8').toString('hex')
+}
+
 /** convert a decimal number string to a hex string - supports long decimals (uses BN)
  *  e.g. '16' => '0xA'  */
 export function decimalToHexString(value: string) {
@@ -384,4 +389,12 @@ export async function asyncForEach(array: any[], callback: (item: any, index: nu
     // eslint-disable-next-line no-await-in-loop
     await callback(array[index], index, array)
   }
+}
+
+/** Generates a SHA256 hash from a string value
+ *  Returns a hex-encoded result */
+export function createSha256Hash(value: string) {
+  const hash = sha256.create()
+  hash.update(value)
+  return hash.hex()
 }

@@ -37,8 +37,8 @@ async function run() {
 
   console.log('keyPair:', await algoTest.generateKeyPair())
 
-  const payload = 'text to encrypt'
-  const encryptedBlob = await algoTest.encryptWithPassword(payload, 'mypassword', {
+  const toEncrypt = 'text to encrypt'
+  const encryptedBlob = await algoTest.encryptWithPassword(toEncrypt, 'mypassword', {
     salt: 'mysalt',
   })
   console.log('encrypted blob:', encryptedBlob)
