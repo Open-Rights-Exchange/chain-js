@@ -213,10 +213,16 @@ export function arrayToObject(array: IndexedObject[]) {
   return result
 }
 
-/** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'X-API-Key': '...'}]  */
+/** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'x-api-key': '...'}]  */
 export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, headerName: string) {
   const { headers } = endpoint?.options
-  const matchingHeader = (headers || []).find((val: {}) => val && Object.keys(val || {}).includes(headerName))
+  const matchingHeader = (headers || []).find(
+    (val: {}) =>
+      val &&
+      Object.keys(val || {})
+        .map((h: any) => h.toLowerCase())
+        .includes(headerName.toLowerCase()),
+  )
   return matchingHeader
 }
 
