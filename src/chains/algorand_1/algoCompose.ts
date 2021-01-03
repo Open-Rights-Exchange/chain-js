@@ -4,7 +4,7 @@ import { composeAction as TokenTransferTemplate } from './templates/chainActions
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
 import { composeAction as ApplicationCloseOutTemplate } from './templates/chainActions/chainSpecific/application_closeout'
-import { composeAction as AApplicationCreateTemplate } from './templates/chainActions/chainSpecific/application_create'
+import { composeAction as ApplicationCreateTemplate } from './templates/chainActions/chainSpecific/application_create'
 import { composeAction as ApplicationDeleteTemplate } from './templates/chainActions/chainSpecific/application_delete'
 import { composeAction as ApplicationNoOpTemplate } from './templates/chainActions/chainSpecific/application_noOp'
 import { composeAction as ApplicationOptInTemplate } from './templates/chainActions/chainSpecific/application_optIn'
@@ -37,13 +37,13 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   AssetDestroy: AssetDestroyTemplate,
   AssetFreeze: AssetFreezeTemplate,
   AssetTransfer: AssetTransferTemplate,
-  ApplicationClear: ApplicationClearTemplate,
-  ApplicationCloseOut: ApplicationCloseOutTemplate,
-  ApplicationCreate: AApplicationCreateTemplate,
-  ApplicationDelete: ApplicationDeleteTemplate,
-  ApplicationNoOp: ApplicationNoOpTemplate,
-  ApplicationOptIn: ApplicationOptInTemplate,
-  ApplicationUpdate: ApplicationUpdateTemplate,
+  AppClear: ApplicationClearTemplate,
+  AppCloseOut: ApplicationCloseOutTemplate,
+  AppCreate: ApplicationCreateTemplate,
+  AppDelete: ApplicationDeleteTemplate,
+  AppNoOp: ApplicationNoOpTemplate,
+  AppOptIn: ApplicationOptInTemplate,
+  AppUpdate: ApplicationUpdateTemplate,
   KeyRegistration: KeyRegistrationTemplate,
   Payment: PaymentTemplate,
 }
