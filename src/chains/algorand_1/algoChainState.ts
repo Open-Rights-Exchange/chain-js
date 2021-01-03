@@ -4,6 +4,7 @@ import { ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '..
 import {
   AlgorandAddress,
   AlgoClient,
+  AlgoClientIndexer,
   AlgorandChainEndpoint,
   AlgorandChainInfo,
   AlgorandChainSettings,
@@ -15,13 +16,7 @@ import {
   AlgorandTxResult,
   AlgorandUnit,
 } from './models'
-import {
-  getHeaderValueFromEndpoint,
-  hexStringToByteArray,
-  isNullOrEmpty,
-  objectHasProperty,
-  trimTrailingChars,
-} from '../../helpers'
+import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import {
   ALGORAND_POST_CONTENT_TYPE,
   DEFAULT_BLOCKS_TO_CHECK,
@@ -45,7 +40,7 @@ export class AlgorandChainState {
 
   private _algoClient: AlgoClient
 
-  private _algoClientWithTxHeader: AlgoClient
+  private _algoClientIndexer: AlgoClient
 
   constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -93,13 +88,13 @@ export class AlgorandChainState {
         const { endpoint } = this.selectEndpoint()
         this._activeEndpoint = endpoint
         this.assertEndpointHasTokenHeader()
-        const { token, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
+        const { token, indexerUrl, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
         const postToken = {
           ...token,
           ...ALGORAND_POST_CONTENT_TYPE,
         }
-        this._algoClient = new algosdk.Algod(token, url, port)
-        this._algoClientWithTxHeader = new algosdk.Algod(postToken, url, port)
+        this._algoClient = new algosdk.Algodv2(token, url, port)
+        this._algoClientIndexer = new algosdk.Indexer(postToken, indexerUrl, port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -112,15 +107,31 @@ export class AlgorandChainState {
   public async getChainInfo(): Promise<ChainInfo> {
     // eslint-disable-next-line no-useless-catch
     try {
-      const transactionHeaderParams: AlgorandChainTransactionParamsStruct = await this._algoClient.getTransactionParams()
-      const { lastRound, consensusVersion } = transactionHeaderParams
-      const { timestamp } = await this._algoClient.block(lastRound)
+      // get details from getTransactionParams endpoint
+      const chainTxParams = await this._algoClient.getTransactionParams().do()
+      const transactionParams: AlgorandChainTransactionParamsStruct = {
+        genesisHash: chainTxParams?.genesisHash,
+        genesisID: chainTxParams?.genesisID,
+        firstRound: chainTxParams?.firstRound,
+        lastRound: chainTxParams?.lastRound,
+        consensusVersion: chainTxParams?.consensusVersion,
+        minFee: 0,
+        suggestedFee: chainTxParams?.fee, // suggested fee (in microAlgos)
+      }
+      // get a few things from status endpoint
+      const {
+        'last-round': lastRound,
+        'last-version': lastVersion,
+        'time-since-last-round': timeSinceLastRoundInNanoSeconds,
+      } = await this._algoClient.status().do()
+
+      const timeOfLastRound = Date.now() + timeSinceLastRoundInNanoSeconds / 1000000
       this._chainInfo = {
         headBlockNumber: lastRound,
-        headBlockTime: new Date(timestamp),
-        // version example: 'https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f'
-        version: consensusVersion.toString(),
-        nativeInfo: { transactionHeaderParams },
+        headBlockTime: new Date(timeOfLastRound),
+        // version example: 'https://github.com/algorandfoundation/specs/tree/3a83c4c743f8b17adfd73944b4319c25722a6782'
+        version: lastVersion,
+        nativeInfo: { transactionHeaderParams: transactionParams },
       }
       return this._chainInfo
     } catch (error) {
@@ -131,7 +142,7 @@ export class AlgorandChainState {
 
   public async getBlock(blockNumber: number): Promise<any> {
     this.assertIsConnected()
-    const block = await this._algoClient.block(blockNumber)
+    const block = await this._algoClientIndexer.lookupBlock(blockNumber)
     return block
   }
 
@@ -151,23 +162,27 @@ export class AlgorandChainState {
     }
 
     const balance = await this.getAssetBalance(account, symbol)
-    return { balance: balance || '0' }
+    return { balance }
   }
 
-  /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
+  /** returns balance of Algos for an account (in microalgos) */
   public async getAlgorandBalance(address: AlgorandAddress): Promise<string> {
-    const accountInfo = await this._algoClient.accountInformation(address)
-    return toAlgo(accountInfo?.amount, AlgorandUnit.Microalgo).toString()
+    const accountInfo = await this._algoClientIndexer.lookupAccountByID(address).do()
+    return (toAlgo(accountInfo?.account?.amount, AlgorandUnit.Microalgo) || 0).toString()
   }
 
-  /** Utilizes native algosdk method to get Algo token balance for an account (in microalgos) */
+  /** returns balance of a specfied asset for an account
+   *  assetSymbol is the assetId */
   public async getAssetBalance(address: AlgorandAddress, assetSymbol: string): Promise<string> {
-    const accountInfo = await this._algoClient.accountInformation(address)
-    const { assets } = accountInfo || {}
-    if (!isNullOrEmpty(assets) && objectHasProperty(assets, assetSymbol)) {
-      return assets[assetSymbol]?.amount
+    let balance = '0'
+    const accountInfo = await this._algoClientIndexer.lookupAccountByID(address).do()
+    const assetId = parseInt(assetSymbol, 10)
+    const { assets } = accountInfo?.account || {}
+    const asset = assets.find((a: any) => a['asset-id'] === assetId)
+    if (asset) {
+      balance = asset?.amount || '0'
     }
-    return null
+    return balance
   }
 
   /** Confirm that we've connected to the chain - throw if not */
@@ -183,9 +198,9 @@ export class AlgorandChainState {
   async sendTransactionWithoutWaitingForConfirm(signedTransaction: string) {
     // eslint-disable-next-line no-useless-catch
     try {
-      const { txId: transactionId } = await this._algoClientWithTxHeader.sendRawTransaction(
-        hexStringToByteArray(signedTransaction),
-      )
+      const { txId: transactionId } = await this._algoClient
+        .sendRawTransaction(hexStringToByteArray(signedTransaction))
+        .do()
       return transactionId
     } catch (error) {
       // ALGO TODO: map chain error
@@ -219,7 +234,7 @@ export class AlgorandChainState {
     let transactionId
     // eslint-disable-next-line no-useless-catch
     try {
-      const { txId } = await this._algoClientWithTxHeader.sendRawTransaction(hexStringToByteArray(signedTransaction))
+      const { txId } = await this._algoClient.sendRawTransaction(hexStringToByteArray(signedTransaction)).do()
       transactionId = txId
     } catch (error) {
       const chainError = mapChainError(error)
@@ -436,9 +451,9 @@ export class AlgorandChainState {
   /** Return instance of algo sdk for sending transactions
    * Includes content-type: 'application/x-binary' in the header
    */
-  public get algoClientWithTxHeader(): AlgoClient {
+  public get algoClientIndexer(): AlgoClientIndexer {
     this.assertIsConnected()
-    return this._algoClientWithTxHeader
+    return this._algoClientIndexer
   }
 
   /** Searched transaction on chain by id
@@ -456,20 +471,19 @@ export class AlgorandChainState {
 
   /** Gets recommented fee (microalgo) per byte according to network's transaction load */
   public async getSuggestedFeePerByte(): Promise<number> {
-    const { fee } = await this.algoClient.suggestedFee()
-    return fee
+    return this._chainInfo?.nativeInfo?.transactionHeaderParams?.suggestedFee
   }
 
   /** Checks for required header 'X-API_key' */
   private assertEndpointHasTokenHeader(): void {
-    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')) {
-      throwNewError('X-API-Key header is required to call algorand endpoint')
+    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')) {
+      throwNewError('x-api-key header is required to call algorand endpoint')
     }
   }
 
-  /** returns the 'X-API-Key' header required to call algorand chain endpoint */
+  /** returns the 'x-api-key' header required to call algorand chain endpoint */
   private getTokenFromEndpointHeader(): AlgorandHeader {
-    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'X-API-Key')
+    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')
     if (isNullOrEmpty(token)) {
       return null
     }
@@ -477,18 +491,23 @@ export class AlgorandChainState {
   }
 
   private getAlgorandConnectionSettingsForEndpoint() {
-    const { url } = this._activeEndpoint
+    const { url, indexerUrl } = this._activeEndpoint
     const { port = '' } = url
     const token = this.getTokenFromEndpointHeader()
-    return { url, token, port }
+    return { url, indexerUrl, token, port }
   }
 
   // TODO: sort based on health info
   /**  * Choose the best Chain endpoint based on health and response time */
-  private selectEndpoint(): { url: URL; endpoint: AlgorandChainEndpoint } {
+  private selectEndpoint(): { url: URL; indexerUrl: URL; endpoint: AlgorandChainEndpoint } {
     // Just choose the first endpoint for now
     const endpoint = this.endpoints[0]
     const url = endpoint?.url?.href
-    return { url: new URL(trimTrailingChars(url, '/')), endpoint }
+    const indexerUrl = endpoint?.indexerUrl?.href
+    return {
+      url: new URL(trimTrailingChars(url, '/')),
+      indexerUrl: new URL(trimTrailingChars(indexerUrl, '/')),
+      endpoint,
+    }
   }
 }
