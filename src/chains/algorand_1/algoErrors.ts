@@ -25,7 +25,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   MiscChainError: 'chain_type_exception',
   MiscBlockValidationError: '(GenesisHash mismatch|GenesisHash required|GenesisID mismatch)',
   MiscTransactionError:
-    '(tx does not|unknown consensus|rejected by logic|asset transaction|transaction (asset|from|cannot|invalid|note|tried|has|window|tries|had|pool)|TransactionPool|(remember|malformed|invlid) tx|transaction already|ps1/v1/transaction)',
+    '(tx does not|unknown consensus|rejected by logic|asset transaction|transaction (asset|from|cannot|invalid|note|tried|has|window|tries|had|pool)|TransactionPool|(remember|malformed|invlid) tx|transaction already|ps2/v2/transaction)',
   MiscActionValidationError:
     '(address|nonempty AuthAddr|cannot close account|cannot spend from fee sink|cannot close fee sink|tx.|invalid application|programs|application|asset (name|metadata|unit|decimal|url))',
   MiscContractError: 'condition violated',

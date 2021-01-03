@@ -215,8 +215,8 @@ export class AlgorandActionHelper {
   applyCurrentTxHeaderParamsWhereNeeded(chainTxParams: AlgorandChainTransactionParamsStruct) {
     const rawAction = this.raw
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
-    rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesishashb64, 'base64')
-    rawAction.firstRound = rawAction.firstRound || chainTxParams.lastRound // start with the most recent chain round (chainTxParams.lastRound)
+    rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
+    rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
     rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
     rawAction.fee = rawAction.fee || chainTxParams.minFee
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true

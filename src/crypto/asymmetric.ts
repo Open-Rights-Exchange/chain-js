@@ -2,7 +2,8 @@
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 import crypto from 'crypto'
 import { decodeBase64 } from 'tweetnacl-util'
-import { isAString, isNullOrEmpty } from '../helpers'
+import { ecdsaSign, ecdsaVerify } from 'secp256k1'
+import { byteArrayToHexString, createSha256Hash, isAString, isNullOrEmpty, utf8StringToHexString } from '../helpers'
 import { throwNewError } from '../errors'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 import {
@@ -21,6 +22,7 @@ import {
   EciesOptionsAsBuffers,
   Unencrypted,
 } from './asymmetricModels'
+import { PrivateKey, PublicKey, Signature } from '../models'
 
 export * from './asymmetricModels'
 
@@ -305,4 +307,22 @@ export function decryptWithPrivateKey(
   // m = E-1(Ke; c)
   const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, encryptionKey, cipherText)
   return buffer.toString()
+}
+
+/** Signs a string (utf8) using the private key (hex string) and returns a signature (hex string) */
+export async function sign(value: string, privateKey: PrivateKey): Promise<Signature> {
+  // convert value to hex string then create a hash of it
+  const valueBuffer = new Uint8Array(Buffer.from(createSha256Hash(utf8StringToHexString(value)), 'hex'))
+  const keyBuffer = new Uint8Array(Buffer.from(privateKey, 'hex'))
+  const signResults = ecdsaSign(valueBuffer, keyBuffer)
+  const signature = byteArrayToHexString(signResults.signature)
+  return signature as Signature
+}
+
+/** Verifies the signature for the string and returns true if verification succeeded */
+export function verifySignedWithPublicKey(value: string, publicKey: PublicKey, signature: Signature): boolean {
+  const valueBuffer = new Uint8Array(Buffer.from(createSha256Hash(utf8StringToHexString(value)), 'hex'))
+  const keyBuffer = new Uint8Array(Buffer.from(publicKey, 'hex'))
+  const sigBuffer = new Uint8Array(Buffer.from(signature, 'hex'))
+  return ecdsaVerify(sigBuffer, valueBuffer, keyBuffer)
 }

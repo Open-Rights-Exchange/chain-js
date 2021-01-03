@@ -1,16 +1,17 @@
-import { ChainEndpoint } from '../../../../models'
-
 import { AlgorandChainState } from '../../algoChainState'
+import { AlgorandChainEndpoint } from '../../models'
 
-const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps1'
+const algoPureStakeTestnet = 'https://testnet-algorand.api.purestake.io/ps2'
+const algoPureStakeTestnetIndexer = 'https://testnet-algorand.api.purestake.io/idx2'
 
-export const algoTestnetEndpoints: ChainEndpoint[] = [
+export const algoTestnetEndpoints: AlgorandChainEndpoint[] = [
   {
     url: new URL(algoPureStakeTestnet),
+    indexerUrl: new URL(algoPureStakeTestnetIndexer),
     options: {
       headers: [
         {
-          'X-API-Key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
+          'x-api-key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',
         },
       ],
     },

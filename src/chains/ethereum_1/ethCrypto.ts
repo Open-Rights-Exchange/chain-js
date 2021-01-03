@@ -118,6 +118,7 @@ export async function decryptWithPrivateKeys(
 
 /** Signs data with private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
+  // todo: data should be hashed first using ethereum-js-tx Transaction.prototype.hash
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
   return toEthereumSignature(ecsign(dataBuffer, keyBuffer))

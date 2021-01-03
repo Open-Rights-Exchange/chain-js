@@ -1,4 +1,10 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable max-len */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
+import { Asymmetric } from '../../../crypto'
 import { ChainFactory, ChainType } from '../../../index'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
 
@@ -7,24 +13,21 @@ require('dotenv').config()
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [
-  {
-    url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
-const algoTestnetEndpoints = [
-  {
-    url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
-const algoBetanetEndpoints = [
-  {
-    url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
+const algoMainnetEndpoints = [{
+  url: new URL('https://mainnet-algorand.api.purestake.io/ps2'),
+  indexerUrl: new URL('https://mainnet-algorand.api.purestake.io/idx2'),
+  options: { headers: [{ 'x-api-key': algoApiKey }] },
+}]
+const algoTestnetEndpoints = [ {
+  url: new URL('https://testnet-algorand.api.purestake.io/ps2'),
+  indexerUrl: new URL('https://testnet-algorand.api.purestake.io/idx2'),
+  options: { headers: [{ 'x-api-key': algoApiKey }] },
+}]
+const algoBetanetEndpoints = [{
+  url: new URL('https://betanet-algorand.api.purestake.io/ps2'),
+  indexerUrl: new URL('https://betanet-algorand.api.purestake.io/idx2'),
+  options: { headers: [{ 'x-api-key': algoApiKey }] },
+}]
 
 async function run() {
   /** Create Algorand chain instance */
@@ -33,6 +36,13 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
+
+  // asymetric sign test
+  // const privKey = '' // for no chain
+  // const pubKey = '' // uncompressed
+  // const signature = await Asymmetric.sign('sign this string', privKey)
+  // console.log('asym sig:', signature)
+  // console.log('verify asym sig:', Asymmetric.verifySignedWithPublicKey('sign this string', pubKey, signature as any))
 
   const publicKey1 = toAlgorandPublicKey('a9f7bdcbc2d11b8f03bdf6cf3eb7d36b9ad53bfe8bdee2e2b5ce39c92a764a45')
   const privateKey1 = toAlgorandPrivateKey(

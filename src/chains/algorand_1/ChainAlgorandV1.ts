@@ -274,6 +274,11 @@ class ChainAlgorandV1 implements Chain {
   public get algoClient() {
     return this._chainState?.algoClient
   }
+
+  /** Access to underlying algoSdk indexer */
+  public get algoClientIndexer() {
+    return this._chainState?.algoClientIndexer
+  }
 }
 
 export { ChainAlgorandV1 }
