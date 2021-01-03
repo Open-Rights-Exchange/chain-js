@@ -137,11 +137,11 @@ export function getPublicKeyFromSignature(
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
-  publicKey: EosSignature | Buffer,
   data: string | Buffer,
-  encoding: string = TRANSACTION_ENCODING,
+  publicKey: EosPublicKey,
+  signature: EosSignature,
 ): boolean {
-  return eosEcc.verify(data, publicKey, encoding)
+  return eosEcc.verify(signature, data, publicKey)
 }
 
 /** Adds privateKeyEncrypted (owner and/or active) if missing by encrypting privateKey (using password) */
