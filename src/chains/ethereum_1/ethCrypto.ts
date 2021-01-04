@@ -182,9 +182,9 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
 // TODO: implement using web3 method?
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
-  publicKey: string | Buffer,
   data: string | Buffer,
-  encoding: string,
+  publicKey: EthereumPublicKey,
+  signature: EthereumSignature,
 ): boolean {
   notImplemented()
   return null
