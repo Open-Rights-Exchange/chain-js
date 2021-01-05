@@ -6,9 +6,9 @@ const algoPureStakeTestnetIndexer = 'https://testnet-algorand.api.purestake.io/i
 
 export const algoTestnetEndpoints: AlgorandChainEndpoint[] = [
   {
-    url: new URL(algoPureStakeTestnet),
+    url: algoPureStakeTestnet,
     options: {
-      indexerUrl: new URL(algoPureStakeTestnetIndexer),
+      indexerUrl: algoPureStakeTestnetIndexer,
       headers: [
         {
           'x-api-key': '7n0G2itKl885HQQzEfwtn4SSE1b6X3nb6zVnUw99',

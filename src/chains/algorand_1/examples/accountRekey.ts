@@ -16,16 +16,16 @@ const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
 const algoMainnetEndpoints = [{
-  url: new URL('https://mainnet-algorand.api.purestake.io/ps2'),
-  options: { indexerUrl: new URL('https://mainnet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
+  url: 'https://mainnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
 const algoTestnetEndpoints = [ {
-  url: new URL('https://testnet-algorand.api.purestake.io/ps2'),
-  options: { indexerUrl: new URL('https://testnet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
+  url: 'https://testnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
 const algoBetanetEndpoints = [{
-  url: new URL('https://betanet-algorand.api.purestake.io/ps2'),
-  options: { indexerUrl: new URL('https://betanet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
+  url: 'https://betanet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
 
 // As of Aug 2020 - Rekey feature only available on beta test net - use beta endpoints to run.

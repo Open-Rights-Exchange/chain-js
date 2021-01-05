@@ -143,9 +143,9 @@ export class EthereumChainState {
   /** Choose the best Chain endpoint based on health and response time */
   private selectEndpoint(): { url: string; endpoint: EthereumChainEndpoint } {
     // Just choose the first endpoint for now
-    const endpoint = this.endpoints[0]
-    const url = endpoint?.url?.href
-    return { url: trimTrailingChars(url, '/'), endpoint }
+    const selectedEndpoint = this.endpoints[0]
+    const endpointUrl = new URL(selectedEndpoint.url)
+    return { url: trimTrailingChars(endpointUrl?.href, '/'), endpoint: selectedEndpoint }
   }
 
   /** Retrieve a specific block from the chain */

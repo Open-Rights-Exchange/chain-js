@@ -163,9 +163,9 @@ export class EosChainState {
       return { url: '', endpoint: null }
     }
     // Just choose the first endpoint for now
-    const endpoint = this.endpoints[0]
-    const url = endpoint?.url?.href
-    return { url: trimTrailingChars(url, '/'), endpoint }
+    const selectedEndpoint = this.endpoints[0]
+    const endpointUrl = new URL(selectedEndpoint.url)
+    return { url: trimTrailingChars(endpointUrl?.href, '/'), endpoint: selectedEndpoint }
   }
 
   /** Configure fetch object with heaqders from chainEndpoint (if any) */

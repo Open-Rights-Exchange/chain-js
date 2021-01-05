@@ -10,7 +10,6 @@ import {
   AlgorandChainSettings,
   AlgorandChainSettingsCommunicationSettings,
   AlgorandChainTransactionParamsStruct,
-  AlgorandHeader,
   AlgorandSymbol,
   AlgorandTxChainResponse,
   AlgorandTxResult,
@@ -85,7 +84,7 @@ export class AlgorandChainState {
   public async connect(): Promise<void> {
     try {
       if (!this._algoClient) {
-        const { endpoint } = this.selectEndpoint()
+        const endpoint = this.selectEndpoint()
         this._activeEndpoint = endpoint
         this.assertEndpointHasTokenHeader()
         const { token, indexerUrl, url, port } = this.getAlgorandConnectionSettingsForEndpoint()
@@ -481,34 +480,24 @@ export class AlgorandChainState {
     }
   }
 
-  /** returns the 'x-api-key' header required to call algorand chain endpoint */
-  private getTokenFromEndpointHeader(): AlgorandHeader {
-    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')
-    if (isNullOrEmpty(token)) {
-      return null
-    }
-    return token
-  }
-
   private getAlgorandConnectionSettingsForEndpoint() {
-    const { url, options } = this._activeEndpoint
-    const { indexerUrl } = options || {}
-    const { port = '' } = url
-    const token = this.getTokenFromEndpointHeader()
-    return { url, indexerUrl, token, port }
+    const endpointUrl = new URL(trimTrailingChars(this.activeEndpoint?.url, '/'))
+    const indexerUrl = new URL(trimTrailingChars(this.activeEndpoint?.options?.indexerUrl, '/'))
+    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')
+
+    return {
+      url: endpointUrl,
+      indexerUrl,
+      token,
+      port: endpointUrl?.port,
+    }
   }
 
   // TODO: sort based on health info
   /**  * Choose the best Chain endpoint based on health and response time */
-  private selectEndpoint(): { url: URL; indexerUrl: URL; endpoint: AlgorandChainEndpoint } {
+  private selectEndpoint(): AlgorandChainEndpoint {
     // Just choose the first endpoint for now
-    const endpoint = this.endpoints[0]
-    const url = endpoint?.url?.href
-    const indexerUrlHref = endpoint?.options?.indexerUrl?.href
-    return {
-      url: new URL(trimTrailingChars(url, '/')),
-      indexerUrl: new URL(trimTrailingChars(indexerUrlHref, '/')),
-      endpoint,
-    }
+    const endpoint = this.endpoints[0] as AlgorandChainEndpoint
+    return endpoint
   }
 }
