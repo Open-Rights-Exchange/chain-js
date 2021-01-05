@@ -9,10 +9,10 @@ export type AlgoClientIndexer = any
 export type AlgorandChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
   url: URL
-  /** Algorand indexer endpoint url - including http(s):// prefix */
-  indexerUrl: URL
   /** Options are name/value pairs used to configure chain endpoint */
   options?: {
+    /** Algorand indexer endpoint url - including http(s):// prefix */
+    indexerUrl?: URL
     /** Array of headers to be included in HTTP requests to chain endpoint
      *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
     headers?: [{ [key: string]: string }]

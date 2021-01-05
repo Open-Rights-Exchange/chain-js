@@ -491,7 +491,8 @@ export class AlgorandChainState {
   }
 
   private getAlgorandConnectionSettingsForEndpoint() {
-    const { url, indexerUrl } = this._activeEndpoint
+    const { url, options } = this._activeEndpoint
+    const { indexerUrl } = options || {}
     const { port = '' } = url
     const token = this.getTokenFromEndpointHeader()
     return { url, indexerUrl, token, port }
@@ -503,10 +504,10 @@ export class AlgorandChainState {
     // Just choose the first endpoint for now
     const endpoint = this.endpoints[0]
     const url = endpoint?.url?.href
-    const indexerUrl = endpoint?.indexerUrl?.href
+    const indexerUrlHref = endpoint?.options?.indexerUrl?.href
     return {
       url: new URL(trimTrailingChars(url, '/')),
-      indexerUrl: new URL(trimTrailingChars(indexerUrl, '/')),
+      indexerUrl: new URL(trimTrailingChars(indexerUrlHref, '/')),
       endpoint,
     }
   }

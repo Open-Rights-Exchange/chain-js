@@ -15,18 +15,15 @@ const { env } = process
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
 const algoMainnetEndpoints = [{
   url: new URL('https://mainnet-algorand.api.purestake.io/ps2'),
-  indexerUrl: new URL('https://mainnet-algorand.api.purestake.io/idx2'),
-  options: { headers: [{ 'x-api-key': algoApiKey }] },
+  options: { indexerUrl: new URL('https://mainnet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
 }]
 const algoTestnetEndpoints = [ {
   url: new URL('https://testnet-algorand.api.purestake.io/ps2'),
-  indexerUrl: new URL('https://testnet-algorand.api.purestake.io/idx2'),
-  options: { headers: [{ 'x-api-key': algoApiKey }] },
+  options: { indexerUrl: new URL('https://testnet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
 }]
 const algoBetanetEndpoints = [{
   url: new URL('https://betanet-algorand.api.purestake.io/ps2'),
-  indexerUrl: new URL('https://betanet-algorand.api.purestake.io/idx2'),
-  options: { headers: [{ 'x-api-key': algoApiKey }] },
+  options: { indexerUrl: new URL('https://betanet-algorand.api.purestake.io/idx2'), headers: [{ 'x-api-key': algoApiKey }] },
 }]
 
 async function run() {
