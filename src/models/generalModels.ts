@@ -44,7 +44,7 @@ export enum ChainType {
 /** Chain urls and related details used to connect to chain */
 export type ChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
-  url: URL
+  url: string
   /** Options are name/value pairs set to chain endpoint - they are chain-specific
    *  Often includes array of headers to be included in HTTP requests to chain endpoint
    *  e.g. options.headers = [{"Authorization":"Bearer..."}] */

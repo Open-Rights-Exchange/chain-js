@@ -17,24 +17,22 @@ require('dotenv').config()
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [
-  {
-    url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
-const algoTestnetEndpoints = [
-  {
-    url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
-const algoBetanetEndpoints = [
-  {
-    url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
-    options: { headers: [{ 'X-API-Key': algoApiKey }] },
-  },
-]
+const algoMainnetEndpoints = [{
+  url: 'https://mainnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+}]
+const algoTestnetEndpoints = [ {
+  url: 'https://testnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+}]
+const algoBetanetEndpoints = [{
+  url: 'https://betanet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+}]
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms || 1000))
+}
 
 async function run() {
   /** Create Algorand chain instance */
@@ -46,14 +44,15 @@ async function run() {
 
   /** get token balance */
   console.log(
-    'get token balance:',
+    'algo balance:',
     await algoTest.fetchBalance(
       toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       toAlgorandSymbol('algo'),
     ),
   )
+  await sleep(1000) // dont hit chain api again too fast
   console.log(
-    'get asset balance for ID 10029482:',
+    'asset balance for ID 10029482:',
     await algoTest.fetchBalance(
       toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       toAlgorandSymbol('10029482'),
@@ -70,8 +69,8 @@ async function run() {
 
   // map chain error
   try {
-    const { algoClient } = algoTest as ChainAlgorandV1
-    const { timestamp } = await algoClient.block(99999999999)
+    const { algoClient, algoClientIndexer } = algoTest as ChainAlgorandV1
+    const { timestamp } = await algoClientIndexer.lookupBlock(99999999999)
   } catch (error) {
     const chainError = mapChainError(error)
     console.log('Chain Error Type:', chainError.errorType)

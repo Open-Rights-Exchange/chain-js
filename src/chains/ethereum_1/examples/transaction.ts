@@ -39,7 +39,7 @@ const { env } = process
   try {
     const ropstenEndpoints: EthereumChainEndpoint[] = [
       {
-        url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
+        url: 'https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
         // Web3 HttpProvider options - https://github.com/ethereum/web3.js/tree/1.x/packages/web3-providers-http#usage
         // options: {
         //   timeout: 20000,

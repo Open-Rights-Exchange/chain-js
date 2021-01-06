@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js'
 import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
+import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
@@ -212,10 +213,16 @@ export function arrayToObject(array: IndexedObject[]) {
   return result
 }
 
-/** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'X-API-Key': '...'}]  */
+/** returns the required header from the headers attached to chain endpoint. For ex: headers: [{'x-api-key': '...'}]  */
 export function getHeaderValueFromEndpoint(endpoint: ChainEndpoint, headerName: string) {
   const { headers } = endpoint?.options
-  const matchingHeader = (headers || []).find((val: {}) => val && Object.keys(val || {}).includes(headerName))
+  const matchingHeader = (headers || []).find(
+    (val: {}) =>
+      val &&
+      Object.keys(val || {})
+        .map((h: any) => h.toLowerCase())
+        .includes(headerName.toLowerCase()),
+  )
   return matchingHeader
 }
 
@@ -249,6 +256,10 @@ export function byteArrayToHexString(value: Uint8Array): string {
 /** Convert a byte array to hex string */
 export function bufferToHexString(value: Buffer): string {
   return value.toString('hex')
+}
+
+export function utf8StringToHexString(value: string): string {
+  return Buffer.from(value, 'utf8').toString('hex')
 }
 
 /** convert a decimal number string to a hex string - supports long decimals (uses BN)
@@ -384,4 +395,12 @@ export async function asyncForEach(array: any[], callback: (item: any, index: nu
     // eslint-disable-next-line no-await-in-loop
     await callback(array[index], index, array)
   }
+}
+
+/** Generates a SHA256 hash from a string value
+ *  Returns a hex-encoded result */
+export function createSha256Hash(value: string) {
+  const hash = sha256.create()
+  hash.update(value)
+  return hash.hex()
 }

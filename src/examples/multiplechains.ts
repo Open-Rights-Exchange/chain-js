@@ -15,7 +15,7 @@ const { env } = process
 // Eos chain creation options (for Kylin test network)
 const kylinEndpoints = [
   {
-    url: new URL('https:api-kylin.eosasia.one:443'),
+    url: 'https:api-kylin.eosasia.one:443',
     chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
   },
 ]
@@ -23,7 +23,7 @@ const kylinEndpoints = [
 // Ethereum chain creation options (for Ropsten test network)
 const ropstenEndpoints: ChainEndpoint[] = [
   {
-    url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
+    url: 'https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
   },
 ]
 const ropstenChainOptions: EthereumChainForkType = {

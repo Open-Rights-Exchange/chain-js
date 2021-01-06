@@ -5,7 +5,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
-import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
 import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams, AlgorandTransactionOptions } from '../models'
@@ -16,18 +15,19 @@ require('dotenv').config()
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [{ 
-  url: new URL('https://mainnet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+const algoMainnetEndpoints = [{
+  url: 'https://mainnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
-const algoTestnetEndpoints = [{ 
-  url: new URL('https://testnet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+const algoTestnetEndpoints = [ {
+  url: 'https://testnet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
-const algoBetanetEndpoints = [{ 
-  url: new URL('https://betanet-algorand.api.purestake.io/ps1'),
-  options: { headers: [ { 'X-API-Key': algoApiKey } ] }, 
+const algoBetanetEndpoints = [{
+  url: 'https://betanet-algorand.api.purestake.io/ps2',
+  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
+
 // As of Aug 2020 - Rekey feature only available on beta test net - use beta endpoints to run.
 // requires transaction setup with betanet endpoints and accounts.
 // example is only repeatable by each time switching between composeAlgoReKeyParamsA and B, providing the necessary private key:

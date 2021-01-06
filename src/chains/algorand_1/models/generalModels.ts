@@ -3,13 +3,16 @@ import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
 export type AlgoClient = any
+export type AlgoClientIndexer = any
 
 /** Chain urls and related details used to connect to chain */
 export type AlgorandChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
-  url: URL
+  url: string
   /** Options are name/value pairs used to configure chain endpoint */
   options?: {
+    /** Algorand indexer endpoint url - including http(s):// prefix */
+    indexerUrl?: string
     /** Array of headers to be included in HTTP requests to chain endpoint
      *  e.g. options.headers = [{"Authorization":"Bearer..."}] */
     headers?: [{ [key: string]: string }]
@@ -19,10 +22,10 @@ export type AlgorandChainEndpoint = {
 }
 
 /**
- * Algorand token: {'X-API-Key': '...'}
+ * Algorand token: {'x-api-key': '...'}
  */
 export type AlgorandHeader = {
-  'X-API-Key': string
+  'x-api-key': string
 }
 
 /** Chain information including head block number and time and software version */

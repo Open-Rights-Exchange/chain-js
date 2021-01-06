@@ -220,10 +220,10 @@ class ChainEosV2 implements Chain {
   generateKeyPair = eoscrypto.generateKeyPair
 
   /** Verifies that the value is a valid, stringified JSON encryption result */
-  isValidEncryptedData = eoscrypto.isEncryptedDataString
+  isSymEncryptedDataString = eoscrypto.isSymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toEncryptedDataString = eoscrypto.toEncryptedDataString
+  toSymEncryptedDataString = eoscrypto.toSymEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString

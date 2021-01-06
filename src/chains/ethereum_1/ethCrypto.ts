@@ -18,12 +18,12 @@ export const defaultIter = AesCrypto.defaultIter
 export const defaultMode = AesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
+export function isSymEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
   return AesCrypto.isAesEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
+export function toSymEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
   return AesCrypto.toAesEncryptedDataString(value)
 }
 
@@ -118,6 +118,7 @@ export async function decryptWithPrivateKeys(
 
 /** Signs data with private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
+  // todo: data should be hashed first using ethereum-js-tx Transaction.prototype.hash
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
   return toEthereumSignature(ecsign(dataBuffer, keyBuffer))
@@ -181,9 +182,9 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
 // TODO: implement using web3 method?
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
-  publicKey: string | Buffer,
   data: string | Buffer,
-  encoding: string,
+  publicKey: EthereumPublicKey,
+  signature: EthereumSignature,
 ): boolean {
   notImplemented()
   return null

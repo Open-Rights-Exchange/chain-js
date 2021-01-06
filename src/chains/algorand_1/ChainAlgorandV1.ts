@@ -153,10 +153,10 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isValidEncryptedData = algoCrypto.isEncryptedDataString
+  isSymEncryptedDataString = algoCrypto.isSymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toEncryptedDataString = algoCrypto.toEncryptedDataString
+  toSymEncryptedDataString = algoCrypto.toSymEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
@@ -183,9 +183,7 @@ class ChainAlgorandV1 implements Chain {
   generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey = (): any => {
-    notImplemented()
-  }
+  verifySignedWithPublicKey = algoCrypto.verifySignedWithPublicKey
 
   // --------- Chain helper functions
 
@@ -273,6 +271,11 @@ class ChainAlgorandV1 implements Chain {
    */
   public get algoClient() {
     return this._chainState?.algoClient
+  }
+
+  /** Access to underlying algoSdk indexer */
+  public get algoClientIndexer() {
+    return this._chainState?.algoClientIndexer
   }
 }
 

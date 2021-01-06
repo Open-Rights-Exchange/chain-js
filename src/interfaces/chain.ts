@@ -110,19 +110,19 @@ export interface Chain {
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
-  getPublicKeyFromSignature(signature: any, data: string | Buffer, encoding: string): PublicKey
+  getPublicKeyFromSignature(signature: Signature, data: string | Buffer, encoding: string): PublicKey
   /** Verifies that the value is a valid, stringified JSON encryption result */
-  isValidEncryptedData(value: string): boolean
-  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isAsymEncryptedDataString(value: string): boolean
   /** Generate a signature given some data and a private key */
+  isSymEncryptedDataString(value: string): boolean
+  /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isValidPrivateKey(value: string | Buffer): boolean
   /** Verifies that the value is a valid public key for the chain */
   isValidPublicKey(value: string | Buffer): boolean
   /** Generate a signature given some data and a private key */
-  sign(data: string | Buffer, privateKey: string, encoding: string): any
+  sign(data: string | Buffer, privateKey: PrivateKey, encoding: string): any
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey(publicKey: string | Buffer, data: string | Buffer, encoding: string): boolean
+  verifySignedWithPublicKey(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
 
   // Chain Helper functions
 
@@ -138,10 +138,10 @@ export interface Chain {
   toPublicKey(value: string): PublicKey
   /** Ensures that the value comforms to a well-formed private Key */
   toPrivateKey(value: string): PrivateKey
-  /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
-  toEncryptedDataString(value: any): GenericCrypto.SymmetricEncryptedDataString
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
   toAsymEncryptedDataString(value: any): Asymmetric.AsymmetricEncryptedDataString
+  /** Ensures that the value comforms to a well-formed encrypted stringified JSON object */
+  toSymEncryptedDataString(value: any): GenericCrypto.SymmetricEncryptedDataString
   /** Ensures that the value comforms to a well-formed signature */
   toSignature(value: string): Signature
 

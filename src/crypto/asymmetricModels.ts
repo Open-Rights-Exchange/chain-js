@@ -9,7 +9,7 @@ export type Unencrypted = string | NodeJS.ArrayBufferView
 /** Stringified JSON ciphertext (used for private keys) */
 export type AsymmetricEncryptedDataString = string & AsymmetricEncryptedDataStringBrand
 
-/** Brand signifiying a valid value - assigned by using toEncryptedDataString */
+/** Brand signifiying a valid value - assigned by using toSymEncryptedDataString */
 export enum AsymmetricEncryptedDataStringBrand {
   _ = '',
 }

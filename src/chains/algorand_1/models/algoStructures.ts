@@ -48,11 +48,13 @@ export type AlgorandAccountStruct = {
 
 /** Latest chain state - from calling {chain}/transactions/params - useful for adding 'header' fields to a transaction */
 export type AlgorandChainTransactionParamsStruct = {
-  genesishashb64: string
+  genesisHash: string
   genesisID: string
+  firstRound: number
   lastRound: number
   consensusVersion: number
   minFee: number
+  suggestedFee: number
 }
 
 /** Account object generated - in the format returned from algosdk */

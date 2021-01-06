@@ -21,12 +21,12 @@ export const defaultIter = AesCrypto.defaultIter
 export const defaultMode = AesCrypto.defaultMode
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
+export function isSymEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
   return AesCrypto.isAesEncryptedDataString(value)
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
+export function toSymEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
   return AesCrypto.toAesEncryptedDataString(value)
 }
 
@@ -137,11 +137,11 @@ export function getPublicKeyFromSignature(
 
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
-  publicKey: EosSignature | Buffer,
   data: string | Buffer,
-  encoding: string = TRANSACTION_ENCODING,
+  publicKey: EosPublicKey,
+  signature: EosSignature,
 ): boolean {
-  return eosEcc.verify(data, publicKey, encoding)
+  return eosEcc.verify(signature, data, publicKey)
 }
 
 /** Adds privateKeyEncrypted (owner and/or active) if missing by encrypting privateKey (using password) */
@@ -203,7 +203,7 @@ export async function generateKeyPairAndEncryptPrivateKeys(
   return {
     publicKey: toEosPublicKey(keys.publicKey),
     privateKey: keys.privateKey,
-    privateKeyEncrypted: toEncryptedDataString(encryptWithPassword(keys.privateKey, password, encryptionOptions)),
+    privateKeyEncrypted: encryptWithPassword(keys.privateKey, password, encryptionOptions),
   }
 }
 

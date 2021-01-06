@@ -12,7 +12,7 @@ import { EthereumChainSettings, EthereumChainForkType, EthUnit, EthereumChainEnd
   try {
     const ropstenEndpoints: EthereumChainEndpoint[] = [
       {
-        url: new URL('https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a'),
+        url: 'https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
       },
     ]
     const ropstenPrivate = '12a1a5e255f23853aeac0581e7e5615433de9817cc5a455c8230bd4f91a03bbb'

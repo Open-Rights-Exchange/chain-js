@@ -57,7 +57,7 @@ export type EthereumNativeChainInfo = {
 /** Chain urls and related details used to connect to chain */
 export type EthereumChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
-  url: URL
+  url: string
   /** Options are same as defined in web3-core-helpers.HttpProviderOptions - https://github.com/ethereum/web3.js/tree/1.x/packages/web3-providers-http#usage
    *  Except: Headers are provided here as {'headerName':'headerValue'} and mapped to EthereumHttpHeader format {name:string, value:string} */
   options?: {

@@ -195,10 +195,10 @@ class ChainEthereumV1 implements Chain {
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isValidEncryptedData = ethcrypto.isEncryptedDataString
+  isSymEncryptedDataString = ethcrypto.isSymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toEncryptedDataString = ethcrypto.toEncryptedDataString
+  toSymEncryptedDataString = ethcrypto.toSymEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
   isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
