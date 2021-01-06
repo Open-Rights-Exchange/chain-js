@@ -8,7 +8,7 @@ import { throwNewError } from './errors'
  * Returns an instance of one of the concrete chain classes
  */
 export class ChainFactory {
-  public create = (chainType: ChainType, endpoints: ChainEndpoint[] | any, settings?: any): Chain => {
+  public create = (chainType: ChainType, endpoints: ChainEndpoint[], settings?: any): Chain => {
     switch (chainType) {
       case ChainType.EosV2:
         return new ChainEosV2(endpoints, settings)

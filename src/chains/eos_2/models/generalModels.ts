@@ -43,7 +43,7 @@ export type EosChainSettings = {
 /** Chain urls and related details used to connect to chain */
 export type EosChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
-  url: URL
+  url: string
   /** Options are name/value pairs used to configure chain endpoint */
   options?: {
     /** Array of headers to be included in HTTP requests to chain endpoint

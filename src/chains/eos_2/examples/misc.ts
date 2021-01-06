@@ -21,18 +21,18 @@ async function run() {
   // Reusable Settings
   const kylinEndpoints = [
     {
-      url: new URL('https:api-kylin.eosasia.one:443'),
+      url: 'https:api-kylin.eosasia.one:443',
       chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
     },
   ]
   const oreStagingEndpoints = [
     {
-      url: new URL('https://ore-staging.openrights.exchange/'),
+      url: 'https://ore-staging.openrights.exchange/',
       chainId: 'a6df478d5593b4efb1ea20d13ba8a3efc1364ee0bf7dbd85d8d756831c0e3256',
     },
   ]
   const ethEndpoint = {
-    url: new URL('https://main-rpc.linkpool.io/'),
+    url: 'https://main-rpc.linkpool.io/',
   }
 
   const chainSettings = { unusedAccountPublicKey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma' }

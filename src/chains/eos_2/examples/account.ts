@@ -47,32 +47,32 @@ export const prepTransaction = async (chain: Chain, transaction: any, key: strin
 // Reusable Settings
 export const kylinEndpoints = [
   {
-    url: new URL('https:api-kylin.eosasia.one:443'),
+    url: 'https:api-kylin.eosasia.one:443',
   },
   {
-    url: new URL('https:api-kylin.eoslaomao.com:443'),
+    url: 'https:api-kylin.eoslaomao.com:443',
   },
   {
-    url: new URL('https:kylin.eosusa.news'),
+    url: 'https:kylin.eosusa.news',
   },
 ]
 
 export const eosMainEndpoints = [
   {
-    url: new URL('https://api.eosn.io:443'),
+    url: 'https://api.eosn.io:443',
   },
 ]
 
 export const oreStagingEndpoints = [
   {
-    url: new URL('https://ore-staging.openrights.exchange/'),
+    url: 'https://ore-staging.openrights.exchange/',
   },
   {
-    url: new URL('https://ore-staging2.openrights.exchange/'),
+    url: 'https://ore-staging2.openrights.exchange/',
   },
 ]
 export const ethEndpoint = {
-  url: new URL('https://main-rpc.linkpool.io/'),
+  url: 'https://main-rpc.linkpool.io/',
 }
 
 export const chainSettings = {
