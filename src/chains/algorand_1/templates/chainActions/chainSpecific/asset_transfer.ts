@@ -14,7 +14,10 @@ import { isNullOrEmpty } from '../../../../../helpers'
 /**
  * Composes asset transfer action
  * Special case: to begin accepting assets, set amount=0 and fromAccountName=toAccountName */
-export const composeAction = (args: AlgorandActionAssetTransferParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (
+  args: AlgorandActionAssetTransferParams,
+  suggestedParams: AlgorandSuggestedParams,
+) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, to, amount, note, assetIndex, assetRevocationTarget, closeRemainderTo, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetTransferTxnWithSuggestedParams(

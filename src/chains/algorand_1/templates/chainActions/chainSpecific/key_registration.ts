@@ -13,7 +13,7 @@ import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes key registration action */
-export const composeAction = (args: AlgorandKeyRegistrationParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandKeyRegistrationParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, note, voteKey, selectionKey, voteFirst, voteLast, voteKeyDilution, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeKeyRegistrationTxnWithSuggestedParams(

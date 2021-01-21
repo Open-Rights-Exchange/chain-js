@@ -7,22 +7,23 @@ import {
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
   AlgorandTxActionRaw,
+  AlgorandOnApplicationComplete,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
+  console.log('ENCODEDFORSDK', argsEncodedForSdk)
   const {
     from,
-    appOnComplete,
-    appApprovalProgram,
-    appClearProgram,
-    appLocalInts,
-    appLocalByteSlices,
-    appGlobalInts,
-    appGlobalByteSlices,
+    approvalProgram,
+    clearProgram,
+    numLocalInts,
+    numLocalByteSlices,
+    numGlobalInts,
+    numGlobalByteSlices,
     appArgs,
     appAccounts,
     appForeignApps,
@@ -31,16 +32,17 @@ export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: Al
     lease,
     reKeyTo,
   } = argsEncodedForSdk
+  console.log('Suggestedparams: ', suggestedParams)
   const composedAction = algosdk.makeApplicationCreateTxn(
     from,
     suggestedParams,
-    appOnComplete,
-    appApprovalProgram,
-    appClearProgram,
-    appLocalInts,
-    appLocalByteSlices,
-    appGlobalInts,
-    appGlobalByteSlices,
+    AlgorandOnApplicationComplete.NoOp,
+    approvalProgram,
+    clearProgram,
+    numLocalInts,
+    numLocalByteSlices,
+    numGlobalInts,
+    numGlobalByteSlices,
     appArgs,
     appAccounts,
     appForeignApps,
@@ -49,6 +51,7 @@ export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: Al
     lease,
     reKeyTo,
   )
+  console.log('COMPOSEDACTION: ', composedAction)
   if (!isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
@@ -62,6 +65,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   // Cant identify using only type (more than one action uses Application type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.Application &&
+    actionParams?.appOnComplete === AlgorandOnApplicationComplete.NoOp &&
     actionParams?.appIndex === 0 // This is 0 only for a create applicaiton transaction
   ) {
     const returnData = {
