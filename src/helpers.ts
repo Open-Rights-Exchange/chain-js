@@ -243,6 +243,11 @@ export function getDecimalPlacesFromString(num: string = '') {
   )
 }
 
+/** Checks if string is a valid hex string */
+export function isValidHex(value: string): Boolean {
+  return false
+}
+
 /** Converts a hex string to a unit8 byte array */
 export function hexStringToByteArray(value: string): Uint8Array {
   return Uint8Array.from(Buffer.from(value, 'hex'))
@@ -251,6 +256,15 @@ export function hexStringToByteArray(value: string): Uint8Array {
 /** Convert a byte array to hex string */
 export function byteArrayToHexString(value: Uint8Array): string {
   return Buffer.from(value).toString('hex')
+}
+
+/** Convert a byte array array to hex string array */
+export function byteArrayArrayToHexStringArray(value: Uint8Array[]): string[] {
+  const stringArr: string[] = []
+  value.forEach(val => {
+    stringArr.push(Buffer.from(val).toString('hex'))
+  })
+  return stringArr
 }
 
 /** Convert a byte array to hex string */

@@ -1,5 +1,15 @@
 import * as algosdk from 'algosdk'
-import { isNullOrEmpty, toBuffer, bufferToString, isAUint8Array, isAString, isAUint8ArrayArray } from '../../helpers'
+import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
+import {
+  isNullOrEmpty,
+  toBuffer,
+  bufferToString,
+  isAUint8Array,
+  isAString,
+  isAUint8ArrayArray,
+  byteArrayToHexString,
+  byteArrayArrayToHexStringArray,
+} from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
   AlgorandTxAction,
@@ -7,7 +17,7 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
-import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
+import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct, AlgorandTxEncodedForChain } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
 import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
 
@@ -24,6 +34,8 @@ import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
  */
 export class AlgorandActionHelper {
   private _rawAction: AlgorandTxActionRaw
+
+  private _actionEncodedForSdk: AlgorandTxEncodedForChain
 
   /** Creates a new Action from a raw action (or Algrorand action replacing hexstrings for Uint8Arrays)
    *  .action property returns action with Uint8Arrays converted to hexstrings
@@ -76,13 +88,9 @@ export class AlgorandActionHelper {
       appAccounts: !isNullOrEmpty(this.raw.appAccounts)
         ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
         : undefined,
-      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
-        ? algosdk.decodeObj(this.raw.appApprovalProgram)
-        : undefined,
-      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram)
-        ? algosdk.decodeObj(this.raw.appClearProgram)
-        : undefined,
-      appArgs: !isNullOrEmpty(this.raw.appArgs) ? (this.raw.appArgs.map(algosdk.decodeObj) as string[]) : undefined,
+      approvalProgram: !isNullOrEmpty(this.raw.approvalProgram) ? this.raw.approvalProgram : undefined,
+      clearProgram: !isNullOrEmpty(this.raw.clearProgram) ? this.raw.clearProgram : undefined,
+      appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.raw.appArgs : undefined,
       group: this.raw.group ? bufferToString(this.raw.group) : undefined,
       lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
       note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,
@@ -125,9 +133,9 @@ export class AlgorandActionHelper {
   /** Convert Action encoded for algo sdk to raw - */
   private actionEncodedForSdkToRaw(action: AlgorandTxActionSdkEncoded) {
     const {
-      appApprovalProgram,
+      approvalProgram,
+      clearProgram,
       appArgs,
-      appClearProgram,
       group,
       lease,
       note,
@@ -138,9 +146,9 @@ export class AlgorandActionHelper {
     }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction) as AlgorandTxActionRaw
     // these fields are already encoded as needed for raw - so we dont want them encoded again
-    raw.appApprovalProgram = appApprovalProgram
-    raw.appArgs = appArgs
-    raw.appClearProgram = appClearProgram
+    raw.approvalProgram = approvalProgram ? byteArrayToHexString(approvalProgram) : undefined
+    raw.clearProgram = clearProgram ? byteArrayToHexString(clearProgram) : undefined
+    raw.appArgs = appArgs ? byteArrayArrayToHexStringArray(appArgs) : undefined
     raw.group = group
     raw.lease = lease
     raw.note = note
@@ -193,12 +201,14 @@ export class AlgorandActionHelper {
 
   /** Encode selected fields required by algo sdk */
   private encodeFieldsForSdk(paramsIn: any) {
-    const { appApprovalProgram, appClearProgram, appArgs, group, lease, note, selectionKey, tag, voteKey } = paramsIn
+    const { appArgs, approvalProgram, clearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
-    if (!isNullOrEmpty(appApprovalProgram) && !isAUint8Array(appApprovalProgram))
-      params.appApprovalProgram = algosdk.encodeObj(appApprovalProgram)
-    if (!isNullOrEmpty(appClearProgram) && !isAUint8Array(appClearProgram))
-      params.appClearProgram = algosdk.encodeObj(appClearProgram)
+    if (!isNullOrEmpty(approvalProgram) && true) {
+      params.approvalProgram = hexToUint8Array(approvalProgram)
+    }
+    if (!isNullOrEmpty(clearProgram) && true) {
+      params.clearProgram = hexToUint8Array(clearProgram)
+    }
     if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
       params.appArgs = appArgs.map(algosdk.encodeObj(appArgs)) as Uint8Array[] // Array of UInt8Array
     if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
@@ -247,8 +257,8 @@ export class AlgorandActionHelper {
   ): boolean {
     return (
       (isAString(action.from) || isNullOrEmpty(action.from)) &&
-      (isAUint8Array(action.appApprovalProgram) ||
-        isAUint8Array(action.appClearProgram) ||
+      (isAUint8Array(action.approvalProgram) ||
+        isAUint8Array(action.clearProgram) ||
         isAUint8ArrayArray(action.appArgs) ||
         isAUint8Array(action.note) ||
         isAUint8Array(action.lease) ||

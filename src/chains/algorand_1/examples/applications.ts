@@ -5,8 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
+import fs from 'fs'
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, TokenTransferParams } from '../../../models'
+import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
 import {
   AlgorandActionAppCreate,
   AlgorandActionAppMultiPurpose,
@@ -15,6 +16,8 @@ import {
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
+import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+import { composedAppCreate } from '../tests/mockups/composedActions'
 
 require('dotenv').config()
 
@@ -40,27 +43,51 @@ const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
   appIndex: 13258116,
 }
 
+const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  numLocalInts: 0,
+  numLocalByteSlices: 0,
+  numGlobalInts: 1,
+  numGlobalByteSlices: 0,
+}
+
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
 
+  const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
+  console.log(applications)
+  const appList = applications.map((app:any) => app?.params )
+
+  const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
+
+  console.log(apps)
+
+  composeAppCreateParams.approvalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  composeAppCreateParams.clearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
+  console.log(composeAppCreateParams)
+  const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
   transaction.actions = [action]
-  console.log('transaction actions: ', transaction.actions[0])
+  // console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  console.log('decomposed actions: ', decomposed)
+  // console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
-  console.log('send response: %o', JSON.stringify(await transaction.send()))
+  try{
+    // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+  }catch(err) {
+    console.log(err)
+  }
 }
 
 ;(async () => {

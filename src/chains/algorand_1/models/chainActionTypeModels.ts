@@ -1,5 +1,6 @@
 import { AlgorandAddress } from './cryptoModels'
 import { ChainActionType } from '../../../models'
+import { AlgoProgram } from './generalModels'
 
 /** ChainJS action type names */
 export enum AlgorandChainActionType {
@@ -39,18 +40,17 @@ export type AlgorandKeyRegistrationParams = {
 /** Make a transaction that will create an application */
 export type AlgorandActionAppCreate = {
   from: AlgorandAddress // Algorand address of sender
-  onComplete?: number // algosdk.OnApplicationComplete, what application should do once the program is done being run
-  approvalProgram?: string // the compiled TEAL that approves a transaction
-  clearProgram?: string // the compiled TEAL that runs when clearing state
-  numLocalInts?: number // restricts number of ints in per-user local state
-  numLocalByteSlices?: number // restricts number of byte slices in per-user local state
-  numGlobalInts?: number // restricts number of ints in global state
-  numGlobalByteSlices?: number // restricts number of byte slices in global state
+  approvalProgram: AlgoProgram // the compiled TEAL that approves a transaction
+  clearProgram: AlgoProgram // the compiled TEAL that runs when clearing state
+  numLocalInts: number // restricts number of ints in per-user local state
+  numLocalByteSlices: number // restricts number of byte slices in per-user local state
+  numGlobalInts: number // restricts number of ints in global state
+  numGlobalByteSlices: number // restricts number of byte slices in global state
   appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
   foreignAssets?: number[] // optional - Array of int, any assets used by the application, identified by index
-  note: string // arbitrary data for sender to store
+  note?: string // arbitrary data for sender to store
   lease?: string
   reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }
@@ -72,8 +72,8 @@ export type AlgorandActionAppMultiPurpose = {
 export type AlgorandActionAppUpdate = {
   from: AlgorandAddress // Algorand address of sender
   appIndex?: number // the ID of the app to be updated
-  approvalProgram?: string // the compiled TEAL that approves a transaction
-  clearProgram?: string // the compiled TEAL that runs when clearing state
+  approvalProgram?: AlgoProgram // the compiled TEAL that approves a transaction
+  clearProgram?: AlgoProgram // the compiled TEAL that runs when clearing state
   appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index

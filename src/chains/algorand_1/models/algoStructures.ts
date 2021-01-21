@@ -138,13 +138,13 @@ export type AlgorandTxActionStruct = {
   group?: Buffer
   appIndex?: number
   appOnComplete?: number
-  appLocalInts?: number
-  appLocalByteSlices?: number
-  appGlobalInts?: number
-  appGlobalByteSlices?: number
-  appApprovalProgram?: Uint8Array
-  appClearProgram?: Uint8Array
-  appArgs?: Uint8Array[]
+  numLocalInts?: number
+  numLocalByteSlices?: number
+  numGlobalInts?: number
+  numGlobalByteSlices?: number
+  approvalProgram?: string
+  clearProgram?: string
+  appArgs?: string[]
   appAccounts?: AlgorandAddressStruct[]
   appForeignApps?: number[]
   appForeignAssets?: number[]
@@ -250,4 +250,12 @@ export type AlgorandRawTransactionStruct = {
 export type AlgorandTxSignResults = {
   txID: string
   blob: Uint8Array
+}
+
+export type AlgorandBlock = {
+  rewards: any
+  round: number
+  seed: string
+  timestamp: number
+  transactions: any[]
 }
