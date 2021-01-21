@@ -74,7 +74,7 @@ export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCOD
 }
 
 // convert buffer into a string
-export function bufferToString(buffer: Buffer, encoding: string = 'utf8') {
+export function bufferToString(buffer: Buffer, encoding: BufferEncoding = 'utf8') {
   if (!buffer) return null
   return buffer.toString(encoding)
 }
