@@ -14,6 +14,7 @@ import {
   AlgorandTxChainResponse,
   AlgorandTxResult,
   AlgorandUnit,
+  AlgorandBlock,
 } from './models'
 import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import {
@@ -139,9 +140,9 @@ export class AlgorandChainState {
     }
   }
 
-  public async getBlock(blockNumber: number): Promise<any> {
+  public async getBlock(blockNumber: number): Promise<Partial<AlgorandBlock>> {
     this.assertIsConnected()
-    const block = await this._algoClientIndexer.lookupBlock(blockNumber)
+    const block = await this._algoClientIndexer.lookupBlock(blockNumber).do()
     return block
   }
 
@@ -380,7 +381,7 @@ export class AlgorandChainState {
       return
     }
     // not yet reached limit - set a timer to call this function again (in checkInterval ms)
-    const checkAgainInMs = checkInterval
+    // const checkAgainInMs = checkInterval
     setTimeout(
       async () =>
         this.checkIfAwaitConditionsReached(
@@ -397,7 +398,7 @@ export class AlgorandChainState {
           transactionResult,
           waitForConfirm,
         ),
-      checkAgainInMs,
+      1000,
     )
   }
 
@@ -435,9 +436,9 @@ export class AlgorandChainState {
   }
 
   /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: any, transactionId: string): AlgorandTxChainResponse => {
-    const { transactions } = block?.txns
-    const result = transactions?.find((transaction: any) => transaction?.tx === transactionId)
+  public blockHasTransaction = (block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse => {
+    const { transactions } = block
+    const result = transactions?.find((transaction: any) => transaction?.id === transactionId)
     return result
   }
 
