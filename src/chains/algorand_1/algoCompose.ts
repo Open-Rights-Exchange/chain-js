@@ -1,5 +1,5 @@
 import { ChainActionType } from '../../models'
-import { byteArrayToHexString, isValidHex, notSupported } from '../../helpers'
+import { byteArrayToHexString, notSupported } from '../../helpers'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -54,7 +54,6 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
 export async function compileFromSourceCode(sourceCode: string, algoClient: AlgoClient): Promise<Uint8Array> {
   const encoder = new TextEncoder()
   const programBytes = encoder.encode(sourceCode)
-  console.log('programbytes: ', programBytes)
   const compileResponse = await algoClient.compile(programBytes).do()
   return new Uint8Array(Buffer.from(compileResponse.result, 'base64'))
 }
@@ -62,19 +61,16 @@ export async function compileIfSourceCodeAndEncode(
   program: string | Uint8Array,
   algoClient: AlgoClient,
 ): Promise<string> {
-  console.log('itshere')
   let byteCode: Uint8Array
-  if (!isValidHex(program as string)) {
+  if (true) {
+    // isValidHex will be implemented
     byteCode = await compileFromSourceCode(program as string, algoClient)
-    console.log('BYTECODE: ', byteCode)
   }
   return byteArrayToHexString(byteCode)
 }
 
-export async function compileIfSourceCodeAppArgs(appArgs: string[], algoClient: AlgoClient) {
-  return Promise.all(appArgs.map(arg => compileIfSourceCodeAndEncode(arg, algoClient)))
-}
-
+// TODO: composeAction expects source code to be sent for appAprovalProgram & appClearProgram
+// Must check if its not a valid hex before it assumes source code has been passed (isValidHex() will be impelemented)
 /** Compose an object for a chain contract action */
 export async function composeAction(
   chainState: AlgorandChainState,
@@ -85,28 +81,25 @@ export async function composeAction(
   if (!composerFunction) {
     notSupported(`ComposeAction:${chainActionType}`)
   }
-  console.log('beforeaction', args)
-  const approvalProgram = args?.approvalProgram
-    ? await compileIfSourceCodeAndEncode(args.approvalProgram, chainState.algoClient)
+  const appApprovalProgram = args?.appApprovalProgram
+    ? await compileIfSourceCodeAndEncode(args.appApprovalProgram, chainState.algoClient)
     : undefined
-  const clearProgram = args?.clearProgram
-    ? await compileIfSourceCodeAndEncode(args.clearProgram, chainState.algoClient)
+  const appClearProgram = args?.appClearProgram
+    ? await compileIfSourceCodeAndEncode(args.appClearProgram, chainState.algoClient)
     : undefined
-  const appArgs = args?.appArgs ? await compileIfSourceCodeAppArgs(args?.appArgs, chainState.algoClient) : undefined
+  const appArgs = args?.appArgs // TODO: check if appArgs are valid base64 encoded, if not encode to base64
 
   const action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded = {
     ...args,
-    approvalProgram,
-    clearProgram,
+    appApprovalProgram,
+    appClearProgram,
     appArgs,
   } as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
-  console.log('ACTION: ', action)
   let actionHelper = new AlgorandActionHelper(action)
   const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
     chainState.chainInfo?.nativeInfo?.transactionHeaderParams
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
   // seperate-out the action param values (required by compose functions) from the suggestedParams (headers)
-  console.log('ACTIONHELPERSPARAMS', actionHelper.paramsOnly, actionHelper.transactionHeaderParams)
   const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = composerFunction(
     actionHelper.paramsOnly,
     actionHelper.transactionHeaderParams,

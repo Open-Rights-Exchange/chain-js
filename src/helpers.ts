@@ -243,10 +243,10 @@ export function getDecimalPlacesFromString(num: string = '') {
   )
 }
 
-/** Checks if string is a valid hex string */
-export function isValidHex(value: string): Boolean {
-  return false
-}
+// /** Checks if string is a valid hex string */
+// export function isValidHex(value: string): Boolean {
+//   return false
+// }
 
 /** Converts a hex string to a unit8 byte array */
 export function hexStringToByteArray(value: string): Uint8Array {
