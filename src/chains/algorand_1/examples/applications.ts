@@ -45,10 +45,25 @@ const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
 
 const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  numLocalInts: 0,
-  numLocalByteSlices: 0,
-  numGlobalInts: 1,
-  numGlobalByteSlices: 0,
+  appNumLocalInts: 0,
+  appNumLocalByteSlices: 0,
+  appNumGlobalInts: 1,
+  appNumGlobalByteSlices: 0,
+  // appApprovalProgram & appClearProgram will be added in run()
+}
+
+const sampleRawNoOPTrx = {
+  type:'appl',
+  from:'6447K33DMECECFTWCWQ6SDJLY7EYM47G4RC5RCOKPTX5KA5RCJOTLAK7LU',
+  fee:1000,
+  firstRound:11395427,
+  lastRound:11396427,
+  genesisID:'testnet-v1.0',
+  genesisHash:'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+  appIndex:13258116, 
+  appOnComplete:0, 
+  appArgs: ['dHJhbnNmZXI=', 'MQ=='],
+  appAccounts: ['IKSNMZFYNMXFBWB2JCPMEC4HT7UECC354UDCKNHQTNKF7WQG3UQW7YZHWA'],
 }
 
 async function run() {
@@ -62,20 +77,20 @@ async function run() {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
 
-  const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
-  console.log(applications)
-  const appList = applications.map((app:any) => app?.params )
+  // const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
+  // console.log(applications)
+  // const appList = applications.map((app:any) => app?.params )
 
-  const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
+  // const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
+  // console.log(apps)
 
-  console.log(apps)
-
-  composeAppCreateParams.approvalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
-  composeAppCreateParams.clearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
+  // composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  // composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
-  console.log(composeAppCreateParams)
-  const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
-  transaction.actions = [action]
+  // console.log(composeAppCreateParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
+  // transaction.actions = [action]
+  transaction.actions = [sampleRawNoOPTrx]
   // console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   // console.log('decomposed actions: ', decomposed)
