@@ -1,5 +1,4 @@
 import * as algosdk from 'algosdk'
-import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import {
   isNullOrEmpty,
   toBuffer,
@@ -9,6 +8,7 @@ import {
   isAUint8ArrayArray,
   byteArrayToHexString,
   byteArrayArrayToHexStringArray,
+  hexStringToByteArray,
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
@@ -88,8 +88,8 @@ export class AlgorandActionHelper {
       appAccounts: !isNullOrEmpty(this.raw.appAccounts)
         ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
         : undefined,
-      approvalProgram: !isNullOrEmpty(this.raw.approvalProgram) ? this.raw.approvalProgram : undefined,
-      clearProgram: !isNullOrEmpty(this.raw.clearProgram) ? this.raw.clearProgram : undefined,
+      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram) ? this.raw.appApprovalProgram : undefined,
+      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram) ? this.raw.appClearProgram : undefined,
       appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.raw.appArgs : undefined,
       group: this.raw.group ? bufferToString(this.raw.group) : undefined,
       lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
@@ -133,8 +133,8 @@ export class AlgorandActionHelper {
   /** Convert Action encoded for algo sdk to raw - */
   private actionEncodedForSdkToRaw(action: AlgorandTxActionSdkEncoded) {
     const {
-      approvalProgram,
-      clearProgram,
+      appApprovalProgram,
+      appClearProgram,
       appArgs,
       group,
       lease,
@@ -146,8 +146,8 @@ export class AlgorandActionHelper {
     }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction) as AlgorandTxActionRaw
     // these fields are already encoded as needed for raw - so we dont want them encoded again
-    raw.approvalProgram = approvalProgram ? byteArrayToHexString(approvalProgram) : undefined
-    raw.clearProgram = clearProgram ? byteArrayToHexString(clearProgram) : undefined
+    raw.appApprovalProgram = appApprovalProgram ? byteArrayToHexString(appApprovalProgram) : undefined
+    raw.appClearProgram = appClearProgram ? byteArrayToHexString(appClearProgram) : undefined
     raw.appArgs = appArgs ? byteArrayArrayToHexStringArray(appArgs) : undefined
     raw.group = group
     raw.lease = lease
@@ -201,16 +201,16 @@ export class AlgorandActionHelper {
 
   /** Encode selected fields required by algo sdk */
   private encodeFieldsForSdk(paramsIn: any) {
-    const { appArgs, approvalProgram, clearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
+    const { appArgs, appApprovalProgram, appClearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
-    if (!isNullOrEmpty(approvalProgram) && true) {
-      params.approvalProgram = hexToUint8Array(approvalProgram)
+    if (!isNullOrEmpty(appApprovalProgram) && true) {
+      params.appApprovalProgram = hexStringToByteArray(appApprovalProgram)
     }
-    if (!isNullOrEmpty(clearProgram) && true) {
-      params.clearProgram = hexToUint8Array(clearProgram)
+    if (!isNullOrEmpty(appClearProgram) && true) {
+      params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
     if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
-      params.appArgs = appArgs.map(algosdk.encodeObj(appArgs)) as Uint8Array[] // Array of UInt8Array
+      params.appArgs = appArgs.map((appArg: string) => algosdk.encodeObj(appArg)) as Uint8Array[] // Array of UInt8Array
     if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
@@ -257,8 +257,8 @@ export class AlgorandActionHelper {
   ): boolean {
     return (
       (isAString(action.from) || isNullOrEmpty(action.from)) &&
-      (isAUint8Array(action.approvalProgram) ||
-        isAUint8Array(action.clearProgram) ||
+      (isAUint8Array(action.appApprovalProgram) ||
+        isAUint8Array(action.appClearProgram) ||
         isAUint8ArrayArray(action.appArgs) ||
         isAUint8Array(action.note) ||
         isAUint8Array(action.lease) ||
