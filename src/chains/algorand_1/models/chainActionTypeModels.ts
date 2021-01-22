@@ -1,6 +1,5 @@
 import { AlgorandAddress } from './cryptoModels'
 import { ChainActionType } from '../../../models'
-import { AlgoProgram } from './generalModels'
 
 /** ChainJS action type names */
 export enum AlgorandChainActionType {
@@ -40,12 +39,12 @@ export type AlgorandKeyRegistrationParams = {
 /** Make a transaction that will create an application */
 export type AlgorandActionAppCreate = {
   from: AlgorandAddress // Algorand address of sender
-  approvalProgram: AlgoProgram // the compiled TEAL that approves a transaction
-  clearProgram: AlgoProgram // the compiled TEAL that runs when clearing state
-  numLocalInts: number // restricts number of ints in per-user local state
-  numLocalByteSlices: number // restricts number of byte slices in per-user local state
-  numGlobalInts: number // restricts number of ints in global state
-  numGlobalByteSlices: number // restricts number of byte slices in global state
+  appApprovalProgram: string // the compiled TEAL that approves a transaction
+  appClearProgram: string // the compiled TEAL that runs when clearing state
+  appNumLocalInts: number // restricts number of ints in per-user local state
+  appNumLocalByteSlices: number // restricts number of byte slices in per-user local state
+  appNumGlobalInts: number // restricts number of ints in global state
+  appNumGlobalByteSlices: number // restricts number of byte slices in global state
   appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
@@ -72,8 +71,8 @@ export type AlgorandActionAppMultiPurpose = {
 export type AlgorandActionAppUpdate = {
   from: AlgorandAddress // Algorand address of sender
   appIndex?: number // the ID of the app to be updated
-  approvalProgram?: AlgoProgram // the compiled TEAL that approves a transaction
-  clearProgram?: AlgoProgram // the compiled TEAL that runs when clearing state
+  appApprovalProgram?: string // the compiled TEAL that approves a transaction
+  appClearProgram?: string // the compiled TEAL that runs when clearing state
   appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index

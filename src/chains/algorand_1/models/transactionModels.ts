@@ -77,8 +77,8 @@ export type AlgorandTxActionSdkEncoded = AlgorandTxActionSdkEncodedFields & Algo
 
 /** action fields in an unencoded state (these will be encoded for the algorand SDK) */
 export type AlgorandTxActionUnencodeFields = {
-  approvalProgram?: string
-  clearProgram?: string
+  appApprovalProgram?: string
+  appClearProgram?: string
   appArgs?: string[]
   group?: string
   lease?: string
@@ -90,8 +90,8 @@ export type AlgorandTxActionUnencodeFields = {
 
 /** action fields as they should be encoded for the algorand SDK */
 export type AlgorandTxActionSdkEncodedFields = {
-  approvalProgram?: Uint8Array
-  clearProgram?: Uint8Array
+  appApprovalProgram?: Uint8Array
+  appClearProgram?: Uint8Array
   appArgs?: Uint8Array[]
   group?: Buffer
   lease?: Uint8Array
@@ -137,12 +137,12 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   decimals?: number
   appIndex?: number
   appOnComplete?: number
-  numLocalInts?: number
-  numLocalByteSlices?: number
-  numGlobalInts?: number
-  numGlobalByteSlices?: number
-  approvalProgram?: string
-  clearProgram?: string
+  appNumLocalInts?: number
+  appNumLocalByteSlices?: number
+  appNumGlobalInts?: number
+  appNumGlobalByteSlices?: number
+  appApprovalProgram?: string
+  appClearProgram?: string
   appArgs?: string[]
   appAccounts?: AlgorandAddress[]
   appForeignApps?: number[]

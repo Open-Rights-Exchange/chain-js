@@ -15,15 +15,14 @@ import { isNullOrEmpty } from '../../../../../helpers'
 /** Composes a transaction that changes an application's approval and clear programs */
 export const composeAction = async (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  console.log('ENCODEDFORSDK', argsEncodedForSdk)
   const {
     from,
-    approvalProgram,
-    clearProgram,
-    numLocalInts,
-    numLocalByteSlices,
-    numGlobalInts,
-    numGlobalByteSlices,
+    appApprovalProgram,
+    appClearProgram,
+    appNumLocalInts,
+    appNumLocalByteSlices,
+    appNumGlobalInts,
+    appNumGlobalByteSlices,
     appArgs,
     appAccounts,
     appForeignApps,
@@ -32,17 +31,17 @@ export const composeAction = async (args: AlgorandActionAppCreate, suggestedPara
     lease,
     reKeyTo,
   } = argsEncodedForSdk
-  console.log('Suggestedparams: ', suggestedParams)
+  console.log('ARGS: ', argsEncodedForSdk)
   const composedAction = algosdk.makeApplicationCreateTxn(
     from,
     suggestedParams,
     AlgorandOnApplicationComplete.NoOp,
-    approvalProgram,
-    clearProgram,
-    numLocalInts,
-    numLocalByteSlices,
-    numGlobalInts,
-    numGlobalByteSlices,
+    appApprovalProgram,
+    appClearProgram,
+    appNumLocalInts,
+    appNumLocalByteSlices,
+    appNumGlobalInts,
+    appNumGlobalByteSlices,
     appArgs,
     appAccounts,
     appForeignApps,
@@ -51,7 +50,6 @@ export const composeAction = async (args: AlgorandActionAppCreate, suggestedPara
     lease,
     reKeyTo,
   )
-  console.log('COMPOSEDACTION: ', composedAction)
   if (!isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }

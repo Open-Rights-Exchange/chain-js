@@ -138,12 +138,12 @@ export type AlgorandTxActionStruct = {
   group?: Buffer
   appIndex?: number
   appOnComplete?: number
-  numLocalInts?: number
-  numLocalByteSlices?: number
-  numGlobalInts?: number
-  numGlobalByteSlices?: number
-  approvalProgram?: string
-  clearProgram?: string
+  appNumLocalInts?: number
+  appNumLocalByteSlices?: number
+  appNumGlobalInts?: number
+  appNumGlobalByteSlices?: number
+  appApprovalProgram?: string
+  appClearProgram?: string
   appArgs?: string[]
   appAccounts?: AlgorandAddressStruct[]
   appForeignApps?: number[]
