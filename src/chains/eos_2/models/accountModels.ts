@@ -31,14 +31,14 @@ export type EosCreateAccountOptions = {
     referralAccountName?: EosEntityName // default = ''  // aka referral
   }
   createEscrowOptions?: {
-    contractName: EosEntityName // default = 'createescrow'
+    contractName: EosEntityName | string // default = 'createescrow'
     appName: string // aka 'origin' field
   }
   createVirtualNestedOptions?: {
     parentAccountName: EosEntityName
     rootPermission?: EosEntityName
     actionsToLink?: {
-      contract: EosEntityName
+      contract: EosEntityName | string
       action: string
     }[]
   }

@@ -3,7 +3,7 @@ import { EosPublicKey } from './cryptoModels'
 
 export type LinkPermissionsParams = {
   permissionName: EosEntityName
-  contract: EosEntityName
+  contract: EosEntityName | string
   action: string
 }
 
@@ -21,6 +21,6 @@ export type ReplacePermissionKeysParams = {
 }
 
 export type UnlinkPermissionsParams = {
-  contract: EosEntityName
+  contract: EosEntityName | string
   action: string
 }
