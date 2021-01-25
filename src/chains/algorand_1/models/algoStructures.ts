@@ -142,9 +142,9 @@ export type AlgorandTxActionStruct = {
   appLocalByteSlices?: number
   appGlobalInts?: number
   appGlobalByteSlices?: number
-  appApprovalProgram?: string
-  appClearProgram?: string
-  appArgs?: string[]
+  appApprovalProgram?: Uint8Array
+  appClearProgram?: Uint8Array
+  appArgs?: Uint8Array[]
   appAccounts?: AlgorandAddressStruct[]
   appForeignApps?: number[]
   appForeignAssets?: number[]

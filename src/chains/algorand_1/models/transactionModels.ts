@@ -77,8 +77,8 @@ export type AlgorandTxActionSdkEncoded = AlgorandTxActionSdkEncodedFields & Algo
 
 /** action fields in an unencoded state (these will be encoded for the algorand SDK) */
 export type AlgorandTxActionUnencodeFields = {
-  appApprovalProgram?: string
-  appClearProgram?: string
+  appApprovalProgram?: string // hexstring encoded compiled TEAL code
+  appClearProgram?: string // hexstring encoded compiled TEAL code
   appArgs?: string[]
   group?: string
   lease?: string
@@ -141,10 +141,9 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   appLocalByteSlices?: number
   appGlobalInts?: number
   appGlobalByteSlices?: number
-  appApprovalProgram?: string
-  appClearProgram?: string
-  appArgs?: string[]
   appAccounts?: AlgorandAddress[]
+  appApprovalProgram?: Uint8Array // Uint8Array is compiled code TEAL code
+  appClearProgram?: Uint8Array // Uint8Array is compiled code TEAL code
   appForeignApps?: number[]
   appForeignAssets?: number[]
   reKeyTo?: AlgorandAddress
