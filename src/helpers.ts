@@ -74,7 +74,7 @@ export function toBuffer(data: any, encoding: BufferEncoding = TRANSACTION_ENCOD
 }
 
 // convert buffer into a string
-export function bufferToString(buffer: Buffer, encoding: string = 'utf8') {
+export function bufferToString(buffer: Buffer, encoding: BufferEncoding = 'utf8') {
   if (!buffer) return null
   return buffer.toString(encoding)
 }
@@ -243,10 +243,14 @@ export function getDecimalPlacesFromString(num: string = '') {
   )
 }
 
-// /** Checks if string is a valid hex string */
-// export function isValidHex(value: string): Boolean {
-//   return false
-// }
+/** Checks if string is a valid hex string 
+ * 
+*/
+export function isHexString(value: any): Boolean {
+  if (!value) return false
+  const match = value.match(/^(0x|0X)?[a-fA-F0-9]+$/i)
+  return !!match
+}
 
 /** Converts a hex string to a unit8 byte array */
 export function hexStringToByteArray(value: string): Uint8Array {

@@ -1,5 +1,5 @@
 import { ChainActionType } from '../../models'
-import { byteArrayToHexString, notSupported } from '../../helpers'
+import { byteArrayToHexString, isHexString, notSupported } from '../../helpers'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -51,21 +51,24 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   Payment: PaymentTemplate,
 }
 
+/** compile an uncompiled TEAL program (into a Uint8Array) */
 export async function compileFromSourceCode(sourceCode: string, algoClient: AlgoClient): Promise<Uint8Array> {
   const encoder = new TextEncoder()
   const programBytes = encoder.encode(sourceCode)
   const compileResponse = await algoClient.compile(programBytes).do()
   return new Uint8Array(Buffer.from(compileResponse.result, 'base64'))
 }
+
+/** compile the TEAL program if needed */
 export async function compileIfSourceCodeAndEncode(
   program: string | Uint8Array,
   algoClient: AlgoClient,
 ): Promise<string> {
-  let byteCode: Uint8Array
-  if (true) {
-    // isValidHex will be implemented
-    byteCode = await compileFromSourceCode(program as string, algoClient)
+  if (isHexString(program)) {
+    return program as string
   }
+  // compile the uncompiled program (into a hex string)
+  const byteCode = await compileFromSourceCode(program as string, algoClient)
   return byteArrayToHexString(byteCode)
 }
 
