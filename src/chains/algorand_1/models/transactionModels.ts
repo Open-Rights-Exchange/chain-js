@@ -137,10 +137,10 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   decimals?: number
   appIndex?: number
   appOnComplete?: number
-  appNumLocalInts?: number
-  appNumLocalByteSlices?: number
-  appNumGlobalInts?: number
-  appNumGlobalByteSlices?: number
+  appLocalInts?: number
+  appLocalByteSlices?: number
+  appGlobalInts?: number
+  appGlobalByteSlices?: number
   appApprovalProgram?: string
   appClearProgram?: string
   appArgs?: string[]

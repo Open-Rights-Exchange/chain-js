@@ -45,10 +45,10 @@ const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
 
 const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-  appNumLocalInts: 0,
-  appNumLocalByteSlices: 0,
-  appNumGlobalInts: 1,
-  appNumGlobalByteSlices: 0,
+  appLocalInts: 0,
+  appLocalByteSlices: 0,
+  appGlobalInts: 1,
+  appGlobalByteSlices: 0,
   // appApprovalProgram & appClearProgram will be added in run()
 }
 

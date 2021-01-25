@@ -41,10 +41,10 @@ export type AlgorandActionAppCreate = {
   from: AlgorandAddress // Algorand address of sender
   appApprovalProgram: string // the compiled TEAL that approves a transaction
   appClearProgram: string // the compiled TEAL that runs when clearing state
-  appNumLocalInts: number // restricts number of ints in per-user local state
-  appNumLocalByteSlices: number // restricts number of byte slices in per-user local state
-  appNumGlobalInts: number // restricts number of ints in global state
-  appNumGlobalByteSlices: number // restricts number of byte slices in global state
+  appLocalInts: number // restricts number of ints in per-user local state
+  appLocalByteSlices: number // restricts number of byte slices in per-user local state
+  appGlobalInts: number // restricts number of ints in global state
+  appGlobalByteSlices: number // restricts number of byte slices in global state
   appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
