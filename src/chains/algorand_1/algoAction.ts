@@ -1,14 +1,15 @@
 import * as algosdk from 'algosdk'
 import {
+  bufferToString,
+  byteArrayArrayToHexStringArray,
+  byteArrayToHexString,
+  hexStringToByteArray,
+  isAString,
+  isAUint8Array,
+  isAUint8ArrayArray,
+  isHexString,
   isNullOrEmpty,
   toBuffer,
-  bufferToString,
-  isAUint8Array,
-  isAString,
-  isAUint8ArrayArray,
-  byteArrayToHexString,
-  byteArrayArrayToHexStringArray,
-  hexStringToByteArray,
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
@@ -203,10 +204,10 @@ export class AlgorandActionHelper {
   private encodeFieldsForSdk(paramsIn: any) {
     const { appArgs, appApprovalProgram, appClearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
-    if (!isNullOrEmpty(appApprovalProgram) && true) {
+    if (!isNullOrEmpty(appApprovalProgram) && isHexString(appApprovalProgram)) {
       params.appApprovalProgram = hexStringToByteArray(appApprovalProgram)
     }
-    if (!isNullOrEmpty(appClearProgram) && true) {
+    if (!isNullOrEmpty(appClearProgram) && isHexString(appApprovalProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
     if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
@@ -235,7 +236,7 @@ export class AlgorandActionHelper {
   /** Remove fields from object that are undefined, null, or empty */
   deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach((key) => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
     if (isAUint8ArrayArray(params.appArgs) && (params.appArgs as Uint8Array[]).length === 0) delete params.appArgs
   }
 
@@ -256,7 +257,7 @@ export class AlgorandActionHelper {
     action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
   ): boolean {
     return (
-      (isAString(action.from) || isNullOrEmpty(action.from)) &&
+      !this.isAlgorandTxActionRaw(action) &&
       (isAUint8Array(action.appApprovalProgram) ||
         isAUint8Array(action.appClearProgram) ||
         isAUint8ArrayArray(action.appArgs) ||
