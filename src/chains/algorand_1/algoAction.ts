@@ -139,8 +139,8 @@ export class AlgorandActionHelper {
   private actionEncodedForSdkToRaw(action: AlgorandTxActionSdkEncoded) {
     const {
       appApprovalProgram,
-      appClearProgram,
       appArgs,
+      appClearProgram,
       group,
       lease,
       note,
@@ -152,8 +152,8 @@ export class AlgorandActionHelper {
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction) as AlgorandTxActionRaw
     // these fields are already encoded as needed for raw - so we dont want them encoded again
     raw.appApprovalProgram = appApprovalProgram
-    raw.appClearProgram = appClearProgram
     raw.appArgs = appArgs
+    raw.appClearProgram = appClearProgram
     raw.group = group
     raw.lease = lease
     raw.note = note
@@ -206,22 +206,20 @@ export class AlgorandActionHelper {
 
   /** Encode selected fields required by algo sdk */
   private encodeFieldsForSdk(paramsIn: any) {
-    const { appArgs, appApprovalProgram, appClearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
+    const { appApprovalProgram, appArgs, appClearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
     if (!isNullOrEmpty(appApprovalProgram) && isHexString(appApprovalProgram)) {
       params.appApprovalProgram = hexStringToByteArray(appApprovalProgram)
     }
-    if (!isNullOrEmpty(appClearProgram) && isHexString(appApprovalProgram)) {
+    if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
     if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
-      params.appArgs = appArgs.map((appArg: string | number[]) => {
-        if (isAString(appArg)) {
-          if (isHexString(appArg)) return hexStringToByteArray(appArg as string)
-          return new Uint8Array(Buffer.from(appArg as string, 'base64'))
-        }
-        return appArg
-      }) as Uint8Array[] // Array of UInt8Array
+      params.appArgs = appArgs.map((appArg: string | number | Uint8Array) => {
+        if (!isAString(appArg)) return appArg
+        if (isHexString(appArg)) return hexStringToByteArray(appArg as string)
+        return new Uint8Array(Buffer.from(appArg as string, 'base64'))
+      }) as Uint8Array[] // Array of Uint8Array
     if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
