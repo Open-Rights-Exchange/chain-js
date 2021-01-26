@@ -89,9 +89,13 @@ export class AlgorandActionHelper {
       appAccounts: !isNullOrEmpty(this.raw.appAccounts)
         ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
         : undefined,
-      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram) ? this.raw.appApprovalProgram : undefined,
-      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram) ? this.raw.appClearProgram : undefined,
-      appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.raw.appArgs : undefined,
+      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
+        ? byteArrayToHexString(this.raw.appApprovalProgram)
+        : undefined,
+      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram)
+        ? byteArrayToHexString(this.raw.appClearProgram)
+        : undefined,
+      appArgs: !isNullOrEmpty(this.raw.appArgs) ? byteArrayArrayToHexStringArray(this.raw.appArgs) : undefined,
       group: this.raw.group ? bufferToString(this.raw.group) : undefined,
       lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
       note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,
@@ -147,9 +151,9 @@ export class AlgorandActionHelper {
     }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction) as AlgorandTxActionRaw
     // these fields are already encoded as needed for raw - so we dont want them encoded again
-    raw.appApprovalProgram = appApprovalProgram ? byteArrayToHexString(appApprovalProgram) : undefined
-    raw.appClearProgram = appClearProgram ? byteArrayToHexString(appClearProgram) : undefined
-    raw.appArgs = appArgs ? byteArrayArrayToHexStringArray(appArgs) : undefined
+    raw.appApprovalProgram = appApprovalProgram
+    raw.appClearProgram = appClearProgram
+    raw.appArgs = appArgs
     raw.group = group
     raw.lease = lease
     raw.note = note
@@ -211,7 +215,13 @@ export class AlgorandActionHelper {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
     if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
-      params.appArgs = appArgs.map((appArg: string) => algosdk.encodeObj(appArg)) as Uint8Array[] // Array of UInt8Array
+      params.appArgs = appArgs.map((appArg: string | number[]) => {
+        if (isAString(appArg)) {
+          if (isHexString(appArg)) return hexStringToByteArray(appArg as string)
+          return new Uint8Array(Buffer.from(appArg as string, 'base64'))
+        }
+        return appArg
+      }) as Uint8Array[] // Array of UInt8Array
     if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
@@ -236,7 +246,7 @@ export class AlgorandActionHelper {
   /** Remove fields from object that are undefined, null, or empty */
   deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach((key) => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
     if (isAUint8ArrayArray(params.appArgs) && (params.appArgs as Uint8Array[]).length === 0) delete params.appArgs
   }
 
