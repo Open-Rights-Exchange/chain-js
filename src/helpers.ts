@@ -243,11 +243,11 @@ export function getDecimalPlacesFromString(num: string = '') {
   )
 }
 
-/** Checks if string is a valid hex string 
- * 
-*/
+/** Checks if string is a valid hex string
+ *
+ */
 export function isHexString(value: any): Boolean {
-  if (!value) return false
+  if (!isAString(value)) return false
   const match = value.match(/^(0x|0X)?[a-fA-F0-9]+$/i)
   return !!match
 }
