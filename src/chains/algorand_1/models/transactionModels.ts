@@ -142,8 +142,6 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   appGlobalInts?: number
   appGlobalByteSlices?: number
   appAccounts?: AlgorandAddress[]
-  appApprovalProgram?: Uint8Array // Uint8Array is compiled code TEAL code
-  appClearProgram?: Uint8Array // Uint8Array is compiled code TEAL code
   appForeignApps?: number[]
   appForeignAssets?: number[]
   reKeyTo?: AlgorandAddress
