@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import fs from 'fs'
+import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
 import {
@@ -54,16 +55,14 @@ const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
 
 const sampleRawNoOPTrx = {
   type:'appl',
-  from:'6447K33DMECECFTWCWQ6SDJLY7EYM47G4RC5RCOKPTX5KA5RCJOTLAK7LU',
+  from:'ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM',
   fee:1000,
-  firstRound:11395427,
-  lastRound:11396427,
   genesisID:'testnet-v1.0',
   genesisHash:'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-  appIndex:13258116, 
+  appIndex:13675644, 
   appOnComplete:0, 
-  appArgs: ['dHJhbnNmZXI=', 'MQ=='],
-  appAccounts: ['IKSNMZFYNMXFBWB2JCPMEC4HT7UECC354UDCKNHQTNKF7WQG3UQW7YZHWA'],
+  appArgs: ['bWludA==', new Uint8Array([39, 16])],
+  appAccounts: ['ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM'],
 }
 
 async function run() {
@@ -96,10 +95,12 @@ async function run() {
   // console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
+  const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
+  await transaction.sign([toAlgorandPrivateKey(sk)])
   console.log('missing signatures: ', transaction.missingSignatures)
+  console.log(transaction.rawTransaction)
   try{
-    // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
   }catch(err) {
     console.log(err)
   }
