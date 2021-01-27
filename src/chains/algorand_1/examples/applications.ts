@@ -83,20 +83,21 @@ async function run() {
   // const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
   // console.log(apps)
 
-  // composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
-  // composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
+  composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
   // console.log(composeAppCreateParams)
-  // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
-  // transaction.actions = [action]
-  transaction.actions = [sampleRawNoOPTrx]
+  const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
+  transaction.actions = [action]
+  // transaction.actions = [sampleRawNoOPTrx]
   // console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   // console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
-  await transaction.sign([toAlgorandPrivateKey(sk)])
+  // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
+  // await transaction.sign([toAlgorandPrivateKey(sk)])
+  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log(transaction.rawTransaction)
   try{
