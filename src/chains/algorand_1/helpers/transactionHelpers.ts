@@ -59,6 +59,7 @@ export async function compileIfSourceCodeIfNeeded(
   program: string | Uint8Array,
   algoClient: AlgoClient,
 ): Promise<string> {
+  if (!program) return undefined
   if (isHexString(program)) {
     return program as string
   }

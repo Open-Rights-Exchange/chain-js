@@ -51,7 +51,6 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   Payment: PaymentTemplate,
 }
 
-// TODO: composeAction expects source code to be sent for appAprovalProgram & appClearProgram
 // Must check if its not a valid hex before it assumes source code has been passed (isValidHex() will be impelemented)
 /** Compose an object for a chain contract action */
 export async function composeAction(
@@ -63,19 +62,11 @@ export async function composeAction(
   if (!composerFunction) {
     notSupported(`ComposeAction:${chainActionType}`)
   }
-  const appApprovalProgram = args?.appApprovalProgram
-    ? await compileIfSourceCodeIfNeeded(args.appApprovalProgram, chainState.algoClient)
-    : undefined
-  const appClearProgram = args?.appClearProgram
-    ? await compileIfSourceCodeIfNeeded(args.appClearProgram, chainState.algoClient)
-    : undefined
-  const appArgs = args?.appArgs // TODO: check if appArgs are valid base64 encoded, if not encode to base64
 
   const action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded = {
     ...args,
-    appApprovalProgram,
-    appClearProgram,
-    appArgs,
+    appApprovalProgram: await compileIfSourceCodeIfNeeded(args.appApprovalProgram, chainState.algoClient),
+    appClearProgram: await compileIfSourceCodeIfNeeded(args.appClearProgram, chainState.algoClient),
   } as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
   let actionHelper = new AlgorandActionHelper(action)
   const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
