@@ -1,5 +1,8 @@
 import * as algosdk from 'algosdk'
+import { byteArrayToHexString, isHexString } from 'src/helpers'
+
 import {
+  AlgoClient,
   AlgorandMultiSigAccount,
   AlgorandMultiSigOptions,
   AlgorandRawTransactionMultisigStruct,
@@ -41,4 +44,25 @@ export function microToAlgoString(microAlgo: number): string {
  * returns microAlgo in number format that AlgoSdk uses */
 export function algoToMicro(algo: string): number {
   return parseFloat(algo) * 1000000
+}
+
+/** compile an uncompiled TEAL program (into a Uint8Array) */
+export async function compileFromSourceCode(sourceCode: string, algoClient: AlgoClient): Promise<Uint8Array> {
+  const encoder = new TextEncoder()
+  const programBytes = encoder.encode(sourceCode)
+  const compileResponse = await algoClient.compile(programBytes).do()
+  return new Uint8Array(Buffer.from(compileResponse.result, 'base64'))
+}
+
+/** compile the TEAL program if needed */
+export async function compileIfSourceCodeIfNeeded(
+  program: string | Uint8Array,
+  algoClient: AlgoClient,
+): Promise<string> {
+  if (isHexString(program)) {
+    return program as string
+  }
+  // compile the uncompiled program (into a hex string)
+  const byteCode = await compileFromSourceCode(program as string, algoClient)
+  return byteArrayToHexString(byteCode)
 }

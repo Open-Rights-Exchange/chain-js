@@ -1,5 +1,5 @@
+import { notSupported } from '../../helpers'
 import { ChainActionType } from '../../models'
-import { byteArrayToHexString, isHexString, notSupported } from '../../helpers'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -18,7 +18,6 @@ import { composeAction as KeyRegistrationTemplate } from './templates/chainActio
 import { composeAction as PaymentTemplate } from './templates/chainActions/chainSpecific/payment'
 
 import {
-  AlgoClient,
   AlgorandChainActionType,
   AlgorandChainTransactionParamsStruct,
   AlgorandTxAction,
@@ -28,6 +27,7 @@ import {
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandActionHelper } from './algoAction'
+import { compileIfSourceCodeIfNeeded } from './helpers'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any } = {
@@ -51,27 +51,6 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   Payment: PaymentTemplate,
 }
 
-/** compile an uncompiled TEAL program (into a Uint8Array) */
-export async function compileFromSourceCode(sourceCode: string, algoClient: AlgoClient): Promise<Uint8Array> {
-  const encoder = new TextEncoder()
-  const programBytes = encoder.encode(sourceCode)
-  const compileResponse = await algoClient.compile(programBytes).do()
-  return new Uint8Array(Buffer.from(compileResponse.result, 'base64'))
-}
-
-/** compile the TEAL program if needed */
-export async function compileIfSourceCodeAndEncode(
-  program: string | Uint8Array,
-  algoClient: AlgoClient,
-): Promise<string> {
-  if (isHexString(program)) {
-    return program as string
-  }
-  // compile the uncompiled program (into a hex string)
-  const byteCode = await compileFromSourceCode(program as string, algoClient)
-  return byteArrayToHexString(byteCode)
-}
-
 // TODO: composeAction expects source code to be sent for appAprovalProgram & appClearProgram
 // Must check if its not a valid hex before it assumes source code has been passed (isValidHex() will be impelemented)
 /** Compose an object for a chain contract action */
@@ -85,10 +64,10 @@ export async function composeAction(
     notSupported(`ComposeAction:${chainActionType}`)
   }
   const appApprovalProgram = args?.appApprovalProgram
-    ? await compileIfSourceCodeAndEncode(args.appApprovalProgram, chainState.algoClient)
+    ? await compileIfSourceCodeIfNeeded(args.appApprovalProgram, chainState.algoClient)
     : undefined
   const appClearProgram = args?.appClearProgram
-    ? await compileIfSourceCodeAndEncode(args.appClearProgram, chainState.algoClient)
+    ? await compileIfSourceCodeIfNeeded(args.appClearProgram, chainState.algoClient)
     : undefined
   const appArgs = args?.appArgs // TODO: check if appArgs are valid base64 encoded, if not encode to base64
 
