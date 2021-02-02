@@ -5,7 +5,6 @@ import {
   hexStringToByteArray,
   isAString,
   isAUint8Array,
-  isAUint8ArrayArray,
   isHexString,
   isNullOrEmpty,
   toBuffer,
@@ -19,7 +18,13 @@ import {
 } from './models/transactionModels'
 import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct, AlgorandTxEncodedForChain } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
-import { encodedAppArgsToReadable, toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
+import {
+  encodeAppArgIfHumanReadable,
+  encodedAppArgsToReadable,
+  isAppArgsSdkEncoded,
+  toAlgorandAddressFromRaw,
+  toRawAddressFromAlgoAddr,
+} from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
  * Algorand supports these actions:
@@ -72,6 +77,7 @@ export class AlgorandActionHelper {
 
   /** Action properties with addresses converted to hexstrings (from Uint8Arrays) */
   public get action(): AlgorandTxAction {
+    console.log('NOTE: ', this.raw.note)
     const returnVal = {
       ...this.raw,
       genesisHash: this.raw.genesisHash ? bufferToString(this.raw.genesisHash, 'base64') : undefined,
@@ -213,12 +219,8 @@ export class AlgorandActionHelper {
     if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
-    if (!isNullOrEmpty(appArgs) && !isAUint8ArrayArray(appArgs))
-      params.appArgs = appArgs.map((appArg: string | number | Uint8Array) => {
-        if (!isAString(appArg)) return appArg
-        if (isHexString(appArg)) return hexStringToByteArray(appArg as string)
-        return new Uint8Array(Buffer.from(appArg as string, 'base64'))
-      }) as Uint8Array[] // Array of Uint8Array
+    if (!isNullOrEmpty(appArgs) && !isAppArgsSdkEncoded(appArgs))
+      params.appArgs = appArgs.map((appArg: string | number | Uint8Array) => encodeAppArgIfHumanReadable(appArg))
     if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
@@ -244,7 +246,8 @@ export class AlgorandActionHelper {
   deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
     Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
-    if (isAUint8ArrayArray(params.appArgs) && (params.appArgs as Uint8Array[]).length === 0) delete params.appArgs
+    if (isAppArgsSdkEncoded(params.appArgs) && (params.appArgs as (Uint8Array | string)[]).length === 0)
+      delete params.appArgs
   }
 
   /** whether action is the native chain 'raw' format */
@@ -267,7 +270,7 @@ export class AlgorandActionHelper {
       !this.isAlgorandTxActionRaw(action) &&
       (isAUint8Array(action.appApprovalProgram) ||
         isAUint8Array(action.appClearProgram) ||
-        isAUint8ArrayArray(action.appArgs) ||
+        isAppArgsSdkEncoded(action.appArgs) ||
         isAUint8Array(action.note) ||
         isAUint8Array(action.lease) ||
         Buffer.isBuffer(action.group) ||
