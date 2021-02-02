@@ -39,6 +39,7 @@ export enum ChainType {
   EosV2 = 'eos',
   EthereumV1 = 'ethereum',
   AlgorandV1 = 'algorand',
+  PolkadotV1 = 'polkadot',
 }
 
 /** Chain urls and related details used to connect to chain */

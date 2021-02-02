@@ -11,6 +11,7 @@ import * as Models from './models'
 import * as ModelsAlgorand from './chains/algorand_1/models'
 import * as ModelsEos from './chains/eos_2/models'
 import * as ModelsEthereum from './chains/ethereum_1/models'
+import * as ModelsPolkadot from './chains/polkadot_1/models'
 import * as HelpersAlgorand from './chains/algorand_1/helpers'
 import * as HelpersEos from './chains/eos_2/helpers'
 import * as HelpersEthereum from './chains/ethereum_1/helpers'
@@ -37,5 +38,6 @@ export {
   ModelsAlgorand,
   ModelsEos,
   ModelsEthereum,
+  ModelsPolkadot,
   Transaction,
 }

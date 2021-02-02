@@ -1,0 +1,202 @@
+import { 
+  ChainActionType, 
+  ChainInfo, 
+  ChainType, 
+  CryptoCurve, 
+  ChainEntityName,
+  ChainDate,
+} from '../../models'
+import {
+  ChainError, 
+} from '../../errors'
+import { Chain } from '../../interfaces'
+import { 
+  PolkadotChainEndpoint, 
+  PolkadotChainSettings, 
+  PolkadotNewKeysOptions, 
+  PolkadotSymbol 
+} from './models'
+import { PolkadotChainState } from './polkadotChainState'
+import { notImplemented } from '../../helpers'
+import { PolkadotChainActionType } from './models/chainActionType'
+import { 
+  PolkadotAddress,
+  PolkadotTransactionAction,    
+} from './models/transactionModels'
+import { PolkadotDecomposeReturn } from './models/PolkadotStructures'
+import { PolkadotAccount } from './polkadotAccount'
+import { PolkadotTransaction } from './polkadotTransaction'
+
+import * as ethcrypto from '../ethereum_1/ethCrypto'
+import { Asymmetric } from '../../crypto'
+import {
+  isValidEthereumPrivateKey,
+  isValidEthereumPublicKey,
+  isValidEthereumDateString,
+  toEthereumEntityName,
+  toEthereumDate,
+  toEthereumPublicKey,
+  toEthereumPrivateKey,
+  toEthereumSignature,
+} from '../ethereum_1/helpers'
+import { PolkadotPublicKey } from './models/cryptoModels'
+
+class ChainPolkadotV1 implements Chain {
+  private _endpoints: PolkadotChainEndpoint[]
+
+  private _settings: PolkadotChainSettings
+
+  private _chainState: PolkadotChainState
+
+  constructor(endpoints: PolkadotChainEndpoint[], settings?: PolkadotChainSettings) {
+    this._endpoints = endpoints
+    this._settings = settings
+    this._chainState = new PolkadotChainState(endpoints, settings)
+  }
+
+  public get isConnected(): boolean {
+    return this._chainState?.isConnected
+  }
+
+  public get chainType(): ChainType {
+    return ChainType.PolkadotV1
+  }
+
+  public connect(): Promise<void> {
+    return this._chainState.connect()
+  }
+
+  public  get chainId(): string {
+    notImplemented()
+    return null
+  }
+
+  public get chainInfo(): ChainInfo {
+    notImplemented()
+    return null
+  }
+
+  public composeAction = async (
+    actionType: ChainActionType | PolkadotChainActionType,
+    args: any,
+  ): Promise<PolkadotTransactionAction> => {
+    notImplemented()
+    return null
+  }
+
+  public decomposeAction = async (
+    action: PolkadotTransactionAction
+  ): Promise<PolkadotDecomposeReturn[]> => {
+    notImplemented()
+    return null
+  }
+
+  public get description(): string {
+    return 'Polkadot Chain'
+  }
+
+  public get nativeToken(): { defaultUnit: string; symbol: PolkadotSymbol; tokenAddress: any } {
+    notImplemented()
+    return null
+  }
+
+  public async fetchBalance(
+    account: PolkadotAddress,
+    symbol: PolkadotSymbol,
+    tokenAddress?: PolkadotAddress,
+  ): Promise<{ balance: string }> {
+    notImplemented()
+    return null
+  }
+
+  public fetchContractData = (
+    contract: string,
+    table: string,
+    owner: string,
+    indexNumber: number,
+    lowerRow: number,
+    upperRow: number,
+    limit: number,
+    reverseOrder: boolean,
+    showPayer: boolean,
+    keyType: string,
+  ): Promise<any> => {
+    return null
+  }
+
+  private newAccount = async (address?: PolkadotAddress): Promise<PolkadotAccount> => {
+    notImplemented()
+    return null
+  }
+
+  private newCreateAccount = (options?: PolkadotNewKeysOptions): any => {
+    notImplemented()
+    return null
+  }
+  
+  private newTransaction = (options?: any): PolkadotTransaction => {
+    notImplemented()
+    return null
+  }
+
+  public new = {
+    Account: this.newAccount,
+    CreateAccount: this.newCreateAccount,
+    Transaction: this.newTransaction,
+  }
+
+  public isValidEntityName = (value: string): boolean => {
+    notImplemented()
+    return false
+  }
+
+  public isValidDate = (value: string): boolean => {
+    notImplemented()
+    return false
+  }
+
+  public toEntityName = (value: string): ChainEntityName => {
+    return toEthereumEntityName(value) as ChainEntityName
+  }
+
+  public toDate = (value: string | Date ): ChainDate => {
+    return toEthereumDate(value) as ChainDate
+  }
+
+  public setPublicKey = (publicKey: PolkadotPublicKey) => {
+    notImplemented()
+    return ''
+  }
+
+  public mapChainError = (error: Error): ChainError => {
+    notImplemented()
+    return new ChainError(null, null, null, error)
+  }
+
+  cryptoCurve: CryptoCurve.Secp256k1
+
+  decryptWithPassword = ethcrypto.decryptWithPassword
+  encryptWithPassword = ethcrypto.encryptWithPassword
+  decryptWithPrivateKey = ethcrypto.decryptWithPrivateKey
+  encryptWithPublicKey = ethcrypto.encryptWithPublicKey
+  decryptWithPrivateKeys = ethcrypto.decryptWithPrivateKeys
+  encryptWithPublicKeys = ethcrypto.encryptWithPublicKeys
+  getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
+  generateKeyPair = ethcrypto.generateKeyPair
+  isSymEncryptedDataString = ethcrypto.isSymEncryptedDataString
+  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
+  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
+  toSymEncryptedDataString = ethcrypto.toSymEncryptedDataString
+  toPublicKey = toEthereumPublicKey
+  toPrivateKey = toEthereumPrivateKey
+  toSignature = toEthereumSignature
+  
+  sign = ethcrypto.sign
+  verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
+
+  isValidPrivateKey = isValidEthereumPrivateKey
+  isValidPublicKey = isValidEthereumPublicKey
+  isValidEthereumDate = isValidEthereumDateString
+}
+
+export { ChainPolkadotV1 }
