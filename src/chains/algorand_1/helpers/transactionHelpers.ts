@@ -1,7 +1,14 @@
 import * as algosdk from 'algosdk'
 import { bufferToInt } from 'ethereumjs-util'
 import { TextEncoder } from 'util'
-import { bigIntToUint8Array, byteArrayToHexString, isAString, isAUint8Array, isHexString } from '../../../helpers'
+import {
+  bigIntToUint8Array,
+  byteArrayToHexString,
+  isAString,
+  isAUint8Array,
+  isHexString,
+  isNullOrEmpty,
+} from '../../../helpers'
 import {
   AlgoClient,
   AlgorandMultiSigAccount,
@@ -97,4 +104,9 @@ export function encodedAppArgsToReadable(args: (string | Uint8Array | number)[])
     return arg as number | string
   })
   return readable
+}
+
+export function isAppArgsSdkEncoded(args: any[]): boolean {
+  if (isNullOrEmpty(args)) return false
+  return args.every(arg => isBase64Encoded(arg) || isAUint8Array(arg))
 }

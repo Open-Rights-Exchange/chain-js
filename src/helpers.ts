@@ -9,13 +9,6 @@ export function isAUint8Array(obj: any) {
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
 }
 
-export function isAUint8ArrayArray(obj: any) {
-  if (obj === undefined || obj === null || !Array.isArray(obj)) {
-    return false
-  }
-  return (obj as Array<any>).every(isAUint8Array)
-}
-
 export function isABuffer(value: any) {
   if (value === undefined || value === null) return false
   return Buffer.isBuffer(value)

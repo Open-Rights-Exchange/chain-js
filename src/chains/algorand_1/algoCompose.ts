@@ -27,7 +27,7 @@ import {
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandActionHelper } from './algoAction'
-import { compileIfSourceCodeIfNeeded, encodeAppArgIfHumanReadable } from './helpers'
+import { compileIfSourceCodeIfNeeded, encodeAppArgIfHumanReadable, isAppArgsSdkEncoded } from './helpers'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any } = {
@@ -70,7 +70,7 @@ export async function composeAction(
     appArgs: [],
   } as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
   // Used push instead of map to evade typescript error probably caused by action possibly having both encdoed and unencoded types
-  if (args?.appArgs) {
+  if (args?.appArgs && !isAppArgsSdkEncoded(args?.appArgs)) {
     args?.appArgs.forEach((arg: any) =>
       (action.appArgs as (string | Uint8Array)[]).push(encodeAppArgIfHumanReadable(arg)),
     )
