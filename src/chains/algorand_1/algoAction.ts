@@ -1,7 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
   bufferToString,
-  byteArrayArrayToHexStringArray,
   byteArrayToHexString,
   hexStringToByteArray,
   isAString,
@@ -20,7 +19,7 @@ import {
 } from './models/transactionModels'
 import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct, AlgorandTxEncodedForChain } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
-import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
+import { encodedAppArgsToReadable, toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
  * Algorand supports these actions:
@@ -95,7 +94,7 @@ export class AlgorandActionHelper {
       appClearProgram: !isNullOrEmpty(this.raw.appClearProgram)
         ? byteArrayToHexString(this.raw.appClearProgram)
         : undefined,
-      appArgs: !isNullOrEmpty(this.raw.appArgs) ? byteArrayArrayToHexStringArray(this.raw.appArgs) : undefined,
+      appArgs: !isNullOrEmpty(this.raw.appArgs) ? encodedAppArgsToReadable(this.raw.appArgs) : undefined,
       group: this.raw.group ? bufferToString(this.raw.group) : undefined,
       lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
       note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,

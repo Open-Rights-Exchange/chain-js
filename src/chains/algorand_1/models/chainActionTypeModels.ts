@@ -62,7 +62,7 @@ export type AlgorandActionAppMultiPurpose = {
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
   foreignAssets?: number[] // optional - Array of int, any assets used by the application, identified by index
-  note: string // arbitrary data for sender to store
+  note?: string // arbitrary data for sender to store
   lease?: string
   reKeyTo?: AlgorandAddress // optional rekeying parameter to make trx a rekeying trx
 }

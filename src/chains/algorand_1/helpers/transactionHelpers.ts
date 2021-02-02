@@ -1,6 +1,7 @@
 import * as algosdk from 'algosdk'
-import { byteArrayToHexString, isHexString } from '../../../helpers'
-
+import { bufferToInt } from 'ethereumjs-util'
+import { TextEncoder } from 'util'
+import { bigIntToUint8Array, byteArrayToHexString, isAString, isAUint8Array, isHexString } from '../../../helpers'
 import {
   AlgoClient,
   AlgorandMultiSigAccount,
@@ -66,4 +67,34 @@ export async function compileIfSourceCodeIfNeeded(
   // compile the uncompiled program (into a hex string)
   const byteCode = await compileFromSourceCode(program as string, algoClient)
   return byteArrayToHexString(byteCode)
+}
+
+export function isBase64Encoded(value: string): boolean {
+  return Buffer.from(value, 'base64').toString('base64') === value
+}
+
+/** AppArgs has two unencoded types => number & string
+ *  Algosdk expects numbers as Uint8Arrays, string to be base64 encoded strings
+ */
+export function encodeAppArgIfHumanReadable(arg: string | number | Uint8Array): string | Uint8Array {
+  if (!arg) return undefined
+  if (isAUint8Array(arg)) return arg as Uint8Array
+  if (isAString(arg)) {
+    if (isBase64Encoded(arg as string)) return arg as string
+    return Buffer.from(arg as string, 'utf-8').toString('base64')
+  }
+  return bigIntToUint8Array(arg as number)
+}
+/** AppArgs has two unencoded types => number & string
+ *  Algosdk expects numbers as Uint8Arrays, string to be base64 encoded strings
+ *  This function accepts appArgs in any format, makes sures each element is
+ *    in number or unencoded string form
+ */
+export function encodedAppArgsToReadable(args: (string | Uint8Array | number)[]): (string | number)[] {
+  const readable: (string | number)[] = args.map(arg => {
+    if (isAUint8Array(arg)) return bufferToInt(Buffer.from(arg as Uint8Array)) as number
+    if (isBase64Encoded(arg as string)) return Buffer.from(arg as string, 'base64').toString('utf-8') as string
+    return arg as number | string
+  })
+  return readable
 }

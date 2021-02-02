@@ -144,7 +144,7 @@ export type AlgorandTxActionStruct = {
   appGlobalByteSlices?: number
   appApprovalProgram?: Uint8Array
   appClearProgram?: Uint8Array
-  appArgs?: Uint8Array[]
+  appArgs?: (string | Uint8Array)[]
   appAccounts?: AlgorandAddressStruct[]
   appForeignApps?: number[]
   appForeignAssets?: number[]
