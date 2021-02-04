@@ -79,7 +79,7 @@ export type AlgorandTxActionSdkEncoded = AlgorandTxActionSdkEncodedFields & Algo
 export type AlgorandTxActionUnencodeFields = {
   appApprovalProgram?: string // hexstring encoded compiled TEAL code
   appClearProgram?: string // hexstring encoded compiled TEAL code
-  appArgs?: (string | number)[]
+  appArgs?: (string | number | Uint8Array)[] // can be string, base64 string, hex string ('0x' prefix), number, or UInt8Array
   group?: string
   lease?: string
   note?: string
@@ -92,7 +92,7 @@ export type AlgorandTxActionUnencodeFields = {
 export type AlgorandTxActionSdkEncodedFields = {
   appApprovalProgram?: Uint8Array
   appClearProgram?: Uint8Array
-  appArgs?: (string | Uint8Array)[]
+  appArgs?: Uint8Array[]
   group?: Buffer
   lease?: Uint8Array
   note?: Uint8Array
