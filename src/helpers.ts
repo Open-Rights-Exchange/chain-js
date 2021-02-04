@@ -6,6 +6,7 @@ import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAUint8Array(obj: any) {
+  if (!obj) return false
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
 }
 
@@ -114,7 +115,7 @@ export function isABoolean(value: any) {
 }
 
 export function isANumber(value: any) {
-  if (Number.isNaN(value)) return false
+  if (!value || Number.isNaN(value)) return false
   return typeof value === 'number' || value instanceof Number
 }
 
@@ -127,8 +128,15 @@ export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
   return Object.values(enumType).includes(value as T[keyof T])
 }
 
+export function isBase64Encoded(value: any): boolean {
+  if (!isAString(value)) return false
+  const fromBase64 = Buffer.from(value, 'base64').toString('utf8')
+  const toBase64 = Buffer.from(fromBase64, 'utf8').toString('base64')
+  return toBase64 === value
+}
+
 export function getUniqueValues<T>(array: T[]) {
-  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
+  return Array.from(new Set(array.map((item) => JSON.stringify(item)))).map((item) => JSON.parse(item))
 }
 
 export function trimTrailingChars(value: string, charToTrim: string) {
@@ -269,6 +277,15 @@ export function bufferToHexString(value: Buffer): string {
   return value.toString('hex')
 }
 
+/**
+ * Converts a `Buffer` to a `Number`.
+ * @param buf `Buffer` object to convert
+ * @throws If the input number exceeds 53 bits.
+ */
+export function bufferToInt(buf: Buffer): number {
+  return new BN(toBuffer(buf)).toNumber()
+}
+
 export function utf8StringToHexString(value: string): string {
   return Buffer.from(value, 'utf8').toString('hex')
 }
@@ -281,6 +298,7 @@ export function decimalToHexString(value: string) {
 
 /** Return true if value is a hexidecimal encoded string (is prefixed by 0x) */
 export function hasHexPrefix(value: any): boolean {
+  if (!value) return false
   return isAString(value) && (value as string).startsWith('0x')
 }
 
@@ -433,4 +451,10 @@ export function bigIntToUint8Array(bn: number) {
     j += 2
   }
   return u8
+}
+
+export function uInt8ArrayToInteger(value: Uint8Array) {
+  if (isNullOrEmpty(value)) return undefined
+  const { length } = value
+  return Buffer.from(value).readUIntBE(0, length)
 }

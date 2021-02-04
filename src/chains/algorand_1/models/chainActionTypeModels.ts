@@ -45,7 +45,7 @@ export type AlgorandActionAppCreate = {
   appLocalByteSlices: number // restricts number of byte slices in per-user local state
   appGlobalInts: number // restricts number of ints in global state
   appGlobalByteSlices: number // restricts number of byte slices in global state
-  appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
+  appArgs?: (string | number | Uint8Array)[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
   foreignAssets?: number[] // optional - Array of int, any assets used by the application, identified by index
@@ -58,7 +58,7 @@ export type AlgorandActionAppCreate = {
 export type AlgorandActionAppMultiPurpose = {
   from: AlgorandAddress // Algorand address of sender
   appIndex: number // the ID of the app to use
-  appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
+  appArgs?: (string | number | Uint8Array)[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
   foreignAssets?: number[] // optional - Array of int, any assets used by the application, identified by index
@@ -73,7 +73,7 @@ export type AlgorandActionAppUpdate = {
   appIndex?: number // the ID of the app to be updated
   appApprovalProgram?: string // the compiled TEAL that approves a transaction
   appClearProgram?: string // the compiled TEAL that runs when clearing state
-  appArgs?: string[] // optional - Array of Uint8Array, any additional arguments to the application
+  appArgs?: (string | number | Uint8Array)[] // optional - Array of Uint8Array, any additional arguments to the application
   accounts?: AlgorandAddress[] // optional - Array of Address strings, any additional accounts to supply to the application
   foreignApps?: number[] // optional - Array of int, any other apps used by the application, identified by index
   foreignAssets?: number[] // optional - Array of int, any assets used by the application, identified by index

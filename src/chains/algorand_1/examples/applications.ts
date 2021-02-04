@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
@@ -76,12 +75,11 @@ const composeAppDeleteParams: Partial<AlgorandActionAppMultiPurpose> = {
 const sampleRawNoOPTrx = {
   type:'appl',
   from:'ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM',
-  fee:1000,
-  genesisID:'testnet-v1.0',
-  genesisHash:'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
   appIndex:13675644, 
   appOnComplete:0, 
   appArgs: ['bWludA==', new Uint8Array([39, 16])],
+  // appArgs: ['mint', '0x2710'], // same value as above 
+  // appArgs: ['0x6d696e74', '0x2710'], // same value as above
   appAccounts: ['ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM'],
 }
 
@@ -126,11 +124,12 @@ async function run() {
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppUpdate, composeAppUpdateParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppClear, composeAppClearParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppDelete, composeAppDeleteParams)
+
   transaction.actions = [action]
-  // transaction.actions = [sampleRawNoOPTrx]
-  // console.log('transaction actions: ', transaction.actions[0])
+
+  console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  // console.log('decomposed actions: ', decomposed)
+  console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
@@ -138,14 +137,14 @@ async function run() {
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log(transaction.rawTransaction)
-  try{
+  try {
     console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
-  }catch(err) {
+  } catch (err) {
     console.log(err)
   }
 }
 
-;(async () => {
+(async () => {
   try {
     await run()
     // await getAppIds()

@@ -27,7 +27,7 @@ import {
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandActionHelper } from './algoAction'
-import { compileIfSourceCodeIfNeeded, encodeAppArgIfHumanReadable, isAppArgsSdkEncoded } from './helpers'
+import { compileIfSourceCodeIfNeeded } from './helpers'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any } = {
@@ -67,14 +67,8 @@ export async function composeAction(
     ...args,
     appApprovalProgram: await compileIfSourceCodeIfNeeded(args.appApprovalProgram, chainState.algoClient),
     appClearProgram: await compileIfSourceCodeIfNeeded(args.appClearProgram, chainState.algoClient),
-    appArgs: [],
   } as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
-  // Used push instead of map to evade typescript error probably caused by action possibly having both encdoed and unencoded types
-  if (args?.appArgs && !isAppArgsSdkEncoded(args?.appArgs)) {
-    args?.appArgs.forEach((arg: any) =>
-      (action.appArgs as (string | Uint8Array)[]).push(encodeAppArgIfHumanReadable(arg)),
-    )
-  }
+
   let actionHelper = new AlgorandActionHelper(action)
   const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
     chainState.chainInfo?.nativeInfo?.transactionHeaderParams
