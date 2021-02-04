@@ -16,7 +16,7 @@ export const ChainErrorRegExs: { [key: string]: string } = {
   AuthUnsatisfied: '(signature validation|multisig validation|signed and not a Logic-only)', // all permission or keys needed for transaction weren't provided
   AuthMissing: '(no sig|LogicSig.Logic empty)', // missing permission or key
   BlockDoesNotExist:
-    '((?=failed to retrieve)(.*)(?=block/[0-9]+)(.*)|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash)',
+    '((?=failed to retrieve)(.*)(?=block/[0-9]+)(.*)|no blocks|previous block|block round|block branch|MakeBlock|unrecognized blockhash|Too Many Requests|looking up block for round)',
   DataReadFailedKeyDoesNotExist: 'key does not exist',
   TokenBalanceTooLow: 'overflowed account balance|overspend',
   // TxConfirmFailure: 'TxConfirmFailure', UnmarshalMsg

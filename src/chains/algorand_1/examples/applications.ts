@@ -1,12 +1,13 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
+import fs from 'fs'
+import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, TokenTransferParams } from '../../../models'
+import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
 import {
   AlgorandActionAppCreate,
   AlgorandActionAppMultiPurpose,
@@ -15,6 +16,8 @@ import {
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
+import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+import { composedAppCreate } from '../tests/mockups/composedActions'
 
 require('dotenv').config()
 
@@ -40,30 +43,68 @@ const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
   appIndex: 13258116,
 }
 
+const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  appLocalInts: 0,
+  appLocalByteSlices: 0,
+  appGlobalInts: 1,
+  appGlobalByteSlices: 0,
+  // appApprovalProgram & appClearProgram will be added in run()
+}
+
+const sampleRawNoOPTrx = {
+  type:'appl',
+  from:'ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM',
+  appIndex:13675644, 
+  appOnComplete:0, 
+  appArgs: ['bWludA==', new Uint8Array([39, 16])],
+  // appArgs: ['mint', '0x2710'], // same value as above 
+  // appArgs: ['0x6d696e74', '0x2710'], // same value as above
+  appAccounts: ['ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM'],
+}
+
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  const action = await algoTest.composeAction(AlgorandChainActionType.AppOptIn, composeAppOptInParams)
 
+  // const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
+  // console.log(applications)
+  // const appList = applications.map((app:any) => app?.params )
+
+  // const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
+  // console.log(apps)
+
+  composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
+  const action = await algoTest.composeAction(AlgorandChainActionType.AppNoOp, sampleRawNoOPTrx)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
   transaction.actions = [action]
+
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
+  // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
+  // await transaction.sign([toAlgorandPrivateKey(sk)])
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
-  console.log('send response: %o', JSON.stringify(await transaction.send()))
+  console.log(transaction.rawTransaction)
+  try {
+    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+  } catch (err) {
+    console.log(err)
+  }
 }
 
-;(async () => {
+(async () => {
   try {
     await run()
   } catch (error) {

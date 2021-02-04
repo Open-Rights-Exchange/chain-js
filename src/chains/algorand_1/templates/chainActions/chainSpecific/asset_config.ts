@@ -13,7 +13,10 @@ import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes asset config action */
-export const composeAction = (args: AlgorandActionAssetConfigParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (
+  args: AlgorandActionAssetConfigParams,
+  suggestedParams: AlgorandSuggestedParams,
+) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, note, assetIndex, assetManager, assetReserve, assetFreeze, assetClawback, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetConfigTxnWithSuggestedParams(

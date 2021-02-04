@@ -6,14 +6,8 @@ import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAUint8Array(obj: any) {
+  if (!obj) return false
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
-}
-
-export function isAUint8ArrayArray(obj: any) {
-  if (obj === undefined || obj === null || !Array.isArray(obj)) {
-    return false
-  }
-  return (obj as Array<any>).every(isAUint8Array)
 }
 
 export function isABuffer(value: any) {
@@ -121,7 +115,7 @@ export function isABoolean(value: any) {
 }
 
 export function isANumber(value: any) {
-  if (Number.isNaN(value)) return false
+  if (!value || Number.isNaN(value)) return false
   return typeof value === 'number' || value instanceof Number
 }
 
@@ -134,8 +128,15 @@ export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
   return Object.values(enumType).includes(value as T[keyof T])
 }
 
+export function isBase64Encoded(value: any): boolean {
+  if (!isAString(value)) return false
+  const fromBase64 = Buffer.from(value, 'base64').toString('utf8')
+  const toBase64 = Buffer.from(fromBase64, 'utf8').toString('base64')
+  return toBase64 === value
+}
+
 export function getUniqueValues<T>(array: T[]) {
-  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
+  return Array.from(new Set(array.map((item) => JSON.stringify(item)))).map((item) => JSON.parse(item))
 }
 
 export function trimTrailingChars(value: string, charToTrim: string) {
@@ -243,6 +244,15 @@ export function getDecimalPlacesFromString(num: string = '') {
   )
 }
 
+/** Checks if string is a valid hex string
+ *
+ */
+export function isHexString(value: any): Boolean {
+  if (!isAString(value)) return false
+  const match = value.match(/^(0x|0X)?[a-fA-F0-9]+$/i)
+  return !!match
+}
+
 /** Converts a hex string to a unit8 byte array */
 export function hexStringToByteArray(value: string): Uint8Array {
   return Uint8Array.from(Buffer.from(value, 'hex'))
@@ -253,9 +263,27 @@ export function byteArrayToHexString(value: Uint8Array): string {
   return Buffer.from(value).toString('hex')
 }
 
+/** Convert a byte array array to hex string array */
+export function byteArrayArrayToHexStringArray(value: Uint8Array[]): string[] {
+  const stringArr: string[] = []
+  value.forEach(val => {
+    stringArr.push(Buffer.from(val).toString('hex'))
+  })
+  return stringArr
+}
+
 /** Convert a byte array to hex string */
 export function bufferToHexString(value: Buffer): string {
   return value.toString('hex')
+}
+
+/**
+ * Converts a `Buffer` to a `Number`.
+ * @param buf `Buffer` object to convert
+ * @throws If the input number exceeds 53 bits.
+ */
+export function bufferToInt(buf: Buffer): number {
+  return new BN(toBuffer(buf)).toNumber()
 }
 
 export function utf8StringToHexString(value: string): string {
@@ -270,6 +298,7 @@ export function decimalToHexString(value: string) {
 
 /** Return true if value is a hexidecimal encoded string (is prefixed by 0x) */
 export function hasHexPrefix(value: any): boolean {
+  if (!value) return false
   return isAString(value) && (value as string).startsWith('0x')
 }
 
@@ -403,4 +432,29 @@ export function createSha256Hash(value: string) {
   const hash = sha256.create()
   hash.update(value)
   return hash.hex()
+}
+
+export function bigIntToUint8Array(bn: number) {
+  let hex = BigInt(bn.toString()).toString(16)
+  if (hex.length % 2) {
+    hex = `0${hex}`
+  }
+
+  const len = hex.length / 2
+  const u8 = new Uint8Array(len)
+
+  let i = 0
+  let j = 0
+  while (i < len) {
+    u8[i] = parseInt(hex.slice(j, j + 2), 16)
+    i += 1
+    j += 2
+  }
+  return u8
+}
+
+export function uInt8ArrayToInteger(value: Uint8Array) {
+  if (isNullOrEmpty(value)) return undefined
+  const { length } = value
+  return Buffer.from(value).readUIntBE(0, length)
 }

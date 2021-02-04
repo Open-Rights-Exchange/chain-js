@@ -7,16 +7,16 @@ import {
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
   AlgorandTxActionRaw,
+  AlgorandOnApplicationComplete,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
-    appOnComplete,
     appApprovalProgram,
     appClearProgram,
     appLocalInts,
@@ -34,7 +34,7 @@ export const composeAction = (args: AlgorandActionAppCreate, suggestedParams: Al
   const composedAction = algosdk.makeApplicationCreateTxn(
     from,
     suggestedParams,
-    appOnComplete,
+    AlgorandOnApplicationComplete.NoOp,
     appApprovalProgram,
     appClearProgram,
     appLocalInts,
@@ -62,6 +62,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   // Cant identify using only type (more than one action uses Application type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.Application &&
+    actionParams?.appOnComplete === AlgorandOnApplicationComplete.NoOp &&
     actionParams?.appIndex === 0 // This is 0 only for a create applicaiton transaction
   ) {
     const returnData = {

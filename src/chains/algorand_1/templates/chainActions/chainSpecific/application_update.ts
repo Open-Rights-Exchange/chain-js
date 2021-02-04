@@ -13,7 +13,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = (args: AlgorandActionAppUpdate, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandActionAppUpdate, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,

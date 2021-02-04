@@ -251,3 +251,11 @@ export type AlgorandTxSignResults = {
   txID: string
   blob: Uint8Array
 }
+
+export type AlgorandBlock = {
+  rewards: any
+  round: number
+  seed: string
+  timestamp: number
+  transactions: any[]
+}

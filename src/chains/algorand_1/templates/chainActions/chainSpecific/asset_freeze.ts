@@ -13,7 +13,10 @@ import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes asset freeze action */
-export const composeAction = (args: AlgorandActionAssetFreezeParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (
+  args: AlgorandActionAssetFreezeParams,
+  suggestedParams: AlgorandSuggestedParams,
+) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, note, assetIndex, freezeAccount, freezeState, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetFreezeTxnWithSuggestedParams(

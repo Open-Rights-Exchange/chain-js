@@ -14,7 +14,10 @@ import { AlgorandActionHelper } from '../../../algoAction'
 
 /**
  * Composes asset create action */
-export const composeAction = (args: AlgorandActionAssetCreateParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (
+  args: AlgorandActionAssetCreateParams,
+  suggestedParams: AlgorandSuggestedParams,
+) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
