@@ -17,6 +17,8 @@ export const DEFAULT_ALGO_UNIT = AlgorandUnit.Microalgo
 export const DEFAULT_BLOCKS_TO_CHECK = 20
 /** time to wait (in ms) between checking chain for a new block (to see if transaction appears within it) */
 export const DEFAULT_CHECK_INTERVAL = 500
+/** minimum milliseconds between requests - prevents getting blacklisted by pinging API too quickly between calls */
+export const MINIMUM_CHECK_INTERVAL = 500
 /** number of times to attempt to read a chain endpoint before failing the read */
 export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 

@@ -5,6 +5,7 @@ import {
   AlgorandAddress,
   AlgoClient,
   AlgoClientIndexer,
+  AlgorandBlock,
   AlgorandChainEndpoint,
   AlgorandChainInfo,
   AlgorandChainSettings,
@@ -21,6 +22,7 @@ import {
   DEFAULT_BLOCKS_TO_CHECK,
   DEFAULT_GET_BLOCK_ATTEMPTS,
   DEFAULT_CHECK_INTERVAL,
+  MINIMUM_CHECK_INTERVAL,
   NATIVE_CHAIN_TOKEN_SYMBOL,
 } from './algoConstants'
 import { toAlgo } from './helpers'
@@ -139,9 +141,9 @@ export class AlgorandChainState {
     }
   }
 
-  public async getBlock(blockNumber: number): Promise<any> {
+  public async getBlock(blockNumber: number): Promise<Partial<AlgorandBlock>> {
     this.assertIsConnected()
-    const block = await this._algoClientIndexer.lookupBlock(blockNumber)
+    const block = await this._algoClientIndexer.lookupBlock(blockNumber).do()
     return block
   }
 
@@ -268,7 +270,14 @@ export class AlgorandChainState {
       ...AlgorandChainState.defaultCommunicationSettings,
       ...this.chainSettings?.communicationSettings,
     }
-    const { blocksToCheck, checkInterval, getBlockAttempts: maxBlockReadAttempts } = useCommunicationSettings
+    const {
+      blocksToCheck,
+      checkInterval: checkIntervalSetting,
+      getBlockAttempts: maxBlockReadAttempts,
+    } = useCommunicationSettings
+
+    const checkInterval = this.ensureMinIntervalRetry(checkIntervalSetting)
+
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
@@ -373,8 +382,9 @@ export class AlgorandChainState {
       rejectAwaitTransaction(
         reject,
         ChainErrorDetailCode.ConfirmTransactionTimeout,
-        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${
+          (checkInterval / 1000) * blocksToCheck
+        } seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
         null,
       )
       return
@@ -435,9 +445,9 @@ export class AlgorandChainState {
   }
 
   /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: any, transactionId: string): AlgorandTxChainResponse => {
-    const { transactions } = block?.txns
-    const result = transactions?.find((transaction: any) => transaction?.tx === transactionId)
+  public blockHasTransaction = (block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse => {
+    const { transactions } = block
+    const result = transactions?.find((transaction: any) => transaction?.id === transactionId)
     return result
   }
 
@@ -499,5 +509,14 @@ export class AlgorandChainState {
     // Just choose the first endpoint for now
     const endpoint = this.endpoints[0] as AlgorandChainEndpoint
     return endpoint
+  }
+
+  /** Ensure that the timeout between requests have a mimimum amount of wait */
+  private ensureMinIntervalRetry(intervalParam: number) {
+    let checkInterval = intervalParam || 0
+    if (intervalParam < MINIMUM_CHECK_INTERVAL) {
+      checkInterval = MINIMUM_CHECK_INTERVAL
+    }
+    return checkInterval
   }
 }

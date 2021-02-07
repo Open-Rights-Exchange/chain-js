@@ -12,7 +12,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Compose action */
-export const composeAction = (args: AlgorandActionPaymentParams, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandActionPaymentParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, to, amount, note, closeRemainderTo, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makePaymentTxnWithSuggestedParams(

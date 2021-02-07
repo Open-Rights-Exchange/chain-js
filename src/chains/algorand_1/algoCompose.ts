@@ -1,5 +1,5 @@
-import { ChainActionType } from '../../models'
 import { notSupported } from '../../helpers'
+import { ChainActionType } from '../../models'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -20,11 +20,14 @@ import { composeAction as PaymentTemplate } from './templates/chainActions/chain
 import {
   AlgorandChainActionType,
   AlgorandChainTransactionParamsStruct,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
   AlgorandTxActionSdkEncoded,
   AlgorandTxHeaderParams,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { AlgorandActionHelper } from './algoAction'
+import { compileIfSourceCodeIfNeeded } from './helpers'
 
 // map a key name to a function that returns an object
 const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any } = {
@@ -48,18 +51,25 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
   Payment: PaymentTemplate,
 }
 
+// Must check if its not a valid hex before it assumes source code has been passed (isValidHex() will be impelemented)
 /** Compose an object for a chain contract action */
 export async function composeAction(
   chainState: AlgorandChainState,
   chainActionType: ChainActionType | AlgorandChainActionType,
-  args: any,
+  args: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
 ): Promise<AlgorandTxActionSdkEncoded> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
     notSupported(`ComposeAction:${chainActionType}`)
   }
 
-  let actionHelper = new AlgorandActionHelper(args)
+  const action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded = {
+    ...args,
+    appApprovalProgram: await compileIfSourceCodeIfNeeded(args.appApprovalProgram, chainState.algoClient),
+    appClearProgram: await compileIfSourceCodeIfNeeded(args.appClearProgram, chainState.algoClient),
+  } as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
+
+  let actionHelper = new AlgorandActionHelper(action)
   const chainTxHeaderParams: AlgorandChainTransactionParamsStruct =
     chainState.chainInfo?.nativeInfo?.transactionHeaderParams
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
