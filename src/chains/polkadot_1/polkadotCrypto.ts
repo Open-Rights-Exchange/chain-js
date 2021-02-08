@@ -4,12 +4,15 @@ import {
   PolkadotKeypair, 
   PolkadotKeypairType
 } from "./models"
+import { u8aToHex } from '@polkadot/util'
 import { 
   mnemonicGenerate, 
   mnemonicToMiniSecret, 
+  signatureVerify, 
 } from '@polkadot/util-crypto'
 import { 
   encodeAddress, 
+  decodeAddress, 
   naclKeypairFromSeed as naclFromSeed, 
   schnorrkelKeypairFromSeed as schnorrkelFromSeed, 
   secp256k1KeypairFromSeed as secp256k1FromSeed, 
@@ -35,4 +38,11 @@ export function generateNewKeyPair(type: PolkadotKeypairType): PolkadotKeypair {
   const seed = mnemonicToMiniSecret(mnemonic)
   const keyPair = keypairFromSeed[type](seed)
   return keyPair
+}
+
+export function verifySignatureWithAddress(signedMessage: string, signature: string, address: PolkadotPublicKey): boolean {
+  const publicKey = decodeAddress(address);
+  const hexPublicKey = u8aToHex(publicKey);
+
+  return signatureVerify(signedMessage, signature, hexPublicKey).isValid;
 }
