@@ -14,13 +14,14 @@ import {
   PolkadotChainEndpoint, 
   PolkadotChainSettings, 
   PolkadotNewKeysOptions, 
-  PolkadotSymbol 
+  PolkadotSymbol, 
+  PolkadotAddress, 
 } from './models'
 import { PolkadotChainState } from './polkadotChainState'
 import { notImplemented } from '../../helpers'
 import { PolkadotChainActionType } from './models/chainActionType'
 import { 
-  PolkadotAddress,
+  
   PolkadotTransactionAction,    
 } from './models/transactionModels'
 import { PolkadotDecomposeReturn } from './models/PolkadotStructures'
@@ -40,6 +41,8 @@ import {
   toEthereumSignature,
 } from '../ethereum_1/helpers'
 import { PolkadotPublicKey } from './models/cryptoModels'
+import { SignedBlock } from '@polkadot/types/interfaces/runtime'
+import { PolkadotCreateAccount } from './polkadotCreateAccount'
 
 class ChainPolkadotV1 implements Chain {
   private _endpoints: PolkadotChainEndpoint[]
@@ -72,8 +75,7 @@ class ChainPolkadotV1 implements Chain {
   }
 
   public get chainInfo(): ChainInfo {
-    notImplemented()
-    return null
+    return this._chainState.chainInfo
   }
 
   public composeAction = async (
@@ -130,8 +132,8 @@ class ChainPolkadotV1 implements Chain {
   }
 
   private newCreateAccount = (options?: PolkadotNewKeysOptions): any => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new PolkadotCreateAccount(this._chainState)
   }
   
   private newTransaction = (options?: any): PolkadotTransaction => {
@@ -173,7 +175,13 @@ class ChainPolkadotV1 implements Chain {
     return new ChainError(null, null, null, error)
   }
 
-  cryptoCurve: CryptoCurve.Secp256k1
+  public assertIsConnected(): void {
+    if (!this._chainState?.isConnected) {
+      throw new Error('Not connected to chain')
+    }
+  }
+
+  cryptoCurve: CryptoCurve.Ed25519
 
   decryptWithPassword = ethcrypto.decryptWithPassword
   encryptWithPassword = ethcrypto.encryptWithPassword
