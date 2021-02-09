@@ -15,6 +15,7 @@ import { trimTrailingChars } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import BigNumber from 'bignumber.js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { isU8a, u8aToString } from '@polkadot/util';
 
 export class PolkadotChainState {
 	private _chainInfo: PolkadotChainInfo
@@ -116,6 +117,12 @@ export class PolkadotChainState {
 		} catch (error) {
 			throw error
 		}
+	}
+
+	public async fetchBalance(address: PolkadotAddress): Promise<{ balance: string}> {
+		const balanceInfo = await this.getBalance(isU8a(address) ? u8aToString(address) : address)
+		const balance = balanceInfo.free.sub(balanceInfo.miscFrozen)
+		return { balance: balance.toString() }
 	}
 
 	public async getBalance(address: string): Promise<PolkadotAccountBalance> {

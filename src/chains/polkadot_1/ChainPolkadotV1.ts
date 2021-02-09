@@ -40,7 +40,7 @@ import {
   toEthereumPrivateKey,
   toEthereumSignature,
 } from '../ethereum_1/helpers'
-import { PolkadotPublicKey } from './models/cryptoModels'
+import { PolkadotPublicKey } from './models'
 import { SignedBlock } from '@polkadot/types/interfaces/runtime'
 import { PolkadotCreateAccount } from './polkadotCreateAccount'
 
@@ -107,8 +107,7 @@ class ChainPolkadotV1 implements Chain {
     symbol: PolkadotSymbol,
     tokenAddress?: PolkadotAddress,
   ): Promise<{ balance: string }> {
-    notImplemented()
-    return null
+    return this._chainState.fetchBalance(account)
   }
 
   public fetchContractData = (
