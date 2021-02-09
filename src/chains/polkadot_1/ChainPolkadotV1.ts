@@ -43,6 +43,7 @@ import {
 import { PolkadotPublicKey } from './models'
 import { SignedBlock } from '@polkadot/types/interfaces/runtime'
 import { PolkadotCreateAccount } from './polkadotCreateAccount'
+import { PolkadotCreateAccountOptions } from './models/accountModels'
 
 class ChainPolkadotV1 implements Chain {
   private _endpoints: PolkadotChainEndpoint[]
@@ -70,8 +71,7 @@ class ChainPolkadotV1 implements Chain {
   }
 
   public  get chainId(): string {
-    notImplemented()
-    return null
+    return this._chainState.chain
   }
 
   public get chainInfo(): ChainInfo {
@@ -98,7 +98,6 @@ class ChainPolkadotV1 implements Chain {
   }
 
   public get nativeToken(): { defaultUnit: string; symbol: PolkadotSymbol; tokenAddress: any } {
-    notImplemented()
     return null
   }
 
@@ -126,18 +125,22 @@ class ChainPolkadotV1 implements Chain {
   }
 
   private newAccount = async (address?: PolkadotAddress): Promise<PolkadotAccount> => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    const account = new PolkadotAccount(this._chainState)
+    if (address) {
+      await account.load(address)
+    }
+    return account
   }
 
-  private newCreateAccount = (options?: PolkadotNewKeysOptions): any => {
+  private newCreateAccount = (options?: PolkadotCreateAccountOptions): any => {
     this.assertIsConnected()
-    return new PolkadotCreateAccount(this._chainState)
+    return new PolkadotCreateAccount(this._chainState, options)
   }
   
   private newTransaction = (options?: any): PolkadotTransaction => {
-    notImplemented()
-    return null
+    this.assertIsConnected()
+    return new PolkadotTransaction(this._chainState, options)
   }
 
   public new = {
