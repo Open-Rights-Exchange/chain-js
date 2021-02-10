@@ -10,9 +10,19 @@ import {
   AlgorandActionAssetDestroyParams,
   AlgorandKeyRegistrationParams,
   AlgorandActionPaymentParams,
+  AlgorandActionAppMultiPurpose,
+  AlgorandActionAppCreate,
+  AlgorandActionAppUpdate,
 } from '../models'
 import { getChainState } from './mockups/chainState'
 import {
+  decomposedAppCreate,
+  decomposedAppUpdate,
+  decomposedAppOptIn,
+  decomposedAppCloseOut,
+  decomposedAppNoOp,
+  decomposedAppClear,
+  decomposedAppDelete,
   decomposedAssetCreate,
   decomposedAssetConfig,
   decomposedAssetFreeze,
@@ -22,6 +32,7 @@ import {
   decomposedPayment,
 } from './mockups/decomposedActions'
 import { AlgorandChainState } from '../algoChainState'
+import { sourceApproval, sourceClear } from './mockups/sourceCode'
 
 // import { AlgorandChainState } from '../algoChainState'
 
@@ -144,5 +155,101 @@ describe('Decompose Algorand Chain Actions', () => {
     const actAction = await decomposeAction(composedAction)
 
     expect(actAction[0]).toEqual(decomposedPayment[0])
+  })
+
+  it('creates app create action object', async () => {
+    const args: Partial<AlgorandActionAppCreate> = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appLocalInts: 0,
+      appLocalByteSlices: 0,
+      appGlobalInts: 1,
+      appGlobalByteSlices: 0,
+      appApprovalProgram: sourceApproval,
+      appClearProgram: sourceClear,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppCreate, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppCreate[0])
+  })
+
+  it('creates app update action object', async () => {
+    const args: Partial<AlgorandActionAppUpdate> = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appIndex: 13379916,
+      appApprovalProgram: sourceApproval,
+      appClearProgram: sourceClear,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppUpdate, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppUpdate[0])
+  })
+
+  it('creates app optIn action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test optIn',
+      appIndex: 13379916,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppOptIn, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppOptIn[0])
+  })
+
+  it('creates app close out action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test close out',
+      appIndex: 13379916,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppCloseOut, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppCloseOut[0])
+  })
+
+  it('creates app noOp action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppNoOp[0])
+  })
+
+  it('creates app clear action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppClear, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppClear[0])
+  })
+
+  it('creates app delete action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+    }
+
+    const composedAction = await composeAction(chainState, AlgorandChainActionType.AppDelete, args)
+    const actAction = await decomposeAction(composedAction)
+
+    expect(actAction[0]).toEqual(decomposedAppDelete[0])
   })
 })
