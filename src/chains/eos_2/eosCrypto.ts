@@ -153,16 +153,20 @@ function encryptAccountPrivateKeysIfNeeded(
   const { privateKeys, publicKeys } = keys
   const encryptedKeys: EosAccountKeys = {
     privateKeysEncrypted: {
-      owner: keys?.privateKeysEncrypted?.owner
-        ? keys?.privateKeysEncrypted.owner
-        : encryptWithPassword(privateKeys.owner, password, encryptionOptions),
-      active: keys?.privateKeysEncrypted?.active
-        ? keys?.privateKeysEncrypted.active
-        : encryptWithPassword(privateKeys.active, password, encryptionOptions),
+      owner: keys?.privateKeysEncrypted?.owner,
+      active: keys?.privateKeysEncrypted?.active,
     },
     privateKeys: { ...privateKeys },
     publicKeys: { ...publicKeys },
   }
+  // encrypt keys if not already encrypted (and password provided)
+  if (!encryptedKeys.privateKeysEncrypted.owner && password) {
+    encryptedKeys.privateKeysEncrypted.owner = encryptWithPassword(privateKeys.owner, password, encryptionOptions)
+  }
+  if (!encryptedKeys.privateKeysEncrypted.active && password) {
+    encryptedKeys.privateKeysEncrypted.active = encryptWithPassword(privateKeys.active, password, encryptionOptions)
+  }
+
   return encryptedKeys
 }
 
@@ -198,12 +202,11 @@ export async function generateKeyPairAndEncryptPrivateKeys(
   password: string,
   encryptionOptions: AesCrypto.AesEncryptionOptions,
 ): Promise<EosKeyPair> {
-  if (isNullOrEmpty(password)) throwNewError('generateKeyPairAndEncryptPrivateKeys: Must provide password for new keys')
   const keys = await generateKeyPair()
   return {
     publicKey: toEosPublicKey(keys.publicKey),
     privateKey: keys.privateKey,
-    privateKeyEncrypted: encryptWithPassword(keys.privateKey, password, encryptionOptions),
+    privateKeyEncrypted: password ? encryptWithPassword(keys.privateKey, password, encryptionOptions) : null,
   }
 }
 
