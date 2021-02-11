@@ -420,11 +420,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   private assertValidOptionNewKeys() {
-    const { newKeysOptions, publicKeys } = this._options
-    const { password } = newKeysOptions || {}
-    if (isNullOrEmpty(publicKeys) && isNullOrEmpty(password)) {
-      throwNewError('Invalid Option - You must provide either public keys or a password to generate new keys')
-    }
+    // nothing to check
   }
 
   private assertValidOptionsResources() {
