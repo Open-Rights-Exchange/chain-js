@@ -147,10 +147,6 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   private assertValidOptionNewKeys() {
-    const { newKeysOptions } = this._options
-    const { password } = newKeysOptions || {}
-    if (isNullOrEmpty(password)) {
-      throwNewError('Invalid Option - You must provide a password to generate new keys')
-    }
+    // nothing to check
   }
 }

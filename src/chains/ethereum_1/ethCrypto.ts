@@ -146,9 +146,10 @@ function encryptAccountPrivateKeysIfNeeded(
   options: AesCrypto.AesEncryptionOptions,
 ): EthereumKeyPair {
   // encrypt if not already encrypted
-  const privateKeyEncrypted = keys?.privateKeyEncrypted
-    ? keys.privateKeyEncrypted
-    : encryptWithPassword(keys?.privateKey, password, options)
+  let privateKeyEncrypted = keys?.privateKeyEncrypted
+  if (!privateKeyEncrypted && password) {
+    privateKeyEncrypted = encryptWithPassword(keys?.privateKey, password, options)
+  }
   const encryptedKeys: EthereumKeyPair = {
     privateKey: keys?.privateKey,
     publicKey: keys?.publicKey,
