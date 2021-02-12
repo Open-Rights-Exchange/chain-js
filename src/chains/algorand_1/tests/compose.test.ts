@@ -245,13 +245,46 @@ describe('Compose Algorand Chain Actions', () => {
     expect(JSON.stringify(actAction)).toEqual(composedAppCloseOut)
   })
 
-  it('creates app noOp action object', async () => {
+  it('creates app noOp base64 & UintArray appArgs action object', async () => {
     const args: AlgorandActionAppMultiPurpose = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test noOp',
       appIndex: 13379916,
+      appArgs: ['bWludA==', new Uint8Array([39, 16])],
     }
 
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+  })
+
+  it('creates app noOp hex appArgs action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appArgs: ['0x6d696e74', '0x2710'],
+    }
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+  })
+
+  it('creates app noOp readable appArgs action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appArgs: ['mint', 10000],
+    }
     const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
 
     actAction.fee = 387000
