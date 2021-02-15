@@ -155,7 +155,7 @@ export class AlgorandTransaction implements Transaction {
   /** Set the transaction by using the blob from the results of an Algo SDK sign function
    *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
    */
-  async setFromRaw(rawTransaction: Uint8Array | any): Promise<void> {
+  async setFromRaw(rawTransaction: Uint8Array | AlgorandRawTransactionStruct): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     let blob // encoded raw transaction
