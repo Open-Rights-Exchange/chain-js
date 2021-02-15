@@ -5,7 +5,7 @@ import {
 
 export type PolkadotCreateAccountOptions = {
   publicKey?: PolkadotPublicKey
-  newKeysOptions: PolkadotNewKeysOptions
+  newKeysOptions?: PolkadotNewKeysOptions
 }
 
 /** Type of account to create */

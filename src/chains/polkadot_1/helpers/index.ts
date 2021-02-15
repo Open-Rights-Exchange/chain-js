@@ -1,4 +1,4 @@
-import { PolkadotPublicKey } from "../models/cryptoModels";
+import { PolkadotPublicKey } from "../models";
 import { isNullOrEmpty } from "../../../helpers";
 import { PolkadotAddress } from "../models";
 import { decodeAddress, encodeAddress } from '@polkadot/keyring'

@@ -31,6 +31,12 @@ const ropstenChainOptions: EthereumChainForkType = {
   hardFork: 'istanbul',
 }
 
+const westendEndpoints: ChainEndpoint[] = [
+  {
+    url: 'wss://westend-rpc.polkadot.io'
+  }
+]
+
 // Example set of options to send tokens for each chain type
 const chainSendTokenData = {
   eos: {
@@ -100,6 +106,7 @@ async function runFunctionsForMultipleChains() {
   const chains = [
     new ChainFactory().create(ChainType.EosV2, kylinEndpoints),
     new ChainFactory().create(ChainType.EthereumV1, ropstenEndpoints, { chainForkType: ropstenChainOptions }),
+    new ChainFactory().create(ChainType.PolkadotV1, westendEndpoints),
   ]
 
   // for each chain, connect to its network (to make sure the endpoint is available)
@@ -110,24 +117,24 @@ async function runFunctionsForMultipleChains() {
   )
 
   // Send Tokens - for each chain, we'll get token option and call the generic sendToken function
-  await Promise.all(
-    chains.map(async chain => {
-      const {chainType} = chain
-      const tokenData = chainType === ChainType.EosV2 ? chainSendTokenData.eos : chainSendTokenData.ethereum
-      const response = await sendToken(chain, tokenData)
-      console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
-    }),
-  )
+  // await Promise.all(
+  //   chains.map(async chain => {
+  //     const {chainType} = chain
+  //     const tokenData = chainType === ChainType.EosV2 ? chainSendTokenData.eos : chainSendTokenData.ethereum
+  //     const response = await sendToken(chain, tokenData)
+  //     console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
+  //   }),
+  // )
 
   // Send 'Currency' - for each chain, sends the native currency for the chain (e.g. 'eth' for Ethereum)
-  await Promise.all(
-    chains.map(async chain => {
-      const {chainType} = chain
-      const currencyData = chainType === ChainType.EosV2 ? chainSendCurrencyData.eos : chainSendCurrencyData.ethereum
-      const response = await sendCurrency(chain, currencyData)
-      console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
-    }),
-  )
+  // await Promise.all(
+  //   chains.map(async chain => {
+  //     const {chainType} = chain
+  //     const currencyData = chainType === ChainType.EosV2 ? chainSendCurrencyData.eos : chainSendCurrencyData.ethereum
+  //     const response = await sendCurrency(chain, currencyData)
+  //     console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
+  //   }),
+  // )
 }
 
 /** Run the example code automatically */

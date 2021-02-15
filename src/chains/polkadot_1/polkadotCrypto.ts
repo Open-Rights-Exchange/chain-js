@@ -33,8 +33,7 @@ export function generateNewAccountPhrase(): string {
   return mnemonic
 }
 
-export function generateNewKeyPair(type: PolkadotKeypairType): PolkadotKeypair {
-  const mnemonic = generateNewAccountPhrase()
+export function getKeypairFromPhrase(mnemonic: string, type: PolkadotKeypairType): PolkadotKeypair {
   const seed = mnemonicToMiniSecret(mnemonic)
   const keyPair = keypairFromSeed[type](seed)
   return keyPair

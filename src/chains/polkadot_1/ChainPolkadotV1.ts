@@ -62,12 +62,14 @@ class ChainPolkadotV1 implements Chain {
     return this._chainState?.isConnected
   }
 
-  public get chainType(): ChainType {
-    return ChainType.PolkadotV1
-  }
-
+  /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   public connect(): Promise<void> {
     return this._chainState.connect()
+  }
+
+  /** Returns chain type enum - resolves to chain family as a string e.g. 'polkadot' */
+  public get chainType(): ChainType {
+    return ChainType.PolkadotV1
   }
 
   public  get chainId(): string {
