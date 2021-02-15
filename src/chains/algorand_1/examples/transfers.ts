@@ -10,6 +10,7 @@ import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
 import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
+import { AlgorandActionHelper } from '../algoAction'
 
 require('dotenv').config()
 
@@ -60,6 +61,33 @@ const payRawTransaction: any = {
   },
 }
 
+const payTransaction: any = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  amount: 1,
+  note: 'Sample payment',
+  type: 'pay',
+}
+
+const payTxWithHeaders = {
+  from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+  amount: 1,
+  note: [
+    174,  83,  97, 109, 112,
+    108, 101,  32, 112,  97,
+    121, 109, 101, 110, 116,
+  ],
+  type: 'pay',
+  genesisID: 'testnet-v1.0',
+  genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+  firstRound: 12286003,
+  lastRound: 12287003,
+  fee: 0,
+  flatFee: true,
+}
+
+
 async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -75,18 +103,22 @@ async function run() {
   const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
   // OR, set an action using params directly - values depend on the SDK requirements
-  // const action = composeAlgoPaymentParams
+  // const action = payTxWithHeaders
   transaction.actions = [action]
 
   // // Alternatively, set action using raw transaction
-  // await transaction.setFromRaw(algosdk.encodeObj(payRawTransaction))
+  // await transaction.setFromRaw(payRawTransaction)
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  
+
+  // const algoActionHelper = new AlgorandActionHelper(transaction.actions[0])
+  // console.log('action sdkEncoded:', algoActionHelper.actionEncodedForSdk)
+
   console.log('required signatures (before signing): ', transaction.missingSignatures)
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
+  console.log('transaction signature:', transaction.signatures)
   console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
