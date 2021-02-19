@@ -34,11 +34,13 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
     const decomposedArgs = decomposed.args
     return {
       args: {
-        ...decomposedArgs,
+        amount: decomposedArgs.amount.toString(), // todo to string with decimals
+        precision: null, // cant determine this
         fromAccountName: decomposedArgs.from,
         toAccountName: decomposedArgs.to,
         memo: decomposedArgs.note,
-        contractName: decomposedArgs.assetIndex,
+        contractName: decomposedArgs.assetIndex.toString(),
+        symbol: null,
       },
       chainActionType: ChainActionType.TokenTransfer,
     }
