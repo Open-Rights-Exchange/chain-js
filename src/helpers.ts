@@ -136,7 +136,7 @@ export function isBase64Encoded(value: any): boolean {
 }
 
 export function getUniqueValues<T>(array: T[]) {
-  return Array.from(new Set(array.map((item) => JSON.stringify(item)))).map((item) => JSON.parse(item))
+  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
 }
 
 export function trimTrailingChars(value: string, charToTrim: string) {
