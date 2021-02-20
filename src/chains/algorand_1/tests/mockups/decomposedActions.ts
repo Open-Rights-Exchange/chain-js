@@ -49,24 +49,41 @@ export const decomposedAssetFreeze = [
   },
 ]
 
+export const decomposedTokenTransfer = [
+  {
+    chainActionType: 'ValueTransfer',
+    args: {
+      amount: '1000',
+      fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      memo: 'create',
+      contractName: '12345',
+      precision: null,
+      symbol: null,
+    },
+  },
+]
+
+export const decomposedValueTransfer = [
+  {
+    chainActionType: 'ValueTransfer',
+    args: {
+      amount: '10',
+      permission: null,
+      fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      memo: 'create',
+      contractName: null,
+      symbol: 'algo',
+    },
+  },
+]
+
 export const decomposedAssetTransfer = [
   {
     chainActionType: 'TokenTransfer',
     args: {
-      name: 'Transaction',
-      tag: 'TX',
-      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      amount: 1000,
-      note: 'create',
-      closeRemainderTo: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      assetIndex: 12345,
-      assetRevocationTarget: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      type: 'axfer',
-      fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      memo: 'create',
-      contractName: 12345,
+      ...decomposedTokenTransfer[0].args,
     },
   },
   {
@@ -116,21 +133,12 @@ export const decomposedKeyRegistration = [
     },
   },
 ]
+
 export const decomposedPayment = [
   {
     chainActionType: 'ValueTransfer',
     args: {
-      name: 'Transaction',
-      tag: 'TX',
-      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      amount: 10,
-      note: 'create',
-      closeRemainderTo: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      type: 'pay',
-      fromAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      toAccountName: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-      memo: 'create',
+      ...decomposedValueTransfer[0].args,
     },
   },
 ]
