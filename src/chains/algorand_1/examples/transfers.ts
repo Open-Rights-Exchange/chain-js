@@ -7,9 +7,10 @@
 
 import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TokenTransferParams } from '../../../models'
+import { ChainEndpoint, ChainActionType, TokenTransferParams, ValueTransferParams } from '../../../models'
 import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
+import { toChainEntityName } from '../../../helpers'
 import { AlgorandActionHelper } from '../algoAction'
 
 require('dotenv').config()
@@ -30,7 +31,26 @@ const algoBetanetEndpoints = [{
   options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
 
-const composeTokenTransferParams: Partial<AlgorandActionAssetTransferParams> = {
+// Standard chainJS action types
+const composeValueTransferParams: Partial<ValueTransferParams> = {
+  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
+  amount: '10', // 10 microalgos
+  symbol: 'microalgo', // or null
+  memo: 'transfer memo',
+}
+const composeTokenTransferParams: Partial<TokenTransferParams> = {
+  contractName: toChainEntityName('10820019'),
+  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
+  amount: '1',
+  precision: 0,
+  symbol: null,
+  memo: 'transfer memo',
+}
+
+// algorand action types
+const composeAssetTransferParams: Partial<AlgorandActionAssetTransferParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   to: 'TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY',
   note: 'transfer memo',
@@ -101,7 +121,9 @@ async function run() {
 
   // Compose an action from basic parameters using composeAction function
   const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
-  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeTokenTransferParams)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAssetTransferParams)
+  // const action = await algoTest.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)
+  // const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = payTxWithHeaders
   transaction.actions = [action]
