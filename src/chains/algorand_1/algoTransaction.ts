@@ -9,6 +9,7 @@ import {
   byteArrayToHexString,
   hexStringToByteArray,
   isArrayLengthOne,
+  isAUint8Array,
   isNullOrEmpty,
   notImplemented,
   uint8ArraysAreEqual,
@@ -151,10 +152,19 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Set the transaction by using the blob from the results of an Algo SDK sign function */
-  async setFromRaw(blob: Uint8Array): Promise<void> {
+  /** Set the transaction by using the blob from the results of an Algo SDK sign function
+   *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
+   */
+  async setFromRaw(rawTransaction: Uint8Array | AlgorandRawTransactionStruct): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
+    let blob // encoded raw transaction
+    // if transaction isnt already encoded, encode it
+    if (isAUint8Array(rawTransaction)) {
+      blob = rawTransaction
+    } else {
+      blob = algosdk.encodeObj(rawTransaction)
+    }
     const decodedTx = algosdk.decodeObj(blob)?.txn
     if (!decodedTx) throwNewError('Cant decode blob into transaction')
     // convert packed transaction blob into AlgorandTxActionSdkEncoded using Algo SDK
