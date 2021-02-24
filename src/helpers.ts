@@ -458,3 +458,29 @@ export function uInt8ArrayToInteger(value: Uint8Array) {
   const { length } = value
   return Buffer.from(value).readUIntBE(0, length)
 }
+
+/**
+ * The reviver function passed into JSON.parse to implement custom type conversions.
+ * If the value is a previously stringified buffer we convert it to a Buffer, otherwise return the value
+ */
+export function jsonParseComplexObjectReviver(key: string, value: any) {
+  // Convert Buffer
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    'type' in value &&
+    value.type === 'Buffer' &&
+    'data' in value &&
+    Array.isArray(value.data)
+  ) {
+    return Buffer.from(value.data)
+  }
+
+  // Return parsed value without modifying
+  return value
+}
+
+/** restore object from JSON serialization (i.e. recrete Buffer properties) */
+export function jsonParseAndRevive(value: any) {
+  return JSON.parse(value, jsonParseComplexObjectReviver)
+}
