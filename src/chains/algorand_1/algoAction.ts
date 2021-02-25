@@ -250,30 +250,30 @@ export class AlgorandActionHelper {
   }
 
   /** Remove fields from object that are undefined, null, or empty */
-  deleteEmptyFields(paramsIn: { [key: string]: any }) {
+  private deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
     Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
+  private isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
     return isAString(action.from)
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxActionRaw(action: any): boolean {
+  private isAlgorandTxActionRaw(action: any): boolean {
     const rawAction = action as AlgorandTxActionRaw
     const hasPublicKey = rawAction.from?.publicKey
     return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
   }
 
   /** whether action is the native chain 'raw' and compressed format (get_obj_for_encoding) as defined here - https://github.com/algorand/js-algorand-sdk/blob/a5309ee57dddbf6f9db5f95dc8a82eb1ae03c326/src/transaction.js#L154 */
-  isAlgorandTxActionRawCompressed(action: any): boolean {
+  private isAlgorandTxActionRawCompressed(action: any): boolean {
     return !!action?.txn?.snd
   }
 
   /** whether action is encoded for the algo sdk (from is string and note is UInt8Array) */
-  isAlgorandTxActionEncodedForSdk(action: any): boolean {
+  private isAlgorandTxActionEncodedForSdk(action: any): boolean {
     return (
       !this.isAlgorandTxActionRaw(action) &&
       (isAUint8Array(action.appApprovalProgram) ||
@@ -290,7 +290,7 @@ export class AlgorandActionHelper {
   /** Accepts encoded or unencoded AppArgs array
    *  Converts to encoded AppArgs - array of Uint8Array
    */
-  encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
+  private encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
     if (!appArgs) return []
     const appArgsEncoded = appArgs.map((appArg: string | number | Uint8Array) => {
       if (isAUint8Array(appArg)) return appArg as Uint8Array
@@ -306,7 +306,7 @@ export class AlgorandActionHelper {
   /** Accepts encoded AppArgs - array of Uint8Array
    *  Converts to unencoded AppArgs - array of hex encoded strings (with '0x' prefix)
    */
-  decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
+  private decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
     if (isNullOrEmpty(appArgs)) return undefined
     const readable: string[] = appArgs.map(arg => {
       if (isAUint8Array(arg)) {
