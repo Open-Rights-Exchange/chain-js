@@ -49,7 +49,7 @@ export const decomposedAssetFreeze = [
   },
 ]
 
-export const decomposedTokenTransfer = [
+export const decomposedTokenTransfer: any = [
   {
     chainActionType: 'ValueTransfer',
     args: {
@@ -64,7 +64,7 @@ export const decomposedTokenTransfer = [
   },
 ]
 
-export const decomposedValueTransfer = [
+export const decomposedValueTransfer: any = [
   {
     chainActionType: 'ValueTransfer',
     args: {
