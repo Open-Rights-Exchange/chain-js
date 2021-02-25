@@ -168,7 +168,7 @@ export class AlgorandTransaction implements Transaction {
     if (!decodedBlob?.txn) throwNewError('Cant decode blob into transaction')
     // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
     this.actions = [decodedBlob]
-    this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
+    this.setRawTransactionFromSignResults({ txID: null, blob: decodedBlob })
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the data from action
     this._isValidated = false
   }
