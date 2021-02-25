@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import { TextEncoder } from 'util'
-import { byteArrayToHexString, isHexString } from '../../../helpers'
+import { byteArrayToHexString, isAUint8Array, isHexString } from '../../../helpers'
 import {
   AlgoClient,
   AlgorandMultiSigAccount,
@@ -24,8 +24,13 @@ export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOption
 /** Decode blob from SDK's sign transaction */
 export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResults) {
   let returnTx
+  let transaction
   const { txID, blob } = signResult
-  const transaction = algosdk.decodeObj(blob)
+  if (isAUint8Array(blob)) {
+    transaction = algosdk.decodeObj(blob)
+  } else {
+    transaction = blob
+  }
   if (transaction?.msig) {
     returnTx = transaction as AlgorandRawTransactionMultisigStruct
   } else {
