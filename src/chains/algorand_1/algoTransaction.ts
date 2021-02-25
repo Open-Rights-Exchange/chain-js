@@ -158,27 +158,35 @@ export class AlgorandTransaction implements Transaction {
   async setFromRaw(rawTransaction: Uint8Array | AlgorandRawTransactionStruct): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    let blob // encoded raw transaction
+    let decodedBlob
     // if transaction isnt already encoded, encode it
     if (isAUint8Array(rawTransaction)) {
-      blob = rawTransaction
+      decodedBlob = algosdk.decodeObj(rawTransaction)
     } else {
-      blob = algosdk.encodeObj(rawTransaction)
+      decodedBlob = rawTransaction
     }
-    const decodedTx = algosdk.decodeObj(blob)?.txn
-    if (!decodedTx) throwNewError('Cant decode blob into transaction')
-    // convert packed transaction blob into AlgorandTxActionSdkEncoded using Algo SDK
-    const action: AlgorandTxActionRaw = AlgoTransactionClass.from_obj_for_encoding(decodedTx)
-    this.actions = [action]
-    this.setRawTransactionFromSignResults({ txID: null, blob })
+    if (!decodedBlob?.txn) throwNewError('Cant decode blob into transaction')
+    // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
+    this.actions = [decodedBlob]
+    this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the data from action
     this._isValidated = false
+  }
+
+  /** actionHelper provides different formats of action - Use only to READ data */
+  get actionHelper() {
+    return this._actionHelper
   }
 
   // NOTE: this funciton will only return type AlgorandTxAction[] - other types added so that get actions() and set actions() have the same signature (required by Typescript)
   /** Algorand transaction action (transfer & asset related functions)
    */
-  public get actions(): (AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded)[] {
+  public get actions(): (
+    | AlgorandTxAction
+    | AlgorandTxActionRaw
+    | AlgorandTxActionSdkEncoded
+    | AlgorandRawTransactionStruct
+  )[] {
     const { action } = this
     if (!action) {
       return null
@@ -206,7 +214,9 @@ export class AlgorandTransaction implements Transaction {
   /** Sets actions array
    * Array length has to be exactly 1 because algorand doesn't support multiple actions
    */
-  public set actions(actions: (AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded)[]) {
+  public set actions(
+    actions: (AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct)[],
+  ) {
     this.assertNoSignatures()
     if (isNullOrEmpty(actions)) {
       this._actionHelper = null

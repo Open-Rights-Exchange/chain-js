@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import {
   bigIntToUint8Array,
   bufferToString,
@@ -21,7 +22,7 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
-import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
+import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct, AlgorandRawTransactionStruct } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
 import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
 
@@ -42,12 +43,16 @@ export class AlgorandActionHelper {
   /** Creates a new Action from a raw action (or Algrorand action replacing hexstrings for Uint8Arrays)
    *  .action property returns action with Uint8Arrays converted to hexstrings
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
-  constructor(params: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded) {
+  constructor(
+    params: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+  ) {
     this.validateAndApplyParams(params)
   }
 
   /** applies rules for input params, converts to raw values if needed */
-  private validateAndApplyParams(action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded) {
+  private validateAndApplyParams(
+    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+  ) {
     if (isNullOrEmpty(action)) {
       throwNewError('Missing action')
     }
@@ -60,6 +65,8 @@ export class AlgorandActionHelper {
       this._rawAction = this.actionEncodedForSdkToRaw(action as AlgorandTxActionSdkEncoded)
     } else if (this.isAlgorandTxActionRaw(action)) {
       this._rawAction = action as AlgorandTxActionRaw
+    } else if (this.isAlgorandTxActionRawCompressed(action)) {
+      this._rawAction = this.actionRawCompressedToRaw(action) as AlgorandTxActionRaw
     } else {
       this._rawAction = this.actionToRaw(action as AlgorandTxAction)
     }
@@ -163,6 +170,12 @@ export class AlgorandActionHelper {
     return raw
   }
 
+  /** Convert raw, compressed format to our decompressed raw format */
+  private actionRawCompressedToRaw(action: any) {
+    const compressedTxn = action?.txn
+    return AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
+  }
+
   /** Always returns 'none' for Algorand chain */
   public get contract(): string {
     return ALGORAND_EMPTY_CONTRACT_NAME
@@ -237,27 +250,30 @@ export class AlgorandActionHelper {
   }
 
   /** Remove fields from object that are undefined, null, or empty */
-  deleteEmptyFields(paramsIn: { [key: string]: any }) {
+  private deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach((key) => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
+  private isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
     return isAString(action.from)
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxActionRaw(action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded): boolean {
+  private isAlgorandTxActionRaw(action: any): boolean {
     const rawAction = action as AlgorandTxActionRaw
     const hasPublicKey = rawAction.from?.publicKey
     return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
   }
 
+  /** whether action is the native chain 'raw' and compressed format (get_obj_for_encoding) as defined here - https://github.com/algorand/js-algorand-sdk/blob/a5309ee57dddbf6f9db5f95dc8a82eb1ae03c326/src/transaction.js#L154 */
+  private isAlgorandTxActionRawCompressed(action: any): boolean {
+    return !!action?.txn?.snd
+  }
+
   /** whether action is encoded for the algo sdk (from is string and note is UInt8Array) */
-  isAlgorandTxActionEncodedForSdk(
-    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
-  ): boolean {
+  private isAlgorandTxActionEncodedForSdk(action: any): boolean {
     return (
       !this.isAlgorandTxActionRaw(action) &&
       (isAUint8Array(action.appApprovalProgram) ||
@@ -274,7 +290,7 @@ export class AlgorandActionHelper {
   /** Accepts encoded or unencoded AppArgs array
    *  Converts to encoded AppArgs - array of Uint8Array
    */
-  encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
+  private encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
     if (!appArgs) return []
     const appArgsEncoded = appArgs.map((appArg: string | number | Uint8Array) => {
       if (isAUint8Array(appArg)) return appArg as Uint8Array
@@ -290,9 +306,9 @@ export class AlgorandActionHelper {
   /** Accepts encoded AppArgs - array of Uint8Array
    *  Converts to unencoded AppArgs - array of hex encoded strings (with '0x' prefix)
    */
-  decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
+  private decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
     if (isNullOrEmpty(appArgs)) return undefined
-    const readable: string[] = appArgs.map((arg) => {
+    const readable: string[] = appArgs.map(arg => {
       if (isAUint8Array(arg)) {
         return `0x${Buffer.from(arg).toString('hex')}`
       }
