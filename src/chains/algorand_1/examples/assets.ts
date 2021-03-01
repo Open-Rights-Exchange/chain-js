@@ -24,18 +24,24 @@ require('dotenv').config()
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [{
-  url: 'https://mainnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoTestnetEndpoints = [ {
-  url: 'https://testnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoBetanetEndpoints = [{
-  url: 'https://betanet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
+const algoMainnetEndpoints = [
+  {
+    url: 'https://mainnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoTestnetEndpoints = [
+  {
+    url: 'https://testnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoBetanetEndpoints = [
+  {
+    url: 'https://betanet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
 
 const composeAssetConfigParams: AlgorandActionAssetConfigParams = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
@@ -116,6 +122,14 @@ const composeTokenTransferParams: TokenTransferParams = {
   precision: 4,
 }
 
+const testAppOptIn = {
+  type: 'axfer',
+  from: 'QLL4PEGFO7MGQJGUOPUT3MANOI2U3TG5YF3ZM66FPF4GMORTIKPHOYIGSI',
+  to: 'QLL4PEGFO7MGQJGUOPUT3MANOI2U3TG5YF3ZM66FPF4GMORTIKPHOYIGSI',
+  amount: 0,
+  assetIndex: 14062899,
+}
+
 async function run() {
   /** Create Algorand chain instance */
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -134,6 +148,7 @@ async function run() {
   const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAssetTransferParams)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AssetTransfer, composeAcceptAssetParams)
   // const action = await algoTest.composeAction(ChainActionType.TokenTransfer, composeTokenTransferParams)
+  // const action = testAppOptIn
 
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
