@@ -121,6 +121,7 @@ export class EosTransaction implements Transaction {
     this._raw = this.rawToUint8Array(rawTransaction)
     this.setHeaderFromRaw(rawTransaction)
     this.setSignBuffer()
+    // TODO: consider how to setTransactionId()
   }
 
   /** Extract header from raw transaction body (eosjs refers to raw as serialized) */
@@ -360,7 +361,8 @@ export class EosTransaction implements Transaction {
 
   public get transactionId(): string {
     if (isNullOrEmpty(this._transactionId)) {
-      throwNewError('Transaction has to be sent to chain to retrieve transactioId')
+      return null
+      // throwNewError('Transaction has to be sent to chain to retrieve transactioId')
     }
     return this._transactionId
   }
