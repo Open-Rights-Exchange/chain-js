@@ -1,6 +1,6 @@
 import sjcl, { BitArray } from '@aikon/sjcl'
 import { EncryptedDataString } from './genericCryptoModels'
-import { isAString, isAnObject } from '../helpers'
+import { isAString, isAnObject, jsonParseAndRevive } from '../helpers'
 
 /** Convert a base64 string to a sjcl.BitArray */
 export function base64StringToBitArray(value: string | BitArray): sjcl.BitArray {
@@ -56,5 +56,5 @@ export function ensureEncryptedValueIsObject(encrypted: EncryptedDataString | an
   if (isAnObject(encrypted)) {
     return encrypted
   }
-  return JSON.parse(encrypted)
+  return jsonParseAndRevive(encrypted)
 }

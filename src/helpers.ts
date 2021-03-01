@@ -5,6 +5,26 @@ import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
+export function isAString(value: any) {
+  if (!value) {
+    return false
+  }
+  return typeof value === 'string' || value instanceof String
+}
+
+export function isADate(value: any) {
+  return value instanceof Date
+}
+
+export function isABoolean(value: any) {
+  return typeof value === 'boolean' || value instanceof Boolean
+}
+
+export function isANumber(value: any) {
+  if (!value || Number.isNaN(value)) return false
+  return typeof value === 'number' || value instanceof Number
+}
+
 export function isAUint8Array(obj: any) {
   if (!obj) return false
   return obj !== undefined && obj !== null && obj.constructor === Uint8Array
@@ -39,6 +59,47 @@ export function isNullOrEmpty(obj: any): boolean {
     }
   }
   return Object.keys(obj).length === 0 && obj.constructor === Object
+}
+
+export function isAnObject(obj: any) {
+  return !isNullOrEmpty(obj) && typeof obj === 'object'
+}
+
+/**
+ * The reviver function passed into JSON.parse to implement custom type conversions.
+ * If the value is a previously stringified buffer we convert it to a Buffer,
+ * If its an object of numbers, we convert to UInt8Array {"0":2,"1":209,"2":8 ...}
+ * otherwise return the value
+ */
+export function jsonParseComplexObjectReviver(key: string, value: any) {
+  // Convert Buffer
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    'type' in value &&
+    value.type === 'Buffer' &&
+    'data' in value &&
+    Array.isArray(value.data)
+  ) {
+    return Buffer.from(value.data)
+  }
+
+  // Convert number array to UInt8Array e.g. {"0":2,"1":209,"2":8 ...}
+  if (value !== null && typeof value === 'object' && !Array.isArray(value) && '0' in value && isANumber(value['0'])) {
+    const values = Object.entries(value).map(([, val]) => val)
+    // if array only has 8-bit numbers, convert it to UInt8Array
+    if (values.every(val => isANumber(val) || val < 256)) {
+      return new Uint8Array(values as number[])
+    }
+  }
+
+  // Return parsed value without modifying
+  return value
+}
+
+/** restore object from JSON serialization (i.e. recrete Buffer properties) */
+export function jsonParseAndRevive(value: any) {
+  return JSON.parse(value, jsonParseComplexObjectReviver)
 }
 
 export function getArrayIndexOrNull(array: any[] = [], index: number) {
@@ -99,30 +160,6 @@ export function addUniqueToArray<T>(array: T[], values: T[]) {
   return [...set]
 }
 
-export function isAString(value: any) {
-  if (!value) {
-    return false
-  }
-  return typeof value === 'string' || value instanceof String
-}
-
-export function isADate(value: any) {
-  return value instanceof Date
-}
-
-export function isABoolean(value: any) {
-  return typeof value === 'boolean' || value instanceof Boolean
-}
-
-export function isANumber(value: any) {
-  if (!value || Number.isNaN(value)) return false
-  return typeof value === 'number' || value instanceof Number
-}
-
-export function isAnObject(obj: any) {
-  return !isNullOrEmpty(obj) && typeof obj === 'object'
-}
-
 /** Typescript Typeguard to verify that the value is in the enumType specified  */
 export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
   return Object.values(enumType).includes(value as T[keyof T])
@@ -136,7 +173,7 @@ export function isBase64Encoded(value: any): boolean {
 }
 
 export function getUniqueValues<T>(array: T[]) {
-  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
+  return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => jsonParseAndRevive(item))
 }
 
 export function trimTrailingChars(value: string, charToTrim: string) {
@@ -251,6 +288,21 @@ export function isHexString(value: any): Boolean {
   if (!isAString(value)) return false
   const match = value.match(/^(0x|0X)?[a-fA-F0-9]+$/i)
   return !!match
+}
+
+/** If input is an object of numbers {'0',123, '1',456}, converts to UInt8Array
+ *  Otherwise, input value is just returned
+ */
+export function ensureJsonArrayOfIntsConvertedToUInt8Array(value: any | Uint8Array) {
+  if (isAUint8Array(value)) return value
+  if (isAnObject(value)) {
+    const values = Object.entries(value).map(([, val]) => val)
+    // if array only has 8-bit numbers, convert it to UInt8Array
+    if (values.every(val => isANumber(val) || val < 256)) {
+      return new Uint8Array(values as number[])
+    }
+  }
+  return value
 }
 
 /** Converts a hex string to a unit8 byte array */
@@ -457,30 +509,4 @@ export function uInt8ArrayToInteger(value: Uint8Array) {
   if (isNullOrEmpty(value)) return undefined
   const { length } = value
   return Buffer.from(value).readUIntBE(0, length)
-}
-
-/**
- * The reviver function passed into JSON.parse to implement custom type conversions.
- * If the value is a previously stringified buffer we convert it to a Buffer, otherwise return the value
- */
-export function jsonParseComplexObjectReviver(key: string, value: any) {
-  // Convert Buffer
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    'type' in value &&
-    value.type === 'Buffer' &&
-    'data' in value &&
-    Array.isArray(value.data)
-  ) {
-    return Buffer.from(value.data)
-  }
-
-  // Return parsed value without modifying
-  return value
-}
-
-/** restore object from JSON serialization (i.e. recrete Buffer properties) */
-export function jsonParseAndRevive(value: any) {
-  return JSON.parse(value, jsonParseComplexObjectReviver)
 }
