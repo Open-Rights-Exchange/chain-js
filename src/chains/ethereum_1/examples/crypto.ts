@@ -8,6 +8,7 @@
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
 import { toEthereumPrivateKey, toEthereumPublicKey } from '../helpers'
+import { uncompressPublicKey } from '../ethCrypto'
 import { EthereumChainEndpoint } from '../models'
 
 require('dotenv').config()
@@ -30,7 +31,9 @@ async function run() {
 
   // crypto
 
-  console.log('keyPair:', await ropsten.generateKeyPair())
+  const keyPair = await ropsten.generateKeyPair()
+  console.log('keyPair:', keyPair)
+  console.log('uncompressed publicKey:', uncompressPublicKey(keyPair.publicKey))
 
   // encrypt/decrypt with password string
   const encrypted1 = ropsten.encryptWithPassword('mystring', 'password', { salt: 'mysalt' })
