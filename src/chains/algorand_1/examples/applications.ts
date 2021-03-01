@@ -13,11 +13,13 @@ import {
   AlgorandActionAppMultiPurpose,
   AlgorandActionAppUpdate,
   AlgorandChainActionType,
+  AlgorandOnApplicationComplete,
 } from '../models'
-import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+import { toAlgorandPrivateKey, toAlgorandSymbol, compileIfSourceCodeIfNeeded } from '../helpers'
+import { bigIntToUint8Array, hexStringToByteArray, toChainEntityName } from '../../../helpers'
 import { ChainAlgorandV1 } from '../ChainAlgorandV1'
 import { composedAppCreate } from '../tests/mockups/composedActions'
+import { rawTrxString, rawTrx } from './application/transactions'
 
 require('dotenv').config()
 
@@ -54,13 +56,47 @@ const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
 
 const sampleRawNoOPTrx = {
   type:'appl',
-  from:'ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM',
+  from:'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex:13675644, 
   appOnComplete:0, 
   appArgs: ['bWludA==', new Uint8Array([39, 16])],
   // appArgs: ['mint', '0x2710'], // same value as above 
   // appArgs: ['0x6d696e74', '0x2710'], // same value as above
   appAccounts: ['ZQHJE5D6E3NT775NKBSE6VLR6OT526F2SKOPQLHMZ2UCRUBVOEA3LIXIDM'],
+}
+
+async function generateRawTrx(algoChain: ChainAlgorandV1) {
+  const appApprovalProgramSource = await fs.readFileSync('../examples/application/security_token_approval.teal', 'utf8')
+  const appClearProgramSource = await fs.readFileSync('../examples/application/security_token_clear_state.teal', 'utf8')
+  const approvalProgram = hexStringToByteArray(await compileIfSourceCodeIfNeeded(appApprovalProgramSource, algoChain.algoClient)) 
+  const clearProgram = hexStringToByteArray(await compileIfSourceCodeIfNeeded(appClearProgramSource, algoChain.algoClient)) 
+  const localInts = 8
+  const localBytes = 8
+  const globalInts = 10
+  const globalBytes = 54
+  const params = await algoChain.algoClient.getTransactionParams().do()
+  const appArgs = []
+  let cap: any = `8${  '0'.repeat(16)}`
+  let decimals: any = '8'
+  let symbol: any = 'ABCTEST'
+  let name: any = 'The XYZ Test Token'
+  cap = bigIntToUint8Array(cap)
+  appArgs.push(cap)
+  decimals = bigIntToUint8Array(decimals)
+  appArgs.push(decimals)
+  const enc = new TextEncoder()
+  symbol = enc.encode(symbol)
+  appArgs.push(symbol)
+  const enc2 = new TextEncoder()
+  name = enc2.encode(name)
+  appArgs.push(name)
+  const txn = algosdk.makeApplicationCreateTxn('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+    params, AlgorandOnApplicationComplete.OptIn,
+    approvalProgram, clearProgram,
+    localInts, localBytes, globalInts, globalBytes, appArgs)
+  const signedTxn = algosdk.signTransaction(txn, hexStringToByteArray(env.ALGOTESTNET_testaccount_PRIVATE_KEY))
+  // const sendTx = await algoTest.algoClient.sendRawTransaction(signedTxn.blob).do()
+  console.log('Transaction : ', JSON.stringify(txn))
 }
 
 async function run() {
@@ -71,8 +107,11 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
+  
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
+
+  // console.log(await generateRawTrx(algoTest))
 
   // const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
   // console.log(applications)
@@ -81,15 +120,15 @@ async function run() {
   // const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
   // console.log(apps)
 
-  composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
-  composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
+  // composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  // composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
   const action = await algoTest.composeAction(AlgorandChainActionType.AppNoOp, sampleRawNoOPTrx)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
   transaction.actions = [action]
-
-  console.log('transaction actions: ', transaction.actions[0])
-  const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  console.log('decomposed actions: ', decomposed)
+  // await transaction.setFromRaw(rawTrx)
+  // console.log('transaction actions: ', transaction)
+  // const decomposed = await algoTest.decomposeAction(transaction.actions[0])
+  // console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
   // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
