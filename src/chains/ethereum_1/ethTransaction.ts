@@ -212,6 +212,7 @@ export class EthereumTransaction implements Transaction {
       const gasFee = await this.getSuggestedFee(this._executionPriority)
       await this.setDesiredFee(gasFee)
     }
+    // TODO: consider how to setTransactionId()
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
@@ -503,7 +504,8 @@ export class EthereumTransaction implements Transaction {
   /** Hash of transaction - signature must be present to determine transactionId */
   public get transactionId(): string {
     if (!this.hasAnySignatures) {
-      throwNewError('Cant determine transaction ID - missing transaction signature')
+      return null
+      // throwNewError('Cant determine transaction ID - missing transaction signature')
     }
     return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
   }
