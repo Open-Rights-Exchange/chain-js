@@ -16,10 +16,11 @@ import {
   AlgorandOnApplicationComplete,
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol, compileIfSourceCodeIfNeeded } from '../helpers'
-import { bigIntToUint8Array, hexStringToByteArray, toChainEntityName } from '../../../helpers'
+import { bigIntToUint8Array, hexStringToByteArray, jsonParseAndRevive, toChainEntityName } from '../../../helpers'
 import { ChainAlgorandV1 } from '../ChainAlgorandV1'
 import { composedAppCreate } from '../tests/mockups/composedActions'
-import { rawTrxString, rawTrx } from './application/transactions'
+import { rawTrxString, rawTrx, rawTrx2 } from './application/transactions'
+import { AlgorandTransaction } from '../algoTransaction'
 
 require('dotenv').config()
 
@@ -66,8 +67,8 @@ const sampleRawNoOPTrx = {
 }
 
 async function generateRawTrx(algoChain: ChainAlgorandV1) {
-  const appApprovalProgramSource = await fs.readFileSync('../examples/application/security_token_approval.teal', 'utf8')
-  const appClearProgramSource = await fs.readFileSync('../examples/application/security_token_clear_state.teal', 'utf8')
+  const appApprovalProgramSource = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
+  const appClearProgramSource = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
   const approvalProgram = hexStringToByteArray(await compileIfSourceCodeIfNeeded(appApprovalProgramSource, algoChain.algoClient)) 
   const clearProgram = hexStringToByteArray(await compileIfSourceCodeIfNeeded(appClearProgramSource, algoChain.algoClient)) 
   const localInts = 8
@@ -122,17 +123,18 @@ async function run() {
 
   // composeAppCreateParams.appApprovalProgram = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
   // composeAppCreateParams.appClearProgram = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
-  const action = await algoTest.composeAction(AlgorandChainActionType.AppNoOp, sampleRawNoOPTrx)
+  // const action = await algoTest.composeAction(AlgorandChainActionType.AppNoOp, sampleRawNoOPTrx)
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
-  transaction.actions = [action]
-  // await transaction.setFromRaw(rawTrx)
-  // console.log('transaction actions: ', transaction)
-  // const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  // console.log('decomposed actions: ', decomposed)
+  // transaction.actions = [action]
+
+  await transaction.setFromRaw(rawTrx)
+  // // console.log('transaction actions: ', transaction)
+  // // const decomposed = await algoTest.decomposeAction(transaction.actions[0])
+  // // console.log('decomposed actions: ', decomposed)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
-  // await transaction.sign([toAlgorandPrivateKey(sk)])
+  // // const { sk } = algosdk.mnemonicToSecretKey(env.PRIVATE_SEED)
+  // // await transaction.sign([toAlgorandPrivateKey(sk)])
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log(transaction.rawTransaction)

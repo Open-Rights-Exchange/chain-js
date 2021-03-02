@@ -31,6 +31,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   } else {
     transaction = blob
   }
+  console.log('signresultTRs: ', transaction)
   if (transaction?.msig) {
     returnTx = transaction as AlgorandRawTransactionMultisigStruct
   } else {

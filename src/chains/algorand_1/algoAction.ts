@@ -4,16 +4,15 @@ import {
   bigIntToUint8Array,
   bufferToString,
   byteArrayToHexString,
-  ensureJsonArrayOfIntsConvertedToUInt8Array,
   hasHexPrefix,
   hexStringToByteArray,
-  isAnObject,
   isANumber,
   isAString,
   isAUint8Array,
   isBase64Encoded,
   isHexString,
   isNullOrEmpty,
+  jsonParseAndRevive,
   removeHexPrefix,
   toBuffer,
 } from '../../helpers'
@@ -53,12 +52,13 @@ export class AlgorandActionHelper {
 
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
-    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+    actionParam: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
   ) {
-    if (isNullOrEmpty(action)) {
+    if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
     }
-    console.log('valudateand')
+    // Stringify & revive to reinstate Uint8Array objects
+    const action = jsonParseAndRevive(JSON.stringify(actionParam))
     // TODO Algo - consider if any validation here is needed - should probably check .from when getting action
     // We cant check for .from here since we want to use action helper to add header values to a partial action
     // if (isNullOrEmpty(action.from)) {
@@ -246,6 +246,7 @@ export class AlgorandActionHelper {
     const rawAction = this.raw
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
+    console.log('applyingBUFFER: ', rawAction.genesisHash, chainTxParams.genesisHash)
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
     rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
     rawAction.fee = rawAction.fee || chainTxParams.minFee
@@ -263,85 +264,9 @@ export class AlgorandActionHelper {
     return isAString(action.from)
   }
 
-  private ensureBufferIsUint8Array(value: any) {
-    if (isAnObject(value)) {
-      if (value?.type === 'Buffer') {
-        return value?.data as Uint8Array
-      }
-    }
-    return ensureJsonArrayOfIntsConvertedToUInt8Array(value)
-  }
-
-  private ensureRawIsUint8Array(action: any) {
-    const rawAction = action
-    if (isAnObject(rawAction?.from)) {
-      rawAction.from.publicKey = this.ensureBufferIsUint8Array(action?.from?.publicKey)
-      rawAction.from.checksum = this.ensureBufferIsUint8Array(action?.from?.checksum)
-    }
-    if (rawAction?.to?.publicKey) {
-      rawAction.to.publicKey = this.ensureBufferIsUint8Array(action?.to?.publicKey)
-      rawAction.to.checksum = this.ensureBufferIsUint8Array(action?.to?.checksum)
-    }
-    rawAction.note = this.ensureBufferIsUint8Array(action?.note)
-    rawAction.tag = this.ensureBufferIsUint8Array(action?.tag)
-    rawAction.lease = this.ensureBufferIsUint8Array(action?.lease)
-    if (rawAction?.closeRemainderTo) {
-      rawAction.closeRemainderTo.publicKey = this.ensureBufferIsUint8Array(action?.closeRemainderTo?.publicKey)
-      rawAction.closeRemainderTo.checksum = this.ensureBufferIsUint8Array(action?.closeRemainderTo?.checksum)
-    }
-    rawAction.voteKey = this.ensureBufferIsUint8Array(action?.voteKey)
-    rawAction.selectionKey = this.ensureBufferIsUint8Array(action?.selectionKey)
-    if (rawAction?.assetManager?.publicKey) {
-      rawAction.assetManager.publicKey = this.ensureBufferIsUint8Array(action?.assetManager?.publicKey)
-      rawAction.assetManager.checksum = this.ensureBufferIsUint8Array(action?.assetManager?.checksum)
-    }
-    if (rawAction?.assetReserve?.publicKey) {
-      rawAction.assetReserve.publicKey = this.ensureBufferIsUint8Array(action?.assetReserve?.publicKey)
-      rawAction.assetReserve.checksum = this.ensureBufferIsUint8Array(action?.assetReserve?.checksum)
-    }
-    if (rawAction?.assetFreeze?.publicKey) {
-      rawAction.assetFreeze.publicKey = this.ensureBufferIsUint8Array(action?.assetFreeze?.publicKey)
-      rawAction.assetFreeze.checksum = this.ensureBufferIsUint8Array(action?.assetFreeze?.checksum)
-    }
-    if (rawAction?.assetClawback?.publicKey) {
-      rawAction.assetClawback.publicKey = this.ensureBufferIsUint8Array(action?.assetClawback?.publicKey)
-      rawAction.assetClawback.checksum = this.ensureBufferIsUint8Array(action?.assetClawback?.checksum)
-    }
-    if (rawAction?.freezeAccount?.publicKey) {
-      rawAction.freezeAccount.publicKey = this.ensureBufferIsUint8Array(action?.freezeAccount?.publicKey)
-      rawAction.freezeAccount.checksum = this.ensureBufferIsUint8Array(action?.freezeAccount?.checksum)
-    }
-    if (rawAction?.assetRevocationTarget?.publicKey) {
-      rawAction.assetRevocationTarget.publicKey = this.ensureBufferIsUint8Array(
-        action?.assetRevocationTarget?.publicKey,
-      )
-      rawAction.assetRevocationTarget.checksum = this.ensureBufferIsUint8Array(action?.assetRevocationTarget?.checksum)
-    }
-    rawAction.group = this.ensureBufferIsUint8Array(action?.group)
-    rawAction.appApprovalProgram = this.ensureBufferIsUint8Array(action?.appApprovalProgram)
-    rawAction.appClearProgram = this.ensureBufferIsUint8Array(action?.appClearProgram)
-    if (rawAction?.appArgs)
-      rawAction.appArgs = action?.appArgs.map((appArg: any) => this.ensureBufferIsUint8Array(appArg))
-    if (rawAction?.appAccounts?.length > 0 && rawAction?.appAccounts[0].publicKey)
-      rawAction.appAccounts = action?.appAccounts.map((appAccount: any) => {
-        return {
-          publicKey: this.ensureBufferIsUint8Array(appAccount?.publicKey),
-          checksum: this.ensureBufferIsUint8Array(appAccount?.checksum),
-        }
-      })
-    if (isAnObject(rawAction?.reKeyTo)) {
-      rawAction.reKeyTo.publicKey = this.ensureBufferIsUint8Array(action?.reKeyTo?.publicKey)
-      rawAction.reKeyTo.checksum = this.ensureBufferIsUint8Array(action?.reKeyTo?.checksum)
-    }
-    rawAction.genesisHash = this.ensureBufferIsUint8Array(action?.genesisHash)
-    // console.log('converted public key: ', rawAction?.from?.publicKey)
-    // console.log('publickey hex: ', byteArrayToHexString(rawAction?.from?.publicKey))
-    return rawAction
-  }
-
   /** whether action is the native chain 'raw' format */
   private isAlgorandTxActionRaw(action: any): boolean {
-    const rawAction = this.ensureRawIsUint8Array(action) as AlgorandTxActionRaw
+    const rawAction = action as AlgorandTxActionRaw
     const hasPublicKey = rawAction.from?.publicKey
     return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
   }
