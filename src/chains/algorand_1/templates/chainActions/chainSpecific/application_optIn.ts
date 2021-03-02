@@ -50,7 +50,8 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   // Cant identify using only type (more than one action uses Application type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.Application &&
-    actionParams?.appOnComplete === AlgorandOnApplicationComplete.OptIn
+    actionParams?.appOnComplete === AlgorandOnApplicationComplete.OptIn &&
+    actionParams?.appIndex !== 0 // If this is 0, we're doing a create application transaction
   ) {
     const returnData = {
       ...actionParams,
