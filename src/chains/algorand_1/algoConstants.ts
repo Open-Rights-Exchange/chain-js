@@ -9,7 +9,7 @@ export const PUBLIC_KEY_LENGTH = nacl.sign.publicKeyLength
 export const ALGORAND_EMPTY_CONTRACT_NAME = 'none'
 export const ALGORAND_POST_CONTENT_TYPE = { 'content-type': 'application/x-binary' }
 /** Number of rounds to wait after the first round for the transaction confirmation */
-export const ALGORAND_TRX_COMFIRMATION_ROUNDS = 1000
+export const ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS = 1000
 export const DEFAULT_TIMEOUT_FOR_TRX_CONFIRM = 500
 export const DEFAULT_ALGO_UNIT = AlgorandUnit.Microalgo
 
@@ -19,6 +19,8 @@ export const DEFAULT_BLOCKS_TO_CHECK = 20
 export const DEFAULT_CHECK_INTERVAL = 500
 /** minimum milliseconds between requests - prevents getting blacklisted by pinging API too quickly between calls */
 export const MINIMUM_CHECK_INTERVAL = 500
+/** time in seconds between blocks */
+export const ALGORAND_CHAIN_BLOCK_FREQUENCY = 2
 /** number of times to attempt to read a chain endpoint before failing the read */
 export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 

@@ -8,6 +8,7 @@ import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
   hexStringToByteArray,
+  isANumber,
   isArrayLengthOne,
   isNullOrEmpty,
   notImplemented,
@@ -79,7 +80,7 @@ export class AlgorandTransaction implements Transaction {
   constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
-    this._options = options || {}
+    this.applyOptions(options)
   }
 
   /** Chain-specific values included in the transaction sent to the chain */
@@ -579,11 +580,24 @@ export class AlgorandTransaction implements Transaction {
 
   /** Throws if from is not null or empty algorand argument */
   private assertValidOptions(options: AlgorandTransactionOptions): void {
+    if (options?.expireSeconds && !isANumber(options.expireSeconds)) {
+      throwNewError('Invalid transaction options: ExpireSeconds is not a number')
+    }
     if (options?.multiSigOptions && options?.signerPublicKey) {
       throwNewError(
         'Invalid transaction options: Provide multiSigOptions OR signerPublicKey - not both. The signerPublicKey is for non-multisig transasctions only',
       )
     }
+  }
+
+  /** apply options and/or use defaults */
+  private applyOptions(options: AlgorandTransactionOptions) {
+    const { multiSigOptions, signerPublicKey } = options || {}
+    let { expireSeconds, fee, flatFee } = options || {}
+    expireSeconds = expireSeconds ?? this._chainState?.chainSettings?.defaultTransactionSettings?.expireSeconds
+    fee = fee ?? this._chainState?.chainSettings?.defaultTransactionSettings?.fee
+    flatFee = flatFee ?? this._chainState?.chainSettings?.defaultTransactionSettings?.flatFee
+    this._options = { expireSeconds, fee, flatFee, multiSigOptions, signerPublicKey }
   }
 
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */

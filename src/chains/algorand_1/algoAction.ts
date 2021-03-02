@@ -16,13 +16,18 @@ import {
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
+  AlgorandTransactionOptions,
   AlgorandTxAction,
   AlgorandTxActionRaw,
   AlgorandTxActionSdkEncoded,
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
 import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
-import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
+import {
+  ALGORAND_CHAIN_BLOCK_FREQUENCY,
+  ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS,
+  ALGORAND_EMPTY_CONTRACT_NAME,
+} from './algoConstants'
 import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
@@ -226,12 +231,21 @@ export class AlgorandActionHelper {
 
   /** Adds the latest transaction header fields (firstRound, etc.) from chain
    *  Applies any that are not already provided in the action */
-  applyCurrentTxHeaderParamsWhereNeeded(chainTxParams: AlgorandChainTransactionParamsStruct) {
+  applyCurrentTxHeaderParamsWhereNeeded(
+    chainTxParams: AlgorandChainTransactionParamsStruct,
+    transactionOptions?: AlgorandTransactionOptions,
+  ) {
+    debugger
     const rawAction = this.raw
+    // calculate last block
+    const numberOfBlockValidFor = transactionOptions?.expireSeconds
+      ? transactionOptions?.expireSeconds * ALGORAND_CHAIN_BLOCK_FREQUENCY
+      : ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS
+    const lastValidBlock = rawAction.firstRound + numberOfBlockValidFor
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
-    rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
+    rawAction.lastRound = rawAction.lastRound || lastValidBlock
     rawAction.fee = rawAction.fee || chainTxParams.minFee
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
   }
@@ -239,7 +253,7 @@ export class AlgorandActionHelper {
   /** Remove fields from object that are undefined, null, or empty */
   deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach((key) => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
   }
 
   /** whether action is the native chain 'raw' format */
@@ -292,7 +306,7 @@ export class AlgorandActionHelper {
    */
   decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
     if (isNullOrEmpty(appArgs)) return undefined
-    const readable: string[] = appArgs.map((arg) => {
+    const readable: string[] = appArgs.map(arg => {
       if (isAUint8Array(arg)) {
         return `0x${Buffer.from(arg).toString('hex')}`
       }
