@@ -12,6 +12,7 @@ import {
   isBase64Encoded,
   isHexString,
   isNullOrEmpty,
+  jsonParseAndRevive,
   removeHexPrefix,
   toBuffer,
 } from '../../helpers'
@@ -51,11 +52,13 @@ export class AlgorandActionHelper {
 
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
-    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+    actionParam: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
   ) {
-    if (isNullOrEmpty(action)) {
+    if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
     }
+    // Stringify & revive to reinstate Uint8Array objects
+    const action = jsonParseAndRevive(JSON.stringify(actionParam))
     // TODO Algo - consider if any validation here is needed - should probably check .from when getting action
     // We cant check for .from here since we want to use action helper to add header values to a partial action
     // if (isNullOrEmpty(action.from)) {
