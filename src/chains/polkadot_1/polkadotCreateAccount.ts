@@ -5,12 +5,7 @@ import { isValidPolkadotPublicKey, toPolkadotEntityName } from './helpers'
 import { notSupported } from '../../helpers'
 import { CreateAccount } from '../../interfaces'
 import { throwNewError } from '../../errors'
-import { 
-  PolkadotAddress, 
-  PolkadotPublicKey, 
-  PolkadotKeypairType, 
-  PolkadotKeypair, 
-} from './models'
+import { PolkadotAddress, PolkadotPublicKey, PolkadotCurve, PolkadotKeypair } from './models'
 
 /** Helper class to compose a transaction for creating a new chain account
  *  Handles native accounts
@@ -19,7 +14,7 @@ import {
 export class PolkadotCreateAccount implements CreateAccount {
   private _accountName: PolkadotAddress
 
-  private _accountType: PolkadotKeypairType
+  private _accountType: PolkadotCurve
 
   private _chainState: PolkadotChainState
 
@@ -31,17 +26,17 @@ export class PolkadotCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
   }
-  
+
   /** Account name for the account to be created */
   public get accountName(): any {
     return this._accountName
   }
-  
+
   /** Account type to be created */
-  public get accountType(): PolkadotKeypairType {
+  public get accountType(): PolkadotCurve {
     return this._accountType
   }
-  
+
   /** Prefix that represents the address on which chain */
   public getSS58Format(): number {
     return this._chainState.chainInfo.nativeInfo.SS58
@@ -124,20 +119,20 @@ export class PolkadotCreateAccount implements CreateAccount {
       await this.generateAccountKeys()
     }
     this._accountName = getPolkadotAddressFromPublicKey(this._generatedKeypair.publicKey)
-    this._accountType = this._options.newKeysOptions.type
+    this._accountType = this._options.newKeysOptions.curve
   }
 
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options
-    const { type } = newKeysOptions || {}
+    const { curve: type } = newKeysOptions || {}
     const overrideType = type || 'ed25519'
     const overridePhrase = generateNewAccountPhrase()
-    
+
     this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
     this._options.publicKey = this._generatedKeypair.publicKey
     this._options.newKeysOptions = {
       phrase: overridePhrase,
-      type: overrideType,
+      curve: overrideType,
     }
   }
 
