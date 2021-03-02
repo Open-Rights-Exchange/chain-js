@@ -7,13 +7,33 @@ import { BlockNumber, Balance, Weight, Hash, } from '@polkadot/types/interfaces'
 import { ChainSymbolBrand, PublicKeyBrand, PrivateKeyBrand, } from '../../../models'
 
 export type PolkadotChainEndpoint = {
+	/**
+	 * The rpc endpoint url of chain (parachain | relay-chain)
+	 */
 	url: string
-	options?: {
-		headers?: { [key: string]: string }
-	}
 }
 
-export type PolkadotChainSettings = {}
+export type PolkadotChainManifest = {
+	/**
+	 * In case, the chain is parachain
+	 * Identifer referring to a specific parachain.
+	 * The relay-chain runtime guarantees that this id is unique 
+	 * for the duration of any session.
+	 * NOTE: https://w3f.github.io/parachain-implementers-guide/types/candidate.html#para-id
+	 * 
+	 * If the id is -1, then the chain is relay-chain.
+	 */
+	id: number
+	endpoint: PolkadotChainEndpoint
+}
+
+export type PolkadotChainSettings = {
+	/**
+	 * In case the chain that we connect is a relay-chain, then the relayEndpoint is useless
+	 */
+	relayEndpoint?: PolkadotChainEndpoint
+	otherParachains: PolkadotChainManifest[]
+}
 
 export type PolkadotChainInfo = {	
 	headBlockNumber: number
@@ -24,9 +44,12 @@ export type PolkadotChainInfo = {
 
 export type PolkadotNativeInfo = {
 	chain: string
-	transacitonByteFee: Balance
-	decimals: number
+	name: string
 	SS58: number
+	tokenDecimals: Array<number>
+	tokenSymbol: Array<string>
+	transacitonByteFee: number
+	meta: any
 }
 
 export type PolkadotSymbol = string & ChainSymbolBrand

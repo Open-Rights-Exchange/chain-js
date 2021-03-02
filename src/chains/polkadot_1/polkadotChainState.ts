@@ -14,8 +14,14 @@ import {
 import { trimTrailingChars } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import BigNumber from 'bignumber.js'
-import { ApiPromise, WsProvider } from '@polkadot/api'
+import { ApiPromise, WsProvider, SubmittableResult } from '@polkadot/api'
 import { isU8a, u8aToString } from '@polkadot/util';
+import { createSubmittable } from '@polkadot/api/submittable'
+import { SubmittableExtrinsic } from '@polkadot/api/submittable/types'
+import { SubmittableExtrinsics, SubmittableExtrinsicFunction } from '@polkadot/api/types'
+import { TypeDef } from '@polkadot/types/types'
+import { GenericCall } from '@polkadot/types';
+import { getTypeDef } from '@polkadot/types/create';
 
 export class PolkadotChainState {
 	private _chainInfo: PolkadotChainInfo
@@ -79,11 +85,16 @@ export class PolkadotChainState {
 
 	public async getChainInfo(): Promise<PolkadotChainInfo> {
 		try {
-			const [headBlockTime, chain, version, lastBlockHead] = await Promise.all([
+			// console.log(this.extrinsicSectionOptions())
+			console.log(this.extrinsicMethodOptions("xcmHandler"))
+			// this.buildExtrinsics("xcmHandler", "sudoSendHrmpXcm");
+			const [headBlockTime, chain, name, version, lastBlockHead, stateMeta] = await Promise.all([
 				this._api.query.timestamp.now(),
 				this._api.rpc.system.chain(),
+				this._api.rpc.system.name(),
 				this._api.rpc.system.version(),
 				this._api.rpc.chain.getHeader(),
+				this._api.rpc.state.getMetadata()
 			])
 
 			this._chainInfo = {
@@ -92,9 +103,12 @@ export class PolkadotChainState {
 				version: version.toString(),
 				nativeInfo: {
 					chain: chain.toString(),
-					transacitonByteFee: this._api.consts.transactionPayment.transactionByteFee,
-					decimals: this._api.registry.chainDecimals[0],
+					name: name.toString(),
+					transacitonByteFee: this._api.consts.transactionPayment.transactionByteFee.toNumber(),
+					tokenDecimals: this._api.registry.chainDecimals,
 					SS58: this._api.registry.chainSS58,
+					tokenSymbol: this._api.registry.chainTokens,
+					meta: JSON.parse(JSON.stringify(stateMeta.toHuman()))
 				}
 			}
 			return this._chainInfo
@@ -135,10 +149,9 @@ export class PolkadotChainState {
 		}
 	}
 
-	public async estimateTxFee(sender: PolkadotKeyringPair, receiver: PolkadotAddress, amount: DotAmount): Promise<PolkadotPaymentInfo> {
+	public async estimateTxFee(sender: PolkadotKeyringPair, extrinsics: SubmittableExtrinsic<"promise">): Promise<PolkadotPaymentInfo> {
 		try {
-			const info = await this._api.tx.balances.transfer(receiver, amount)
-																							.paymentInfo(sender)
+			const info = await extrinsics.paymentInfo(sender)
 
 			const paymentInfo: PolkadotPaymentInfo = {
 				weight: info.weight,
@@ -150,33 +163,91 @@ export class PolkadotChainState {
 			throw error
 		}
 	}
+	// public async estimateTxFee(sender: PolkadotKeyringPair, receiver: PolkadotAddress, amount: DotAmount): Promise<PolkadotPaymentInfo> {
+	// 	try {
+	// 		const info = await this._api.tx.balances.transfer(receiver, amount)
+	// 																						.paymentInfo(sender)
 
-	public async sendTransaction(sender: PolkadotKeyringPair, receiver: PolkadotAddress, amount: DotAmount): Promise<PolkadotHash> {
+	// 		const paymentInfo: PolkadotPaymentInfo = {
+	// 			weight: info.weight,
+	// 			partialFee: info.partialFee
+	// 		}
+
+	// 		return paymentInfo
+	// 	} catch (error) {
+	// 		throw error
+	// 	}
+	// }
+
+	public async sendTransaction(sender: PolkadotKeyringPair, extrinsics: SubmittableExtrinsic<"promise">): Promise<PolkadotHash> {
 		try{
-			const tx = await this._api.tx.balances.transfer(receiver, amount)
-			const paymentInfo = await tx.paymentInfo(sender)
-			const fee = paymentInfo.partialFee.toString()
-			const balanceInfo = await this.getBalance(sender.address)
-			const balance = balanceInfo.free.sub(balanceInfo.miscFrozen)
-
-			const bnFee = new BigNumber(fee, this._chainInfo.nativeInfo.decimals)
-			const bnAmount = new BigNumber(amount.toString(), this._chainInfo.nativeInfo.decimals)
-			const bnBalance = new BigNumber(balance.toString(), this._chainInfo.nativeInfo.decimals)
-
-			if (bnFee.plus(bnAmount).isGreaterThan(bnBalance) ) {
-				throw new Error('Insufficient balance')
-			}
-
-			const txHash = await tx.signAndSend(sender)
+			const txHash = await extrinsics.signAndSend(sender)
 			return txHash
 		} catch (error) {
 			throw error
 		}
 	}
 
+	// public async sendTransaction(sender: PolkadotKeyringPair, receiver: PolkadotAddress, amount: DotAmount): Promise<PolkadotHash> {
+	// 	try{
+	// 		const tx = await this._api.tx.balances.transfer(receiver, amount)
+	// 		const paymentInfo = await tx.paymentInfo(sender)
+	// 		const fee = paymentInfo.partialFee.toString()
+	// 		const balanceInfo = await this.getBalance(sender.address)
+	// 		const balance = balanceInfo.free.sub(balanceInfo.miscFrozen)
+
+	// 		const bnFee = new BigNumber(fee, this._chainInfo.nativeInfo.tokenDecimals[0])
+	// 		const bnAmount = new BigNumber(amount.toString(), this._chainInfo.nativeInfo.tokenDecimals[0])
+	// 		const bnBalance = new BigNumber(balance.toString(), this._chainInfo.nativeInfo.tokenDecimals[0])
+
+	// 		if (bnFee.plus(bnAmount).isGreaterThan(bnBalance) ) {
+	// 			throw new Error('Insufficient balance')
+	// 		}
+
+	// 		const txHash = await tx.signAndSend(sender)
+	// 		return txHash
+	// 	} catch (error) {
+	// 		throw error
+	// 	}
+	// }
+
+	public async submitExtrinsics() {
+		// Submittable createSubmittable()
+		
+	}
+	
+	public buildExtrinsics(section: string, method: string) {
+		const sectionOptions = this.extrinsicSectionOptions()
+		if (!sectionOptions.filter(option => option === section).length) {
+			throwNewError("Not available Extrinsic Section Option")
+		}
+		const methodOptions = this.extrinsicMethodOptions(section)
+		if (!methodOptions.filter(option => option === method).length) {
+			throwNewError("Not available Extrinsic Method Option")
+		}
+		let fn: SubmittableExtrinsicFunction<"promise"> = this._api.tx[section][method]
+		console.log( this.getParams(fn) )
+	}
+
+	public extrinsicSectionOptions(): string[] {
+		return Object.keys(this._api.tx).sort().filter((name): number => Object.keys(this._api.tx[name]).length).map((name): string => name)
+	}
+
+	public extrinsicMethodOptions(sectionName: string): string[] {
+		const section = this._api.tx[sectionName];
+		return Object.keys(section).sort().map((name): string => name)
+	}
+
+	public getParams({meta}: SubmittableExtrinsicFunction<"promise">): {name: string; type: TypeDef} [] {
+		return GenericCall.filterOrigin(meta).map((arg): {name: string; type: TypeDef} => ({
+			name: arg.name.toString(),
+			type: getTypeDef(arg.type.toString())
+		}))
+	}
+
 	public assertIsConnected(): void {
 		if (!this._isConnected) {
 			throwNewError('Not connected to chain')
-		}
+		} 
 	}
 }
