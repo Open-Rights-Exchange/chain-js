@@ -246,7 +246,6 @@ export class AlgorandActionHelper {
     const rawAction = this.raw
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
-    console.log('applyingBUFFER: ', rawAction.genesisHash, chainTxParams.genesisHash)
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
     rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
     rawAction.fee = rawAction.fee || chainTxParams.minFee
