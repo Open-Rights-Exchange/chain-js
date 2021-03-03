@@ -5,14 +5,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug Algo Examples - applications.ts",
+      "sourceMaps": true,
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/chains/algorand_1/examples/applications.ts",
+      "cwd": "${workspaceRoot}/src/chains/algorand_1/examples",
+      "env": {
+        "TS_NODE_IGNORE": "false"
+      },
+    },
+    {
       "name": "Debug Algo Examples - transfers.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/algorand_1/examples/transfers.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/algorand_1/examples/transfers.ts",
+      "cwd": "${workspaceRoot}/src/chains/algorand_1/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
