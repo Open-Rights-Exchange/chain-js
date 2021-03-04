@@ -51,7 +51,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   if (
     actionParams?.type === AlgorandTransactionTypeCode.Application &&
     actionParams?.appOnComplete === AlgorandOnApplicationComplete.OptIn &&
-    actionParams?.appIndex !== 0 // If this is 0, we're doing a create application transaction
+    !(actionParams?.appIndex === 0 || !actionParams?.appIndex) // If this is 0 (or missing or undefined), then the action is a create application transaction
   ) {
     const returnData = {
       ...actionParams,
