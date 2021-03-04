@@ -223,6 +223,14 @@ export type AlgorandMultiSignatureStruct = {
   s?: Uint8Array
 }
 
+export type AlgorandMultiSignatureMsigStruct = {
+  /** multisig version */
+  v: number
+  /** multisig threshold */
+  thr: number
+  subsig: AlgorandMultiSignatureStruct[]
+}
+
 /** the object that can be encoded as a Uint8Array and sent to the chain */
 export type AlgorandRawTransactionMultisigStruct = {
   /** JSON object */

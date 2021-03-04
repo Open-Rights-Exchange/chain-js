@@ -50,10 +50,15 @@ export function toAlgorandEntityName(value: string): AlgorandEntityName {
   throw new Error(`Not a valid Algorand Account:${value}.`)
 }
 
-// converts an address (encoded as a hex string) to a Uint8Array array (needed by the chain)
-export function toAlgorandAddressFromRaw(rawAddress: AlgorandAddressStruct): AlgorandAddress {
+/** Converts a publicKey (encoded as Uint8Array for chain) to an AlgorandAddres */
+export function toAlgorandAddressFromPublicKeyByteArray(publicKeyBuffer: Uint8Array): AlgorandAddress {
+  return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(publicKeyBuffer)))
+}
+
+/** Converts a AlgorandAddressStruct (has publicKey encoded as Uint8Array inside) to an AlgorandAddres */
+export function toAlgorandAddressFromRawStruct(rawAddress: AlgorandAddressStruct): AlgorandAddress {
   if (isNullOrEmpty(rawAddress)) return undefined
-  return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey)))
+  return toAlgorandAddressFromPublicKeyByteArray(rawAddress.publicKey)
 }
 
 /** converts an address (encoded as a Uint8Array array) to a hex string  */
