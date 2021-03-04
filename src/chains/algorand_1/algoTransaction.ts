@@ -162,6 +162,7 @@ export class AlgorandTransaction implements Transaction {
 
   /** Set the transaction by using the blob from the results of an Algo SDK sign function
    *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
+   *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
    */
   async setFromRaw(
     rawTransaction: AlgorandRawTransactionMultisigStruct | AlgorandRawTransactionStruct | Uint8Array,
@@ -175,7 +176,11 @@ export class AlgorandTransaction implements Transaction {
     } else {
       decodedBlob = rawTransaction
     }
-    if (!decodedBlob?.txn) throwNewError('Cant decode blob into transaction')
+
+    if (!decodedBlob?.txn) {
+      throwNewError('Cant decode blob into transaction - expected a property .txn')
+    }
+
     // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
     this.actions = [decodedBlob]
     this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
