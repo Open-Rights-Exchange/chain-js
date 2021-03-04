@@ -23,9 +23,14 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
-import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct, AlgorandRawTransactionStruct } from './models'
+import {
+  AlgorandTxHeaderParams,
+  AlgorandChainTransactionParamsStruct,
+  AlgorandRawTransactionStruct,
+  AlgorandRawTransactionMultisigStruct,
+} from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
-import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
+import { toAlgorandAddressFromRawStruct, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
  * Algorand supports these actions:
@@ -45,14 +50,24 @@ export class AlgorandActionHelper {
    *  .action property returns action with Uint8Arrays converted to hexstrings
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
   constructor(
-    params: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+    params:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     this.validateAndApplyParams(params)
   }
 
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
-    actionParam: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionStruct,
+    actionParam:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
@@ -87,18 +102,18 @@ export class AlgorandActionHelper {
     const returnVal = {
       ...this.raw,
       genesisHash: this.raw.genesisHash ? bufferToString(this.raw.genesisHash, 'base64') : undefined,
-      to: toAlgorandAddressFromRaw(this.raw.to),
-      from: toAlgorandAddressFromRaw(this.raw.from),
-      closeRemainderTo: toAlgorandAddressFromRaw(this.raw.closeRemainderTo),
-      assetManager: toAlgorandAddressFromRaw(this.raw.assetManager),
-      assetReserve: toAlgorandAddressFromRaw(this.raw.assetReserve),
-      assetFreeze: toAlgorandAddressFromRaw(this.raw.assetFreeze),
-      assetClawback: toAlgorandAddressFromRaw(this.raw.assetClawback),
-      assetRevocationTarget: toAlgorandAddressFromRaw(this.raw.assetRevocationTarget),
-      freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
-      reKeyTo: toAlgorandAddressFromRaw(this.raw.reKeyTo),
+      to: toAlgorandAddressFromRawStruct(this.raw.to),
+      from: toAlgorandAddressFromRawStruct(this.raw.from),
+      closeRemainderTo: toAlgorandAddressFromRawStruct(this.raw.closeRemainderTo),
+      assetManager: toAlgorandAddressFromRawStruct(this.raw.assetManager),
+      assetReserve: toAlgorandAddressFromRawStruct(this.raw.assetReserve),
+      assetFreeze: toAlgorandAddressFromRawStruct(this.raw.assetFreeze),
+      assetClawback: toAlgorandAddressFromRawStruct(this.raw.assetClawback),
+      assetRevocationTarget: toAlgorandAddressFromRawStruct(this.raw.assetRevocationTarget),
+      freezeAccount: toAlgorandAddressFromRawStruct(this.raw.freezeAccount),
+      reKeyTo: toAlgorandAddressFromRawStruct(this.raw.reKeyTo),
       appAccounts: !isNullOrEmpty(this.raw.appAccounts)
-        ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
+        ? this.raw.appAccounts.map(toAlgorandAddressFromRawStruct)
         : undefined,
       appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
         ? byteArrayToHexString(this.raw.appApprovalProgram)
@@ -163,6 +178,8 @@ export class AlgorandActionHelper {
     }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction)
     // these fields are already encoded as needed for raw - so we dont want them encoded again
+    raw.appApprovalProgram = appApprovalProgram
+    raw.appArgs = appArgs
     raw.appClearProgram = appClearProgram
     raw.group = group
     raw.lease = lease
