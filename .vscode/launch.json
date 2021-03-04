@@ -29,11 +29,8 @@
       "name": "Debug EOS Examples - misc.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/eos_2/examples/transaction.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/eos_2/examples/transaction.ts",
+      "cwd": "${workspaceRoot}/src/chains/eos_2/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
@@ -42,11 +39,8 @@
       "name": "Debug EOS Examples - account.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/eos_2/examples/account.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/eos_2/examples/account.ts",
+      "cwd": "${workspaceRoot}/src/chains/eos_2/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
@@ -55,11 +49,8 @@
       "name": "Debug EOS Examples - transaction.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/eos_2/examples/transaction.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/eos_2/examples/transaction.ts",
+      "cwd": "${workspaceRoot}/src/chains/eos_2/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
@@ -68,11 +59,8 @@
       "name": "Debug ETH Examples - account.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/ethereum_1/examples/account.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/eos_2/examples/account.ts",
+      "cwd": "${workspaceRoot}/src/chains/eos_2/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
@@ -81,11 +69,8 @@
       "name": "Debug ETH Examples - transaction.ts",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/src/chains/ethereum_1/examples/transaction.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceRoot}/src/chains/eos_2/examples/transaction.ts",
+      "cwd": "${workspaceRoot}/src/chains/eos_2/examples",
       "env": {
         "TS_NODE_IGNORE": "false"
       }
