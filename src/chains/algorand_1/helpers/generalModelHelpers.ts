@@ -55,14 +55,14 @@ export function toAlgorandAddressFromPublicKeyByteArray(publicKeyBuffer: Uint8Ar
   return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(publicKeyBuffer)))
 }
 
-/** Converts a AlgorandAddressStruct (has publicKey encoded as Uint8Array inside) to an AlgorandAddres */
+/** Determines AlgorandAddres from AlgorandAddressStruct (using embedded publicKey) */
 export function toAlgorandAddressFromRawStruct(rawAddress: AlgorandAddressStruct): AlgorandAddress {
   if (isNullOrEmpty(rawAddress)) return undefined
   return toAlgorandAddressFromPublicKeyByteArray(rawAddress.publicKey)
 }
 
-/** converts an address (encoded as a Uint8Array array) to a hex string  */
 // NOTE: copied most of this code from algosdk - address.decode
+/** converts an address (encoded as a Uint8Array array) to a hex string  */
 export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddressStruct {
   if (isNullOrEmpty(address)) return null
   const decoded = base32.decode.asBytes(address)

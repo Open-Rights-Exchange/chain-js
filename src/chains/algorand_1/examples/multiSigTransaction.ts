@@ -50,7 +50,7 @@ export const CreateMultiSigAccountOptions = {
 }
 
 const composeValueTransferParams: ValueTransferParams = {
-  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  // fromAccountName: ... // from will be calculated from hash of multiSigOptions
   toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
   amount: '1000000',
   symbol: AlgorandUnit.Microalgo,
