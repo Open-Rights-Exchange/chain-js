@@ -251,17 +251,16 @@ export class AlgorandTransaction implements Transaction {
     }
     const action = actions[0]
     if (this.isMultiSig) {
-      const formAddr = this.getFromAddrFromAction(action)
-      // TODO: Consider set formAddr from multiSig if null
-      this.assertMultisigFromMatchesOptions(formAddr, this.multiSigOptions)
+      const fromAddr = this.getFromAddrFromAction(action)
+      this.assertMultisigFromMatchesOptions(fromAddr, this.multiSigOptions)
     }
     this._actionHelper = new AlgorandActionHelper(action)
     this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
   }
 
-  /** Returns from address
-   * returns null if from is missing
+  /** Returns the 'from' or 'snd' address for the transaction
+   *  If multisig, returns the multisig address (hash of multisigOptions)
    */
   private getFromAddrFromAction(
     action:
@@ -273,13 +272,17 @@ export class AlgorandTransaction implements Transaction {
   ): AlgorandAddress {
     const txAction = action as AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded
     const rawAction = action as AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct
-    if (txAction.from) {
+    const rawActionMultisig = action as AlgorandRawTransactionMultisigStruct
+    if (!isNullOrEmpty(txAction.from)) {
       return isAString(txAction.from)
         ? toAlgorandAddress(txAction.from as string)
         : toAlgorandAddressFromRawStruct(txAction.from as AlgorandAddressStruct)
     }
-    if (rawAction.txn?.snd) {
+    if (!isNullOrEmpty(rawAction.txn?.snd)) {
       return toAlgorandAddressFromPublicKeyByteArray(rawAction.txn?.snd)
+    }
+    if (!isNullOrEmpty(rawActionMultisig?.msig)) {
+      return determineMultiSigAddress(this.multisigOptionsFromRawTransactionMultisig(rawActionMultisig.msig))
     }
     return null
   }
@@ -507,7 +510,7 @@ export class AlgorandTransaction implements Transaction {
     return rawTransaction
   }
 
-  // Move to helpers
+  /** Determine standard multisig options from raw msig struct */
   private multisigOptionsFromRawTransactionMultisig(msig: AlgorandMultiSignatureMsigStruct): AlgorandMultiSigOptions {
     const addrs = msig.subsig.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
     return {
@@ -595,9 +598,7 @@ export class AlgorandTransaction implements Transaction {
       const action = this._actionHelper.actionEncodedForSdk
       const privateKeyAddress = toAddressFromPublicKey(getAlgorandPublicKeyFromPrivateKey(key))
       if (!this.multiSigOptions.addrs.includes(privateKeyAddress)) {
-        throwNewError(
-          'Can not sign multisig transaction with a private key that doesnt match an address in multisig options',
-        )
+        throwNewError('Cant sign multisig transaction the private key - it doesnt match an address in multisig options')
       }
       const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
         action,
