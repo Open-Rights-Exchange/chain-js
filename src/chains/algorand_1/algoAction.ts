@@ -24,10 +24,11 @@ import {
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
 import {
-  AlgorandTxHeaderParams,
+  AlgorandAddress,
   AlgorandChainTransactionParamsStruct,
-  AlgorandRawTransactionStruct,
   AlgorandRawTransactionMultisigStruct,
+  AlgorandRawTransactionStruct,
+  AlgorandTxHeaderParams,
 } from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
 import { toAlgorandAddressFromRawStruct, toRawAddressFromAlgoAddr } from './helpers'
@@ -335,5 +336,11 @@ export class AlgorandActionHelper {
       return undefined
     })
     return readable
+  }
+
+  /** Returns the 'from' or 'snd' address for the transaction */
+  get from(): AlgorandAddress {
+    if (isNullOrEmpty(this.raw.from)) return null
+    return toAlgorandAddressFromRawStruct(this.raw.from)
   }
 }
