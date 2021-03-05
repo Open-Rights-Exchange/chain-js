@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import { TextEncoder } from 'util'
-import { byteArrayToHexString, isAUint8Array, isHexString } from '../../../helpers'
+import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from '../../../helpers'
 import {
   AlgoClient,
   AlgorandMultiSigAccount,
@@ -11,14 +11,14 @@ import {
 } from '../models'
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
-export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions) {
+export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions): AlgorandMultiSigAccount {
+  if (isNullOrEmpty(multiSigOptions)) return null
   const mSigOptions = {
     version: multiSigOptions.version,
     threshold: multiSigOptions.threshold,
     addrs: multiSigOptions.addrs,
   }
-  const multisigAddress: AlgorandMultiSigAccount = algosdk.multisigAddress(mSigOptions)
-  return multisigAddress
+  return algosdk.multisigAddress(mSigOptions)
 }
 
 /** Decode blob from SDK's sign transaction */
