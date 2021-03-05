@@ -55,7 +55,7 @@ export function toAlgorandAddressFromPublicKeyByteArray(publicKeyBuffer: Uint8Ar
   return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(publicKeyBuffer)))
 }
 
-/** Determines AlgorandAddres from AlgorandAddressStruct (using embedded publicKey) */
+/** Determines AlgorandAddress from AlgorandAddressStruct (using embedded publicKey) */
 export function toAlgorandAddressFromRawStruct(rawAddress: AlgorandAddressStruct): AlgorandAddress {
   if (isNullOrEmpty(rawAddress)) return undefined
   return toAlgorandAddressFromPublicKeyByteArray(rawAddress.publicKey)
@@ -80,4 +80,9 @@ export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddr
 export function getPublicKeyForAddress(address: AlgorandAddress): AlgorandPublicKey {
   const rawAddress = toRawAddressFromAlgoAddr(address)
   return toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey))
+}
+
+/** Returns raw address for compressed transaction from address */
+export function toRawAddressBufferFromAlgorandAddress(address: AlgorandAddress): Buffer {
+  return Buffer.from(getPublicKeyForAddress(address))
 }
