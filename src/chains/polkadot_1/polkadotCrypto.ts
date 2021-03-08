@@ -7,9 +7,8 @@ import {
   naclKeypairFromSeed,
   schnorrkelKeypairFromSeed,
   secp256k1KeypairFromSeed,
-  signatureVerify,
 } from '@polkadot/util-crypto'
-import { Keypair, Seedpair, KeypairType } from '@polkadot/util-crypto/types'
+import { Keypair, Seedpair } from '@polkadot/util-crypto/types'
 import secp256k1 from 'secp256k1'
 import {
   PolkadotAddress,
@@ -30,11 +29,18 @@ import {
 } from '../../helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
+import { throwNewError } from '../../errors'
 
-export const keypairFromSeed = {
-  ecdsa: (seed: Uint8Array): Keypair => secp256k1KeypairFromSeed(seed) as Keypair,
-  ed25519: (seed: Uint8Array): Keypair => naclKeypairFromSeed(seed) as Keypair,
-  sr25519: (seed: Uint8Array): Keypair => schnorrkelKeypairFromSeed(seed) as Keypair,
+// TODO - should change depending on curve
+const POLKADOT_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.polkadot'
+
+/** returns a keypair for a specific curve */
+export function generateKeypairFromSeed(seed: Uint8Array, curve: PolkadotCurve): Keypair {
+  if (curve === PolkadotCurve.Secp256k1) return secp256k1KeypairFromSeed(seed) as Keypair
+  if (curve === PolkadotCurve.Ed25519) return naclKeypairFromSeed(seed) as Keypair
+  if (curve === PolkadotCurve.Sr25519) return schnorrkelKeypairFromSeed(seed) as Keypair
+  throwNewError(`Curve type not supported: ${curve}`)
+  return null
 }
 
 export function getPolkadotAddressFromPublicKey(publicKey: PolkadotPublicKey): PolkadotAddress {
@@ -46,22 +52,11 @@ export function generateNewAccountPhrase(): string {
   return mnemonic
 }
 
-export function getKeypairFromPhrase(mnemonic: string, type: PolkadotCurve): PolkadotKeypair {
+export function getKeypairFromPhrase(mnemonic: string, curve: PolkadotCurve): Keypair {
   const seed = mnemonicToMiniSecret(mnemonic)
-  const keyPair = keypairFromSeed[type](seed)
+  const keyPair = generateKeypairFromSeed(seed, curve)
   return keyPair
 }
-
-// export function verifySignatureWithAddress(
-//   signedMessage: string,
-//   signature: string,
-//   address: PolkadotPublicKey,
-// ): boolean {
-//   const publicKey = decodeAddress(address)
-//   const hexPublicKey = u8aToHex(publicKey)
-
-//   return signatureVerify(signedMessage, signature, hexPublicKey).isValid
-// }
 
 // export function determineCurveFromAddress() {}
 
@@ -69,22 +64,10 @@ export function getKeypairFromPhrase(mnemonic: string, type: PolkadotCurve): Pol
 //   // itererate verify - trying each curve
 // }
 
-const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
-
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
 // eslint-disable-next-line prefer-destructuring
 export const defaultMode = AesCrypto.defaultMode
-
-/** Verifies that the value is a valid, stringified JSON Encrypted object */
-export function isSymEncryptedDataString(value: string): value is AesCrypto.AesEncryptedDataString {
-  return AesCrypto.isAesEncryptedDataString(value)
-}
-
-/** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */
-export function toSymEncryptedDataString(value: any): AesCrypto.AesEncryptedDataString {
-  return AesCrypto.toAesEncryptedDataString(value)
-}
 
 /** get uncompressed public key from EthereumPublicKey */
 export function uncompressPublicKey(publicKey: PolkadotPublicKey): string {
@@ -132,7 +115,7 @@ export async function encryptWithPublicKey(
   const useOptions = {
     ...options,
     curveType: Asymmetric.EciesCurveType.Secp256k1,
-    scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME,
+    scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME,
   }
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
@@ -201,10 +184,10 @@ export async function decryptWithPrivateKeys(
 //   return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s).toString())
 // }
 
-// /** Returns public key from ethereum address */
-// export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
-//   return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
-// }
+/** Returns public key from polkadot address */
+export function getPolkadotAddressFromPublicKey(publicKey: PolkadotPublicKey): PolkadotAddress {
+  notImplemented()
+}
 
 /** Adds privateKeyEncrypted if missing by encrypting privateKey (using password) */
 function encryptAccountPrivateKeysIfNeeded(
@@ -218,6 +201,7 @@ function encryptAccountPrivateKeysIfNeeded(
     ? keys.privateKeyEncrypted
     : encryptWithPassword(keys?.privateKey, password, options)
   const encryptedKeys: PolkadotKeypair = {
+    type: keys?.type,
     privateKey: keys?.privateKey,
     publicKey: keys?.publicKey,
     privateKeyEncrypted,
@@ -226,13 +210,21 @@ function encryptAccountPrivateKeysIfNeeded(
 }
 
 /** Generates and returns a new public/private key pair */
-export async function generateKeyPair(): Promise<EthereumKeyPair> {
-  notImplemented()
-  const wallet = Wallet.generate()
-  const privateKey: PolkadotPrivateKey = wallet.getPrivateKeyString()
-  const publicKey: PolkadotPublicKey = wallet.getPublicKeyString()
-  const keys: PolkadotKeypair = { privateKey, publicKey }
-  return keys
+export async function generateKeyPair(
+  keyPairType: PolkadotKeypairType,
+  phrase?: string,
+  derivationPath?: number,
+): Promise<PolkadotKeypair> {
+  const { newKeysOptions } = this._options
+  // const { curve: type } = newKeysOptions || {}
+  // const overrideType = type || 'ed25519'
+  // const overridePhrase = generateNewAccountPhrase()
+  // this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
+  // this._options.publicKey = this._generatedKeypair.publicKey
+  // this._options.newKeysOptions = {
+  //   phrase: overridePhrase,
+  //   curve: overrideType,
+  // }
 }
 
 /** Generates new public and private key pair
@@ -257,21 +249,4 @@ export function verifySignedWithPublicKey(
 ): boolean {
   notImplemented()
   return null
-}
-
-/** determine crypto curve from key type */
-export function getCurveFromKeyType(keyType: PolkadotKeyPairType): PolkadotCurve {
-  switch (keyType) {
-    case PolkadotKeyPairType.Ecdsa:
-      return PolkadotCurve.Secp256k1
-    case PolkadotKeyPairType.Ethereum:
-      return PolkadotCurve.Secp256k1
-    case PolkadotKeyPairType.Ed25519:
-      return PolkadotCurve.Ed25519
-    case PolkadotKeyPairType.Sr25519:
-      return PolkadotCurve.Sr25519
-    default:
-      notSupported(`Keytype ${keyType}`)
-      return null
-  }
 }
