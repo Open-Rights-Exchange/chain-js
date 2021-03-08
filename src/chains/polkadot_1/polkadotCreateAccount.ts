@@ -1,11 +1,12 @@
 import { PolkadotCreateAccountOptions } from './models/accountModels'
 import { PolkadotChainState } from './polkadotChainState'
-import { generateNewAccountPhrase, getKeypairFromPhrase, getPolkadotAddressFromPublicKey } from './polkadotCrypto'
+import { generateKeyPair, generateNewAccountPhrase, getKeypairFromPhrase, getPolkadotAddressFromPublicKey } from './polkadotCrypto'
 import { isValidPolkadotPublicKey, toPolkadotEntityName } from './helpers'
 import { notSupported } from '../../helpers'
 import { CreateAccount } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { PolkadotAddress, PolkadotPublicKey, PolkadotCurve, PolkadotKeypair } from './models'
+import { DEFAULT_POLKADOT_KEY_PAIR_TYPE } from './polkadotConstants'
 
 /** Helper class to compose a transaction for creating a new chain account
  *  Handles native accounts
@@ -119,20 +120,20 @@ export class PolkadotCreateAccount implements CreateAccount {
       await this.generateAccountKeys()
     }
     this._accountName = getPolkadotAddressFromPublicKey(this._generatedKeypair.publicKey)
-    this._accountType = this._options.newKeysOptions.curve
+    this._accountType = this._options.newKeysOptions.keyPaitType
   }
 
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options
-    const { curve: type } = newKeysOptions || {}
-    const overrideType = type || 'ed25519'
-    const overridePhrase = generateNewAccountPhrase()
+    const { keyPairType, phrase: overridePhrase, derivationPath } = newKeysOptions || {}
+    const overrideType = keyPairType || DEFAULT_POLKADOT_KEY_PAIR_TYPE
 
-    this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
+    // this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
+    this._generatedKeypair = await generateKeyPair(keyPairType, phrase, derivationPath)
     this._options.publicKey = this._generatedKeypair.publicKey
     this._options.newKeysOptions = {
       phrase: overridePhrase,
-      curve: overrideType,
+      keyPairType: overrideType,
     }
   }
 
