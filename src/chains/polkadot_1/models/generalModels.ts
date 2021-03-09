@@ -46,10 +46,10 @@ export type PolkadotNativeInfo = {
   chain: string
   name: string
   SS58: number
-  tokenDecimals: Array<number>
-  tokenSymbol: Array<string>
+  tokenDecimals: number[]
+  tokenSymbols: string[]
   transacitonByteFee: number
-  meta: any
+  metadata: any
 }
 
 export type PolkadotSymbol = string & ChainSymbolBrand
