@@ -12,6 +12,7 @@ import { Keypair } from '@polkadot/util-crypto/types'
 // import Keyring from '@polkadot/keyring'
 import { isHex } from '@polkadot/util'
 import secp256k1 from 'secp256k1'
+import { DeriveJunction } from '@polkadot/util-crypto/key/DeriveJunction'
 import {
   PolkadotEncryptionOptions,
   PolkadotKeypair,
@@ -19,9 +20,9 @@ import {
   PolkadotPrivateKey,
   PolkadotPublicKey,
 } from './models'
-import { CryptoCurve } from '../../models'
+import { CryptoCurve, PublicKey } from '../../models'
 import { AesCrypto, Asymmetric, Ed25519Crypto } from '../../crypto'
-import { removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
+import { removeHexPrefix, byteArrayToHexString, hexStringToByteArray, notSupported } from '../../helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 // import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 import { throwNewError } from '../../errors'
@@ -53,8 +54,8 @@ export function getKeypairFromPhrase(mnemonic: string, curve: CryptoCurve): Keyp
   return keyPair
 }
 
-/** get uncompressed public key from SEecp256k1 key */
-export function uncompressPublicKey(publicKey: PolkadotPublicKey): string {
+/** get uncompressed public key from Ethereum key */
+export function uncompressEthereumPublicKey(publicKey: PolkadotPublicKey): string {
   // if already decompressed an not has trailing 04
   const cleanedPublicKey = removeHexPrefix(publicKey)
   const testBuffer = Buffer.from(cleanedPublicKey, 'hex')
@@ -104,6 +105,37 @@ export function decryptWithPassword(
   throw new Error(`Curve not supported ${curve}`)
 }
 
+/** uncompress public key based on keypairType */
+export function uncompressPublicKey(
+  publicKey: PolkadotPublicKey,
+  keypairType: PolkadotKeyPairType,
+): {
+  curveType: Asymmetric.EciesCurveType
+  publicKeyUncompressed: PublicKey
+  scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME
+} {
+  let scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME
+  let curveType: Asymmetric.EciesCurveType
+  let publicKeyUncompressed
+  if (keypairType === PolkadotKeyPairType.Ecdsa) {
+    // TODO: confirm that ecdsa is uncompressed, might be same as Ethereum
+    publicKeyUncompressed = publicKey
+  } else if (keypairType === PolkadotKeyPairType.Ethereum) {
+    publicKeyUncompressed = uncompressEthereumPublicKey(publicKey)
+    curveType = Asymmetric.EciesCurveType.Secp256k1
+    scheme = POLKADOT_ASYMMETRIC_SCHEME_NAME.Secp256k1
+  } else if (keypairType === PolkadotKeyPairType.Ed25519) {
+    publicKeyUncompressed = publicKey
+    curveType = Asymmetric.EciesCurveType.Ed25519
+    scheme = POLKADOT_ASYMMETRIC_SCHEME_NAME.Ed25519
+  } else if (keypairType === PolkadotKeyPairType.Sr25519) {
+    // TODO: add
+  } else {
+    notSupported(`uncompressPublicKey keypairType: ${keypairType}`)
+  }
+  return { curveType, publicKeyUncompressed, scheme }
+}
+
 /** Encrypts a string using a public key into a stringified JSON object
  * The encrypted result can be decrypted with the matching private key */
 export async function encryptWithPublicKey(
@@ -112,32 +144,17 @@ export async function encryptWithPublicKey(
   keypairType: PolkadotKeyPairType,
   options: Asymmetric.EciesOptions,
 ): Promise<Asymmetric.AsymmetricEncryptedDataString> {
-  // TODO: Define Src25519 curve
-  const curve = getCurveFromKeyType(keypairType)
-  let publicKeyUncompressed = ''
-  let useOptions = { ...options }
-  if (curve === CryptoCurve.Secp256k1) {
-    publicKeyUncompressed = uncompressPublicKey(publicKey)
-    useOptions = {
-      ...useOptions,
-      curveType: Asymmetric.EciesCurveType.Secp256k1,
-      scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME.Secp256k1,
-    }
-  } else if (curve === CryptoCurve.Ed25519) {
-    publicKeyUncompressed = publicKey
-    useOptions = {
-      ...useOptions,
-      curveType: Asymmetric.EciesCurveType.Ed25519,
-      scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME.Ed25519,
-    }
-  } else {
-    // if no curve, throw an error - not supported curve
-    throw new Error(`Curve not supported ${curve}`)
+  const { curveType, publicKeyUncompressed, scheme } = uncompressPublicKey(publicKey, keypairType)
+  const useOptions = {
+    ...options,
+    curveType,
+    scheme,
   }
-
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
 }
+
+// TODO: Refactor - Tray - reuse functions across chains
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
@@ -148,7 +165,7 @@ export async function decryptWithPrivateKey(
   keypairType: PolkadotKeyPairType,
   options: Asymmetric.EciesOptions,
 ): Promise<string> {
-  const curve = getCurveFromKeyType(keypairType)
+  const curve = getCurveFromKeyType(keypairType) // TODO: Should be keypairtype not curve
   let useOptions = { ...options }
   let privateKeyConverted = ''
   if (curve === CryptoCurve.Secp256k1) {
@@ -208,18 +225,13 @@ export async function decryptWithPrivateKey(
 //   return toEthereumSignature(ecsign(dataBuffer, keyBuffer))
 // }
 
-/** Generates and returns a new public/private key pair
- * Note: Reference - createFromUri from @polkadot/keyring
- * https://github.com/polkadot-js/common/blob/master/packages/keyring/src/keyring.ts#L197
- */
-export async function generateKeyPair(
+/** Derive a seed from a mnemoic (and optional derivation path) */
+function generateSeedFromMnemonic(
   keypairType: PolkadotKeyPairType,
-  mnemonic?: string,
+  mnemonic: string,
   derivationPath?: string,
-): Promise<PolkadotKeypair> {
-  const curve = getCurveFromKeyType(keypairType)
-  const overridePhrase = mnemonic || generateNewAccountPhrase()
-  const suri = derivationPath !== undefined ? `${overridePhrase}//${derivationPath}` : overridePhrase
+): { seed: Uint8Array; path: DeriveJunction[] } {
+  const suri = derivationPath !== undefined ? `${mnemonic}//${derivationPath}` : mnemonic
   const { password, path, phrase } = keyExtractSuri(suri)
   let seed: Uint8Array
   if (isHex(phrase, 256)) {
@@ -236,15 +248,28 @@ export async function generateKeyPair(
       throw new Error('Specified phrase is not a valild mnemonic and is invalid as a raw seed at > 32 bytes')
     }
   }
+  return { seed, path }
+}
 
-  // TODO: need to support ethereum type
+/** Generates and returns a new public/private key pair
+ *  Supports optional key gen from mnemonic phase
+ * Note: Reference - createFromUri from @polkadot/keyring
+ * https://github.com/polkadot-js/common/blob/master/packages/keyring/src/keyring.ts#L197
+ */
+export async function generateKeyPair(
+  keypairType: PolkadotKeyPairType,
+  mnemonic?: string,
+  derivationPath?: string,
+): Promise<PolkadotKeypair> {
+  const curve = getCurveFromKeyType(keypairType)
+  const overrideMnemonic = mnemonic || generateNewAccountPhrase()
+  const { seed, path } = generateSeedFromMnemonic(keypairType, overrideMnemonic, derivationPath)
   const derivedKeypair = keyFromPath(generateKeypairFromSeed(seed, curve), path, keypairType)
   const keypair: PolkadotKeypair = {
     type: keypairType,
     publicKey: toPolkadotPublicKey(byteArrayToHexString(derivedKeypair.publicKey)),
     privateKey: toPolkadotPrivateKey(byteArrayToHexString(derivedKeypair.secretKey)),
   }
-
   return keypair
 }
 
@@ -278,9 +303,6 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }
-
-// export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
-// }
 
 // export function determineCurveFromAddress() {}
 
