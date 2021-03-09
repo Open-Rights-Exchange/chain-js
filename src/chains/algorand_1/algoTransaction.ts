@@ -250,7 +250,6 @@ export class AlgorandTransaction implements Transaction {
       throwNewError('Algorand transaction.actions only accepts an array of exactly 1 action')
     }
     const action = actions[0]
-    this.assertMultisigFromMatchesOptions(action)
     this._actionHelper = new AlgorandActionHelper(action)
     this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
@@ -279,6 +278,7 @@ export class AlgorandTransaction implements Transaction {
   public async validate(): Promise<void> {
     this.assertHasAction()
     this.assertHasRaw()
+    this.assertMultisigFromMatchesOptions(this.actions[0])
     this._isValidated = true
   }
 
