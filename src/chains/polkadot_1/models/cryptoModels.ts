@@ -1,12 +1,6 @@
 import { Ed25519Crypto } from '../../../crypto'
 import { PublicKeyBrand, PrivateKeyBrand, SignatureBrand, ModelsCryptoAes, ChainEntityNameBrand } from '../../../models'
 
-export enum PolkadotCurve {
-  Ed25519 = 'ed25519',
-  Sr25519 = 'sr25519',
-  Secp256k1 = 'secp256k1',
-}
-
 export enum PolkadotKeyPairType {
   Ed25519 = 'ed25519',
   Sr25519 = 'sr25519',

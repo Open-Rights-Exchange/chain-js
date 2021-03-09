@@ -13,13 +13,13 @@ import { Keypair } from '@polkadot/util-crypto/types'
 import { isHex } from '@polkadot/util'
 import secp256k1 from 'secp256k1'
 import {
-  PolkadotCurve,
   PolkadotEncryptionOptions,
   PolkadotKeypair,
   PolkadotKeyPairType,
   PolkadotPrivateKey,
   PolkadotPublicKey,
 } from './models'
+import { CryptoCurve } from '../../models'
 import { AesCrypto, Asymmetric, Ed25519Crypto } from '../../crypto'
 import { removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
@@ -34,10 +34,10 @@ const enum POLKADOT_ASYMMETRIC_SCHEME_NAME {
 }
 
 /** returns a keypair for a specific curve */
-export function generateKeypairFromSeed(seed: Uint8Array, curve: PolkadotCurve): Keypair {
-  if (curve === PolkadotCurve.Secp256k1) return secp256k1KeypairFromSeed(seed) as Keypair
-  if (curve === PolkadotCurve.Ed25519) return naclKeypairFromSeed(seed) as Keypair
-  if (curve === PolkadotCurve.Sr25519) return schnorrkelKeypairFromSeed(seed) as Keypair
+export function generateKeypairFromSeed(seed: Uint8Array, curve: CryptoCurve): Keypair {
+  if (curve === CryptoCurve.Secp256k1) return secp256k1KeypairFromSeed(seed) as Keypair
+  if (curve === CryptoCurve.Ed25519) return naclKeypairFromSeed(seed) as Keypair
+  if (curve === CryptoCurve.Sr25519) return schnorrkelKeypairFromSeed(seed) as Keypair
   throwNewError(`Curve type not supported: ${curve}`)
   return null
 }
@@ -47,7 +47,7 @@ export function generateNewAccountPhrase(): string {
   return mnemonic
 }
 
-export function getKeypairFromPhrase(mnemonic: string, curve: PolkadotCurve): Keypair {
+export function getKeypairFromPhrase(mnemonic: string, curve: CryptoCurve): Keypair {
   const seed = mnemonicToMiniSecret(mnemonic)
   const keyPair = generateKeypairFromSeed(seed, curve)
   return keyPair
@@ -74,12 +74,12 @@ export function encryptWithPassword(
 ): AesCrypto.AesEncryptedDataString | Ed25519Crypto.Ed25519EncryptedDataString {
   // TODO: Define Src25519 curve
   const curve = getCurveFromKeyType(keypairType)
-  if (curve === PolkadotCurve.Ed25519) {
+  if (curve === CryptoCurve.Ed25519) {
     const passwordKey = Ed25519Crypto.calculatePasswordByteArray(password, options)
     const encrypted = Ed25519Crypto.encrypt(unencrypted, passwordKey)
     return toSymEncryptedDataString(encrypted, keypairType)
   }
-  if (curve === PolkadotCurve.Secp256k1) return AesCrypto.encryptWithPassword(unencrypted, password, options)
+  if (curve === CryptoCurve.Secp256k1) return AesCrypto.encryptWithPassword(unencrypted, password, options)
   // if no curve, throw an error - curve not supported
   throw new Error(`Curve not supported ${curve}`)
 }
@@ -94,12 +94,12 @@ export function decryptWithPassword(
 ): string {
   // TODO: Define Src25519 curve
   const curve = getCurveFromKeyType(keypairType)
-  if (curve === PolkadotCurve.Ed25519) {
+  if (curve === CryptoCurve.Ed25519) {
     const passwordKey = Ed25519Crypto.calculatePasswordByteArray(password, options)
     const decrypted = Ed25519Crypto.decrypt(encrypted, passwordKey)
     return decrypted
   }
-  if (curve === PolkadotCurve.Secp256k1) return AesCrypto.decryptWithPassword(encrypted, password, options)
+  if (curve === CryptoCurve.Secp256k1) return AesCrypto.decryptWithPassword(encrypted, password, options)
   // if no curve, throw an error - curve not supported
   throw new Error(`Curve not supported ${curve}`)
 }
@@ -116,14 +116,14 @@ export async function encryptWithPublicKey(
   const curve = getCurveFromKeyType(keypairType)
   let publicKeyUncompressed = ''
   let useOptions = { ...options }
-  if (curve === PolkadotCurve.Secp256k1) {
+  if (curve === CryptoCurve.Secp256k1) {
     publicKeyUncompressed = uncompressPublicKey(publicKey)
     useOptions = {
       ...useOptions,
       curveType: Asymmetric.EciesCurveType.Secp256k1,
       scheme: POLKADOT_ASYMMETRIC_SCHEME_NAME.Secp256k1,
     }
-  } else if (curve === PolkadotCurve.Ed25519) {
+  } else if (curve === CryptoCurve.Ed25519) {
     publicKeyUncompressed = publicKey
     useOptions = {
       ...useOptions,
@@ -151,10 +151,10 @@ export async function decryptWithPrivateKey(
   const curve = getCurveFromKeyType(keypairType)
   let useOptions = { ...options }
   let privateKeyConverted = ''
-  if (curve === PolkadotCurve.Secp256k1) {
+  if (curve === CryptoCurve.Secp256k1) {
     useOptions = { ...useOptions, curveType: Asymmetric.EciesCurveType.Secp256k1 }
     privateKeyConverted = removeHexPrefix(privateKey)
-  } else if (curve === PolkadotCurve.Ed25519) {
+  } else if (curve === CryptoCurve.Ed25519) {
     useOptions = { ...useOptions, curveType: Asymmetric.EciesCurveType.Ed25519 }
     privateKeyConverted = privateKey.slice(0, privateKey.length / 2)
   } else {
@@ -218,7 +218,7 @@ export async function generateKeyPair(
   derivationPath?: string,
 ): Promise<PolkadotKeypair> {
   const curve = getCurveFromKeyType(keypairType)
-  const overridePhrase = mnemonic !== undefined ? mnemonic : generateNewAccountPhrase()
+  const overridePhrase = mnemonic || generateNewAccountPhrase()
   const suri = derivationPath !== undefined ? `${overridePhrase}//${derivationPath}` : overridePhrase
   const { password, path, phrase } = keyExtractSuri(suri)
   let seed: Uint8Array

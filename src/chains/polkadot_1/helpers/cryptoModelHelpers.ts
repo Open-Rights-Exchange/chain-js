@@ -8,23 +8,29 @@ import {
   byteArrayToHexString,
   notSupported,
 } from '../../../helpers'
-import { PolkadotPublicKey, PolkadotPrivateKey, PolkadotSignature, PolkadotAddress, PolkadotCurve, PolkadotKeyPairType } from '../models'
+import {
+  PolkadotPublicKey,
+  PolkadotPrivateKey,
+  PolkadotSignature,
+  PolkadotAddress,
+  PolkadotKeyPairType,
+} from '../models'
+import { CryptoCurve } from '../../../models'
 import { decodeAddress, encodeAddress } from '@polkadot/keyring'
 import { signatureVerify } from '@polkadot/util-crypto'
 import { AesCrypto, Ed25519Crypto } from '../../../crypto'
-import { throwNewError } from 'src/errors'
 
 /** determine crypto curve from key type */
-export function getCurveFromKeyType(keyPairType: PolkadotKeyPairType): PolkadotCurve {
+export function getCurveFromKeyType(keyPairType: PolkadotKeyPairType): CryptoCurve {
   switch (keyPairType) {
     case PolkadotKeyPairType.Ecdsa:
-      return PolkadotCurve.Secp256k1
+      return CryptoCurve.Secp256k1
     case PolkadotKeyPairType.Ethereum:
-      return PolkadotCurve.Secp256k1
+      return CryptoCurve.Secp256k1
     case PolkadotKeyPairType.Ed25519:
-      return PolkadotCurve.Ed25519
+      return CryptoCurve.Ed25519
     case PolkadotKeyPairType.Sr25519:
-      return PolkadotCurve.Sr25519
+      return CryptoCurve.Sr25519
     default:
       notSupported(`Keytype ${keyPairType}`)
       return null
@@ -104,8 +110,8 @@ export function isSymEncryptedDataString(
   keyPairType?: PolkadotKeyPairType,
 ): value is AesCrypto.AesEncryptedDataString | Ed25519Crypto.Ed25519EncryptedDataString {
   const curve = getCurveFromKeyType(keyPairType)
-  if (curve === PolkadotCurve.Secp256k1) return AesCrypto.isAesEncryptedDataString(value)
-  if (curve === PolkadotCurve.Ed25519) return Ed25519Crypto.isEd25519EncryptedDataString(value)
+  if (curve === CryptoCurve.Secp256k1) return AesCrypto.isAesEncryptedDataString(value)
+  if (curve === CryptoCurve.Ed25519) return Ed25519Crypto.isEd25519EncryptedDataString(value)
   // if no curve param, check all possible options
   return AesCrypto.isAesEncryptedDataString(value) || Ed25519Crypto.isEd25519EncryptedDataString(value)
 }
@@ -116,8 +122,8 @@ export function toSymEncryptedDataString(
   keyPairType?: PolkadotKeyPairType,
 ): AesCrypto.AesEncryptedDataString | Ed25519Crypto.Ed25519EncryptedDataString {
   const curve = getCurveFromKeyType(keyPairType)
-  if (curve === PolkadotCurve.Secp256k1) return AesCrypto.toAesEncryptedDataString(value)
-  if (curve === PolkadotCurve.Ed25519) return Ed25519Crypto.toEd25519EncryptedDataString(value)
+  if (curve === CryptoCurve.Secp256k1) return AesCrypto.toAesEncryptedDataString(value)
+  if (curve === CryptoCurve.Ed25519) return Ed25519Crypto.toEd25519EncryptedDataString(value)
   throw new Error(`Curve not supported ${curve}`)
 }
 

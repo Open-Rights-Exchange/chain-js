@@ -1,11 +1,17 @@
 import { PolkadotCreateAccountOptions } from './models/accountModels'
 import { PolkadotChainState } from './polkadotChainState'
-import { generateKeyPair, generateNewAccountPhrase, getKeypairFromPhrase, getPolkadotAddressFromPublicKey } from './polkadotCrypto'
+import {
+  generateKeyPair,
+  generateNewAccountPhrase,
+  getKeypairFromPhrase,
+  getPolkadotAddressFromPublicKey,
+} from './polkadotCrypto'
 import { isValidPolkadotPublicKey, toPolkadotEntityName } from './helpers'
 import { notSupported } from '../../helpers'
 import { CreateAccount } from '../../interfaces'
 import { throwNewError } from '../../errors'
-import { PolkadotAddress, PolkadotPublicKey, PolkadotCurve, PolkadotKeypair } from './models'
+import { PolkadotAddress, PolkadotPublicKey, PolkadotKeypair } from './models'
+import { CryptoCurve } from '../../models'
 import { DEFAULT_POLKADOT_KEY_PAIR_TYPE } from './polkadotConstants'
 
 /** Helper class to compose a transaction for creating a new chain account
@@ -15,7 +21,7 @@ import { DEFAULT_POLKADOT_KEY_PAIR_TYPE } from './polkadotConstants'
 export class PolkadotCreateAccount implements CreateAccount {
   private _accountName: PolkadotAddress
 
-  private _accountType: PolkadotCurve
+  private _accountType: CryptoCurve
 
   private _chainState: PolkadotChainState
 
@@ -34,7 +40,7 @@ export class PolkadotCreateAccount implements CreateAccount {
   }
 
   /** Account type to be created */
-  public get accountType(): PolkadotCurve {
+  public get accountType(): CryptoCurve {
     return this._accountType
   }
 
@@ -120,7 +126,7 @@ export class PolkadotCreateAccount implements CreateAccount {
       await this.generateAccountKeys()
     }
     this._accountName = getPolkadotAddressFromPublicKey(this._generatedKeypair.publicKey)
-    this._accountType = this._options.newKeysOptions.keyPaitType
+    this._accountType = this._options.newKeysOptions.keyPairType
   }
 
   private async generateAccountKeys(): Promise<void> {
