@@ -1,6 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 // import { isU8a, u8aToString } from '@polkadot/util'
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types'
+import { ChainFeature } from '../../models'
 import {
   PolkadotBlock,
   PolkadotBlockNumber,
@@ -77,6 +78,38 @@ export class PolkadotChainState {
     } catch (error) {
       throwAndLogError('Problem connection to api', 'apiConnectFailed', error)
     }
+  }
+
+  /** map our chain features names to polkadot metadata module name */
+  mapFeatureToMetadataModuleName(feature: ChainFeature) {
+    switch (feature) {
+      case ChainFeature.Account:
+        return 'Account'
+      case ChainFeature.AccountCreationTransaction:
+        return 'Account'
+      case ChainFeature.Multisig:
+        return 'Multisig'
+      case ChainFeature.TransactionFees:
+        return 'TransactionPayment'
+      default:
+        return null
+    }
+  }
+
+  /** get the module metadata for a named module */
+  getMetadataModule(moduleName: string) {
+    // TODO: update to use types for PolkadotMetadata
+    return this.metadata?.V12?.modules.find((m: any) => m.name.toLowercase() === moduleName)
+  }
+
+  /** Whether the current parachain has a specific feautre/module installed */
+  public hasFeature(feature: ChainFeature): boolean {
+    const moduleName = this.mapFeatureToMetadataModuleName(feature)
+    return !!this.getMetadataModule(moduleName)
+  }
+
+  get metadata() {
+    return this.chainInfo?.nativeInfo?.metadata
   }
 
   public async getChainInfo(): Promise<PolkadotChainInfo> {
