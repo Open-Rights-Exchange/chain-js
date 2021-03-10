@@ -218,13 +218,11 @@ export class EosAccount implements Account {
 
   /** A new password must be provided if any permissions are missing public keys */
   private assertValidOptionNewKeys = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     permissionsToAdd: Partial<EosPermissionSimplified>[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     newKeysOptions?: EosNewKeysOptions,
   ) => {
-    const isAnyPublicKeyMissing = permissionsToAdd.some(p => isNullOrEmpty(p.publicKey))
-    const { password } = newKeysOptions || {}
-    if (isAnyPublicKeyMissing && isNullOrEmpty(password)) {
-      throwNewError('Invalid Option - You must provide either public keys or a password to generate new keys')
-    }
+    // nothing to check
   }
 }

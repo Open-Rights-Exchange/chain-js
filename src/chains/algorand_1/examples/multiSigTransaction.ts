@@ -38,9 +38,9 @@ export const multiSigOptions: AlgorandMultiSigOptions = {
   version: 1,
   threshold: 2,
   addrs: [
-    env.ALGOTESTNET_mulitsig_child_account1,
-    env.ALGOTESTNET_mulitsig_child_account2,
-    env.ALGOTESTNET_mulitsig_child_account3,
+    env.ALGOTESTNET_mulitsig_child_account1,  // 1
+    env.ALGOTESTNET_mulitsig_child_account2,  // 2
+    env.ALGOTESTNET_mulitsig_child_account3,  // 3
   ],
 }
 
@@ -50,7 +50,7 @@ export const CreateMultiSigAccountOptions = {
 }
 
 const composeValueTransferParams: ValueTransferParams = {
-  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  // fromAccountName: ... // from will be calculated from hash of multiSigOptions
   toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
   amount: '1000000',
   symbol: AlgorandUnit.Microalgo,

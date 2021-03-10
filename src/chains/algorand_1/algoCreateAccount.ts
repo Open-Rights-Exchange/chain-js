@@ -1,6 +1,6 @@
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
-import { isNullOrEmpty, notSupported } from '../../helpers'
+import { notSupported } from '../../helpers'
 import {
   AlgorandCreateAccountOptions,
   AlgorandEntityName,
@@ -163,10 +163,6 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   private assertValidOptionNewKeys() {
-    const { newKeysOptions } = this._options
-    const { password } = newKeysOptions || {}
-    if (isNullOrEmpty(password)) {
-      throwNewError('Invalid Option - You must provide a password to generate new keys')
-    }
+    // nothing to check
   }
 }

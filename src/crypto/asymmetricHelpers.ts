@@ -1,5 +1,5 @@
 import { throwNewError } from '../errors'
-import { asyncForEach, isNullOrEmpty } from '../helpers'
+import { asyncForEach, isNullOrEmpty, jsonParseAndRevive } from '../helpers'
 import { PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
@@ -17,7 +17,7 @@ export async function encryptWithPublicKeys(
   let valueToBeEncrypted = unencrypted
   // loop through the public keys and wrap encrypted text once for each
   await asyncForEach(publicKeys, async (pk: PublicKey, index: number) => {
-    const lastEncrypted: Asymmetric.AsymmetricEncryptedData = JSON.parse(
+    const lastEncrypted: Asymmetric.AsymmetricEncryptedData = jsonParseAndRevive(
       await encryptCallback(valueToBeEncrypted, pk, options),
     )
     // for each pass, encrypt the result of the last encryption

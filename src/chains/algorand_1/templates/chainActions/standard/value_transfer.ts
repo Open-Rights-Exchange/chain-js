@@ -34,10 +34,13 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
     const decomposedArgs = decomposed.args
     return {
       args: {
-        ...decomposedArgs,
+        amount: decomposedArgs.amount.toString(), // todo to string with decimals
+        permission: null,
         fromAccountName: decomposedArgs.from,
         toAccountName: decomposedArgs.to,
         memo: decomposedArgs.note,
+        contractName: null,
+        symbol: AlgorandUnit.Algo, // the value is in microalgo, but the symbol name is 'algo'
       },
       chainActionType: ChainActionType.ValueTransfer,
     }

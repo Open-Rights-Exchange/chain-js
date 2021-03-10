@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import {
   bigIntToUint8Array,
   bufferToString,
@@ -11,6 +12,7 @@ import {
   isBase64Encoded,
   isHexString,
   isNullOrEmpty,
+  jsonParseAndRevive,
   removeHexPrefix,
   toBuffer,
 } from '../../helpers'
@@ -21,9 +23,15 @@ import {
   AlgorandTxActionSdkEncoded,
   AlgorandTxActionSdkEncodedFields,
 } from './models/transactionModels'
-import { AlgorandTxHeaderParams, AlgorandChainTransactionParamsStruct } from './models'
+import {
+  AlgorandAddress,
+  AlgorandChainTransactionParamsStruct,
+  AlgorandRawTransactionMultisigStruct,
+  AlgorandRawTransactionStruct,
+  AlgorandTxHeaderParams,
+} from './models'
 import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
-import { toAlgorandAddressFromRaw, toRawAddressFromAlgoAddr } from './helpers'
+import { toAlgorandAddressFromRawStruct, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
  * Algorand supports these actions:
@@ -42,15 +50,31 @@ export class AlgorandActionHelper {
   /** Creates a new Action from a raw action (or Algrorand action replacing hexstrings for Uint8Arrays)
    *  .action property returns action with Uint8Arrays converted to hexstrings
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
-  constructor(params: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded) {
+  constructor(
+    params:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
+  ) {
     this.validateAndApplyParams(params)
   }
 
   /** applies rules for input params, converts to raw values if needed */
-  private validateAndApplyParams(action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded) {
-    if (isNullOrEmpty(action)) {
+  private validateAndApplyParams(
+    actionParam:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
+  ) {
+    if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
     }
+    // Stringify & revive to reinstate Uint8Array objects
+    const action = jsonParseAndRevive(JSON.stringify(actionParam))
     // TODO Algo - consider if any validation here is needed - should probably check .from when getting action
     // We cant check for .from here since we want to use action helper to add header values to a partial action
     // if (isNullOrEmpty(action.from)) {
@@ -60,6 +84,8 @@ export class AlgorandActionHelper {
       this._rawAction = this.actionEncodedForSdkToRaw(action as AlgorandTxActionSdkEncoded)
     } else if (this.isAlgorandTxActionRaw(action)) {
       this._rawAction = action as AlgorandTxActionRaw
+    } else if (this.isAlgorandTxActionRawCompressed(action)) {
+      this._rawAction = this.actionRawCompressedToRaw(action) as AlgorandTxActionRaw
     } else {
       this._rawAction = this.actionToRaw(action as AlgorandTxAction)
     }
@@ -77,18 +103,18 @@ export class AlgorandActionHelper {
     const returnVal = {
       ...this.raw,
       genesisHash: this.raw.genesisHash ? bufferToString(this.raw.genesisHash, 'base64') : undefined,
-      to: toAlgorandAddressFromRaw(this.raw.to),
-      from: toAlgorandAddressFromRaw(this.raw.from),
-      closeRemainderTo: toAlgorandAddressFromRaw(this.raw.closeRemainderTo),
-      assetManager: toAlgorandAddressFromRaw(this.raw.assetManager),
-      assetReserve: toAlgorandAddressFromRaw(this.raw.assetReserve),
-      assetFreeze: toAlgorandAddressFromRaw(this.raw.assetFreeze),
-      assetClawback: toAlgorandAddressFromRaw(this.raw.assetClawback),
-      assetRevocationTarget: toAlgorandAddressFromRaw(this.raw.assetRevocationTarget),
-      freezeAccount: toAlgorandAddressFromRaw(this.raw.freezeAccount),
-      reKeyTo: toAlgorandAddressFromRaw(this.raw.reKeyTo),
+      to: toAlgorandAddressFromRawStruct(this.raw.to),
+      from: toAlgorandAddressFromRawStruct(this.raw.from),
+      closeRemainderTo: toAlgorandAddressFromRawStruct(this.raw.closeRemainderTo),
+      assetManager: toAlgorandAddressFromRawStruct(this.raw.assetManager),
+      assetReserve: toAlgorandAddressFromRawStruct(this.raw.assetReserve),
+      assetFreeze: toAlgorandAddressFromRawStruct(this.raw.assetFreeze),
+      assetClawback: toAlgorandAddressFromRawStruct(this.raw.assetClawback),
+      assetRevocationTarget: toAlgorandAddressFromRawStruct(this.raw.assetRevocationTarget),
+      freezeAccount: toAlgorandAddressFromRawStruct(this.raw.freezeAccount),
+      reKeyTo: toAlgorandAddressFromRawStruct(this.raw.reKeyTo),
       appAccounts: !isNullOrEmpty(this.raw.appAccounts)
-        ? this.raw.appAccounts.map(toAlgorandAddressFromRaw)
+        ? this.raw.appAccounts.map(toAlgorandAddressFromRawStruct)
         : undefined,
       appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
         ? byteArrayToHexString(this.raw.appApprovalProgram)
@@ -153,6 +179,8 @@ export class AlgorandActionHelper {
     }: AlgorandTxActionSdkEncodedFields & { otherParams?: any } = action
     const raw: AlgorandTxActionRaw = this.actionToRaw(otherParams as AlgorandTxAction)
     // these fields are already encoded as needed for raw - so we dont want them encoded again
+    raw.appApprovalProgram = appApprovalProgram
+    raw.appArgs = appArgs
     raw.appClearProgram = appClearProgram
     raw.group = group
     raw.lease = lease
@@ -161,6 +189,12 @@ export class AlgorandActionHelper {
     raw.tag = tag
     raw.voteKey = voteKey
     return raw
+  }
+
+  /** Convert raw, compressed format to our decompressed raw format */
+  private actionRawCompressedToRaw(action: any) {
+    const compressedTxn = action?.txn
+    return AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
   }
 
   /** Always returns 'none' for Algorand chain */
@@ -237,27 +271,30 @@ export class AlgorandActionHelper {
   }
 
   /** Remove fields from object that are undefined, null, or empty */
-  deleteEmptyFields(paramsIn: { [key: string]: any }) {
+  private deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach((key) => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
+  private isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
     return isAString(action.from)
   }
 
   /** whether action is the native chain 'raw' format */
-  isAlgorandTxActionRaw(action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded): boolean {
+  private isAlgorandTxActionRaw(action: any): boolean {
     const rawAction = action as AlgorandTxActionRaw
     const hasPublicKey = rawAction.from?.publicKey
     return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
   }
 
+  /** whether action is the native chain 'raw' and compressed format (get_obj_for_encoding) as defined here - https://github.com/algorand/js-algorand-sdk/blob/a5309ee57dddbf6f9db5f95dc8a82eb1ae03c326/src/transaction.js#L154 */
+  private isAlgorandTxActionRawCompressed(action: any): boolean {
+    return !!action?.txn?.snd
+  }
+
   /** whether action is encoded for the algo sdk (from is string and note is UInt8Array) */
-  isAlgorandTxActionEncodedForSdk(
-    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
-  ): boolean {
+  private isAlgorandTxActionEncodedForSdk(action: any): boolean {
     return (
       !this.isAlgorandTxActionRaw(action) &&
       (isAUint8Array(action.appApprovalProgram) ||
@@ -274,7 +311,7 @@ export class AlgorandActionHelper {
   /** Accepts encoded or unencoded AppArgs array
    *  Converts to encoded AppArgs - array of Uint8Array
    */
-  encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
+  private encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
     if (!appArgs) return []
     const appArgsEncoded = appArgs.map((appArg: string | number | Uint8Array) => {
       if (isAUint8Array(appArg)) return appArg as Uint8Array
@@ -290,14 +327,20 @@ export class AlgorandActionHelper {
   /** Accepts encoded AppArgs - array of Uint8Array
    *  Converts to unencoded AppArgs - array of hex encoded strings (with '0x' prefix)
    */
-  decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
+  private decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
     if (isNullOrEmpty(appArgs)) return undefined
-    const readable: string[] = appArgs.map((arg) => {
+    const readable: string[] = appArgs.map(arg => {
       if (isAUint8Array(arg)) {
         return `0x${Buffer.from(arg).toString('hex')}`
       }
       return undefined
     })
     return readable
+  }
+
+  /** Returns the 'from' or 'snd' address for the transaction */
+  get from(): AlgorandAddress {
+    if (isNullOrEmpty(this.raw.from)) return null
+    return toAlgorandAddressFromRawStruct(this.raw.from)
   }
 }

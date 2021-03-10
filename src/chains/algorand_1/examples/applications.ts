@@ -109,9 +109,14 @@ async function run() {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
 
+  // const { applications } = await algoTest.algoClientIndexer.searchForApplications().do()
+  // console.log(applications)
+  // const appList = applications.map((app:any) => app?.params )
+  // const apps =  appList.filter((app: any) => app?.creator === 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ')
+  // console.log(apps)
+
   const appApprovalSourceCode = await fs.readFileSync('../examples/application/approval_program.teal', 'utf8')
   const appClearSourceCode = await fs.readFileSync('../examples/application/clear_state_program.teal', 'utf8')
-
   // composeAppCreateParams.appApprovalProgram = appApprovalSourceCode
   // composeAppCreateParams.appClearProgram = appClearSourceCode
   // const action = await algoTest.composeAction(AlgorandChainActionType.AppCreate, composeAppCreateParams)
@@ -153,34 +158,3 @@ async function run() {
   }
   process.exit()
 })()
-
-// ... For OptIn Test ...
-// transaction actions:  {
-//   name: 'Transaction',
-//   tag: 'TX',
-//   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-//   fee: 1000,
-//   firstRound: 11047681,
-//   lastRound: 11048681,
-//   note: 'test optIn',
-//   genesisID: 'testnet-v1.0',
-//   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-//   appIndex: 13258116,
-//   appOnComplete: 1,
-//   type: 'appl',
-//   flatFee: true
-// }
-// decomposed actions:  [
-//   {
-//     chainActionType: 'AppOptIn',
-//     args: {
-//       name: 'Transaction',
-//       tag: 'TX',
-//       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
-//       note: 'test optIn',
-//       appIndex: 13258116,
-//       appOnComplete: 1,
-//       type: 'appl'
-//     }
-//   }
-// ]

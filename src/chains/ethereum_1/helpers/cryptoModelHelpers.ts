@@ -1,6 +1,6 @@
 import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
 import { isString } from 'util'
-import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString } from '../../../helpers'
+import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString, jsonParseAndRevive } from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -61,7 +61,7 @@ export function isValidEthereumSignature(
   // signatures are actually verified in transaction object
   if (!value) return false
   if (isString(value)) {
-    signature = JSON.parse(value)
+    signature = jsonParseAndRevive(value)
   } else {
     signature = value
   }
