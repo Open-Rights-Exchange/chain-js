@@ -78,6 +78,7 @@ Just install the chainjs library to get started
 ```
 
 To run ts files (and examples), use ts-node (with the --files option to include local customTypes)
+Important: Node version 13 or greater is required to run polkadot examples - Hint: Use nvm to run run node on your local machine
 ```bash
  $ ts-node --files mycode.ts
 ```

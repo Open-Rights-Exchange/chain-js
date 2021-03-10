@@ -3,7 +3,4 @@ export type ActionChainOptions = {
   hardfork: string
 }
 
-export class PolkadotActionHelper {
-  constructor(actionInput: PolkadotActionHelper, chainOptions: ActionChainOptions) {
-  }
-}
+export class PolkadotActionHelper {}

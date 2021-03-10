@@ -5,7 +5,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, Chain } from '../index'
-import { ChainActionType, ChainEndpoint, ConfirmType, ChainEntityNameBrand, ChainType } from '../models'
+import {
+  ChainActionType,
+  ChainEndpoint,
+  ConfirmType,
+  ChainEntityNameBrand,
+  ChainType,
+  TxExecutionPriority,
+} from '../models'
 import { EthereumChainForkType } from '../chains/ethereum_1/models'
 
 require('dotenv').config()
@@ -33,8 +40,8 @@ const ropstenChainOptions: EthereumChainForkType = {
 
 const westendEndpoints: ChainEndpoint[] = [
   {
-    url: 'wss://westend-rpc.polkadot.io'
-  }
+    url: 'wss://westend-rpc.polkadot.io',
+  },
 ]
 
 // Example set of options to send tokens for each chain type
@@ -83,6 +90,8 @@ const chainSendCurrencyData = {
 async function sendToken(chain: Chain, options: any) {
   const sendTokenTx = chain.new.Transaction()
   sendTokenTx.actions = [await chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
+  const fee = await sendTokenTx.getSuggestedFee(TxExecutionPriority.Fast)
+  await sendTokenTx.setDesiredFee(fee)
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
   await sendTokenTx.sign([options.privateKey])
@@ -93,12 +102,45 @@ async function sendToken(chain: Chain, options: any) {
 /** Send 'cryptocurrency' (value) between accounts on the chain */
 async function sendCurrency(chain: Chain, options: any) {
   const sendCurrencyTx = chain.new.Transaction()
-  sendCurrencyTx.actions = [await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
+  sendCurrencyTx.actions = [
+    await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams),
+  ]
+  if (sendCurrencyTx.supportsFee) {
+    const fee = await sendCurrencyTx.getSuggestedFee(TxExecutionPriority.Fast)
+    await sendCurrencyTx.setDesiredFee(fee)
+  }
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()
   await sendCurrencyTx.sign([options.privateKey])
   const response = await sendCurrencyTx.send(ConfirmType.None)
   return response
+}
+
+/** Send 'cryptocurrency' (value) between accounts on the chain */
+async function createAccount(chain: Chain, options: any) {
+  // const sendCurrencyTx = chain.new.Transaction()
+  // sendCurrencyTx.actions = [await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
+  // const fee = await sendCurrencyTx.getSuggestedFee(TxExecutionPriority.Fast)
+  // await sendCurrencyTx.setDesiredFee(fee)
+  // await sendCurrencyTx.prepareToBeSigned()
+  // await sendCurrencyTx.validate()
+  // await sendCurrencyTx.sign([options.privateKey])
+  // const response = await sendCurrencyTx.send(ConfirmType.None)
+  // return response
+  const createAccountOptions = {
+    newKeysOptions: {
+      password: '2233',
+      salt: env.EOS_KYLIN_PK_SALT_V0,
+    },
+  }
+
+  const accountCreate = chain.new.CreateAccount(createAccountOptions)
+  await accountCreate.generateKeysIfNeeded()
+  console.log('generatedKeys:', accountCreate.generatedKeys)
+  console.log('address:', accountCreate.accountName)
+  const { password, salt } = createAccountOptions.newKeysOptions
+  // const decryptedPrivateKey = chain.decryptWithPassword(createAccount.generatedKeys.privateKey, password, { salt })
+  // console.log('decrypted privateKey: ', decryptedPrivateKey)
 }
 
 /** Run the same functions (e.g. transfer a token) for one or more chains using the same code */

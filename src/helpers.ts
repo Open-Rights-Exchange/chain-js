@@ -273,6 +273,11 @@ export function hasHexPrefix(value: any): boolean {
   return isAString(value) && (value as string).startsWith('0x')
 }
 
+/** Return true if value is a hexidecimal encoded string (is prefixed by 0x) */
+export function isHexString(value: any): boolean {
+  return hasHexPrefix(value)
+}
+
 /** Checks that string starts with 0x - appends if not
  *  Also converts hex chars to lowercase for consistency
  */

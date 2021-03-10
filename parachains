@@ -1,0 +1,50 @@
+
+
+
+ParachainA Manifest
+- DPOS 
+- curve type
+- Account palate Type 1
+- Currency ABC 
+- Fee palate type 1
+
+ParachainB 
+- POW 
+- curve type
+- Account palate Type 2
+- Currency XYZ 
+- No Fees
+
+ParachainC 
+- POW 
+- curve type
+- No Accounts 
+- No Currency
+
+
+Developer Code 
+
+- CreateAccount on chain
+- Transfer Currency on chain 
+- ...
+- compose transaction type X on chain
+- sign transaction
+- send transaction to chain 
+- wait for transaction confirmation 
+
+chainJS != Poladot chain standard  (parachains are diff)
+
+
+para
+
+new ChainFactory(PolkaDotV1, options: {parachainManifest})
+
+
+
+Developer App - Game 
+
+(TX GAME123) -> Parachain X - general purpose contract chain (game contracts go here)
+  (tx 123) -> Parachain A - Marketplace for NFTs 
+  (tx 456) -> Parachain B - Bridge to ETH (send 721)
+  Parachain C - service XYC 
+

@@ -41,8 +41,9 @@ type AccountKeysStruct = {
 }
 
 enum CryptoCurve {
-  Secp256k1 = 'secp256k1',
   Ed25519 = 'ed25519',
+  Secp256k1 = 'secp256k1',
+  Sr25519 = 'sr25519',
 }
 
 // exporting explicity in order to alias Models.. exports

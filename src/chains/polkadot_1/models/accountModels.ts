@@ -1,7 +1,4 @@
-import { 
-  PolkadotPublicKey, 
-  PolkadotNewKeysOptions 
-} from './'
+import { PolkadotPublicKey, PolkadotNewKeysOptions } from '.'
 
 export type PolkadotCreateAccountOptions = {
   publicKey?: PolkadotPublicKey

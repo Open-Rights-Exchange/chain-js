@@ -16,7 +16,7 @@ export type EthereumPublicKey = string & PublicKeyBrand
 /** a signature string - formatted correcly for ethereum */
 export type EthereumSignature = ECDSASignature & SignatureBrand
 
-/** key pair - in the format returned from algosdk */
+/** key pair - in the format returned from ethereum */
 export type EthereumKeyPair = {
   publicKey: EthereumPublicKey
   privateKey: EthereumPrivateKey

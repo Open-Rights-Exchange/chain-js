@@ -1,16 +1,18 @@
 import { PolkadotCreateAccountOptions } from './models/accountModels'
 import { PolkadotChainState } from './polkadotChainState'
-import { generateNewAccountPhrase, getKeypairFromPhrase, getPolkadotAddressFromPublicKey } from './polkadotCrypto'
-import { isValidPolkadotPublicKey, toPolkadotEntityName } from './helpers'
-import { notSupported } from '../../helpers'
+// import {
+//   generateKeyPair,
+//   generateNewAccountPhrase,
+//   getKeypairFromPhrase,
+//   getPolkadotAddressFromPublicKey,
+// } from './polkadotCrypto'
+import { isValidPolkadotPublicKey } from './helpers'
+import { notImplemented, notSupported } from '../../helpers'
 import { CreateAccount } from '../../interfaces'
 import { throwNewError } from '../../errors'
-import { 
-  PolkadotAddress, 
-  PolkadotPublicKey, 
-  PolkadotKeypairType, 
-  PolkadotKeypair, 
-} from './models'
+import { PolkadotAddress, PolkadotKeypair } from './models'
+import { CryptoCurve } from '../../models'
+// import { DEFAULT_POLKADOT_KEY_PAIR_TYPE } from './polkadotConstants'
 
 /** Helper class to compose a transaction for creating a new chain account
  *  Handles native accounts
@@ -19,7 +21,7 @@ import {
 export class PolkadotCreateAccount implements CreateAccount {
   private _accountName: PolkadotAddress
 
-  private _accountType: PolkadotKeypairType
+  private _accountType: CryptoCurve
 
   private _chainState: PolkadotChainState
 
@@ -31,17 +33,17 @@ export class PolkadotCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
   }
-  
+
   /** Account name for the account to be created */
   public get accountName(): any {
     return this._accountName
   }
-  
+
   /** Account type to be created */
-  public get accountType(): PolkadotKeypairType {
+  public get accountType(): CryptoCurve {
     return this._accountType
   }
-  
+
   /** Prefix that represents the address on which chain */
   public getSS58Format(): number {
     return this._chainState.chainInfo.nativeInfo.SS58
@@ -102,8 +104,10 @@ export class PolkadotCreateAccount implements CreateAccount {
    *  Updates generatedKeys for the newly generated name (since name/account is derived from publicKey)
    */
   async generateAccountName(): Promise<any> {
-    const accountName = await this.generateAccountNameString()
-    return toPolkadotEntityName(accountName)
+    notImplemented()
+    return null
+    // const accountName = await this.generateAccountNameString()
+    // return toPolkadotEntityName(accountName)
   }
 
   /** Returns a string of the Polkadot Address for the public key provide in options - OR generates a new mnemonic(phrase)/private/public/address */
@@ -116,30 +120,29 @@ export class PolkadotCreateAccount implements CreateAccount {
    *  autogenerate the public and private key pair and add them to options
    */
   async generateKeysIfNeeded() {
-    let publicKey: PolkadotPublicKey
-    this.assertValidOptionPublicKeys()
-
-    publicKey = this?._options?.publicKey
-    if (!publicKey) {
-      await this.generateAccountKeys()
-    }
-    this._accountName = getPolkadotAddressFromPublicKey(this._generatedKeypair.publicKey)
-    this._accountType = this._options.newKeysOptions.type
+    // let publicKey: PolkadotPublicKey
+    // this.assertValidOptionPublicKeys()
+    // publicKey = this?._options?.publicKey
+    // if (!publicKey) {
+    //   await this.generateAccountKeys()
+    // }
+    // this._accountName = getPolkadotAddressFromPublicKey(this._generatedKeypair.publicKey)
+    // this._accountType = this._options.newKeysOptions.keyPairType
   }
 
-  private async generateAccountKeys(): Promise<void> {
-    const { newKeysOptions } = this._options
-    const { type } = newKeysOptions || {}
-    const overrideType = type || 'ed25519'
-    const overridePhrase = generateNewAccountPhrase()
-    
-    this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
-    this._options.publicKey = this._generatedKeypair.publicKey
-    this._options.newKeysOptions = {
-      phrase: overridePhrase,
-      type: overrideType,
-    }
-  }
+  // private async generateAccountKeys(): Promise<void> {
+  //   const { newKeysOptions } = this._options
+  //   const { keyPairType, phrase: overridePhrase, derivationPath } = newKeysOptions || {}
+  //   const overrideType = keyPairType || DEFAULT_POLKADOT_KEY_PAIR_TYPE
+
+  //   // this._generatedKeypair = getKeypairFromPhrase(overridePhrase, overrideType)
+  //   this._generatedKeypair = await generateKeyPair(keyPairType, phrase, derivationPath)
+  //   this._options.publicKey = this._generatedKeypair.publicKey
+  //   this._options.newKeysOptions = {
+  //     phrase: overridePhrase,
+  //     keyPairType: overrideType,
+  //   }
+  // }
 
   private assertValidOptionPublicKeys() {
     const { publicKey } = this._options

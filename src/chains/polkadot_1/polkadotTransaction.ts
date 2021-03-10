@@ -1,14 +1,19 @@
-import { ConfirmType, TxExecutionPriority } from '../../models'
+/* eslint-disable max-len */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
+import { ChainFeature, ConfirmType, TxExecutionPriority } from '../../models'
 import { notImplemented } from '../../helpers'
 import { Transaction } from '../../interfaces'
-import { PolkadotSignature, } from './models/cryptoModels'
-import { 
-  PolkadotAddress, 
-  PolkadotPublicKey, 
-  PolkadotPrivateKey, 
-  PolkadotChainSettingsCommunicationSettings, 
+import { PolkadotSignature } from './models/cryptoModels'
+import {
+  PolkadotAddress,
+  PolkadotPublicKey,
+  PolkadotPrivateKey,
+  PolkadotChainSettingsCommunicationSettings,
 } from './models'
-import {   
+import {
   PolkadotAddressBuffer,
   PolkadotTransactionOptions,
   PolkadotRawTransaction,
@@ -260,7 +265,7 @@ export class PolkadotTransaction implements Transaction {
 
   /** Ethereum has a fee for transactions */
   public get supportsFee(): boolean {
-    return true
+    return this._chainState.hasFeature(ChainFeature.TransactionFees)
   }
 
   /** Gets estimated cost in units of gas to execute this transaction (at current chain rates) */
@@ -292,6 +297,7 @@ export class PolkadotTransaction implements Transaction {
    *  If gasLimitOverride is provided, gasPrice will be calculated and gasLimit will be set to gasLimitOverride
    * */
   public async setDesiredFee(desiredFee: string, options?: PolkadotSetDesiredFeeOptions) {
+    notImplemented()
   }
 
   /** Hash of transaction - signature must be present to determine transactionId */
@@ -371,6 +377,8 @@ export class PolkadotTransaction implements Transaction {
     waitForConfirm: ConfirmType = ConfirmType.None,
     communicationSettings?: PolkadotChainSettingsCommunicationSettings,
   ): Promise<any> {
+    notImplemented()
+    return null
   }
 
   // helpers

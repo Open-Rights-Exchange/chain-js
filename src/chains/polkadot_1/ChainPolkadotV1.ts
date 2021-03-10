@@ -1,33 +1,23 @@
-import { 
-  ChainActionType, 
-  ChainInfo, 
-  ChainType, 
-  CryptoCurve, 
-  ChainEntityName,
-  ChainDate,
-} from '../../models'
-import {
-  ChainError, 
-} from '../../errors'
+import { ChainActionType, ChainInfo, ChainType, CryptoCurve, ChainEntityName, ChainDate } from '../../models'
+import { ChainError } from '../../errors'
 import { Chain } from '../../interfaces'
-import { 
-  PolkadotChainEndpoint, 
-  PolkadotChainSettings, 
-  PolkadotNewKeysOptions, 
-  PolkadotSymbol, 
-  PolkadotAddress, 
+import {
+  PolkadotAddress,
+  PolkadotChainEndpoint,
+  PolkadotChainInfo,
+  PolkadotChainSettings,
+  PolkadotDecomposeReturn,
+  PolkadotPublicKey,
+  PolkadotSymbol,
 } from './models'
 import { PolkadotChainState } from './polkadotChainState'
 import { notImplemented } from '../../helpers'
 import { PolkadotChainActionType } from './models/chainActionType'
-import { 
-  
-  PolkadotTransactionAction,    
-} from './models/transactionModels'
-import { PolkadotDecomposeReturn } from './models/PolkadotStructures'
+import { PolkadotTransactionAction } from './models/transactionModels'
 import { PolkadotAccount } from './polkadotAccount'
 import { PolkadotTransaction } from './polkadotTransaction'
 
+import * as polkadotCrypto from './polkadotCrypto'
 import * as ethcrypto from '../ethereum_1/ethCrypto'
 import { Asymmetric } from '../../crypto'
 import {
@@ -40,10 +30,10 @@ import {
   toEthereumPrivateKey,
   toEthereumSignature,
 } from '../ethereum_1/helpers'
-import { PolkadotPublicKey } from './models'
-import { SignedBlock } from '@polkadot/types/interfaces/runtime'
 import { PolkadotCreateAccount } from './polkadotCreateAccount'
 import { PolkadotCreateAccountOptions } from './models/accountModels'
+import { composeAction } from './polkadotCompose'
+import { decomposeAction } from './polkadotDecompose'
 
 class ChainPolkadotV1 implements Chain {
   private _endpoints: PolkadotChainEndpoint[]
@@ -72,11 +62,11 @@ class ChainPolkadotV1 implements Chain {
     return ChainType.PolkadotV1
   }
 
-  public  get chainId(): string {
+  public get chainId(): string {
     return this._chainState.chain
   }
 
-  public get chainInfo(): ChainInfo {
+  public get chainInfo(): PolkadotChainInfo {
     return this._chainState.chainInfo
   }
 
@@ -84,15 +74,11 @@ class ChainPolkadotV1 implements Chain {
     actionType: ChainActionType | PolkadotChainActionType,
     args: any,
   ): Promise<PolkadotTransactionAction> => {
-    notImplemented()
-    return null
+    return composeAction(this._chainState, actionType, args)
   }
 
-  public decomposeAction = async (
-    action: PolkadotTransactionAction
-  ): Promise<PolkadotDecomposeReturn[]> => {
-    notImplemented()
-    return null
+  public decomposeAction = async (action: PolkadotTransactionAction): Promise<PolkadotDecomposeReturn[]> => {
+    return decomposeAction(action)
   }
 
   public get description(): string {
@@ -108,19 +94,29 @@ class ChainPolkadotV1 implements Chain {
     symbol: PolkadotSymbol,
     tokenAddress?: PolkadotAddress,
   ): Promise<{ balance: string }> {
-    return this._chainState.fetchBalance(account)
+    return this._chainState.fetchBalance(account, symbol, tokenAddress)
   }
 
   public fetchContractData = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     contract: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     table: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     owner: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     indexNumber: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     lowerRow: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     upperRow: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     limit: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reverseOrder: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     showPayer: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     keyType: string,
   ): Promise<any> => {
     return null
@@ -139,7 +135,7 @@ class ChainPolkadotV1 implements Chain {
     this.assertIsConnected()
     return new PolkadotCreateAccount(this._chainState, options)
   }
-  
+
   private newTransaction = (options?: any): PolkadotTransaction => {
     this.assertIsConnected()
     return new PolkadotTransaction(this._chainState, options)
@@ -151,11 +147,13 @@ class ChainPolkadotV1 implements Chain {
     Transaction: this.newTransaction,
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public isValidEntityName = (value: string): boolean => {
     notImplemented()
     return false
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public isValidDate = (value: string): boolean => {
     notImplemented()
     return false
@@ -165,10 +163,11 @@ class ChainPolkadotV1 implements Chain {
     return toEthereumEntityName(value) as ChainEntityName
   }
 
-  public toDate = (value: string | Date ): ChainDate => {
+  public toDate = (value: string | Date): ChainDate => {
     return toEthereumDate(value) as ChainDate
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public setPublicKey = (publicKey: PolkadotPublicKey) => {
     notImplemented()
     return ''
@@ -187,27 +186,44 @@ class ChainPolkadotV1 implements Chain {
 
   cryptoCurve: CryptoCurve.Ed25519
 
-  decryptWithPassword = ethcrypto.decryptWithPassword
-  encryptWithPassword = ethcrypto.encryptWithPassword
-  decryptWithPrivateKey = ethcrypto.decryptWithPrivateKey
-  encryptWithPublicKey = ethcrypto.encryptWithPublicKey
+  decryptWithPassword = polkadotCrypto.decryptWithPassword
+
+  encryptWithPassword = polkadotCrypto.encryptWithPassword
+
+  decryptWithPrivateKey = polkadotCrypto.decryptWithPrivateKey
+
+  encryptWithPublicKey = polkadotCrypto.encryptWithPublicKey
+
+  generateKeyPair = polkadotCrypto.generateKeyPair
+
   decryptWithPrivateKeys = ethcrypto.decryptWithPrivateKeys
+
   encryptWithPublicKeys = ethcrypto.encryptWithPublicKeys
+
   getPublicKeyFromSignature = ethcrypto.getEthereumPublicKeyFromSignature
-  generateKeyPair = ethcrypto.generateKeyPair
+
   isSymEncryptedDataString = ethcrypto.isSymEncryptedDataString
+
   isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
+
   toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
+
   toSymEncryptedDataString = ethcrypto.toSymEncryptedDataString
+
   toPublicKey = toEthereumPublicKey
+
   toPrivateKey = toEthereumPrivateKey
+
   toSignature = toEthereumSignature
-  
+
   sign = ethcrypto.sign
+
   verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
 
   isValidPrivateKey = isValidEthereumPrivateKey
+
   isValidPublicKey = isValidEthereumPublicKey
+
   isValidEthereumDate = isValidEthereumDateString
 }
 
