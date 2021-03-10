@@ -27,7 +27,8 @@ describe('Test Algorand Multisig Transactions', () => {
       url: 'https://testnet-algorand.api.purestake.io/ps2',
       options: {
         indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2',
-        headers: [{ 'x-api-key': 'algoApiKey' }],
+        // API Key is the same with ALGORAND_API_KEY in ore-id-docs .env.example files.
+        headers: [{ 'x-api-key': '3bk0oUJKr7aLJlcWnMOqu4OxLcXHaPpk5niyPGHR' }],
       },
     },
   ]
@@ -72,7 +73,7 @@ describe('Test Algorand Multisig Transactions', () => {
     await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
     expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
     await expect(transaction.sign([toAlgorandPrivateKey(wrongPrivate)])).rejects.toThrow(
-      'Cant sign multisig transaction the private key of address VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ - it doesnt match an address in multisig options: 5NS7YTBXFPC4IQHDCS4RIKQXGYQJIQVNI2CLRXN7ZJ77BHJGQZNQHO4OBA,N3TSCN6IFKL6MFHOQ4KTNYJWJHSSKBK3PDSVJJBKQSCLB4RCVF37BEVHFU,YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4',
+      'Cant sign multisig transaction the private key of address ZMSQEAGNID5EBHQS53ICHANVVUWFHQTVN7OEIBF2DEQGUOL3CFG6UDHS7U - it doesnt match an address in multisig options: E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA,DO3QUYQYULI2FZ6TKCLCFMGEXEKPNWXZOWIYROKSLULGJ32DX6UUPY5V2A,UWEZ3SOBO66JAPVPKW43RI4VEIEDVOOVLEF4RWKTDIFFWUDWLEBWJYUARM',
     )
     await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
     expect(transaction.missingSignatures).toEqual([childAcct3])
