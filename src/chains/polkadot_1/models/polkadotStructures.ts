@@ -6,3 +6,5 @@ export type PolkadotDecomposeReturn = {
   args: any
   partial: boolean
 }
+
+// TODO: define types for PolkadotMetadata
