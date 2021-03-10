@@ -22,9 +22,8 @@ describe('Test Algorand Multisig Transactions', () => {
 
   it('setFromRaw() using chain serialized', async () => {
     await algoTest.connect()
-    if (algoTest.isConnected) {
-      console.log('Connected to %o', algoTest.chainId)
-    }
+    expect(algoTest.isConnected).toBeTruthy()
+
     const transaction = algoTest.new.Transaction()
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
@@ -74,7 +73,6 @@ describe('Test Algorand Multisig Transactions', () => {
     expect(transaction.missingSignatures).toBeNull()
   })
 
-  // TODO: add error cases
   it('from and multisigOptions mismatch', async () => {
     const valueTransferParams: ValueTransferParams = {
       fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
@@ -93,10 +91,9 @@ describe('Test Algorand Multisig Transactions', () => {
     const multisigAddress = determineMultiSigAddress(multiSigOptions)
     const transaction = algoTest.new.Transaction({ multiSigOptions })
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
-
-    expect(() => {
-      transaction.actions = [action]
-    }).toThrowError(
+    transaction.actions = [action]
+    await transaction.prepareToBeSigned()
+    await expect(transaction.validate()).rejects.toThrow(
       `From address (or txn.snd) must be the multisig address (hash of multisig options). Got: ${valueTransferParams.fromAccountName}. Expected: ${multisigAddress}`,
     )
   })
