@@ -41,6 +41,8 @@
   "dependencies": {
     "@aikon/sjcl": "^0.1.8",
     "@polkadot/api": "^3.6.4",
+    "@polkadot/keyring": "^6.0.5",
+    "@polkadot/types": "^4.0.3",
     "@polkadot/util": "^5.9.2",
     "@polkadot/util-crypto": "^5.9.2",
     "@types/bignumber.js": "^5.0.0",

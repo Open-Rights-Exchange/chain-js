@@ -64,8 +64,6 @@ export type PolkadotBlockNumber = BlockNumber | BN | BigInt | Uint8Array | numbe
 
 export type PolkadotBlock = Record<string, AnyJson>
 
-export type PolkadotAddress = string | Uint8Array
-
 export type PolkadotKeyringPair = KeyringPair
 
 export type DotAmount = Compact<Balance> | AnyNumber | Uint8Array

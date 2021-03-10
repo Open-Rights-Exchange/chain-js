@@ -3,25 +3,24 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ChainFactory, ChainType, } from '../../../index'
-import {
-  PolkadotChainEndpoint, PolkadotChainSettings,
-} from '../models'
+import { ChainFactory, ChainType } from '../../../index'
+import { PolkadotChainEndpoint, PolkadotChainSettings } from '../models'
+
 require('dotenv').config()
 
 const { env } = process
 ;(async () => {
   try {
-    const westendEndpoints: PolkadotChainEndpoint[] = [
-      {
-        url: 'wss://westend-rpc.polkadot.io'
-      }
-    ]
+    // const westendEndpoints: PolkadotChainEndpoint[] = [
+    //   {
+    //     url: 'wss://westend-rpc.polkadot.io',
+    //   },
+    // ]
 
-    const westendChainOptions: PolkadotChainSettings = {}
+    // const westendChainOptions: PolkadotChainSettings = {}
 
-    const ropsten = new ChainFactory().create(ChainType.PolkadotV1, westendEndpoints, westendChainOptions)
-    await ropsten.connect()
+    // const ropsten = new ChainFactory().create(ChainType.PolkadotV1, westendEndpoints, westendChainOptions)
+    // await ropsten.connect()
 
     // const ropstenEndpoints: EthereumChainEndpoint[] = [
     //   {

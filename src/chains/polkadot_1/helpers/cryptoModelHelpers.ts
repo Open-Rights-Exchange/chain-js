@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { decodeAddress, encodeAddress } from '@polkadot/keyring'
+import { signatureVerify } from '@polkadot/util-crypto'
 import {
   ensureHexPrefix,
   isNullOrEmpty,
@@ -16,8 +19,6 @@ import {
   PolkadotKeyPairType,
 } from '../models'
 import { CryptoCurve } from '../../../models'
-import { decodeAddress, encodeAddress } from '@polkadot/keyring'
-import { signatureVerify } from '@polkadot/util-crypto'
 import { AesCrypto, Ed25519Crypto } from '../../../crypto'
 
 /** determine crypto curve from key type */
@@ -84,7 +85,7 @@ export function isValidPolkadotAddress(value: string | Buffer | PolkadotAddress)
   return true
 }
 
-/** Accepts hex string checks if a valid ethereum public key
+/** Accepts hex string checks if a valid polkadot public key
  *  Returns PolkadotPublicKey with prefix
  */
 export function toPolkadotPublicKey(value: string): PolkadotPublicKey {
@@ -94,10 +95,10 @@ export function toPolkadotPublicKey(value: string): PolkadotPublicKey {
   throw new Error(`Not a valid polkadot public key:${value}.`)
 }
 
-/** Accepts hex string checks if a valid ethereum private key
+/** Accepts hex string checks if a valid polkadot private key
  *  Returns PolkadotPrivateKey with prefix
  */
-export function toEthereumPrivateKey(value: string): PolkadotPrivateKey {
+export function toPolkadotPrivateKey(value: string): PolkadotPrivateKey {
   if (isValidPolkadotPrivateKey(value)) {
     return value as PolkadotPrivateKey
   }

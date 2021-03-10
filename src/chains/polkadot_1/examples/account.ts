@@ -1,4 +1,4 @@
-import { createSecureContext } from 'tls'
+import { Chain } from '../../../interfaces'
 import { ChainFactory, ChainType } from '../../../index'
 import { PolkadotChainEndpoint } from '../models'
 
@@ -17,10 +17,10 @@ const createAccountOptions = {
 async function createAccount(paraChain: Chain) {
   try {
     await paraChain.connect()
-    const createAccount = paraChain.new.CreateAccount(createAccountOptions)
-    await createAccount.generateKeysIfNeeded()
-    console.log('generatedKeys:', createAccount.generatedKeys)
-    console.log('address:', createAccount.accountName)
+    const createdAccount = paraChain.new.CreateAccount(createAccountOptions)
+    await createdAccount.generateKeysIfNeeded()
+    console.log('generatedKeys:', createdAccount.generatedKeys)
+    console.log('address:', createdAccount.accountName)
     const account = await paraChain.new.Account('5FkJuxShVBRJRirM3t3k5Y8XyDaxMi1c8hLdBsH2qeAYqAzF')
     console.log('account', account)
   } catch (error) {

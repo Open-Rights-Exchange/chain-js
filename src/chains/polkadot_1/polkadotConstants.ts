@@ -1,6 +1,6 @@
 // TODO: Update values for Polkadot
 
-import { PolkadotKeyPairType } from "./models"
+import { PolkadotKeyPairType } from './models'
 
 // sign transaction default parameters
 export const TRANSACTION_ENCODING = 'utf8'
