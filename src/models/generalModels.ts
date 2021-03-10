@@ -42,6 +42,14 @@ export enum ChainType {
   PolkadotV1 = 'polkadot',
 }
 
+/** Standard 'features' that each type of chain supports */
+export const enum ChainFeature {
+  Account = 'accounts',
+  AccountCreationTransaction = 'accountCreationTransaction',
+  Multisig = 'multisig',
+  TransactionFees = 'transactionFees',
+}
+
 /** Chain urls and related details used to connect to chain */
 export type ChainEndpoint = {
   /** api endpoint url - including http(s):// prefix */
