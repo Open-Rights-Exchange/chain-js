@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainFeature, ConfirmType, TxExecutionPriority } from '../../models'
 import { notImplemented } from '../../helpers'
 import { Transaction } from '../../interfaces'
 import { PolkadotSignature } from './models/cryptoModels'
@@ -265,7 +265,7 @@ export class PolkadotTransaction implements Transaction {
 
   /** Ethereum has a fee for transactions */
   public get supportsFee(): boolean {
-    return true
+    return this._chainState.hasFeature(ChainFeature.TransactionFees)
   }
 
   /** Gets estimated cost in units of gas to execute this transaction (at current chain rates) */
