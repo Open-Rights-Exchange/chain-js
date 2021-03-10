@@ -7,15 +7,28 @@ import { multisigChainSerialized } from './mockups/multisig'
 import { AlgorandMultiSigOptions } from '../models'
 import { ChainActionType, ValueTransferParams } from '../../../models'
 
-require('dotenv').config({ path: `${__dirname}/./../examples/.env` })
+const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
+const childAcct1Private =
+  'd981cfed95079eddfabfacf6ae0e25532110ea574ee06879ec7d55d0a627ee372739bf899158b5be1c069f251c4d12c977781b349ef70d7e83b7c431e17745cc'
+const childAcct2 = 'DO3QUYQYULI2FZ6TKCLCFMGEXEKPNWXZOWIYROKSLULGJ32DX6UUPY5V2A'
+const childAcct2Private =
+  '5c9e78cf352176ffc1e73e3a4d0e49039f8f365b36784aaefeb0561e0566f9c61bb70a6218a2d1a2e7d3509622b0c4b914f6daf9759188b9525d1664ef43bfa9'
+const childAcct3 = 'UWEZ3SOBO66JAPVPKW43RI4VEIEDVOOVLEF4RWKTDIFFWUDWLEBWJYUARM'
+const childAcct3Private =
+  '3f4a8e3a6550059561b880365146c727663899b071dadae7754b6296713e5761a5899dc9c177bc903eaf55b9b8a39522083ab9d5590bc8d9531a0a5b50765903'
+const multisigAddres = '24JFLJNUGGF6MNIW7SK544WKOOAONT6FTRGV64VODWRNZAJX7OK6GZRLZA'
+
+const wrongPrivate =
+  'fe436b04b330c5a85c0ccdb0348e05aa229e8b13e9ff151306cc4731532126c6cb250200cd40fa409e12eed02381b5ad2c53c2756fdc4404ba19206a397b114d'
 
 describe('Test Algorand Multisig Transactions', () => {
-  const { env } = process
-  const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
   const algoTestnetEndpoints = [
     {
       url: 'https://testnet-algorand.api.purestake.io/ps2',
-      options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+      options: {
+        indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2',
+        headers: [{ 'x-api-key': 'algoApiKey' }],
+      },
     },
   ]
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
@@ -28,20 +41,17 @@ describe('Test Algorand Multisig Transactions', () => {
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
-    expect(transaction.missingSignatures).toEqual([
-      'N3TSCN6IFKL6MFHOQ4KTNYJWJHSSKBK3PDSVJJBKQSCLB4RCVF37BEVHFU',
-      'YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4',
-    ])
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
-    expect(transaction.missingSignatures).toEqual(['YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4'])
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account3_PRIVATE_KEY)])
+    await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
+    expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
+    await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
+    expect(transaction.missingSignatures).toEqual([childAcct3])
+    await transaction.sign([toAlgorandPrivateKey(childAcct3Private)])
     expect(transaction.missingSignatures).toBeNull()
   })
 
   it('set multisig payment action', async () => {
     const valueTransferParams: ValueTransferParams = {
-      fromAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
+      fromAccountName: toChainEntityName(multisigAddres),
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
@@ -49,9 +59,9 @@ describe('Test Algorand Multisig Transactions', () => {
       version: 1,
       threshold: 3,
       addrs: [
-        env.ALGOTESTNET_mulitsig_child_account1, // 1
-        env.ALGOTESTNET_mulitsig_child_account2, // 2
-        env.ALGOTESTNET_mulitsig_child_account3, // 3
+        childAcct1, // 1
+        childAcct2, // 2
+        childAcct3, // 3
       ],
     }
     const transaction = algoTest.new.Transaction({ multiSigOptions })
@@ -59,17 +69,14 @@ describe('Test Algorand Multisig Transactions', () => {
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
     await transaction.validate()
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
-    expect(transaction.missingSignatures).toEqual([
-      'N3TSCN6IFKL6MFHOQ4KTNYJWJHSSKBK3PDSVJJBKQSCLB4RCVF37BEVHFU',
-      'YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4',
-    ])
-    await expect(transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])).rejects.toThrow(
+    await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
+    expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
+    await expect(transaction.sign([toAlgorandPrivateKey(wrongPrivate)])).rejects.toThrow(
       'Cant sign multisig transaction the private key of address VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ - it doesnt match an address in multisig options: 5NS7YTBXFPC4IQHDCS4RIKQXGYQJIQVNI2CLRXN7ZJ77BHJGQZNQHO4OBA,N3TSCN6IFKL6MFHOQ4KTNYJWJHSSKBK3PDSVJJBKQSCLB4RCVF37BEVHFU,YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4',
     )
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
-    expect(transaction.missingSignatures).toEqual(['YIMLLIQHKASYE2I34O7M4JNOQNOHDOMXK7EK3IIFMCNAU3ZMTGCI4E5DE4'])
-    await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account3_PRIVATE_KEY)])
+    await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
+    expect(transaction.missingSignatures).toEqual([childAcct3])
+    await transaction.sign([toAlgorandPrivateKey(childAcct3Private)])
     expect(transaction.missingSignatures).toBeNull()
   })
 
@@ -83,9 +90,9 @@ describe('Test Algorand Multisig Transactions', () => {
       version: 1,
       threshold: 3,
       addrs: [
-        env.ALGOTESTNET_mulitsig_child_account1, // 1
-        env.ALGOTESTNET_mulitsig_child_account2, // 2
-        env.ALGOTESTNET_mulitsig_child_account3, // 3
+        childAcct1, // 1
+        childAcct2, // 2
+        childAcct3, // 3
       ],
     }
     const multisigAddress = determineMultiSigAddress(multiSigOptions)
