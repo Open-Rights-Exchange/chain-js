@@ -2,7 +2,14 @@
 import { composeAction } from '../algoCompose'
 // import { ChainActionType } from '../../../models'
 import {
+  composedAppCreate,
+  composedAppUpdate,
   composedAssetCreate,
+  composedAppCloseOut,
+  composedAppOptIn,
+  composedAppNoOp,
+  composedAppClear,
+  composedAppDelete,
   composedAssetConfig,
   composedAssetFreeze,
   composedAssetTransfer,
@@ -10,6 +17,7 @@ import {
   composedKeyRegistration,
   composedPayment,
 } from './mockups/composedActions'
+import { sourceApproval, sourceClear } from './mockups/sourceCode'
 import {
   AlgorandChainActionType,
   AlgorandActionAssetCreateParams,
@@ -19,6 +27,9 @@ import {
   AlgorandActionAssetDestroyParams,
   AlgorandKeyRegistrationParams,
   AlgorandActionPaymentParams,
+  AlgorandActionAppCreate,
+  AlgorandActionAppMultiPurpose,
+  AlgorandActionAppUpdate,
 } from '../models'
 import { getChainState } from './mockups/chainState'
 
@@ -163,5 +174,155 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.lastRound = 8323719
 
     expect(JSON.stringify(actAction)).toEqual(composedPayment)
+  })
+
+  it('creates app create action object', async () => {
+    const args: Partial<AlgorandActionAppCreate> = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appLocalInts: 0,
+      appLocalByteSlices: 0,
+      appGlobalInts: 1,
+      appGlobalByteSlices: 0,
+      appApprovalProgram: sourceApproval,
+      appClearProgram: sourceClear,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppCreate, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppCreate)
+  })
+
+  it('creates app update action object', async () => {
+    const args: Partial<AlgorandActionAppUpdate> = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appIndex: 13379916,
+      appApprovalProgram: sourceApproval,
+      appClearProgram: sourceClear,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppUpdate, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppUpdate)
+  })
+
+  it('creates app optIn action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test optIn',
+      appIndex: 13379916,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppOptIn, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppOptIn)
+  })
+
+  it('creates app close out action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test close out',
+      appIndex: 13379916,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppCloseOut, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppCloseOut)
+  })
+
+  it('creates app noOp base64 & UintArray appArgs action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appArgs: ['bWludA==', new Uint8Array([39, 16])],
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+  })
+
+  it('creates app noOp hex appArgs action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appArgs: ['0x6d696e74', '0x2710'],
+    }
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+  })
+
+  it('creates app noOp readable appArgs action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appArgs: ['mint', 10000],
+    }
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppNoOp, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+  })
+
+  it('creates app clear action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppClear, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppClear)
+  })
+
+  it('creates app delete action object', async () => {
+    const args: AlgorandActionAppMultiPurpose = {
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+    }
+
+    const actAction = await composeAction(chainState, AlgorandChainActionType.AppDelete, args)
+
+    actAction.fee = 387000
+    actAction.firstRound = 8322719
+    actAction.lastRound = 8323719
+
+    expect(JSON.stringify(actAction)).toEqual(composedAppDelete)
   })
 })

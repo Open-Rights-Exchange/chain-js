@@ -115,7 +115,6 @@ export const decomposedAssetDestroy = [
     },
   },
 ]
-
 export const decomposedKeyRegistration = [
   {
     chainActionType: 'KeyRegistration',
@@ -139,6 +138,110 @@ export const decomposedPayment = [
     chainActionType: 'ValueTransfer',
     args: {
       ...decomposedValueTransfer[0].args,
+    },
+  },
+]
+export const decomposedAppCreate = [
+  {
+    chainActionType: 'AppCreate',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appIndex: 0,
+      appOnComplete: 0,
+      appLocalInts: 0,
+      appLocalByteSlices: 0,
+      appGlobalInts: 1,
+      appGlobalByteSlices: 0,
+      appApprovalProgram: '02200101260107636f756e746572284964220849350067340043',
+      appClearProgram: '0220010122',
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppUpdate = [
+  {
+    chainActionType: 'AppUpdate',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      appIndex: 13379916,
+      appOnComplete: 4,
+      appApprovalProgram: '02200101260107636f756e746572284964220849350067340043',
+      appClearProgram: '0220010122',
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppOptIn = [
+  {
+    chainActionType: 'AppOptIn',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test optIn',
+      appIndex: 13379916,
+      appOnComplete: 1,
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppCloseOut = [
+  {
+    chainActionType: 'AppCloseOut',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test close out',
+      appIndex: 13379916,
+      appOnComplete: 2,
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppNoOp = [
+  {
+    chainActionType: 'AppNoOp',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test noOp',
+      appIndex: 13379916,
+      appOnComplete: 0,
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppClear = [
+  {
+    chainActionType: 'AppClear',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+      appOnComplete: 3,
+      type: 'appl',
+    },
+  },
+]
+export const decomposedAppDelete = [
+  {
+    chainActionType: 'AppDelete',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      note: 'test clear',
+      appIndex: 13379916,
+      appOnComplete: 5,
+      type: 'appl',
     },
   },
 ]
