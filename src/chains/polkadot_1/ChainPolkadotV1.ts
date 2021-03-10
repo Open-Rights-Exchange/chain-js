@@ -2,12 +2,13 @@ import { ChainActionType, ChainInfo, ChainType, CryptoCurve, ChainEntityName, Ch
 import { ChainError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
-  PolkadotChainEndpoint,
-  PolkadotChainSettings,
-  PolkadotSymbol,
   PolkadotAddress,
+  PolkadotChainEndpoint,
+  PolkadotChainInfo,
+  PolkadotChainSettings,
   PolkadotDecomposeReturn,
   PolkadotPublicKey,
+  PolkadotSymbol,
 } from './models'
 import { PolkadotChainState } from './polkadotChainState'
 import { notImplemented } from '../../helpers'
@@ -65,7 +66,7 @@ class ChainPolkadotV1 implements Chain {
     return this._chainState.chain
   }
 
-  public get chainInfo(): ChainInfo {
+  public get chainInfo(): PolkadotChainInfo {
     return this._chainState.chainInfo
   }
 
