@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
+import { ChainPolkadotV1 } from '../ChainPolkadotV1'
 import { toPolkadotPrivateKey, toPolkadotPublicKey } from '../helpers'
 
 require('dotenv').config()
@@ -18,7 +19,7 @@ const polkadotMainnetEndpoints = [{
 
 async function run() {
   /** Create Algorand chain instance */
-  const para = new ChainFactory().create(ChainType.PolkadotV1, polkadotMainnetEndpoints)
+  const para = (new ChainFactory().create(ChainType.PolkadotV1, polkadotMainnetEndpoints) as ChainPolkadotV1)
   await para.connect()
   if (para.isConnected) {
     console.log('Connected to %o', para.chainId)
