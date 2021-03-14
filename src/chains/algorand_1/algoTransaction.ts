@@ -568,7 +568,9 @@ export class AlgorandTransaction implements Transaction {
       const action = this._actionHelper.actionEncodedForSdk
       const privateKeyAddress = toAddressFromPublicKey(getAlgorandPublicKeyFromPrivateKey(key))
       if (!this.multiSigOptions.addrs.includes(privateKeyAddress)) {
-        throwNewError('Cant sign multisig transaction the private key - it doesnt match an address in multisig options')
+        throwNewError(
+          `Cant sign multisig transaction the private key of address ${privateKeyAddress} - it doesnt match an address in multisig options: ${this.multiSigOptions.addrs}`,
+        )
       }
       const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
         action,
