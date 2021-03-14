@@ -7,7 +7,6 @@ import {
   AlgoEncryptionOptions,
   AlgorandGeneratedAccountStruct,
   AlgorandKeyPair,
-  AlgorandNewKeysOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandSignature,
@@ -185,8 +184,8 @@ export function getAlgorandPublicKeyFromPrivateKey(privateKey: AlgorandPrivateKe
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
+export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgoEncryptionOptions) {
   const keys = await generateKeyPair()
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, { salt: options?.salt })
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }
