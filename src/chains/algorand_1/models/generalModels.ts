@@ -1,4 +1,4 @@
-import { ChainSymbolBrand } from '../../../models'
+import { ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
 import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
@@ -64,7 +64,7 @@ export type AlgorandGeneratedKeys = AlgorandKeyPair
 /**  Algorand new keys options including password and optional multisig parameters */
 export type AlgorandNewKeysOptions = {
   password: string
-  salt?: string
+  encryptionOptions?: ModelsCryptoEd25519.Ed25519PasswordEncryptionOptions
 }
 
 /** Algorand value units */

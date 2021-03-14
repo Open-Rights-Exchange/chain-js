@@ -30,7 +30,10 @@ const algoBetanetEndpoints = [{
 export const createAccountOptions = {
   newKeysOptions: {
     password: '2233',
-    salt: 'salt',
+    encryptionOptions: {
+      salt: 'salt',
+      N: 65536,
+    },
   },
 }
 
