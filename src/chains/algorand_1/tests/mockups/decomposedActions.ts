@@ -140,6 +140,19 @@ export const decomposedPayment = [
       ...decomposedValueTransfer[0].args,
     },
   },
+  {
+    chainActionType: 'Payment',
+    args: {
+      name: 'Transaction',
+      tag: 'TX',
+      from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      amount: 10,
+      note: 'create',
+      closeRemainderTo: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
+      type: 'pay',
+    },
+  },
 ]
 export const decomposedAppCreate = [
   {
@@ -213,6 +226,7 @@ export const decomposedAppNoOp = [
       note: 'test noOp',
       appIndex: 13379916,
       appOnComplete: 0,
+      appArgs: ['0x6d696e74', '0x2710'],
       type: 'appl',
     },
   },
