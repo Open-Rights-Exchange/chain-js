@@ -1,7 +1,9 @@
+import crypto from 'crypto'
 import { throwNewError } from '../errors'
 import { asyncForEach, isNullOrEmpty, jsonParseAndRevive } from '../helpers'
 import { PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
+import { EciesCurveType } from './asymmetricModels'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 
 /** Use assymmetric encryption with multiple public keys - wrapping with each
@@ -62,4 +64,14 @@ export async function decryptWithPrivateKeys(
     index -= 1 // step in reverse order
   })
   return lastValueDecrypted
+}
+
+/** generates a new ECDSA private/public keypair */
+export function generateKeys(curveType: EciesCurveType, format: crypto.ECDHKeyFormat = 'uncompressed') {
+  const ecdh = crypto.createECDH(curveType)
+  ecdh.generateKeys(null, format)
+  return {
+    publicKey: ecdh.getPublicKey('hex', format),
+    privateKey: ecdh.getPrivateKey('hex'),
+  }
 }
