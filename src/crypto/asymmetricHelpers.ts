@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { throwNewError } from '../errors'
 import { asyncForEach, isNullOrEmpty, jsonParseAndRevive } from '../helpers'
-import { PrivateKey, PublicKey } from '../models'
+import { KeyPair, PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
 import { EciesCurveType } from './asymmetricModels'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
@@ -67,7 +67,7 @@ export async function decryptWithPrivateKeys(
 }
 
 /** generates a new ECDSA private/public keypair */
-export function generateKeys(curveType: EciesCurveType, format: crypto.ECDHKeyFormat = 'uncompressed') {
+export function generateKeyPair(curveType: EciesCurveType, format: crypto.ECDHKeyFormat = 'uncompressed'): KeyPair {
   const ecdh = crypto.createECDH(curveType)
   ecdh.generateKeys(null, format)
   return {
