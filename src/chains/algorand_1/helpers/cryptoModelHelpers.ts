@@ -1,6 +1,7 @@
 import * as base32 from 'hi-base32'
 import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
+import { throwNewError } from '../../../errors'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
 import {
   byteArrayToHexString,
@@ -17,6 +18,9 @@ import {
   ALGORAND_ADDRESS_LENGTH,
 } from '../algoConstants'
 import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandAddress } from '../models'
+
+// eslint-disable-next-line import/no-cycle
+import { verifySignedWithPublicKey } from '../algoCrypto'
 
 /**
  * ConcatArrays takes two array and returns a joint Uint8 array of both
@@ -118,4 +122,20 @@ export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array)
 // convert a native Uint8Array signature to Hexstring
 export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Array {
   return hexStringToByteArray(signature)
+}
+
+/** Whether the transaction signature is valid for this transaction body and publicKey provided */
+export function isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
+  if (!this.rawTransaction) return false
+  const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
+  return verifySignedWithPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
+}
+
+/** Throws if signatures isn't properly formatted */
+export function assertValidSignatures(signatures: AlgorandSignature[]) {
+  ;(signatures || []).forEach(sig => {
+    if (!isValidAlgorandSignature(sig)) {
+      throwNewError(`Not a valid signature : ${sig}`, 'signature_invalid')
+    }
+  })
 }

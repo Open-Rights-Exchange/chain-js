@@ -57,12 +57,16 @@ import {
   toPublicKeyFromAddress,
   toAlgorandPrivateKey,
   toAddressFromPublicKey,
+  isValidTxSignatureForPublicKey,
+  assertValidSignatures,
 } from './helpers/cryptoModelHelpers'
 import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
 import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
+// eslint-disable-next-line import/no-cycle
+import { AlgorandMultisigPlugin } from './plugins/multisigNativePlugin'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -77,18 +81,24 @@ export class AlgorandTransaction implements Transaction {
   /** Raw transaction object including signature (if any) */
   private _rawTransaction: AlgorandRawTransactionStruct
 
-  /** Raw multisig transaction object including signature(s) (if any) */
-  private _rawTransactionMultisig: AlgorandRawTransactionMultisigStruct
-
   /** Public Key used to sign transaction - set by sign() */
   private _signedByPublicKey: AlgorandPublicKey
 
   private _isValidated: boolean
 
+  private _multisigPlugin: AlgorandMultisigPlugin
+
   constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
+    if (options?.multiSigOptions) {
+      this._multisigPlugin = new AlgorandMultisigPlugin({ options })
+    }
+  }
+
+  get multisigPlugin(): AlgorandMultisigPlugin {
+    return this._multisigPlugin
   }
 
   /** Chain-specific values included in the transaction sent to the chain */
@@ -133,16 +143,8 @@ export class AlgorandTransaction implements Transaction {
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
     if (this.isMultiSig) {
-      this._rawTransactionMultisig = {
-        txn: rawTx,
-        msig: {
-          v: this.multiSigOptions.version,
-          thr: this.multiSigOptions.threshold,
-          subsig: this.multiSigOptions.addrs.map(addr => ({
-            pk: Buffer.from(hexStringToByteArray(toPublicKeyFromAddress(addr))),
-          })),
-        },
-      }
+      console.log('rawTrx: ', rawTx)
+      this.multisigPlugin.prepareMultisigToBeSigned(rawTx)
     } else {
       this._rawTransaction = {
         txn: rawTx,
@@ -301,18 +303,12 @@ export class AlgorandTransaction implements Transaction {
   /** Signatures attached to transaction */
   get signatures(): AlgorandSignature[] {
     // retrieve signatures from raw transaction
-    let signatures: AlgorandSignature[]
     const { rawTransaction } = this
     if (this.isMultiSig) {
-      signatures = (rawTransaction as AlgorandRawTransactionMultisigStruct)?.msig?.subsig
-        ?.filter(subsig => !!subsig.s)
-        ?.map(subsig => toAlgorandSignatureFromRawSig(subsig.s))
-    } else {
-      const signature = (rawTransaction as AlgorandRawTransactionStruct)?.sig
-      signatures = signature ? [toAlgorandSignatureFromRawSig(signature)] : null
+      return this.multisigPlugin.signatures
     }
-
-    return signatures || null
+    const signature = (rawTransaction as AlgorandRawTransactionStruct)?.sig
+    return signature ? [toAlgorandSignatureFromRawSig(signature)] : null
   }
 
   /** Sets one or more signatures on the transaction
@@ -327,7 +323,7 @@ export class AlgorandTransaction implements Transaction {
   addSignatures = (signaturesIn: AlgorandSignature[]): void => {
     const signatures = signaturesIn || []
     this.assertHasRaw()
-    this.assertValidSignatures(signatures)
+    assertValidSignatures(signatures)
     let errorMsg: string
 
     // NOTE: since we dont have the public key for the incoming signature, we check the signature against each of the public keys used for this transaction
@@ -339,48 +335,17 @@ export class AlgorandTransaction implements Transaction {
       if (this.hasAnySignatures) errorMsg = 'Transaction already has a signature. Cant add more than one signature.'
       if (signatures.length > 1) errorMsg = 'Cant add more than one signature to a non-multisig transaction.'
       // Check that the signature matches the raw transaction body (and signing public key)
-      if (!this.isValidTxSignatureForPublicKey(signature, this.signerPublicKey)) {
+      if (!isValidTxSignatureForPublicKey(signature, this.signerPublicKey)) {
         errorMsg = `Signature isnt valid for this transaction using publicKey ${this.signerPublicKey}. If this is a rekeyed account, specify its spending key (via transaction options signerPublicKey) before adding signature`
       }
       this._rawTransaction.sig = Buffer.from(hexStringToByteArray(signature))
     } else {
-      // Handle multisig transaction
-      if (isNullOrEmpty(signatures) && this?._rawTransactionMultisig?.msig) {
-        // wipe out all the signatures in the subsig array (just set the public key)
-        this._rawTransactionMultisig.msig.subsig = this._rawTransactionMultisig.msig.subsig.map(ss => ({ pk: ss.pk }))
-      }
-      // For every signature provided...
-      signatures.forEach(sig => {
-        // look for a match with any of the publicKeys in the multiSigOptions
-        const addressForSig = this.multiSigOptions.addrs.find(addr =>
-          this.isValidTxSignatureForPublicKey(sig, getPublicKeyForAddress(addr)),
-        )
-        if (addressForSig) {
-          const newPubKey = hexStringToByteArray(getPublicKeyForAddress(addressForSig))
-          const newSig = hexStringToByteArray(sig)
-          // set signature for publickey in subsig array
-          this._rawTransactionMultisig.msig.subsig.find(ss => uint8ArraysAreEqual(ss.pk, newPubKey)).s = newSig
-        } else {
-          errorMsg = `The signature: ${sig} isnt valid for this transaction using any of publicKeys specified in multiSigOptions: ${JSON.stringify(
-            this.multiSigOptions,
-          )}.`
-          throwNewError(errorMsg)
-        }
-      })
+      this.multisigPlugin.addSignatures(signatures)
     }
 
     if (errorMsg) {
       throwNewError(errorMsg)
     }
-  }
-
-  /** Throws if signatures isn't properly formatted */
-  private assertValidSignatures = (signatures: AlgorandSignature[]) => {
-    ;(signatures || []).forEach(sig => {
-      if (!isValidAlgorandSignature(sig)) {
-        throwNewError(`Not a valid signature : ${sig}`, 'signature_invalid')
-      }
-    })
   }
 
   /** Whether there is an attached signature */
@@ -415,13 +380,9 @@ export class AlgorandTransaction implements Transaction {
   private getPublicKeysForSignaturesFromRawTx(): AlgorandPublicKey[] {
     let publicKeys: AlgorandPublicKey[]
     if (this.isMultiSig) {
-      const { msig } = this._rawTransactionMultisig
-      // drop empty values in subsig
-      const multiSigs = msig?.subsig?.filter((sig: AlgorandMultiSignatureStruct) => !!sig?.s) || []
-      publicKeys = multiSigs?.map((sig: AlgorandMultiSignatureStruct) =>
-        toAlgorandPublicKey(byteArrayToHexString(sig.pk)),
-      )
-    } else if (this._rawTransaction.sig) {
+      return this.multisigPlugin.getPublicKeysForSignaturesFromRawTx()
+    }
+    if (this._rawTransaction.sig) {
       return this.signerPublicKey ? [this.signerPublicKey] : null
     }
     return publicKeys
@@ -441,38 +402,34 @@ export class AlgorandTransaction implements Transaction {
 
   /** Returns whether the transaction is a multisig transaction */
   public get isMultiSig(): boolean {
-    return !isNullOrEmpty(this.multiSigOptions)
+    return !isNullOrEmpty(this.multisigPlugin)
   }
 
   /** Returns address, for which, a matching signature must be attached to transaction */
   public get missingSignatures(): AlgorandAddress[] {
     this.assertIsValidated()
-    const missingSignatures =
-      this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
-    const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
-
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
     if (this.isMultiSig) {
-      return signaturesAttachedCount >= this.multiSigOptions.threshold ? null : missingSignatures
+      return this.multisigPlugin.missingSignatures
     }
+    const missingSignatures =
+      this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
+    const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
 
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
   }
 
   /** Multisig transaction options */
   private get multiSigOptions(): AlgorandMultiSigOptions {
-    if (!isNullOrEmpty(this._rawTransactionMultisig)) {
-      return this.multisigOptionsFromRawTransactionMultisig(this._rawTransactionMultisig.msig)
-    }
-    return this._options?.multiSigOptions
+    return this.isMultiSig ? this.multisigPlugin.multiSigOptions : null
   }
 
   /** Get the raw transaction (either regular or multisig) */
   get rawTransaction(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     let rawTransaction
     if (this.isMultiSig) {
-      rawTransaction = this._rawTransactionMultisig
+      rawTransaction = this.multisigPlugin.rawMultisigTransaction
     } else {
       rawTransaction = this._rawTransaction
     }
@@ -535,7 +492,7 @@ export class AlgorandTransaction implements Transaction {
     let transactionId: string
     this.assertIsValidated()
     if (this.isMultiSig) {
-      this.signMultiSigTransaction(privateKeys)
+      this.multisigPlugin.signMultisig(privateKeys, this.transactionId)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const signResults: AlgorandTxSignResults = algosdk.signTransaction(
@@ -548,48 +505,6 @@ export class AlgorandTransaction implements Transaction {
         toAlgorandPrivateKey(byteArrayToHexString(privateKey)),
       )
     }
-  }
-
-  /** Generate signed multisig transaction object and add signatures for every private key provided
-   *  Merge signatures with any we might already have in signedTransactionMultisig */
-  private signMultiSigTransaction(privateKeys: AlgorandPrivateKey[]) {
-    let signedMergedTransaction: AlgorandTxSignResults
-    const signedTransactionResults: AlgorandTxSignResults[] = []
-    // start with existing multiSig transaction/signatures (if any)
-    if (!isNullOrEmpty(this._rawTransactionMultisig)) {
-      signedTransactionResults.push({
-        txID: this.transactionId,
-        blob: algosdk.encodeObj(this._rawTransactionMultisig),
-      })
-    }
-    // add signatures for each private key provided
-    privateKeys.forEach(key => {
-      const privateKey = hexStringToByteArray(key)
-      const action = this._actionHelper.actionEncodedForSdk
-      const privateKeyAddress = toAddressFromPublicKey(getAlgorandPublicKeyFromPrivateKey(key))
-      if (!this.multiSigOptions.addrs.includes(privateKeyAddress)) {
-        throwNewError(
-          `Cant sign multisig transaction the private key of address ${privateKeyAddress} - it doesnt match an address in multisig options: ${this.multiSigOptions.addrs}`,
-        )
-      }
-      const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
-        action,
-        this.multiSigOptions,
-        privateKey,
-      )
-      signedTransactionResults.push(signResults)
-    })
-    // if more than one sig, use the sdk's merge function
-    if (signedTransactionResults.length > 1) {
-      const { txID } = signedTransactionResults[0] // txID should be the same for all results
-      const blob = algosdk.mergeMultisigTransactions(signedTransactionResults.map(r => r.blob))
-      signedMergedTransaction = { txID, blob }
-    } else {
-      // eslint-disable-next-line prefer-destructuring
-      signedMergedTransaction = signedTransactionResults[0]
-    }
-    // set results to class
-    this.setRawTransactionFromSignResults(signedMergedTransaction)
   }
 
   /** Broadcast a signed transaction to the chain
@@ -649,21 +564,14 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Whether the transaction signature is valid for this transaction body and publicKey provided */
-  private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
-    if (!this.rawTransaction) return false
-    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
-    return verifySignatureForDataAndPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
-  }
-
   /** extract 'from' address from various action types and confirm it matches multisig options */
   private assertMultisigFromMatchesOptions(
     action?:
-      | AlgorandTxAction
-      | AlgorandTxActionRaw
-      | AlgorandTxActionSdkEncoded
-      | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+    | AlgorandTxAction
+    | AlgorandTxActionRaw
+    | AlgorandTxActionSdkEncoded
+    | AlgorandRawTransactionStruct
+    | AlgorandRawTransactionMultisigStruct,
   ): AlgorandAddress {
     let fromAddr: AlgorandAddress
     const txAction = action as AlgorandTxAction | AlgorandTxActionSdkEncoded
@@ -699,7 +607,7 @@ export class AlgorandTransaction implements Transaction {
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      this._rawTransactionMultisig = transaction as AlgorandRawTransactionMultisigStruct
+      this._multisigPlugin = new AlgorandMultisigPlugin({ raw: transaction as AlgorandRawTransactionMultisigStruct })
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
