@@ -32,9 +32,9 @@ async function run() {
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
-
   console.log('keyPair:', await algoTest.generateKeyPair())
 
+  // Test symmetric encryption (with a password)
   const toEncrypt = 'text to encrypt'
   const encryptedBlob = await algoTest.encryptWithPassword(toEncrypt, 'mypassword', {
     salt: 'mysalt',
@@ -47,6 +47,18 @@ async function run() {
     N: 65536,
   })
   console.log('decrypted payload:', decryptedPayload)
+
+  // Test asymmetric encryption (with a public/private key pair)
+  const toEncryptAsymString = 'text to encrypt'
+  const publicKey = 'a41306d9d3c047f31d04110cbc58e1c5c37018caabdeda53533636fe7b06c256'
+  const privateKey = 'b911137ecf59d4f917801ccc0bb365ae866d381c2f7961bbbafa2a7e08bac884a41306d9d3c047f31d04110cbc58e1c5c37018caabdeda53533636fe7b06c256'
+
+  const encryptedAsymBlob = await algoTest.encryptWithPublicKey(toEncryptAsymString, publicKey)
+  console.log('encrypted blob:', encryptedAsymBlob)
+
+  const decryptedAsymPayload = await algoTest.decryptWithPrivateKey(encryptedAsymBlob, privateKey)
+  console.log('decrypted payload:', decryptedAsymPayload)
+
 }
 
 ;(async () => {
