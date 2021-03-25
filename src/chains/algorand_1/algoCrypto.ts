@@ -7,7 +7,6 @@ import {
   AlgoEncryptionOptions,
   AlgorandGeneratedAccountStruct,
   AlgorandKeyPair,
-  AlgorandNewKeysOptions,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandSignature,
@@ -137,9 +136,10 @@ export function verifySignedWithPublicKey(
 /** Adds privateKeyEncrypted if missing by encrypting privateKey (using password) */
 function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: string, options: AlgoEncryptionOptions) {
   // encrypt if not already encrypted
-  const privateKeyEncrypted = keys?.privateKeyEncrypted
-    ? keys.privateKeyEncrypted
-    : encryptWithPassword(keys?.privateKey, password, options)
+  let privateKeyEncrypted = keys?.privateKeyEncrypted
+  if (!privateKeyEncrypted && password) {
+    privateKeyEncrypted = encryptWithPassword(keys?.privateKey, password, options)
+  }
   const encryptedKeys = {
     privateKey: keys?.privateKey,
     publicKey: keys?.publicKey,
@@ -184,8 +184,8 @@ export function getAlgorandPublicKeyFromPrivateKey(privateKey: AlgorandPrivateKe
 /** Generates new public and private key pair
  * Encrypts the private key using password
  */
-export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgorandNewKeysOptions) {
+export async function generateNewAccountKeysAndEncryptPrivateKeys(password: string, options: AlgoEncryptionOptions) {
   const keys = await generateKeyPair()
-  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, { salt: options?.salt })
+  const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }

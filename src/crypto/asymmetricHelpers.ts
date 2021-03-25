@@ -1,7 +1,9 @@
+import crypto from 'crypto'
 import { throwNewError } from '../errors'
-import { asyncForEach, isNullOrEmpty } from '../helpers'
-import { PrivateKey, PublicKey } from '../models'
+import { asyncForEach, isNullOrEmpty, jsonParseAndRevive } from '../helpers'
+import { KeyPair, PrivateKey, PublicKey } from '../models'
 import * as Asymmetric from './asymmetric'
+import { EciesCurveType } from './asymmetricModels'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 
 /** Use assymmetric encryption with multiple public keys - wrapping with each
@@ -17,7 +19,7 @@ export async function encryptWithPublicKeys(
   let valueToBeEncrypted = unencrypted
   // loop through the public keys and wrap encrypted text once for each
   await asyncForEach(publicKeys, async (pk: PublicKey, index: number) => {
-    const lastEncrypted: Asymmetric.AsymmetricEncryptedData = JSON.parse(
+    const lastEncrypted: Asymmetric.AsymmetricEncryptedData = jsonParseAndRevive(
       await encryptCallback(valueToBeEncrypted, pk, options),
     )
     // for each pass, encrypt the result of the last encryption
@@ -62,4 +64,14 @@ export async function decryptWithPrivateKeys(
     index -= 1 // step in reverse order
   })
   return lastValueDecrypted
+}
+
+/** generates a new ECDSA private/public keypair */
+export function generateKeyPair(curveType: EciesCurveType, format: crypto.ECDHKeyFormat = 'uncompressed'): KeyPair {
+  const ecdh = crypto.createECDH(curveType)
+  ecdh.generateKeys(null, format)
+  return {
+    publicKey: ecdh.getPublicKey('hex', format),
+    privateKey: ecdh.getPrivateKey('hex'),
+  }
 }

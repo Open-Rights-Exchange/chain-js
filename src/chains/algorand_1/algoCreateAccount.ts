@@ -1,6 +1,6 @@
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
-import { isNullOrEmpty, notSupported } from '../../helpers'
+import { notSupported } from '../../helpers'
 import {
   AlgorandCreateAccountOptions,
   AlgorandEntityName,
@@ -150,8 +150,8 @@ export class AlgorandCreateAccount implements CreateAccount {
   // ---- Private functions
   private async generateAccountKeys(): Promise<void> {
     const { newKeysOptions } = this._options || {}
-    const { password } = newKeysOptions || {}
-    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, newKeysOptions)
+    const { password, encryptionOptions } = newKeysOptions || {}
+    this._generatedKeys = await generateNewAccountKeysAndEncryptPrivateKeys(password, encryptionOptions)
     this._publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
@@ -163,10 +163,6 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   private assertValidOptionNewKeys() {
-    const { newKeysOptions } = this._options
-    const { password } = newKeysOptions || {}
-    if (isNullOrEmpty(password)) {
-      throwNewError('Invalid Option - You must provide a password to generate new keys')
-    }
+    // nothing to check
   }
 }

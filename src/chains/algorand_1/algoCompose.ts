@@ -74,7 +74,7 @@ export async function composeAction(
     chainState.chainInfo?.nativeInfo?.transactionHeaderParams
   actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
   // seperate-out the action param values (required by compose functions) from the suggestedParams (headers)
-  const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = composerFunction(
+  const sdkEncodedActionParams: AlgorandTxActionSdkEncoded = await composerFunction(
     actionHelper.paramsOnly,
     actionHelper.transactionHeaderParams,
   )
