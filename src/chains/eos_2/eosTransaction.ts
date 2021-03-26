@@ -201,6 +201,7 @@ export class EosTransaction implements Transaction {
       newActions.push(action)
     }
     this._actions = newActions
+    this._isValidated = false
   }
 
   // validation
@@ -370,7 +371,9 @@ export class EosTransaction implements Transaction {
   // authorizations
 
   /** An array of the unique set of account/permission/publicKey for all actions in transaction
-   *  Also fetches the related accounts from the chain (to get public keys) */
+   *  Also fetches the related accounts from the chain (to get public keys)
+   *  NOTE: EOS requires async fecting, thus this getter requires validate() to be called
+   *        call fetchAuthorizationsRequired() if needed before validate() */
   get requiredAuthorizations() {
     this.assertIsValidated()
     return this._requiredAuthorizations
@@ -378,7 +381,7 @@ export class EosTransaction implements Transaction {
 
   /** Collect unique set of account/permission for all actions in transaction
    * Retrieves public keys from the chain by retrieving account(s) when needed */
-  private async fetchAuthorizationsRequired(): Promise<EosAuthorization[]> {
+  public async fetchAuthorizationsRequired(): Promise<EosAuthorization[]> {
     const requiredAuths = new Set<EosAuthorization>()
     const actions = this._actions
     if (actions) {
