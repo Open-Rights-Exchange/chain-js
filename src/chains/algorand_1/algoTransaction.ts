@@ -507,7 +507,6 @@ export class AlgorandTransaction implements Transaction {
    *  Returns the from address in the action or addresses from multisig options for multisig transaction
    */
   public get requiredAuthorizations(): AlgorandAddress[] {
-    this.assertIsValidated()
     this.assertFromIsValidAddress()
     if (this.isMultiSig) {
       return this?.multiSigOptions?.addrs || []
@@ -659,11 +658,11 @@ export class AlgorandTransaction implements Transaction {
   /** extract 'from' address from various action types and confirm it matches multisig options */
   private assertMultisigFromMatchesOptions(
     action?:
-      | AlgorandTxAction
-      | AlgorandTxActionRaw
-      | AlgorandTxActionSdkEncoded
-      | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+    | AlgorandTxAction
+    | AlgorandTxActionRaw
+    | AlgorandTxActionSdkEncoded
+    | AlgorandRawTransactionStruct
+    | AlgorandRawTransactionMultisigStruct,
   ): AlgorandAddress {
     let fromAddr: AlgorandAddress
     const txAction = action as AlgorandTxAction | AlgorandTxActionSdkEncoded
