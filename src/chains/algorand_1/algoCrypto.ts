@@ -109,8 +109,9 @@ export async function encryptWithPublicKeys(
 export async function decryptWithPrivateKeys(
   encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: AlgorandPrivateKey[],
+  options?: any,
 ): Promise<string> {
-  return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, {})
+  return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
 }
 
 /** Signs a string with a private key
