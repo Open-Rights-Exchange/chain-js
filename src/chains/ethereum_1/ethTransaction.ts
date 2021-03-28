@@ -566,7 +566,6 @@ export class EthereumTransaction implements Transaction {
 
   /** Return the one signature address required */
   private get requiredAuthorization(): EthereumAddress {
-    this.assertIsValidated()
     this.assertFromIsValid()
     return this.senderAddress
   }
