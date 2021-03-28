@@ -285,7 +285,7 @@ describe('Compose Chain Actions', () => {
       creatorPermission: 'active',
       publicKeyActive: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
       publicKeyOwner: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
-      pricekey: '1',
+      tier: '1',
       referralAccountName: 'referral',
     }
     const actAction = await composeAction(EosChainActionType.OreCreateAccount, args)

@@ -14,7 +14,7 @@ export interface OreCreateAccountParams {
   creatorPermission: EosEntityName
   publicKeyActive: EosPublicKey
   publicKeyOwner: EosPublicKey
-  pricekey: string
+  tier: string
   referralAccountName: EosEntityName
 }
 
@@ -24,7 +24,7 @@ export const composeAction = ({
   creatorPermission,
   publicKeyActive,
   publicKeyOwner,
-  pricekey,
+  tier,
   referralAccountName,
 }: OreCreateAccountParams): EosActionStruct => ({
   account: toEosEntityName('system.ore'),
@@ -40,7 +40,7 @@ export const composeAction = ({
     newname: accountName, // Some versions of the system contract are running a different version of the newaccount code
     ownerkey: publicKeyOwner,
     activekey: publicKeyActive,
-    pricekey,
+    tier,
     referral: referralAccountName || '',
   },
 })
@@ -57,7 +57,7 @@ export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => 
       creatorPermission: toEosEntityNameOrNull(auth?.permission),
       publicKeyActive: toEosPublicKey(data.ownerkey),
       publicKeyOwner: toEosPublicKey(data.activekey),
-      pricekey: data.pricekey,
+      tier: data.tier,
       referralAccountName: toEosEntityName(data.referral),
     }
     const partial = !returnData?.creatorPermission

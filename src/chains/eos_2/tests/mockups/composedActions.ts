@@ -406,7 +406,7 @@ export const composedOreCreateAccount = {
     newname: toEosEntityName('accountname'), // Some versions of the system contract are running a different version of the newaccount code
     ownerkey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
     activekey: 'EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma',
-    pricekey: '1',
+    tier: '1',
     referral: 'referral',
   },
 }
