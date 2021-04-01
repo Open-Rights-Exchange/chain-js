@@ -346,13 +346,12 @@ export function decryptWithPrivateKey(
     // m = E-1(Ke; c)
     decryptedBuffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, cipherKey, cipherText)
   } catch (err) {
-    let errorMessage = err
     // if we're using a customAsymScheme, use that provided scheme name
     const scheme = customScheme || useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
     if (encryptedObject?.scheme && scheme !== encryptedObject?.scheme) {
-      errorMessage += `. Notice: scheme does not match - expected ${scheme}, encrypted value scheme:${encryptedObject?.scheme}`
+      err.message += `. Notice: scheme does not match - expected ${scheme}, encrypted value scheme:${encryptedObject?.scheme}`
     }
-    throwNewError(errorMessage)
+    throw err
   }
   return decryptedBuffer.toString()
 }
