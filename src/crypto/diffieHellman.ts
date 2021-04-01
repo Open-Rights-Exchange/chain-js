@@ -27,7 +27,9 @@ export function generateSharedSecretType1(
   curveType: EciesCurveType,
 ) {
   if (!((publicKey as Buffer).length === 65 || (publicKey as Buffer).length === 33)) {
-    throwNewError('generateSharedSecretType1: publicKey buffer must be 65 or 33 (compressed) bytes')
+    throwNewError(
+      'generateSharedSecretType1: publicKey buffer must be 65 bytes (uncompressed) or 33 bytes (compressed)',
+    )
   }
   const ecdh = crypto.createECDH(curveType)
   ecdh.setPrivateKey(secretKey)
