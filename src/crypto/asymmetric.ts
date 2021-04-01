@@ -249,10 +249,7 @@ export function encryptWithPublicKey(
     // Ke || Km = KDF(S || S1)
     const hash = generateMessageHash(
       useOptions.hashCypherType,
-      Buffer.concat(
-        [sharedSecret, useOptions.s1, ephemBuffer],
-        sharedSecret.length + useOptions.s1.length + ephemBuffer.length,
-      ),
+      Buffer.concat([sharedSecret, useOptions.s1], sharedSecret.length + useOptions.s1.length),
     )
     cipherKey = hash.slice(0, hash.length / 2)
     macKey = hash.slice(hash.length / 2)
@@ -329,10 +326,7 @@ export function decryptWithPrivateKey(
     // Ke || Km = KDF(S || S1)
     const hash = generateMessageHash(
       useOptions.hashCypherType,
-      Buffer.concat(
-        [sharedSecret, useOptions.s1, ephemBuffer],
-        sharedSecret.length + useOptions.s1.length + ephemBuffer.length,
-      ),
+      Buffer.concat([sharedSecret, useOptions.s1], sharedSecret.length + useOptions.s1.length),
     )
     cipherKey = hash.slice(0, hash.length / 2)
     macKey = hash.slice(hash.length / 2)
