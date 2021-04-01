@@ -59,10 +59,7 @@ import {
   isValidTxSignatureForPublicKey,
   assertValidSignatures,
 } from './helpers/cryptoModelHelpers'
-import {
-  getAlgorandPublicKeyFromPrivateKey,
-  verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
-} from './algoCrypto'
+import { getAlgorandPublicKeyFromPrivateKey } from './algoCrypto'
 import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultiSigOptions, AlgorandMultisigTransaction } from './plugins/models'
 import { AlgorandMultisigPluginFactory } from './plugins/algorandMultisigPlugin'

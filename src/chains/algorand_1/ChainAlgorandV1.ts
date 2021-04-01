@@ -31,6 +31,7 @@ import {
   toAlgorandPrivateKey,
   toAlgorandPublicKey,
   toAlgorandSignature,
+  verifySignedWithPublicKey,
 } from './helpers'
 import { Asymmetric } from '../../crypto'
 
@@ -183,7 +184,7 @@ class ChainAlgorandV1 implements Chain {
   generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey = algoCrypto.verifySignedWithPublicKey
+  verifySignedWithPublicKey = verifySignedWithPublicKey
 
   // --------- Chain helper functions
 

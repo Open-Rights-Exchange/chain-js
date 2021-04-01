@@ -1,6 +1,7 @@
 import { AlgorandValue } from './generalModels'
 import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
 import { AlgorandTxActionStruct } from './algoStructures'
+// eslint-disable-next-line import/no-cycle
 import { AlgorandMultiSigOptions } from '../plugins/models'
 
 /**

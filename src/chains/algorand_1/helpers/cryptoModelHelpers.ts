@@ -19,9 +19,6 @@ import {
 } from '../algoConstants'
 import { AlgorandPublicKey, AlgorandSignature, AlgorandPrivateKey, AlgorandAddress } from '../models'
 
-// eslint-disable-next-line import/no-cycle
-import { verifySignedWithPublicKey } from '../algoCrypto'
-
 /**
  * ConcatArrays takes two array and returns a joint Uint8 array of both
  */
@@ -122,6 +119,19 @@ export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array)
 // convert a native Uint8Array signature to Hexstring
 export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Array {
   return hexStringToByteArray(signature)
+}
+
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+export function verifySignedWithPublicKey(
+  data: string,
+  publicKey: AlgorandPublicKey,
+  signature: AlgorandSignature,
+): boolean {
+  return ed25519Crypto.verify(
+    hexStringToByteArray(data),
+    hexStringToByteArray(publicKey),
+    hexStringToByteArray(signature),
+  )
 }
 
 /** Whether the transaction signature is valid for this transaction body and publicKey provided */

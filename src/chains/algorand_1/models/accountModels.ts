@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import { AlgorandMultiSigOptions } from '../plugins/models'
 import { AlgorandPublicKey } from './cryptoModels'
 import { AlgorandNewKeysOptions } from './generalModels'
