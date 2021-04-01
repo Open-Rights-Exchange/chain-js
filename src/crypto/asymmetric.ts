@@ -231,7 +231,7 @@ export function encryptWithPublicKey(
   options?: EciesOptions,
   customAsymScheme?: CustomAsymmetricScheme,
 ): AsymmetricEncryptedData {
-  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme
+  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme || {}
   const useOptions = composeOptions(options)
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
@@ -294,65 +294,67 @@ export function decryptWithPrivateKey(
   options?: EciesOptions,
   customAsymScheme?: CustomAsymmetricScheme,
 ): string {
-  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme
+  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme || {}
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
-  const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
-  const iv = !isNullOrEmpty(encryptedObject?.iv) ? Buffer.from(encryptedObject.iv, 'hex') : emptyBuffer
-  const mac = Buffer.from(encryptedObject.mac, 'hex')
-  const privateKeyBuffer = Buffer.from(privateKey, 'hex')
-  const { sharedSecret } = generateSharedSecretUsingPrivateKey(
-    privateKeyBuffer,
-    encryptedObject.ephemPublicKey,
-    useOptions?.curveType,
-  )
-  const ephemBuffer = Buffer.from(encryptedObject.ephemPublicKey, 'hex')
-  let cipherKey
-  let macKey
-
-  // if we're using a customAsymScheme, use that provided scheme name
-  const scheme = customScheme || useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
-  if (encryptedObject?.scheme && scheme !== encryptedObject?.scheme) {
-    throwNewError(
-      `decryptWithPrivateKey: scheme does not match - expected ${scheme}, encrypted value scheme:${encryptedObject?.scheme}`,
+  let decryptedBuffer: Buffer
+  try {
+    const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
+    const iv = !isNullOrEmpty(encryptedObject?.iv) ? Buffer.from(encryptedObject.iv, 'hex') : emptyBuffer
+    const mac = Buffer.from(encryptedObject.mac, 'hex')
+    const privateKeyBuffer = Buffer.from(privateKey, 'hex')
+    const { sharedSecret } = generateSharedSecretUsingPrivateKey(
+      privateKeyBuffer,
+      encryptedObject.ephemPublicKey,
+      useOptions?.curveType,
     )
-  }
+    const ephemBuffer = Buffer.from(encryptedObject.ephemPublicKey, 'hex')
+    let cipherKey
+    let macKey
 
-  if (customMessageKeyGenerator) {
-    // override with custom way to generate
-    ;({ cipherKey, macKey } = customMessageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer))
-  } else {
-    // uses KDF to derive a symmetric encryption and a MAC keys:
-    // Ke || Km = KDF(S || S1)
-    const hash = generateMessageHash(
-      useOptions.hashCypherType,
-      Buffer.concat([sharedSecret, useOptions.s1], sharedSecret.length + useOptions.s1.length),
-    )
-    cipherKey = hash.slice(0, hash.length / 2)
-    macKey = hash.slice(hash.length / 2)
-  }
+    if (customMessageKeyGenerator) {
+      // override with custom way to generate
+      ;({ cipherKey, macKey } = customMessageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer))
+    } else {
+      // uses KDF to derive a symmetric encryption and a MAC keys:
+      // Ke || Km = KDF(S || S1)
+      const hash = generateMessageHash(
+        useOptions.hashCypherType,
+        Buffer.concat([sharedSecret, useOptions.s1], sharedSecret.length + useOptions.s1.length),
+      )
+      cipherKey = hash.slice(0, hash.length / 2)
+      macKey = hash.slice(hash.length / 2)
+    }
 
-  let compareMac
-  if (customMacGenerator) {
-    compareMac = customMacGenerator(macKey, useOptions.s2, cipherText)
-  } else {
-    // computes the tag of encrypted message and S2
-    // d = MAC(Km; c || S2)
-    compareMac = generateMessageMac(
-      useOptions.macCipherType,
-      macKey,
-      Buffer.concat([cipherText, useOptions.s2], cipherText.length + useOptions.s2.length),
-    )
+    let compareMac
+    if (customMacGenerator) {
+      compareMac = customMacGenerator(macKey, useOptions.s2, cipherText)
+    } else {
+      // computes the tag of encrypted message and S2
+      // d = MAC(Km; c || S2)
+      compareMac = generateMessageMac(
+        useOptions.macCipherType,
+        macKey,
+        Buffer.concat([cipherText, useOptions.s2], cipherText.length + useOptions.s2.length),
+      )
+    }
+    // outputs failed if d != MAC(Km; c || S2)
+    if (!equalConstTime(mac, compareMac)) {
+      throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
+    }
+    // uses symmetric encryption to decrypt the message
+    // m = E-1(Ke; c)
+    decryptedBuffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, cipherKey, cipherText)
+  } catch (err) {
+    let errorMessage = err
+    // if we're using a customAsymScheme, use that provided scheme name
+    const scheme = customScheme || useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
+    if (encryptedObject?.scheme && scheme !== encryptedObject?.scheme) {
+      errorMessage += `. Notice: scheme does not match - expected ${scheme}, encrypted value scheme:${encryptedObject?.scheme}`
+    }
+    throwNewError(errorMessage)
   }
-  // outputs failed if d != MAC(Km; c || S2)
-  if (!equalConstTime(mac, compareMac)) {
-    throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
-  }
-
-  // uses symmetric encryption to decrypt the message
-  // m = E-1(Ke; c)
-  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, cipherKey, cipherText)
-  return buffer.toString()
+  return decryptedBuffer.toString()
 }
 
 /** Signs a string (utf8) using the private key (hex string) and returns a signature (hex string) */
