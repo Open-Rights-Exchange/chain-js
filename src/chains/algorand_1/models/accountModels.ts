@@ -1,5 +1,6 @@
+import { AlgorandMultiSigOptions } from '../plugins/models'
 import { AlgorandPublicKey } from './cryptoModels'
-import { AlgorandNewKeysOptions, AlgorandMultiSigOptions } from './generalModels'
+import { AlgorandNewKeysOptions } from './generalModels'
 
 export type AlgorandCreateAccountOptions = {
   publicKey?: AlgorandPublicKey

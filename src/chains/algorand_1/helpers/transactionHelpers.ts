@@ -4,11 +4,11 @@ import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from 
 import {
   AlgoClient,
   AlgorandMultiSigAccount,
-  AlgorandMultiSigOptions,
   AlgorandRawTransactionMultisigStruct,
   AlgorandRawTransactionStruct,
   AlgorandTxSignResults,
 } from '../models'
+import { AlgorandMultiSigOptions } from '../plugins/models'
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
 export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions): AlgorandMultiSigAccount {

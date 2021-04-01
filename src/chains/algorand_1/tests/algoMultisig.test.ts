@@ -4,8 +4,8 @@ import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../..'
 import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
 import { multisigChainSerialized } from './mockups/multisig'
-import { AlgorandMultiSigOptions } from '../models'
 import { ChainActionType, ValueTransferParams } from '../../../models'
+import { AlgorandMultiSigOptions } from '../plugins/models'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =

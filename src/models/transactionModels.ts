@@ -8,6 +8,11 @@ export type TransactionResult = {
   chainResponse: TransactionChainResponse
 }
 
+export type MultisigOptions = {
+  pluginType: string
+  options: any
+}
+
 export type TransactionChainResponse = any
 export type TransactionId = string
 

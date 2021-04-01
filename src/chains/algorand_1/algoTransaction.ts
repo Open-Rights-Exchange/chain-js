@@ -20,7 +20,6 @@ import {
   AlgorandAddress,
   AlgorandChainSettingsCommunicationSettings,
   AlgorandChainTransactionParamsStruct,
-  AlgorandMultiSigOptions,
   AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
   AlgorandPublicKey,
@@ -65,8 +64,8 @@ import {
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
 import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
-// eslint-disable-next-line import/no-cycle
-import { AlgorandMultisigPlugin } from './plugins/multisigNativePlugin'
+import { AlgorandMultiSigOptions, AlgorandMultisigTransaction } from './plugins/models'
+import { AlgorandMultisigPluginFactory } from './plugins/algorandMultisigPlugin'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -86,18 +85,20 @@ export class AlgorandTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  private _multisigPlugin: AlgorandMultisigPlugin
+  private _multisigPlugin: AlgorandMultisigTransaction
 
   constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
     if (options?.multiSigOptions) {
-      this._multisigPlugin = new AlgorandMultisigPlugin({ options })
+      this._multisigPlugin = new AlgorandMultisigPluginFactory().create({
+        multiSigOptions: options?.multiSigOptions,
+      }).transaction
     }
   }
 
-  get multisigPlugin(): AlgorandMultisigPlugin {
+  get multisigPlugin(): AlgorandMultisigTransaction {
     return this._multisigPlugin
   }
 
@@ -143,8 +144,7 @@ export class AlgorandTransaction implements Transaction {
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
     if (this.isMultiSig) {
-      console.log('rawTrx: ', rawTx)
-      this.multisigPlugin.prepareMultisigToBeSigned(rawTx)
+      await this.multisigPlugin.prepareToBeSigned(rawTx)
     } else {
       this._rawTransaction = {
         txn: rawTx,
@@ -182,7 +182,6 @@ export class AlgorandTransaction implements Transaction {
     if (!decodedBlob?.txn) {
       throwNewError('Cant decode blob into transaction - expected a property .txn')
     }
-    this.assertMultisigFromMatchesOptions(decodedBlob)
     // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
     this.actions = [decodedBlob]
     this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
@@ -280,7 +279,7 @@ export class AlgorandTransaction implements Transaction {
   public async validate(): Promise<void> {
     this.assertHasAction()
     this.assertHasRaw()
-    this.assertMultisigFromMatchesOptions(this.actions[0])
+    if (this.isMultiSig) this.multisigPlugin.validate()
     this._isValidated = true
   }
 
@@ -429,23 +428,23 @@ export class AlgorandTransaction implements Transaction {
   get rawTransaction(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     let rawTransaction
     if (this.isMultiSig) {
-      rawTransaction = this.multisigPlugin.rawMultisigTransaction
+      rawTransaction = this.multisigPlugin.rawTransaction
     } else {
       rawTransaction = this._rawTransaction
     }
     return rawTransaction
   }
 
-  /** Determine standard multisig options from raw msig struct */
-  private multisigOptionsFromRawTransactionMultisig(msig: AlgorandMultiSignatureMsigStruct): AlgorandMultiSigOptions {
-    if (isNullOrEmpty(msig)) return null
-    const addrs = msig.subsig.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
-    return {
-      version: msig.v,
-      threshold: msig.thr,
-      addrs,
-    }
-  }
+  // /** Determine standard multisig options from raw msig struct */
+  // private multisigOptionsFromRawTransactionMultisig(msig: AlgorandMultiSignatureMsigStruct): AlgorandMultiSigOptions {
+  //   if (isNullOrEmpty(msig)) return null
+  //   const addrs = msig.subsig.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
+  //   return {
+  //     version: msig.v,
+  //     threshold: msig.thr,
+  //     addrs,
+  //   }
+  // }
 
   /** Public Key of account that has signed (or will sign) this transaction (for non-multisig)
    *  Usually the same as the from address's PK - unless the account has been rekeyed in which case this is the rekeyed PK
@@ -492,7 +491,7 @@ export class AlgorandTransaction implements Transaction {
     let transactionId: string
     this.assertIsValidated()
     if (this.isMultiSig) {
-      this.multisigPlugin.signMultisig(privateKeys, this.transactionId)
+      await this.multisigPlugin.sign(this._actionHelper.actionEncodedForSdk, privateKeys, this.transactionId)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const signResults: AlgorandTxSignResults = algosdk.signTransaction(
@@ -564,50 +563,13 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** extract 'from' address from various action types and confirm it matches multisig options */
-  private assertMultisigFromMatchesOptions(
-    action?:
-    | AlgorandTxAction
-    | AlgorandTxActionRaw
-    | AlgorandTxActionSdkEncoded
-    | AlgorandRawTransactionStruct
-    | AlgorandRawTransactionMultisigStruct,
-  ): AlgorandAddress {
-    let fromAddr: AlgorandAddress
-    const txAction = action as AlgorandTxAction | AlgorandTxActionSdkEncoded
-    const txRaw = action as AlgorandTxActionRaw
-    const txRawStruct = action as AlgorandRawTransactionStruct
-    const txRawStructMultisig = action as AlgorandRawTransactionMultisigStruct // has .msig
-    const multiSigOptionsFromRaw = !isNullOrEmpty(txRawStructMultisig?.msig)
-      ? this.multisigOptionsFromRawTransactionMultisig(txRawStructMultisig.msig)
-      : null
-    const multiSigOptions = this.multiSigOptions || multiSigOptionsFromRaw
-    // if not multisig, we're done here
-    if (isNullOrEmpty(multiSigOptions)) return
-
-    const multiSigFrom: AlgorandAddress = determineMultiSigAddress(multiSigOptions)
-
-    // extract fromAddr from various action types
-    if (!isNullOrEmpty(txRawStruct?.txn)) {
-      fromAddr = toAlgorandAddressFromPublicKeyByteArray(txRawStruct.txn?.snd) // AlgorandRawTransactionStruct and AlgorandRawTransactionMultisigStruct
-    } else if (isAString(txAction.from)) {
-      fromAddr = toAlgorandAddress(txAction.from) // AlgorandTxAction and AlgorandTxActionSdkEncoded
-    } else {
-      fromAddr = toAlgorandAddressFromRawStruct(txRaw.from) // AlgorandTxActionRaw
-    }
-
-    if (fromAddr !== multiSigFrom) {
-      throwNewError(
-        `From address (or txn.snd) must be the multisig address (hash of multisig options). Got: ${fromAddr}. Expected: ${multiSigFrom}`,
-      )
-    }
-  }
-
   /** Set the raw trasaction properties from the packed results from using Algo SDK to sign tx */
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      this._multisigPlugin = new AlgorandMultisigPlugin({ raw: transaction as AlgorandRawTransactionMultisigStruct })
+      this._multisigPlugin = new AlgorandMultisigPluginFactory().create({
+        raw: transaction as AlgorandRawTransactionMultisigStruct,
+      }).transaction
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }

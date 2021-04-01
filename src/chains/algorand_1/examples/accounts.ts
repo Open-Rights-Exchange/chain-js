@@ -7,7 +7,7 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
-import { AlgorandMultiSigOptions } from '../models'
+import { AlgorandMultiSigOptions } from '../plugins/models'
 
 require('dotenv').config()
 

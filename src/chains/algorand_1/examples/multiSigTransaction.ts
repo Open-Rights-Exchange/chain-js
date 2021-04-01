@@ -6,9 +6,10 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
+import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey, determineMultiSigAddress, toAlgorandSignature } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
+import { AlgorandMultiSigOptions } from '../plugins/models'
 
 require('dotenv').config()
 

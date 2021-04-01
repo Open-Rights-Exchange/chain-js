@@ -1,6 +1,7 @@
-import { AlgorandValue, AlgorandMultiSigOptions } from './generalModels'
+import { AlgorandValue } from './generalModels'
 import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
 import { AlgorandTxActionStruct } from './algoStructures'
+import { AlgorandMultiSigOptions } from '../plugins/models'
 
 /**
  * Chain response type after a transaction is confirmed on the chain
