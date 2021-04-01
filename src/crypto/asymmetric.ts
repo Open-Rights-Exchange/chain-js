@@ -16,12 +16,11 @@ import {
   AsymmetricEncryptedData,
   AsymmetricEncryptedDataString,
   CipherGCMTypes,
+  CustomAsymmetricScheme,
   ECDHKeyFormat,
   EciesCurveType,
   EciesOptions,
   EciesOptionsAsBuffers,
-  GenerateCipherHash,
-  GenerateMac,
   SymmetricCypherType,
   Unencrypted,
 } from './asymmetricModels'
@@ -230,9 +229,9 @@ export function encryptWithPublicKey(
   publicKey: string, // hex string
   plainText: string,
   options?: EciesOptions,
-  customCipherGenerator?: GenerateCipherHash,
-  customMacGenerator?: GenerateMac,
+  customAsymScheme?: CustomAsymmetricScheme,
 ): AsymmetricEncryptedData {
+  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme
   const useOptions = composeOptions(options)
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { ephemPublicKey, sharedSecret } = generateSharedSecretAndEphemPublicKey(
@@ -243,8 +242,8 @@ export function encryptWithPublicKey(
   const ephemBuffer = Buffer.from(ephemPublicKey, 'hex')
   let cipherKey
   let macKey
-  if (customCipherGenerator) {
-    ;({ cipherKey, macKey } = customCipherGenerator(sharedSecret, useOptions.s1, ephemBuffer))
+  if (customMessageKeyGenerator) {
+    ;({ cipherKey, macKey } = customMessageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer))
   } else {
     // uses KDF to derive a symmetric encryption and a MAC keys:
     // Ke || Km = KDF(S || S1)
@@ -284,7 +283,8 @@ export function encryptWithPublicKey(
     mac: Buffer.from(mac).toString('hex'),
   }
 
-  const scheme = useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
+  // if we're using a customAsymScheme, use that provided scheme name
+  const scheme = customScheme || useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
   if (scheme) result.scheme = scheme
 
   return result
@@ -295,9 +295,9 @@ export function decryptWithPrivateKey(
   encrypted: AsymmetricEncryptedData,
   privateKey: string, // hex string
   options?: EciesOptions,
-  customCipherGenerator?: GenerateCipherHash,
-  customMacGenerator?: GenerateMac,
+  customAsymScheme?: CustomAsymmetricScheme,
 ): string {
+  const { scheme: customScheme, customMessageKeyGenerator, customMacGenerator } = customAsymScheme
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
   const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
@@ -312,9 +312,18 @@ export function decryptWithPrivateKey(
   const ephemBuffer = Buffer.from(encryptedObject.ephemPublicKey, 'hex')
   let cipherKey
   let macKey
-  if (customCipherGenerator) {
+
+  // if we're using a customAsymScheme, use that provided scheme name
+  const scheme = customScheme || useOptions?.scheme || getDefaultScheme(useOptions?.curveType)
+  if (encryptedObject?.scheme && scheme !== encryptedObject?.scheme) {
+    throwNewError(
+      `decryptWithPrivateKey: scheme does not match - expected ${scheme}, encrypted value scheme:${encryptedObject?.scheme}`,
+    )
+  }
+
+  if (customMessageKeyGenerator) {
     // override with custom way to generate
-    ;({ cipherKey, macKey } = customCipherGenerator(sharedSecret, useOptions.s1, ephemBuffer))
+    ;({ cipherKey, macKey } = customMessageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer))
   } else {
     // uses KDF to derive a symmetric encryption and a MAC keys:
     // Ke || Km = KDF(S || S1)
