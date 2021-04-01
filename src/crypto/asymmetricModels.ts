@@ -84,11 +84,21 @@ export type AsymmetricEncryptedData = {
 }
 
 /** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
-export type GenerateCipherHash = (
+export type CustomMessageKeyGenerator = (
   sharedSecret?: Buffer | Uint8Array,
   s1?: Buffer,
   ephemKeyBuffer?: Buffer,
 ) => { cipherKey: Buffer; macKey: Buffer }
 
 /** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom mac generation */
-export type GenerateMac = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
+export type CustomMacGenerator = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
+
+/** Custom way to compose an asymmetic encyption payload */
+export type CustomAsymmetricScheme = {
+  /** unique name that defines the details of how cipher key and mac key were composed (e.g. compressed or umcompressed public key) */
+  scheme: string
+  /** function to generate a cipher key in a 'custom' way */
+  customMessageKeyGenerator: CustomMessageKeyGenerator
+  /** function to generate a mac key in a 'custom' way */
+  customMacGenerator: CustomMacGenerator
+}
