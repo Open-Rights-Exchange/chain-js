@@ -15,7 +15,7 @@ export enum AsymmetricEncryptedDataStringBrand {
 }
 
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
-export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
+export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256' | 'aes-256-ctr'
 export enum EciesCurveType {
   Secp256k1 = 'secp256k1',
   Ed25519 = 'ed25519',
@@ -71,3 +71,13 @@ export type AsymmetricEncryptedData = {
   mac: string
   scheme?: Scheme
 }
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
+export type GenerateCipherHash = (
+  sharedSecret?: Buffer | Uint8Array,
+  s1?: Buffer,
+  ephemKeyBuffer?: Buffer,
+) => { cipherKey: Buffer; macKey: Buffer }
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom mac generation */
+export type GenerateMac = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
