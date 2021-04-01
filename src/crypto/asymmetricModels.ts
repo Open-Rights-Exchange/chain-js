@@ -14,8 +14,19 @@ export enum AsymmetricEncryptedDataStringBrand {
   _ = '',
 }
 
+/** Possible symmetric cypher types */
+export enum SymmetricCypherType {
+  Aes128Ecb = 'aes-128-ecb',
+  Aes256Ctr = 'aes-256-ctr',
+  Sha256 = 'sha256',
+}
+
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
-export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
+export type CipherGCMTypes =
+  | crypto.CipherGCMTypes // cipher types supported by Node (depends on version of Node)
+  | SymmetricCypherType.Aes128Ecb
+  | SymmetricCypherType.Sha256
+  | SymmetricCypherType.Aes256Ctr
 export enum EciesCurveType {
   Secp256k1 = 'secp256k1',
   Ed25519 = 'ed25519',
@@ -26,10 +37,10 @@ export enum EciesCurveType {
 export type Scheme = string
 
 export type EciesOptions = {
-  hashCypherType?: CipherGCMTypes
-  macCipherType?: CipherGCMTypes // e.g. 'sha256'
+  hashCypherType?: SymmetricCypherType
+  macCipherType?: SymmetricCypherType // e.g. 'sha256'
   curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
-  symmetricCypherType?: CipherGCMTypes
+  symmetricCypherType?: SymmetricCypherType
   keyFormat?: ECDHKeyFormat
   /** Optional Initialization Vector (as Hex string) */
   iv?: string
@@ -43,10 +54,10 @@ export type EciesOptions = {
 }
 
 export type EciesOptionsAsBuffers = {
-  hashCypherType?: CipherGCMTypes
-  macCipherType?: CipherGCMTypes // e.g. 'sha256'
+  hashCypherType?: SymmetricCypherType
+  macCipherType?: SymmetricCypherType // e.g. 'sha256'
   curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
-  symmetricCypherType?: CipherGCMTypes
+  symmetricCypherType?: SymmetricCypherType
   keyFormat?: ECDHKeyFormat
   /** Optional Initialization Vector (as Hex string) */
   iv?: Buffer
@@ -70,4 +81,24 @@ export type AsymmetricEncryptedData = {
   ciphertext?: string
   mac: string
   scheme?: Scheme
+}
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
+export type CustomMessageKeyGenerator = (
+  sharedSecret?: Buffer | Uint8Array,
+  s1?: Buffer,
+  ephemKeyBuffer?: Buffer,
+) => { cipherKey: Buffer; macKey: Buffer }
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom mac generation */
+export type CustomMacGenerator = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
+
+/** Custom way to compose an asymmetic encyption payload */
+export type CustomAsymmetricScheme = {
+  /** unique name that defines the details of how cipher key and mac key were composed (e.g. compressed or umcompressed public key) */
+  scheme: string
+  /** function to generate a cipher key in a 'custom' way */
+  customMessageKeyGenerator: CustomMessageKeyGenerator
+  /** function to generate a mac key in a 'custom' way */
+  customMacGenerator: CustomMacGenerator
 }
