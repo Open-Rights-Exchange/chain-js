@@ -22,13 +22,12 @@ import {
   EciesOptionsAsBuffers,
   GenerateCipherHash,
   GenerateMac,
+  SymmetricCypherType,
   Unencrypted,
 } from './asymmetricModels'
 import { PrivateKey, PublicKey, Signature } from '../models'
 
 export * from './asymmetricModels'
-
-export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 
 const DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1'
 const DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519'
@@ -36,14 +35,24 @@ const DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519'
 // ECIES details in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 /** default options for ECIES Assymetric encryption (encrypt with public key, decrypt with private key) */
 export const DefaultEciesOptions: any = {
-  hashCypherType: 'sha256',
-  macCipherType: 'sha256',
+  hashCypherType: SymmetricCypherType.Sha256,
+  macCipherType: SymmetricCypherType.Sha256,
   curveType: EciesCurveType.Secp256k1,
-  symmetricCypherType: 'aes-128-ecb',
+  symmetricCypherType: SymmetricCypherType.Aes128Ecb,
   /** iv is used in symmetric cipher
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
   keyFormat: 'uncompressed',
+}
+
+export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
+/** compose the right length of empty buffer for a specific cypherType */
+function emptyBufferForIv(symmetricCypherType: SymmetricCypherType) {
+  // aes-256-ctr requires a buffer value to exist
+  if (symmetricCypherType === SymmetricCypherType.Aes256Ctr) {
+    return Buffer.alloc(16)
+  }
+  return emptyBuffer
 }
 
 /** Verifies that the value is a valid, stringified JSON Encrypted object */
@@ -107,16 +116,16 @@ function symmetricDecrypt(
   return Buffer.concat([firstChunk, secondChunk])
 }
 
-// KDF
-export function hashMessage(cypherName: CipherGCMTypes, message: Unencrypted) {
+/**  uses KDF to derive a symmetric encryption from message */
+export function generateMessageHash(cypherName: SymmetricCypherType, message: Unencrypted) {
   return crypto
     .createHash(cypherName)
     .update(message)
     .digest()
 }
 
-// MAC
-export function macMessage(cypherName: CipherGCMTypes, key: crypto.CipherKey, message: Unencrypted) {
+/**  computes the tag of encrypted message provided */
+export function generateMessageMac(cypherName: SymmetricCypherType, key: crypto.CipherKey, message: Unencrypted) {
   return crypto
     .createHmac(cypherName, key)
     .update(message)
@@ -152,16 +161,12 @@ function composeOptions(optionsIn: EciesOptions): EciesOptionsAsBuffers {
     ivIn = undefined // use options.iv to determine is the cypher in ecb mode
   }
 
-  if (newOptions.symmetricCypherType === 'aes-256-ctr') {
-    ivIn = Buffer.alloc(16).toString('hex')
-  }
-
   // iv should be a Buffer or null or undefined - retain either undefined or null - used in symmetricEncrypt for diff examples
   let iv: Buffer
   if (!isNullOrEmpty(ivIn)) {
     iv = Buffer.from(ivIn, 'hex')
   } else if (ivIn === undefined) {
-    iv = emptyBuffer
+    iv = emptyBufferForIv(newOptions.symmetricCypherType)
   } else if (ivIn === null) {
     iv = null
   }
@@ -225,8 +230,8 @@ export function encryptWithPublicKey(
   publicKey: string, // hex string
   plainText: string,
   options?: EciesOptions,
-  cipherGenerateFunctıon?: GenerateCipherHash,
-  macGenerateFunction?: GenerateMac,
+  customCipherGenerator?: GenerateCipherHash,
+  customMacGenerator?: GenerateMac,
 ): AsymmetricEncryptedData {
   const useOptions = composeOptions(options)
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
@@ -236,37 +241,35 @@ export function encryptWithPublicKey(
     useOptions?.keyFormat,
   )
   const ephemBuffer = Buffer.from(ephemPublicKey, 'hex')
-  let encryptionKey
+  let cipherKey
   let macKey
-  if (cipherGenerateFunctıon) {
-    const { cipherKey, macKey: macHash } = cipherGenerateFunctıon(sharedSecret, useOptions.s1, ephemBuffer)
-    encryptionKey = cipherKey
-    macKey = macHash
+  if (customCipherGenerator) {
+    ;({ cipherKey, macKey } = customCipherGenerator(sharedSecret, useOptions.s1, ephemBuffer))
   } else {
     // uses KDF to derive a symmetric encryption and a MAC keys:
     // Ke || Km = KDF(S || S1)
-    const hash = hashMessage(
+    const hash = generateMessageHash(
       useOptions.hashCypherType,
       Buffer.concat(
         [sharedSecret, useOptions.s1, ephemBuffer],
         sharedSecret.length + useOptions.s1.length + ephemBuffer.length,
       ),
     )
-    encryptionKey = hash.slice(0, hash.length / 2)
+    cipherKey = hash.slice(0, hash.length / 2)
     macKey = hash.slice(hash.length / 2)
   }
 
   // encrypts the message:
   // c = E(Ke; m);
-  const cipherText = symmetricEncrypt(useOptions.symmetricCypherType, useOptions.iv, encryptionKey, plainText)
+  const cipherText = symmetricEncrypt(useOptions.symmetricCypherType, useOptions.iv, cipherKey, plainText)
 
   let mac
-  if (macGenerateFunction) {
-    mac = macGenerateFunction(macKey, useOptions.s2, cipherText)
+  if (customMacGenerator) {
+    mac = customMacGenerator(macKey, useOptions.s2, cipherText)
   } else {
     // computes the tag of encrypted message and S2:
     // d = MAC(Km; c || S2)
-    mac = macMessage(
+    mac = generateMessageMac(
       useOptions.macCipherType,
       macKey,
       Buffer.concat([cipherText, useOptions.s2], cipherText.length + useOptions.s2.length),
@@ -292,8 +295,8 @@ export function decryptWithPrivateKey(
   encrypted: AsymmetricEncryptedData,
   privateKey: string, // hex string
   options?: EciesOptions,
-  cipherGenerateFunctıon?: GenerateCipherHash,
-  macGenerateFunction?: GenerateMac,
+  customCipherGenerator?: GenerateCipherHash,
+  customMacGenerator?: GenerateMac,
 ): string {
   const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
@@ -307,46 +310,45 @@ export function decryptWithPrivateKey(
     useOptions?.curveType,
   )
   const ephemBuffer = Buffer.from(encryptedObject.ephemPublicKey, 'hex')
-  let encryptionKey
+  let cipherKey
   let macKey
-  if (cipherGenerateFunctıon) {
-    const { cipherKey, macKey: macHash } = cipherGenerateFunctıon(sharedSecret, useOptions.s1, ephemBuffer)
-    encryptionKey = cipherKey
-    macKey = macHash
+  if (customCipherGenerator) {
+    // override with custom way to generate
+    ;({ cipherKey, macKey } = customCipherGenerator(sharedSecret, useOptions.s1, ephemBuffer))
   } else {
     // uses KDF to derive a symmetric encryption and a MAC keys:
     // Ke || Km = KDF(S || S1)
-    const hash = hashMessage(
+    const hash = generateMessageHash(
       useOptions.hashCypherType,
       Buffer.concat(
         [sharedSecret, useOptions.s1, ephemBuffer],
         sharedSecret.length + useOptions.s1.length + ephemBuffer.length,
       ),
     )
-    encryptionKey = hash.slice(0, hash.length / 2)
+    cipherKey = hash.slice(0, hash.length / 2)
     macKey = hash.slice(hash.length / 2)
   }
 
-  let keyTag
-  if (macGenerateFunction) {
-    keyTag = macGenerateFunction(macKey, useOptions.s2, cipherText)
+  let compareMac
+  if (customMacGenerator) {
+    compareMac = customMacGenerator(macKey, useOptions.s2, cipherText)
   } else {
-    // computes the tag of encrypted message and S2:
+    // computes the tag of encrypted message and S2
     // d = MAC(Km; c || S2)
-    keyTag = macMessage(
+    compareMac = generateMessageMac(
       useOptions.macCipherType,
       macKey,
       Buffer.concat([cipherText, useOptions.s2], cipherText.length + useOptions.s2.length),
     )
   }
-  // outputs failed if d != MAC(Km; c || S2);
-  if (!equalConstTime(mac, keyTag)) {
+  // outputs failed if d != MAC(Km; c || S2)
+  if (!equalConstTime(mac, compareMac)) {
     throwNewError('decryptWithPrivateKey: mac does not match - encrypted value may be corrupted')
   }
 
   // uses symmetric encryption to decrypt the message
   // m = E-1(Ke; c)
-  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, encryptionKey, cipherText)
+  const buffer = symmetricDecrypt(useOptions.symmetricCypherType, iv, cipherKey, cipherText)
   return buffer.toString()
 }
 
