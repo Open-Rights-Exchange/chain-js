@@ -52,8 +52,14 @@ function macGenerator( macKey?: Buffer, s2?: Buffer, cipherText?: Buffer ) {
   return mac.slice(0, mac.length / 2)
 }
 
-export const asymmetricSchemeType1: AsymmetricSchemeGenerator = {
+export const asymmetricSchemeSecpk256k1Type1: AsymmetricSchemeGenerator = {
   scheme: AsymmetricScheme.SECP256K1_TYPE1,
+  messageKeyGenerator,
+  macGenerator,
+}
+
+export const asymmetricSchemeEd25519Type1: AsymmetricSchemeGenerator = {
+  scheme: AsymmetricScheme.ED25519_TYPE1,
   messageKeyGenerator,
   macGenerator,
 }

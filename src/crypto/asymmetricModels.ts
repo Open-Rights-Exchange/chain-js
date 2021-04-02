@@ -41,6 +41,7 @@ export enum AsymmetricScheme {
   EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.eos',
   ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum',
   SECP256K1_TYPE1 = 'asym.chainjs.secp256k1.type1',
+  ED25519_TYPE1 = 'asym.chainjs.ed25519.type1',
 }
 
 export type EciesOptions = {
