@@ -58,7 +58,7 @@ export type EciesOptions = {
   s2?: string
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: AsymmetricScheme
+  scheme?: AsymmetricScheme | string
 }
 
 export type EciesOptionsAsBuffers = {
@@ -75,7 +75,7 @@ export type EciesOptionsAsBuffers = {
   s2?: Buffer
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: AsymmetricScheme
+  scheme?: AsymmetricScheme | string
 }
 
 /** Asymmetric encypted data object
@@ -88,7 +88,7 @@ export type AsymmetricEncryptedData = {
   ephemPublicKey: string
   ciphertext?: string
   mac: string
-  scheme?: AsymmetricScheme
+  scheme?: AsymmetricScheme | string
 }
 
 /** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
