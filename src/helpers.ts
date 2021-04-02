@@ -167,8 +167,8 @@ export function isInEnum<T>(enumType: T, value: any): value is T[keyof T] {
 
 export function isBase64Encoded(value: any): boolean {
   if (!isAString(value)) return false
-  const fromBase64 = Buffer.from(value, 'base64').toString('utf8')
-  const toBase64 = Buffer.from(fromBase64, 'utf8').toString('base64')
+  const fromBase64 = Buffer.from(value, 'base64')
+  const toBase64 = Buffer.from(fromBase64).toString('base64')
   return toBase64 === value
 }
 
