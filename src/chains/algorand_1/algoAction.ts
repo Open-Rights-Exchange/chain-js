@@ -9,7 +9,7 @@ import {
   isANumber,
   isAString,
   isAUint8Array,
-  isBase64Encoded,
+  isBase64EncodedAndNotUtf,
   isHexString,
   isNullOrEmpty,
   jsonParseAndRevive,
@@ -52,11 +52,11 @@ export class AlgorandActionHelper {
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
   constructor(
     params:
-      | AlgorandTxAction
-      | AlgorandTxActionRaw
-      | AlgorandTxActionSdkEncoded
-      | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+    | AlgorandTxAction
+    | AlgorandTxActionRaw
+    | AlgorandTxActionSdkEncoded
+    | AlgorandRawTransactionStruct
+    | AlgorandRawTransactionMultisigStruct,
   ) {
     this.validateAndApplyParams(params)
   }
@@ -64,11 +64,11 @@ export class AlgorandActionHelper {
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
     actionParam:
-      | AlgorandTxAction
-      | AlgorandTxActionRaw
-      | AlgorandTxActionSdkEncoded
-      | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+    | AlgorandTxAction
+    | AlgorandTxActionRaw
+    | AlgorandTxActionSdkEncoded
+    | AlgorandRawTransactionStruct
+    | AlgorandRawTransactionMultisigStruct,
   ) {
     if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
@@ -316,7 +316,7 @@ export class AlgorandActionHelper {
     const appArgsEncoded = appArgs.map((appArg: string | number | Uint8Array) => {
       if (isAUint8Array(appArg)) return appArg as Uint8Array
       if (hasHexPrefix(appArg)) return new Uint8Array(Buffer.from(removeHexPrefix(appArg as string), 'hex'))
-      if (isBase64Encoded(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'base64'))
+      if (isBase64EncodedAndNotUtf(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'base64'))
       if (isAString(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'utf8'))
       if (isANumber(appArg)) return bigIntToUint8Array(appArg as number) // TODO: Confirm this is the right conversion - can we use an existing function for this?
       return undefined

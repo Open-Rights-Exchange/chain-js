@@ -171,6 +171,13 @@ export function isBase64Encoded(value: any): boolean {
   const toBase64 = Buffer.from(fromBase64).toString('base64')
   return toBase64 === value
 }
+// TODO: Revise. This might base a temporary hack
+export function isBase64EncodedAndNotUtf(value: any): boolean {
+  if (!isAString(value)) return false
+  const fromBase64 = Buffer.from(value, 'base64').toString('utf8')
+  const toBase64 = Buffer.from(fromBase64, 'utf8').toString('base64')
+  return toBase64 === value
+}
 
 export function getUniqueValues<T>(array: T[]) {
   return Array.from(new Set(array.map(item => JSON.stringify(item)))).map(item => jsonParseAndRevive(item))
