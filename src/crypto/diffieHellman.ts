@@ -5,15 +5,19 @@ import { encodeBase64 } from 'tweetnacl-util'
 import { throwNewError } from '../errors'
 import { EciesCurveType } from './asymmetricModels'
 
+function assertPublicKeyBufferLengthValid(publicKey: Buffer, functionName: string) {
+  if (!(publicKey.length === 65 || publicKey.length === 33)) {
+    throwNewError(`${functionName}: publicKey buffer must be 65 bytes (uncompressed) or 33 bytes (compressed)`)
+  }
+}
+
 /** Generates Ephemeral Keypair and sharedSecret - used for ECC curves and some others supported by Node crypto curveType */
 export function generateEphemPublicKeyAndSharedSecretType1(
   publicKey: NodeJS.ArrayBufferView,
   curveType: EciesCurveType,
   keyFormat: ECDHKeyFormat,
 ) {
-  if ((publicKey as Buffer).length !== 65) {
-    throwNewError('generateEphemPublicKeyAndSharedSecretType1: publicKey buffer must be 65 bytes')
-  }
+  assertPublicKeyBufferLengthValid(publicKey as Buffer, 'generateEphemPublicKeyAndSharedSecretType1')
   const ecdh = crypto.createECDH(curveType)
   const encodedEphemPublicKey = ecdh.generateKeys(null, keyFormat)
   const sharedSecret = ecdh.computeSecret(publicKey)
@@ -26,11 +30,7 @@ export function generateSharedSecretType1(
   secretKey: NodeJS.ArrayBufferView,
   curveType: EciesCurveType,
 ) {
-  if (!((publicKey as Buffer).length === 65 || (publicKey as Buffer).length === 33)) {
-    throwNewError(
-      'generateSharedSecretType1: publicKey buffer must be 65 bytes (uncompressed) or 33 bytes (compressed)',
-    )
-  }
+  assertPublicKeyBufferLengthValid(publicKey as Buffer, 'generateSharedSecretType1')
   const ecdh = crypto.createECDH(curveType)
   ecdh.setPrivateKey(secretKey)
   const sharedSecret = ecdh.computeSecret(publicKey)
