@@ -213,15 +213,15 @@ function generateSharedSecretUsingPrivateKey(
   return { ephemPublicKeyBuffer, sharedSecret }
 }
 
-function convertEphemPublicKeyToBuffer(ephemPublicKey: any) {
+function convertEphemPublicKeyToBuffer(ephemPublicKey: string | Buffer): Buffer {
   if (isHexString(ephemPublicKey)) {
-    return Buffer.from(ephemPublicKey, 'hex')
+    return Buffer.from(ephemPublicKey as string, 'hex')
   }
   if (isBase64Encoded(ephemPublicKey)) {
-    return Buffer.from(ephemPublicKey, 'base64')
+    return Buffer.from(ephemPublicKey as string, 'base64')
   }
   if (isABuffer(ephemPublicKey)) {
-    return ephemPublicKey
+    return ephemPublicKey as Buffer
   }
   throwNewError('Invalid ephemPublicKey format. Expected Buffer, Hex or Base64 String')
   return Buffer.alloc(0)
