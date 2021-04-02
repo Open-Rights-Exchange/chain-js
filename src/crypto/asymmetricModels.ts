@@ -34,7 +34,14 @@ export enum EciesCurveType {
 
 /** Informational string added to encrypted results - useful when decrypting in determining set of options used
  * e.g. 'chainjs.ethereum.secp256k1.v2' */
-export type Scheme = string
+export enum AsymmetricScheme {
+  DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1',
+  DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519',
+  ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519.algorand',
+  EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.eos',
+  ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum',
+  SECP256K1_TYPE1 = 'asym.chainjs.secp256k1.type1',
+}
 
 export type EciesOptions = {
   hashCypherType?: SymmetricCypherType
@@ -50,7 +57,7 @@ export type EciesOptions = {
   s2?: string
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: Scheme
+  scheme?: AsymmetricScheme
 }
 
 export type EciesOptionsAsBuffers = {
@@ -67,7 +74,7 @@ export type EciesOptionsAsBuffers = {
   s2?: Buffer
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: Scheme
+  scheme?: AsymmetricScheme
 }
 
 /** Asymmetric encypted data object
@@ -80,25 +87,25 @@ export type AsymmetricEncryptedData = {
   ephemPublicKey: string
   ciphertext?: string
   mac: string
-  scheme?: Scheme
+  scheme?: AsymmetricScheme
 }
 
 /** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
-export type CustomMessageKeyGenerator = (
+export type MessageKeyGenerator = (
   sharedSecret?: Buffer | Uint8Array,
   s1?: Buffer,
   ephemKeyBuffer?: Buffer,
 ) => { cipherKey: Buffer; macKey: Buffer }
 
 /** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom mac generation */
-export type CustomMacGenerator = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
+export type MacGenerator = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
 
 /** Custom way to compose an asymmetic encyption payload */
-export type CustomAsymmetricScheme = {
+export type AsymmetricSchemeGenerator = {
   /** unique name that defines the details of how cipher key and mac key were composed (e.g. compressed or umcompressed public key) */
-  scheme: string
+  scheme: AsymmetricScheme
   /** function to generate a cipher key in a 'custom' way */
-  customMessageKeyGenerator: CustomMessageKeyGenerator
+  messageKeyGenerator: MessageKeyGenerator
   /** function to generate a mac key in a 'custom' way */
-  customMacGenerator: CustomMacGenerator
+  macGenerator: MacGenerator
 }
