@@ -1,9 +1,17 @@
 // This code from https://github.com/bin-y/standard-ecies
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 import crypto from 'crypto'
-import { decodeBase64 } from 'tweetnacl-util'
 import { ecdsaSign, ecdsaVerify } from 'secp256k1'
-import { byteArrayToHexString, createSha256Hash, isAString, isNullOrEmpty, utf8StringToHexString } from '../helpers'
+import {
+  byteArrayToHexString,
+  createSha256Hash,
+  isABuffer,
+  isAString,
+  isBase64Encoded,
+  isHexString,
+  isNullOrEmpty,
+  utf8StringToHexString,
+} from '../helpers'
 import { throwNewError } from '../errors'
 import { ensureEncryptedValueIsObject } from './genericCryptoHelpers'
 import {
@@ -35,7 +43,7 @@ export const DefaultEciesOptions: any = {
   hashCypherType: SymmetricCypherType.Sha256,
   macCipherType: SymmetricCypherType.Sha256,
   curveType: EciesCurveType.Secp256k1,
-  symmetricCypherType: SymmetricCypherType.Aes128Ecb,
+  symmetricCypherType: SymmetricCypherType.Aes256Ctr,
   /** iv is used in symmetric cipher
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
@@ -199,11 +207,24 @@ function generateSharedSecretUsingPrivateKey(
   }
   if (curveType === EciesCurveType.Ed25519) {
     ephemPublicKeyBuffer = Buffer.from(ephemPublicKey, 'hex')
-    const decodedPublicKey = decodeBase64(ephemPublicKeyBuffer.toString())
-    sharedSecret = generateSharedSecretEd25519(decodedPublicKey, privateKey as Uint8Array)
+    sharedSecret = generateSharedSecretEd25519(ephemPublicKeyBuffer, privateKey as Uint8Array)
   }
 
   return { ephemPublicKeyBuffer, sharedSecret }
+}
+
+function convertEphemPublicKeyToBuffer(ephemPublicKey: any) {
+  if (isHexString(ephemPublicKey)) {
+    return Buffer.from(ephemPublicKey, 'hex')
+  }
+  if (isBase64Encoded(ephemPublicKey)) {
+    return Buffer.from(ephemPublicKey, 'base64')
+  }
+  if (isABuffer(ephemPublicKey)) {
+    return ephemPublicKey
+  }
+  throwNewError('Invalid ephemPublicKey format. Expected Buffer, Hex or Base64 String')
+  return Buffer.alloc(0)
 }
 
 /** ECDH encryption using publicKey */
@@ -223,7 +244,7 @@ export function encryptWithPublicKey(
   const asymSchemeGenerator = getAsymSchemeGenerator(useOptions?.scheme)
   const { messageKeyGenerator, macGenerator } = asymSchemeGenerator
 
-  const ephemBuffer = Buffer.from(ephemPublicKey, 'hex')
+  const ephemBuffer = convertEphemPublicKeyToBuffer(ephemPublicKey)
 
   const { cipherKey, macKey } = messageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer)
   // let cipherKey
@@ -262,7 +283,7 @@ export function encryptWithPublicKey(
   const result: AsymmetricEncryptedData = {
     iv: !isNullOrEmpty(useOptions?.iv) ? useOptions.iv.toString('hex') : null,
     publicKey,
-    ephemPublicKey: Buffer.from(ephemPublicKey).toString('hex'),
+    ephemPublicKey: Buffer.from(ephemBuffer).toString('hex'),
     ciphertext: cipherText.toString('hex'),
     mac: Buffer.from(mac).toString('hex'),
   }
@@ -282,8 +303,12 @@ export function decryptWithPrivateKey(
 ): string {
   // const { scheme: customScheme, messageKeyGenerator: customMessageKeyGenerator, macGenerator: customMacGenerator } =
   //   customAsymScheme || {}
-  const useOptions = composeOptions(options)
   const encryptedObject = ensureEncryptedValueIsObject(encrypted)
+  const optionsWithScheme = {
+    scheme: encryptedObject?.scheme,
+    ...options,
+  }
+  const useOptions = composeOptions(optionsWithScheme)
   let decryptedBuffer: Buffer
   try {
     const cipherText = Buffer.from(encryptedObject.ciphertext, 'hex')
@@ -299,7 +324,7 @@ export function decryptWithPrivateKey(
     const asymSchemeGenerator = getAsymSchemeGenerator(useOptions?.scheme)
     const { messageKeyGenerator, macGenerator } = asymSchemeGenerator
 
-    const ephemBuffer = Buffer.from(encryptedObject.ephemPublicKey, 'hex')
+    const ephemBuffer = convertEphemPublicKeyToBuffer(encryptedObject?.ephemPublicKey)
 
     const { cipherKey, macKey } = messageKeyGenerator(sharedSecret, useOptions.s1, ephemBuffer)
 
