@@ -9,8 +9,7 @@ import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey
 import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
-
-const ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum'
+import { AsymmetricScheme } from '../../crypto/asymmetricModels'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -69,7 +68,7 @@ export async function encryptWithPublicKey(
   const useOptions = {
     ...options,
     curveType: Asymmetric.EciesCurveType.Secp256k1,
-    scheme: ETHEREUM_ASYMMETRIC_SCHEME_NAME,
+    scheme: AsymmetricScheme.ETHEREUM_ASYMMETRIC_SCHEME_NAME,
   }
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
