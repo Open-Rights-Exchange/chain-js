@@ -47,12 +47,12 @@ export const DefaultEciesOptions: any = {
   /** iv is used in symmetric cipher
    * set iv=null if the cipher does not need an initialization vector (e.g. a cipher in ecb mode)
    * Set iv=undefined to use deprecated createCipheriv / createDecipher / EVP_BytesToKey */
-  keyFormat: 'uncompressed',
+  keyFormat: 'compressed',
 }
 
 export const emptyBuffer = Buffer.allocUnsafe ? Buffer.allocUnsafe(0) : Buffer.from([])
 /** compose the right length of empty buffer for a specific cypherType */
-function emptyBufferForIv(symmetricCypherType: SymmetricCypherType) {
+export function emptyBufferForIv(symmetricCypherType: SymmetricCypherType) {
   // aes-256-ctr requires a buffer value to exist
   if (symmetricCypherType === SymmetricCypherType.Aes256Ctr) {
     return Buffer.alloc(16)
