@@ -14,8 +14,19 @@ export enum AsymmetricEncryptedDataStringBrand {
   _ = '',
 }
 
+/** Possible symmetric cypher types */
+export enum SymmetricCypherType {
+  Aes128Ecb = 'aes-128-ecb',
+  Aes256Ctr = 'aes-256-ctr',
+  Sha256 = 'sha256',
+}
+
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
-export type CipherGCMTypes = crypto.CipherGCMTypes | 'aes-128-ecb' | 'sha256'
+export type CipherGCMTypes =
+  | crypto.CipherGCMTypes // cipher types supported by Node (depends on version of Node)
+  | SymmetricCypherType.Aes128Ecb
+  | SymmetricCypherType.Sha256
+  | SymmetricCypherType.Aes256Ctr
 export enum EciesCurveType {
   Secp256k1 = 'secp256k1',
   Ed25519 = 'ed25519',
@@ -23,13 +34,21 @@ export enum EciesCurveType {
 
 /** Informational string added to encrypted results - useful when decrypting in determining set of options used
  * e.g. 'chainjs.ethereum.secp256k1.v2' */
-export type Scheme = string
+export enum AsymmetricScheme {
+  DEFAULT_SECP256K1_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1',
+  DEFAULT_ED25519_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519',
+  ALGORAND_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.ed25519.algorand',
+  EOS_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.eos',
+  ETHEREUM_ASYMMETRIC_SCHEME_NAME = 'asym.chainjs.secp256k1.ethereum',
+  SECP256K1_TYPE1 = 'asym.chainjs.secp256k1.type1',
+  ED25519_TYPE1 = 'asym.chainjs.ed25519.type1',
+}
 
 export type EciesOptions = {
-  hashCypherType?: CipherGCMTypes
-  macCipherType?: CipherGCMTypes // e.g. 'sha256'
+  hashCypherType?: SymmetricCypherType
+  macCipherType?: SymmetricCypherType // e.g. 'sha256'
   curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
-  symmetricCypherType?: CipherGCMTypes
+  symmetricCypherType?: SymmetricCypherType
   keyFormat?: ECDHKeyFormat
   /** Optional Initialization Vector (as Hex string) */
   iv?: string
@@ -39,14 +58,14 @@ export type EciesOptions = {
   s2?: string
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: Scheme
+  scheme?: AsymmetricScheme | string
 }
 
 export type EciesOptionsAsBuffers = {
-  hashCypherType?: CipherGCMTypes
-  macCipherType?: CipherGCMTypes // e.g. 'sha256'
+  hashCypherType?: SymmetricCypherType
+  macCipherType?: SymmetricCypherType // e.g. 'sha256'
   curveType?: EciesCurveType // e.g. 'secp256k1' or 'ed25519'
-  symmetricCypherType?: CipherGCMTypes
+  symmetricCypherType?: SymmetricCypherType
   keyFormat?: ECDHKeyFormat
   /** Optional Initialization Vector (as Hex string) */
   iv?: Buffer
@@ -56,7 +75,7 @@ export type EciesOptionsAsBuffers = {
   s2?: Buffer
   // Informational string added to encrypted results - useful when decrypting in determining set of options used
   // e.g. 'chainjs.ethereum.secp256k1.v2'
-  scheme?: Scheme
+  scheme?: AsymmetricScheme | string
 }
 
 /** Asymmetric encypted data object
@@ -69,5 +88,25 @@ export type AsymmetricEncryptedData = {
   ephemPublicKey: string
   ciphertext?: string
   mac: string
-  scheme?: Scheme
+  scheme?: AsymmetricScheme | string
+}
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom cipherkey & mackey generation */
+export type MessageKeyGenerator = (
+  sharedSecret?: Buffer | Uint8Array,
+  s1?: Buffer,
+  ephemKeyBuffer?: Buffer,
+) => { cipherKey: Buffer; macKey: Buffer }
+
+/** Passed into encryptWithPublicKey & decryptWithPublicKey to allow custom mac generation */
+export type MacGenerator = (macKey?: Buffer, s2?: Buffer, cipherText?: Buffer) => Buffer
+
+/** Custom way to compose an asymmetic encyption payload */
+export type AsymmetricSchemeGenerator = {
+  /** unique name that defines the details of how cipher key and mac key were composed (e.g. compressed or umcompressed public key) */
+  scheme: AsymmetricScheme
+  /** function to generate a cipher key in a 'custom' way */
+  messageKeyGenerator: MessageKeyGenerator
+  /** function to generate a mac key in a 'custom' way */
+  macGenerator: MacGenerator
 }

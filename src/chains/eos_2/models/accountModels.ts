@@ -27,7 +27,7 @@ export type EosCreateAccountOptions = {
   publicKeys?: EosPublicKeys
   newKeysOptions?: EosNewKeysOptions
   oreOptions?: {
-    pricekey?: number // default = 1
+    tier?: number // default = 1
     referralAccountName?: EosEntityName // default = ''  // aka referral
   }
   createEscrowOptions?: {

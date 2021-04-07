@@ -460,7 +460,6 @@ export class AlgorandTransaction implements Transaction {
    *  Returns the from address in the action or addresses from multisig options for multisig transaction
    */
   public get requiredAuthorizations(): AlgorandAddress[] {
-    this.assertIsValidated()
     this.assertFromIsValidAddress()
     if (this.isMultiSig) {
       return this?.multiSigOptions?.addrs || []

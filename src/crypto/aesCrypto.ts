@@ -12,7 +12,11 @@ export const defaultMode = EncryptionMode.Gcm
 export function isAesEncryptedDataString(value: string): value is AesEncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^\{.+iv.+iter.+ks.+ts.+mode.+adata.+cipher.+ct.+\}$/is) !== null
+  return (
+    value.match(
+      /^(?=.*\biv\b)(?=.*\biter\b)(?=.*\bks\b)(?=.*\bts\b)(?=.*\bmode\b)(?=.*\badata\b)(?=.*\bcipher\b)(?=.*\bct\b).*$/is,
+    ) !== null
+  )
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */

@@ -26,7 +26,7 @@ import {
   DEFAULT_ACCOUNT_NAME_PREFIX,
   DEFAULT_CREATEESCROW_APPNAME,
   DEFAULT_CREATEESCROW_CONTRACT,
-  DEFAULT_ORE_ACCOUNT_PRICEKEY,
+  DEFAULT_ORE_ACCOUNT_TIER,
 } from './eosConstants'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './eosCrypto'
 import { isNullOrEmpty, isANumber } from '../../helpers'
@@ -119,7 +119,7 @@ export class EosCreateAccount implements CreateAccount {
       createEscrowOptions,
       resourcesOptions,
     } = this._options
-    const { pricekey, referralAccountName } = oreOptions || {}
+    const { tier, referralAccountName } = oreOptions || {}
     const { contractName, appName } = createEscrowOptions || {}
     const { ramBytes, stakeNetQuantity, stakeCpuQuantity, transfer } = resourcesOptions || {}
 
@@ -158,7 +158,7 @@ export class EosCreateAccount implements CreateAccount {
       appName,
       creatorAccountName,
       creatorPermission,
-      pricekey,
+      tier,
       publicKeyActive,
       publicKeyOwner,
       referralAccountName,
@@ -304,7 +304,7 @@ export class EosCreateAccount implements CreateAccount {
       accountNamePrefix: DEFAULT_ACCOUNT_NAME_PREFIX,
       creatorPermission: 'active',
       oreOptions: {
-        pricekey: DEFAULT_ORE_ACCOUNT_PRICEKEY,
+        tier: DEFAULT_ORE_ACCOUNT_TIER,
         referralAccountName: null,
       },
       createEscrowOptions: {

@@ -106,6 +106,7 @@ export interface Chain {
   decryptWithPrivateKeys(
     encrypted: Asymmetric.AsymmetricEncryptedDataString,
     privateKeys: PrivateKey[],
+    options?: any,
   ): Promise<string>
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>

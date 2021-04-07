@@ -15,7 +15,7 @@ export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 /** default prefix for an autogenerate account name */
 export const DEFAULT_ACCOUNT_NAME_PREFIX = ''
 export const DEFAULT_CREATEESCROW_CONTRACT = 'createescrow'
-export const DEFAULT_ORE_ACCOUNT_PRICEKEY = 1
+export const DEFAULT_ORE_ACCOUNT_TIER = 1
 export const DEFAULT_CREATEESCROW_APPNAME = 'free'
 
 // The symbol for the native token/currency on the chain
