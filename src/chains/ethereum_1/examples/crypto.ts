@@ -63,9 +63,10 @@ async function run() {
   console.log('decrypted text 2:', decrypted2)
 
   // asymmetric encrypt/decrypt wrapping MULTIPLE publicKey/privateKey pairs - wapped with multiple keys
-  const encrypted3 = await ropsten.encryptWithPublicKeys('text to encrypt 3', [publicKey1, publicKey2, publicKey3])
+  // s1 (and s2) are optional additional secrets (think password) that must be the same for encrypt and decrypt
+  const encrypted3 = await ropsten.encryptWithPublicKeys('text to encrypt 3', [publicKey1, publicKey2, publicKey3], {s1:'abc'})
   console.log('encrypted text 3:', encrypted3)
-  const decrypted3 = await ropsten.decryptWithPrivateKeys(encrypted3, [privateKey1, privateKey2, privateKey3])
+  const decrypted3 = await ropsten.decryptWithPrivateKeys(encrypted3, [privateKey1, privateKey2, privateKey3], {s1:'abc'})
   console.log('decrypted asymmetric text 3:', decrypted3)
 }
 
