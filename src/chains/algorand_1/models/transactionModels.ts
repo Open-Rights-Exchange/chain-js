@@ -1,8 +1,7 @@
 import { AlgorandValue } from './generalModels'
 import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
 import { AlgorandTxActionStruct } from './algoStructures'
-// eslint-disable-next-line import/no-cycle
-import { AlgorandMultiSigOptions } from '../plugins/models'
+import { AlgorandMultiSigOptions } from './multisig'
 
 /**
  * Chain response type after a transaction is confirmed on the chain

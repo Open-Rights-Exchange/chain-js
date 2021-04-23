@@ -13,7 +13,7 @@ import {
   BlockType,
   ContractEventLog,
   BaseContract,
-} from "types";
+} from "GnosisTypes";
 
 interface EventOptions {
   filter?: object;

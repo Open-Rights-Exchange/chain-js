@@ -1,7 +1,8 @@
-import { PrivateKey, Signature } from '../../models'
+import { Transaction } from '../'
+import { ChainEntityName, PrivateKey, Signature } from '../../models'
 
-export interface MultisigTransaction {
-  /** Transaction's actions */
+export interface MultisigPlugin {
+  // TRANSACTION
   multiSigOptions: any
   /** Chain-specific and time-sensitive transaction header */
   multiSigOptionsFromRaw: any
@@ -24,6 +25,13 @@ export interface MultisigTransaction {
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(actionEncodedForSdk: any, privateKeys: PrivateKey[], transactionId: string): Promise<void>
+
+  // CREATEACCOUNT
+  accountName: ChainEntityName
+
+  transaction: Transaction
+
+  generateKeysIfNeeded(): Promise<void>
 }
 
 // addSignature() *

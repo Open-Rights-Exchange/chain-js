@@ -11,8 +11,11 @@ import {
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
-import { AlgorandMultisigCreateAccount } from './plugins/models'
-import { AlgorandMultisigPluginFactory } from './plugins/algorandMultisigPlugin'
+import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
+import { AlgorandMultisigNativePlugin } from './plugins/native/multisigNative'
+import { AlgorandMultiSigOptions } from './models/multisig'
+import { multiSigOptions } from './examples/accounts'
+import { setMultisigPlugin } from './helpers/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -20,7 +23,7 @@ import { AlgorandMultisigPluginFactory } from './plugins/algorandMultisigPlugin'
 export class AlgorandCreateAccount implements CreateAccount {
   private _publicKey: AlgorandPublicKey
 
-  private _multisigPlugin: AlgorandMultisigCreateAccount
+  private _multisigPlugin: AlgorandMultisigPlugin
 
   private _chainState: AlgorandChainState
 
@@ -36,14 +39,11 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
     this._publicKey = options?.publicKey
-    this._multisigPlugin = options?.multiSigOptions
-      ? new AlgorandMultisigPluginFactory().create({ multiSigOptions: options?.multiSigOptions }).createAccount
-      : null
+    this._multisigPlugin = setMultisigPlugin(options?.multiSigOptions)
   }
-
   // ---- Interface implementation
 
-  get multisigPlugin(): AlgorandMultisigCreateAccount {
+  get multisigPlugin(): AlgorandMultisigPlugin {
     return this._multisigPlugin
   }
 
