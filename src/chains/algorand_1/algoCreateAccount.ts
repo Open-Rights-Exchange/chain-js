@@ -39,7 +39,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
     this._publicKey = options?.publicKey
-    this._multisigPlugin = setMultisigPlugin(options?.multiSigOptions)
+    this._multisigPlugin = setMultisigPlugin({multiSigOptions: options?.multiSigOptions})
   }
   // ---- Interface implementation
 

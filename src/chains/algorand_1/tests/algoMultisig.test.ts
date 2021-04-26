@@ -5,7 +5,7 @@ import { ChainFactory, ChainType } from '../../..'
 import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
 import { multisigChainSerialized } from './mockups/multisig'
 import { ChainActionType, ValueTransferParams } from '../../../models'
-import { AlgorandMultiSigOptions } from '../plugins/models'
+import { AlgorandMultiSigOptions } from '../models/multisig'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =

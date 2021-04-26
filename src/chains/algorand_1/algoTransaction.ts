@@ -61,8 +61,10 @@ import {
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey } from './algoCrypto'
 import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
-import { AlgorandMultiSigOptions, AlgorandMultisigTransaction } from './plugins/models'
-import { AlgorandMultisigPluginFactory } from './plugins/algorandMultisigPlugin'
+import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
+import { setMultisigPlugin } from './helpers/plugin'
+import { AlgorandMultiSigOptions } from './models/multisig'
+
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -82,20 +84,16 @@ export class AlgorandTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  private _multisigPlugin: AlgorandMultisigTransaction
+  private _multisigPlugin: AlgorandMultisigPlugin
 
   constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
-    if (options?.multiSigOptions) {
-      this._multisigPlugin = new AlgorandMultisigPluginFactory().create({
-        multiSigOptions: options?.multiSigOptions,
-      }).transaction
-    }
+    this._multisigPlugin = setMultisigPlugin({multiSigOptions: options?.multiSigOptions})
   }
 
-  get multisigPlugin(): AlgorandMultisigTransaction {
+  get multisigPlugin(): AlgorandMultisigPlugin {
     return this._multisigPlugin
   }
 
@@ -563,10 +561,8 @@ export class AlgorandTransaction implements Transaction {
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      this._multisigPlugin = new AlgorandMultisigPluginFactory().create({
-        raw: transaction as AlgorandRawTransactionMultisigStruct,
-      }).transaction
-    } else {
+      this._multisigPlugin = setMultisigPlugin({raw: transaction as AlgorandRawTransactionMultisigStruct})
+    }else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
   }

@@ -8,7 +8,7 @@ import {
   AlgorandRawTransactionStruct,
   AlgorandTxSignResults,
 } from '../models'
-import { AlgorandMultiSigOptions } from '../plugins/models'
+import { AlgorandMultiSigOptions } from '../models/multisig'
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
 export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions): AlgorandMultiSigAccount {

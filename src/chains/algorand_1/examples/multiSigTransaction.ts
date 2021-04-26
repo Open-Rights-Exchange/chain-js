@@ -9,7 +9,7 @@ import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../mo
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey, determineMultiSigAddress, toAlgorandSignature } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
-import { AlgorandMultiSigOptions } from '../plugins/models'
+import { AlgorandMultiSigOptions } from '../models/multisig'
 
 require('dotenv').config()
 

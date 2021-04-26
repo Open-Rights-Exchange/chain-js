@@ -20,6 +20,7 @@ import {
   AlgorandTxActionRaw,
   AlgorandTxActionSdkEncoded,
   AlgorandTxSignResults,
+  AlgorandTxEncodedForChain,
 } from '../../models'
 import { getAlgorandPublicKeyFromPrivateKey } from '../../algoCrypto'
 import {
@@ -45,7 +46,7 @@ import { AlgorandMultisigPlugin } from '../algorandMultisigPlugin'
 export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
   private _multiSigOptions: AlgorandMultiSigOptions
 
-  private _rawTransaction: any
+  private _rawTransaction: AlgorandRawTransactionMultisigStruct
 
   constructor(input: AlgorandMultisigPluginInput) {
     const { multiSigOptions, raw } = input
@@ -93,7 +94,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
   /** Generate the raw transaction body using the actions attached
    *  Also adds a header to the transaction that is included when transaction is signed
    */
-  public async prepareToBeSigned(rawTransaction: AlgorandRawTransactionMultisigStruct): Promise<void> {
+  public async prepareToBeSigned(rawTransaction: AlgorandTxEncodedForChain): Promise<void> {
     this._rawTransaction = {
       txn: rawTransaction,
       msig: {
