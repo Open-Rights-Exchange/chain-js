@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import {
   byteArrayToHexString,
   hexStringToByteArray,
@@ -13,7 +14,6 @@ import {
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransactionMultisigStruct,
-  AlgorandRawTransactionStruct,
   AlgorandSignature,
   AlgorandEntityName,
   AlgorandTxAction,
@@ -22,12 +22,11 @@ import {
   AlgorandTxSignResults,
   AlgorandTxEncodedForChain,
 } from '../../models'
-import { getAlgorandPublicKeyFromPrivateKey } from '../../algoCrypto'
+import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from '../../algoCrypto'
 import {
   assertValidSignatures,
   determineMultiSigAddress,
   getPublicKeyForAddress,
-  isValidTxSignatureForPublicKey,
   toAddressFromPublicKey,
   toAlgorandAddress,
   toAlgorandAddressFromPublicKeyByteArray,
@@ -42,17 +41,21 @@ import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
 import { throwNewError } from '../../../../errors'
 import { AlgorandMultiSigOptions, AlgorandMultisigPluginInput } from '../../models/multisig'
 import { AlgorandMultisigPlugin } from '../algorandMultisigPlugin'
+import { AlgorandActionHelper } from '../../algoAction'
 
 export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
   private _multiSigOptions: AlgorandMultiSigOptions
-
+  /** Instance of Algorand SDK's Algorand Transaction Class */
+  private _algoSdkTransaction: any
   private _rawTransaction: AlgorandRawTransactionMultisigStruct
+  private _actionHelper: AlgorandActionHelper
 
   constructor(input: AlgorandMultisigPluginInput) {
     const { multiSigOptions, raw } = input
     if (raw) {
       this.assertMultisigFromMatchesOptions(raw)
       this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(raw) })
+      this._actionHelper = new AlgorandActionHelper(raw)
     } else {
       this._multiSigOptions = multiSigOptions
     }
@@ -105,6 +108,8 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
         })),
       },
     }
+    this._actionHelper = new AlgorandActionHelper(this._rawTransaction)
+    this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk)
   }
 
   /** Determine standard multisig options from raw msig struct */
@@ -153,6 +158,13 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
     return multiSigs?.map((sig: AlgorandMultiSignatureStruct) => toAlgorandPublicKey(byteArrayToHexString(sig.pk)))
   }
 
+  /** Whether the transaction signature is valid for this transaction body and publicKey provided */
+  private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
+    if (!this.rawTransaction) return false
+    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
+    return verifySignedWithPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
+  }
+
   /** Add signatures to raw transaction
    *  Only allows signatures that use the publicKey(s) required for the transaction (from accnt, rekeyed spending key, or mulisig keys)
    *  Signatures are hexstring encoded Uint8Array */
@@ -171,7 +183,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
     signatures.forEach(sig => {
       // look for a match with any of the publicKeys in the multiSigOptions
       const addressForSig = this.multiSigOptions.addrs.find(addr =>
-        isValidTxSignatureForPublicKey(sig, getPublicKeyForAddress(addr)),
+        this.isValidTxSignatureForPublicKey(sig, getPublicKeyForAddress(addr)),
       )
       if (addressForSig) {
         const newPubKey = hexStringToByteArray(getPublicKeyForAddress(addressForSig))
