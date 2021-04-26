@@ -176,3 +176,16 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(password: stri
   const encryptedKeys = encryptAccountPrivateKeysIfNeeded(keys, password, options)
   return encryptedKeys
 }
+
+/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+export function verifySignedWithPublicKey(
+  data: string,
+  publicKey: AlgorandPublicKey,
+  signature: AlgorandSignature,
+): boolean {
+  return ed25519Crypto.verify(
+    hexStringToByteArray(data),
+    hexStringToByteArray(publicKey),
+    hexStringToByteArray(signature),
+  )
+}

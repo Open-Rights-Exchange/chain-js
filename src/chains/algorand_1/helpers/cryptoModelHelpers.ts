@@ -121,26 +121,6 @@ export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Ar
   return hexStringToByteArray(signature)
 }
 
-/** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-export function verifySignedWithPublicKey(
-  data: string,
-  publicKey: AlgorandPublicKey,
-  signature: AlgorandSignature,
-): boolean {
-  return ed25519Crypto.verify(
-    hexStringToByteArray(data),
-    hexStringToByteArray(publicKey),
-    hexStringToByteArray(signature),
-  )
-}
-
-/** Whether the transaction signature is valid for this transaction body and publicKey provided */
-export function isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
-  if (!this.rawTransaction) return false
-  const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
-  return verifySignedWithPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
-}
-
 /** Throws if signatures isn't properly formatted */
 export function assertValidSignatures(signatures: AlgorandSignature[]) {
   ;(signatures || []).forEach(sig => {

@@ -56,10 +56,9 @@ import {
   toPublicKeyFromAddress,
   toAlgorandPrivateKey,
   toAddressFromPublicKey,
-  isValidTxSignatureForPublicKey,
   assertValidSignatures,
 } from './helpers/cryptoModelHelpers'
-import { getAlgorandPublicKeyFromPrivateKey } from './algoCrypto'
+import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
 import { setMultisigPlugin } from './helpers/plugin'
@@ -329,7 +328,7 @@ export class AlgorandTransaction implements Transaction {
       if (this.hasAnySignatures) errorMsg = 'Transaction already has a signature. Cant add more than one signature.'
       if (signatures.length > 1) errorMsg = 'Cant add more than one signature to a non-multisig transaction.'
       // Check that the signature matches the raw transaction body (and signing public key)
-      if (!isValidTxSignatureForPublicKey(signature, this.signerPublicKey)) {
+      if (!this.isValidTxSignatureForPublicKey(signature, this.signerPublicKey)) {
         errorMsg = `Signature isnt valid for this transaction using publicKey ${this.signerPublicKey}. If this is a rekeyed account, specify its spending key (via transaction options signerPublicKey) before adding signature`
       }
       this._rawTransaction.sig = Buffer.from(hexStringToByteArray(signature))
@@ -430,16 +429,6 @@ export class AlgorandTransaction implements Transaction {
     return rawTransaction
   }
 
-  // /** Determine standard multisig options from raw msig struct */
-  // private multisigOptionsFromRawTransactionMultisig(msig: AlgorandMultiSignatureMsigStruct): AlgorandMultiSigOptions {
-  //   if (isNullOrEmpty(msig)) return null
-  //   const addrs = msig.subsig.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
-  //   return {
-  //     version: msig.v,
-  //     threshold: msig.thr,
-  //     addrs,
-  //   }
-  // }
 
   /** Public Key of account that has signed (or will sign) this transaction (for non-multisig)
    *  Usually the same as the from address's PK - unless the account has been rekeyed in which case this is the rekeyed PK
@@ -565,6 +554,13 @@ export class AlgorandTransaction implements Transaction {
     }else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
+  }
+
+  /** Whether the transaction signature is valid for this transaction body and publicKey provided */
+  private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
+    if (!this.rawTransaction) return false
+    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
+    return verifySignedWithPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
 
   /** JSON representation of transaction data */
