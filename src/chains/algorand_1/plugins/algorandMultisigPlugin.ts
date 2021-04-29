@@ -1,13 +1,28 @@
-import { MultisigPlugin } from "../../../interfaces/plugins/multisig";
-import { AlgorandTransaction } from "../algoTransaction";
-import { AlgorandAddress, AlgorandEntityName, AlgorandPrivateKey, AlgorandPublicKey, AlgorandRawTransactionMultisigStruct, AlgorandSignature, AlgorandTxAction, AlgorandTxActionRaw, AlgorandTxActionSdkEncoded, AlgorandTxEncodedForChain } from "../models";
-import { AlgorandMultiSigOptions } from "../models/multisig";
+import { MultisigOptions } from '../../../models'
+import {
+  AlgorandAddress,
+  AlgorandEntityName,
+  AlgorandPrivateKey,
+  AlgorandPublicKey,
+  AlgorandRawTransactionMultisigStruct,
+  AlgorandSignature,
+  AlgorandTxAction,
+  AlgorandTxActionRaw,
+  AlgorandTxActionSdkEncoded,
+  AlgorandTxEncodedForChain,
+} from '../models'
+import { MultisigPlugin } from '../../../interfaces'
+
+export interface AlgorandMultisigPluginInput {
+  multisigOptions?: MultisigOptions
+  raw?: AlgorandRawTransactionMultisigStruct
+}
 
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
   /** Transaction's actions */
-  multiSigOptions: AlgorandMultiSigOptions
+  multisigOptions: MultisigOptions
   /** Chain-specific and time-sensitive transaction header */
-  multiSigOptionsFromRaw: AlgorandMultiSigOptions
+  multisigOptionsFromRaw: MultisigOptions
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
   rawTransaction: AlgorandRawTransactionMultisigStruct
@@ -41,7 +56,8 @@ export interface AlgorandMultisigPlugin extends MultisigPlugin {
 
   accountName: AlgorandEntityName
 
-  transaction: AlgorandTransaction
+  /** Not supported */
+  transaction: any
 
   generateKeysIfNeeded(): Promise<void>
 }

@@ -83,7 +83,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Multisig transactions are not supported by ethereum */
-  public get isMultiSig(): boolean {
+  public get isMultisig(): boolean {
     return false
   }
 

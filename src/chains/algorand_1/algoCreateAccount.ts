@@ -12,9 +12,6 @@ import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
 import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
-import { AlgorandMultisigNativePlugin } from './plugins/native/multisigNative'
-import { AlgorandMultiSigOptions } from './models/multisig'
-import { multiSigOptions } from './examples/accounts'
 import { setMultisigPlugin } from './helpers/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
@@ -39,7 +36,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
     this._publicKey = options?.publicKey
-    this._multisigPlugin = setMultisigPlugin({multiSigOptions: options?.multiSigOptions})
+    this._multisigPlugin = setMultisigPlugin({ multisigOptions: options?.multisigOptions })
   }
   // ---- Interface implementation
 
@@ -136,7 +133,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     return this.accountName as string
   }
 
-  /** Checks create options - if both publicKey and multiSigOptions are missing,
+  /** Checks create options - if both publicKey and multisigOptions are missing,
    *  autogenerate the public and private key pair and add them to options
    *  Algorand keys are represented as hex strings in chainjs.
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).

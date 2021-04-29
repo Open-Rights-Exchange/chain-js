@@ -8,11 +8,6 @@ export type TransactionResult = {
   chainResponse: TransactionChainResponse
 }
 
-export type MultisigOptions = {
-  pluginType: string
-  options: any
-}
-
 export type TransactionChainResponse = any
 export type TransactionId = string
 
@@ -39,4 +34,11 @@ export enum ConfirmType {
   After010 = 10,
   /** After final block */
   Final = 999999,
+}
+
+export type MultisigOptions = {
+  pluginOptions: any
+  threshold: number
+  addrs: string[]
+  plugin?: any
 }

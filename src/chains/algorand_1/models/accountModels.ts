@@ -1,11 +1,11 @@
+import { MultisigOptions } from '../../../models'
 import { AlgorandPublicKey } from './cryptoModels'
 import { AlgorandNewKeysOptions } from './generalModels'
-import { AlgorandMultiSigOptions } from './multisig'
 
 export type AlgorandCreateAccountOptions = {
   publicKey?: AlgorandPublicKey
   newKeysOptions?: AlgorandNewKeysOptions
-  multiSigOptions?: AlgorandMultiSigOptions
+  multisigOptions?: MultisigOptions
 }
 
 /** Type of account to create */

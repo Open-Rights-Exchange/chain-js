@@ -5,27 +5,32 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint } from '../../../models'
+import { ChainEndpoint, MultisigOptions } from '../../../models'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
-import { AlgorandMultiSigOptions } from '../models/multisig'
 
 require('dotenv').config()
 
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [{
-  url: 'https://mainnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoTestnetEndpoints = [ {
-  url: 'https://testnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoBetanetEndpoints = [{
-  url: 'https://betanet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
+const algoMainnetEndpoints = [
+  {
+    url: 'https://mainnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoTestnetEndpoints = [
+  {
+    url: 'https://testnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoBetanetEndpoints = [
+  {
+    url: 'https://betanet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
 
 export const createAccountOptions = {
   newKeysOptions: {
@@ -37,8 +42,8 @@ export const createAccountOptions = {
   },
 }
 
-export const multiSigOptions: AlgorandMultiSigOptions = {
-  version: 1,
+export const multisigOptions: MultisigOptions = {
+  pluginOptions: { version: 1 },
   threshold: 2,
   addrs: [
     env.ALGOTESTNET_mulitsig_child_account1,
@@ -49,7 +54,7 @@ export const multiSigOptions: AlgorandMultiSigOptions = {
 
 export const createMultiSigAccountOptions = {
   ...createAccountOptions,
-  multiSigOptions,
+  multisigOptions,
 }
 
 async function run() {
@@ -71,8 +76,8 @@ async function run() {
   // /** Create Algorand multisig account */
   // const createMultiSigAccount = algoTest.new.CreateAccount(createMultiSigAccountOptions)
   // await createMultiSigAccount.generateKeysIfNeeded()
-  // const { accountName: multiSigAccountName } = createMultiSigAccount
-  // console.log('mulitsig account: %o', multiSigAccountName)
+  // const { accountName: multisigAccountName } = createMultiSigAccount
+  // console.log('mulitsig account: %o', multisigAccountName)
 }
 
 ;(async () => {

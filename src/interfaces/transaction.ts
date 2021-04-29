@@ -9,7 +9,6 @@ import {
   TransactionCost,
   TxExecutionPriority,
 } from '../models'
-
 /**
  * The Transaction interface declares the operations that all concrete chain (chain)transaction classes must implement
  */
@@ -30,7 +29,7 @@ export interface Transaction {
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
   /** Whether the transaction is a multi-signature transaction */
-  isMultiSig: boolean
+  isMultisig: boolean
   // ** Whether transaction has been validated - via vaidate() */
   isValidated: boolean
   /** An array of authorizations (chain-specific result type) that do not have an attached signature

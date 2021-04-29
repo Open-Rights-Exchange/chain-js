@@ -1,9 +1,8 @@
-import { AlgorandMultiSigOptions, AlgorandMultisigPluginInput } from "../models/multisig";
-import { AlgorandMultisigPlugin } from "../plugins/algorandMultisigPlugin";
-import { AlgorandMultisigNativePlugin } from "../plugins/native/multisigNative";
+import { AlgorandMultisigPlugin, AlgorandMultisigPluginInput } from '../plugins/algorandMultisigPlugin'
+import { AlgorandMultisigNativePlugin } from '../plugins/native/multisigNative'
 
 export function setMultisigPlugin(input: AlgorandMultisigPluginInput): AlgorandMultisigPlugin {
-  const { multiSigOptions, raw} = input
-  if(!multiSigOptions && !raw) return null
-  return this._multisigPlugin = multiSigOptions?.plugin || new AlgorandMultisigNativePlugin(input)
+  const { multisigOptions, raw } = input
+  if (!multisigOptions && !raw) return null
+  return multisigOptions?.plugin || new AlgorandMultisigNativePlugin(input)
 }
