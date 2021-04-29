@@ -1,11 +1,11 @@
-import { Transaction } from '../'
-import { ChainEntityName, PrivateKey, Signature } from '../../models'
+import { Transaction } from '../transaction'
+import { ChainEntityName, MultisigOptions, PrivateKey, Signature } from '../../models'
 
 export interface MultisigPlugin {
   // TRANSACTION
-  multiSigOptions: any
+  multisigOptions: MultisigOptions
   /** Chain-specific and time-sensitive transaction header */
-  multiSigOptionsFromRaw: any
+  multisigOptionsFromRaw: MultisigOptions
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
   rawTransaction: any
@@ -33,12 +33,3 @@ export interface MultisigPlugin {
 
   generateKeysIfNeeded(): Promise<void>
 }
-
-// addSignature() *
-// get signatures() *
-// assertValidSignatures (moved to helpers)
-// missingSignatures()
-// get rawTransaction() *
-// Sign *
-// get requiredAuthorizations() *
-// prepareToBeSigned()

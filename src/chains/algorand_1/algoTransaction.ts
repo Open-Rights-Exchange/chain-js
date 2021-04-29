@@ -1,27 +1,21 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
 import { Transaction } from '../../interfaces'
-import { ChainErrorType, ConfirmType, MultisigOptions, TransactionCost, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ConfirmType, MultisigOptions, TxExecutionPriority } from '../../models'
 import { mapChainError } from './algoErrors'
 import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
   hexStringToByteArray,
   isArrayLengthOne,
-  isAString,
   isAUint8Array,
   isNullOrEmpty,
   notImplemented,
-  uint8ArraysAreEqual,
 } from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
   AlgorandChainSettingsCommunicationSettings,
-  AlgorandChainTransactionParamsStruct,
-  AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransactionMultisigStruct,
@@ -34,21 +28,13 @@ import {
   AlgorandTxHeaderParams,
   AlgorandTxSignResults,
   AlgorandTransactionResources,
-  AlgorandMultiSignatureMsigStruct,
-  AlgorandAddressStruct,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
   algoToMicro,
   isValidAlgorandAddress,
-  isValidAlgorandSignature,
   getPublicKeyForAddress,
   microToAlgoString,
-  toAlgorandAddress,
-  toAlgorandAddressFromPublicKeyByteArray,
-  toAlgorandAddressFromRawStruct,
-  toAlgorandPublicKey,
-  toRawAddressBufferFromAlgorandAddress,
   toRawTransactionFromSignResults,
 } from './helpers'
 import {
@@ -59,7 +45,7 @@ import {
   assertValidSignatures,
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
-import { MINIMUM_TRANSACTION_FEE, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
+import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
 import { setMultisigPlugin } from './helpers/plugin'
 
@@ -130,8 +116,6 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     this.assertHasAction()
-    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
-      ?.nativeInfo?.transactionHeaderParams
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
@@ -253,6 +237,7 @@ export class AlgorandTransaction implements Transaction {
    *  Ignores asFirstAction parameter since only one action is supported in algorand */
   public addAction(
     action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     asFirstAction?: boolean,
   ): void {
     this.assertNoSignatures()
@@ -406,8 +391,6 @@ export class AlgorandTransaction implements Transaction {
     }
     const missingSignatures =
       this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
-    const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
-
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
   }
 
@@ -468,7 +451,6 @@ export class AlgorandTransaction implements Transaction {
 
   /** Sign the transaction body with private key and add to attached signatures */
   public async sign(privateKeys: AlgorandPrivateKey[]): Promise<void> {
-    let transactionId: string
     this.assertIsValidated()
     if (this.isMultisig) {
       await this.multisigPlugin.sign(this._actionHelper.actionEncodedForSdk, privateKeys, this.transactionId)
