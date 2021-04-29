@@ -82,6 +82,10 @@ class ChainEosV2 implements Chain {
     return this._chainState.chainInfo
   }
 
+  public get endpoints(): EosChainEndpoint[] {
+    return this._endpoints
+  }
+
   /** Returns chain native token symbol and default token contract address */
   public get nativeToken(): { defaultUnit: string; symbol: EosSymbol; tokenAddress: EosEntityName } {
     return {

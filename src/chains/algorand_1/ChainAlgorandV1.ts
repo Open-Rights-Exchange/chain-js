@@ -64,6 +64,10 @@ class ChainAlgorandV1 implements Chain {
     return this._chainState.chainInfo
   }
 
+  public get endpoints(): AlgorandChainEndpoint[] {
+    return this._endpoints
+  }
+
   /** Fetch data from an on-chain contract table */
   public fetchContractData = (): any => {
     notImplemented()

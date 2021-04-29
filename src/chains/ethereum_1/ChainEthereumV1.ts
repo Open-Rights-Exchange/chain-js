@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
+import {
+  ChainActionType,
+  ChainDate,
+  ChainEndpoint,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  CryptoCurve,
+} from '../../models'
 // import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
@@ -77,6 +85,10 @@ class ChainEthereumV1 implements Chain {
 
   public get chainInfo(): ChainInfo {
     return this._chainState.chainInfo
+  }
+
+  public get endpoints(): EthereumChainEndpoint[] {
+    return this._endpoints
   }
 
   public composeAction = async (
