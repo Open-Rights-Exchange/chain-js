@@ -1,5 +1,5 @@
 import * as algosdk from 'algosdk'
-import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
+import { Transaction as AlgoTransactionClass } from 'algosdk'
 import { Transaction } from '../../interfaces'
 import { ChainErrorType, ConfirmType, MultisigOptions, TxExecutionPriority } from '../../models'
 import { mapChainError } from './algoErrors'
