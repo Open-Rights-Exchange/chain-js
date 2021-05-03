@@ -44,7 +44,7 @@ export const createAccountOptions = {
 
 export const multisigOptions: MultisigOptions = {
   pluginOptions: { version: 1 },
-  threshold: 2,
+  weight: 2,
   addrs: [
     env.ALGOTESTNET_mulitsig_child_account1,
     env.ALGOTESTNET_mulitsig_child_account2,

@@ -38,7 +38,7 @@ export enum ConfirmType {
 
 export type MultisigOptions = {
   pluginOptions: any
-  threshold: number
+  weight: number
   addrs: string[]
   plugin?: any
 }

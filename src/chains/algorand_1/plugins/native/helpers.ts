@@ -8,7 +8,7 @@ export function determineMultiSigAddress(multisigOptions: MultisigOptions): Algo
   if (isNullOrEmpty(multisigOptions)) return null
   const mSigOptions = {
     version: multisigOptions.pluginOptions?.version,
-    threshold: multisigOptions.threshold,
+    threshold: multisigOptions.weight,
     addrs: multisigOptions.addrs,
   }
   return algosdk.multisigAddress(mSigOptions)

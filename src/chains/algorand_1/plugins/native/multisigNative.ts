@@ -68,7 +68,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
   }
 
   get multisigOptionsForAlgoSdk() {
-    const { addrs, threshold, pluginOptions } = this.multisigOptions
+    const { addrs, weight: threshold, pluginOptions } = this.multisigOptions
     return {
       addrs,
       threshold,
@@ -114,7 +114,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
       txn: rawTransaction,
       msig: {
         v: this.multisigOptions?.pluginOptions?.version,
-        thr: this.multisigOptions?.threshold,
+        thr: this.multisigOptions?.weight,
         subsig: this.multisigOptions?.addrs?.map(addr => ({
           pk: Buffer.from(hexStringToByteArray(toPublicKeyFromAddress(addr))),
         })),
@@ -131,7 +131,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
     const addrs = msig.subsig.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
     return {
       pluginOptions: { version: msig?.v },
-      threshold: msig?.thr,
+      weight: msig?.thr,
       addrs,
     }
   }
@@ -159,7 +159,7 @@ export class AlgorandMultisigNativePlugin implements AlgorandMultisigPlugin {
 
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
-    return signaturesAttachedCount >= this.multisigOptions.threshold ? null : missingSignatures
+    return signaturesAttachedCount >= this.multisigOptions.weight ? null : missingSignatures
   }
 
   /** Returns public keys of the signatures attached to the signed transaction

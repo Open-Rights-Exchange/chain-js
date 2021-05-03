@@ -59,7 +59,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
     const multisigOptions: MultisigOptions = {
       pluginOptions: { version: 1 },
-      threshold: 3,
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
@@ -90,7 +90,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
     const multisigOptions: MultisigOptions = {
       pluginOptions: { version: 1 },
-      threshold: 3,
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
