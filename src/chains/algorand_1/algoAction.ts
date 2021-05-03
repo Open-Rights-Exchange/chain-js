@@ -1,5 +1,5 @@
 import * as algosdk from 'algosdk'
-import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
+import { Transaction as AlgoTransactionClass } from 'algosdk'
 import {
   bigIntToUint8Array,
   bufferToString,
@@ -52,11 +52,11 @@ export class AlgorandActionHelper {
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
   constructor(
     params:
-    | AlgorandTxAction
-    | AlgorandTxActionRaw
-    | AlgorandTxActionSdkEncoded
-    | AlgorandRawTransactionStruct
-    | AlgorandRawTransactionMultisigStruct,
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     this.validateAndApplyParams(params)
   }
@@ -64,11 +64,11 @@ export class AlgorandActionHelper {
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
     actionParam:
-    | AlgorandTxAction
-    | AlgorandTxActionRaw
-    | AlgorandTxActionSdkEncoded
-    | AlgorandRawTransactionStruct
-    | AlgorandRawTransactionMultisigStruct,
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')

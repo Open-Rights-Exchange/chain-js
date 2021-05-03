@@ -24,7 +24,7 @@ export interface MultisigPlugin {
   prepareToBeSigned(rawTransaction: any): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  sign(actionEncodedForSdk: any, privateKeys: PrivateKey[], transactionId: string): Promise<void>
+  sign(privateKeys: PrivateKey[]): Promise<void>
 
   // CREATEACCOUNT
   accountName: ChainEntityName

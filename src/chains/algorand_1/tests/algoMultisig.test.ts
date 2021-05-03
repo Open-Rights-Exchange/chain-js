@@ -42,6 +42,7 @@ describe('Test Algorand Multisig Transactions', () => {
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
+    expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
     expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
@@ -58,7 +59,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
     const multisigOptions: MultisigOptions = {
       pluginOptions: { version: 1 },
-      threshold: 3,
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
@@ -89,7 +90,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
     const multisigOptions: MultisigOptions = {
       pluginOptions: { version: 1 },
-      threshold: 3,
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2

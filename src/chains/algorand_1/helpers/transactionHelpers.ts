@@ -20,7 +20,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   }
   if (transaction?.msig) {
     returnTx = transaction as AlgorandRawTransactionMultisigStruct
-  } else {
+  } else if (transaction?.sig) {
     returnTx = transaction as AlgorandRawTransactionStruct
   }
   return { transactionId: txID, transaction: returnTx }

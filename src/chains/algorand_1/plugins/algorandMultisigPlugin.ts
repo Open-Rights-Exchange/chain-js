@@ -48,11 +48,7 @@ export interface AlgorandMultisigPlugin extends MultisigPlugin {
 
   prepareToBeSigned(trxEncodedForChain: AlgorandTxEncodedForChain): Promise<void>
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  sign(
-    actionEncodedForSdk: AlgorandTxActionSdkEncoded,
-    privateKeys: AlgorandPrivateKey[],
-    transactionId: string,
-  ): Promise<void>
+  sign(privateKeys: AlgorandPrivateKey[]): Promise<void>
 
   accountName: AlgorandEntityName
 
