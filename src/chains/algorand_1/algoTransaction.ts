@@ -453,7 +453,7 @@ export class AlgorandTransaction implements Transaction {
   public async sign(privateKeys: AlgorandPrivateKey[]): Promise<void> {
     this.assertIsValidated()
     if (this.isMultisig) {
-      await this.multisigPlugin.sign(this._actionHelper.actionEncodedForSdk, privateKeys, this.transactionId)
+      await this.multisigPlugin.sign(privateKeys)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const signResults: AlgorandTxSignResults = algosdk.signTransaction(

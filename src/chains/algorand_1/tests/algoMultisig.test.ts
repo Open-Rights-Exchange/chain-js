@@ -42,6 +42,7 @@ describe('Test Algorand Multisig Transactions', () => {
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
+    expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
     expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
