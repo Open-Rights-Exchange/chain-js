@@ -48,6 +48,11 @@ export function setupInitilaizerAction(initializerAction?: InitializerAction) {
   }
 }
 
+export function sortHexStrings(hexArray: string[]) {
+  hexArray?.sort((left, right) => left.toLowerCase().localeCompare(right.toLowerCase()))
+  return hexArray
+}
+
 export async function getCreateProxyInitializerData(multisigOptions: EthereumGnosisSafeMultisigOptions) {
   const { pluginOptions, weight: threshold, addrs } = multisigOptions
   const { gnosisSafeMasterAddress, fallbackHandlerAddress, chainUrl, initializerAction } = pluginOptions
@@ -56,8 +61,9 @@ export async function getCreateProxyInitializerData(multisigOptions: EthereumGno
   const { initializerTo, initializerData, paymentToken, paymentAmount, paymentReceiver } = setupInitilaizerAction(
     initializerAction,
   )
+  const sortedAddrs = sortHexStrings(addrs)
   const { data } = await gnosisSafeMasterContract.populateTransaction.setup(
-    addrs,
+    sortedAddrs,
     threshold,
     initializerTo,
     initializerData,
@@ -133,7 +139,7 @@ export async function rawTransactionToSafeTx(
   rawTransaction: EthereumMultisigRawTransaction,
   multisigOptions: EthereumGnosisSafeMultisigOptions,
 ): Promise<GnosisSafeTransaction> {
-  const { to, value, data, contract, gasLimit, gasPrice } = rawTransaction
+  const { to, value, data, contract } = rawTransaction
   const {
     operation,
     refundReceiver,
@@ -150,19 +156,41 @@ export async function rawTransactionToSafeTx(
   } else {
     safeTxData = data
   }
-  const txNonce = nonce || (await getSafeNonce(multisigOptions))
   return {
     to,
     value: value || 0,
     data: safeTxData || '0x',
     operation: operation || 0,
-    safeTxGas: safeTxGas || gasLimit,
-    baseGas: baseGas || gasLimit,
-    gasPrice: safeGasPice || gasPrice,
+    safeTxGas: safeTxGas || 0,
+    baseGas: baseGas || 0,
+    gasPrice: safeGasPice || 0,
     gasToken: gasToken || ZERO_ADDRESS,
     refundReceiver: refundReceiver || ZERO_ADDRESS,
-    nonce: txNonce,
+    nonce: nonce || 0,
   }
+}
+
+export async function getSafeTransactionHash(
+  multisigOptions: EthereumGnosisSafeMultisigOptions,
+  safeTx: GnosisSafeTransaction,
+): Promise<string> {
+  const { pluginOptions } = multisigOptions
+  const { chainUrl, multisigAddress } = pluginOptions
+  const ethersProvier = getEthersJsonRpcProvider(chainUrl)
+  const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
+  const hash = await multisigContract.getTransactionHash(
+    safeTx.to,
+    safeTx.value,
+    safeTx.data,
+    safeTx.operation,
+    safeTx.safeTxGas,
+    safeTx.baseGas,
+    safeTx.gasPrice,
+    safeTx.gasToken,
+    safeTx.refundReceiver,
+    safeTx.nonce,
+  )
+  return hash
 }
 
 /** Generates GnosisSafe signature object, that is gonne be passed in as serialized for executeTransaction  */
@@ -171,13 +199,8 @@ export async function signSafeTransactionHash(
   safeTx: GnosisSafeTransaction,
   multisigOptions: EthereumGnosisSafeMultisigOptions,
 ) {
-  const { pluginOptions } = multisigOptions
-  const { multisigAddress, chainUrl } = pluginOptions
-  const ethersProvier = getEthersJsonRpcProvider(chainUrl)
-  const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
-  const { chainId } = await ethersProvier.getNetwork()
   const signerWallet = getEthersWallet(privateKey)
-  const trxHash = calculateSafeTransactionHash(multisigContract, safeTx, chainId)
+  const trxHash = await getSafeTransactionHash(multisigOptions, safeTx)
   const typedDataHash = utils.arrayify(trxHash)
   return {
     signer: signerWallet.address,
