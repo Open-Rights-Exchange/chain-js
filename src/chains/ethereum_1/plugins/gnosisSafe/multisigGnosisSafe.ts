@@ -81,6 +81,13 @@ export class GnosisSafeMultisigPlugin implements EthereumMultisigPlugin {
     this._owners = owners
   }
 
+  get owners(): string[] {
+    if (isNullOrEmpty(this._owners)) {
+      throwNewError('Owners are not set. Call prepareToBeSigned() or multisigContract.getOwners()')
+    }
+    return this._owners
+  }
+
   get multisigContract(): any {
     const { pluginOptions } = this.multisigOptions
     const { chainUrl } = pluginOptions
