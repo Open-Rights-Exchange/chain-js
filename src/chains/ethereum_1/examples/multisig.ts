@@ -4,29 +4,29 @@ import { ConfirmType } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
-import {
-  DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
-  DEFAULT_PROXY_FACTORY_ADDRESS,
-  DEFAULT_FALLBACK_HANDLER_ADDRESS,
-} from '../ethConstants'
-
 import { EthereumGnosisSafeMultisigOptions } from '../plugins/gnosisSafe/models'
 import { GnosisSafeMultisigPlugin } from '../plugins/gnosisSafe/multisigGnosisSafe'
+
+require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
     const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
     const multisigOptions: EthereumGnosisSafeMultisigOptions = {
-      addrs: ['0x31DF49653c72933A4b99aF6fb5d5b77Cc169346a', '0x76d1b5dCFE51dbeB3C489977Faf2643272AaD901'],
+      addrs: [
+        process.env.GOERLI_multisigOwner_1,
+        process.env.GOERLI_multisigOwner_2,
+        process.env.GOERLI_multisigOwner_3,
+      ],
       weight: 2,
       pluginOptions: {
         chainUrl: goerliEndpoints[0].url,
-        multisigAddress: '0x1Fa8f05dEA1F77c9D9AEb7A29C812871810501E0',
+        multisigAddress: '0x88ACEb3D7c1Fab437997e53224672DB6b1BaDDC2',
       },
     }
 
     const defaultEthTxOptions: EthereumTransactionOptions = {
-      chain: 'ropsten',
+      chain: 'goerli',
       hardfork: 'istanbul',
       multisigOptions,
     }
@@ -40,24 +40,23 @@ import { GnosisSafeMultisigPlugin } from '../plugins/gnosisSafe/multisigGnosisSa
     }
 
     const transaction = goerli.new.Transaction(defaultEthTxOptions)
-    console.log('1:')
+
     await transaction.setFromRaw(sampleSetFromRawTrx)
-    console.log('2:')
+
     await transaction.prepareToBeSigned()
-    console.log('3:')
+
     await transaction.validate()
-    console.log('multisigRaw:', transaction.multisigPlugin?.rawTransaction)
-    console.log('transaction action: ', transaction.actions)
-    await transaction.sign([toEthereumPrivateKey('0xbafee378c528ac180d309760f24378a2cfe47d175691966d15c83948e4a7faa6')])
-    console.log('multisigRaw:', transaction.multisigPlugin?.rawTransaction)
-    console.log('EthereumJsTx : ', transaction.raw)
-    await transaction.sign([toEthereumPrivateKey('0x9c58fafab2feb46838efdba78e108d2be13ec0064496889677f32044acf0bbc6')])
-    console.log('multisigRaw:', transaction.multisigPlugin?.rawTransaction)
-    console.log('EthereumJsTx : ', transaction.raw)
-    console.log('Missing multisig signatures: ', transaction.multisigPlugin.missingSignatures)
-    console.log('Missing parent trx signatures: ', transaction.missingSignatures)
 
     console.log('owners: ', await (transaction.multisigPlugin as GnosisSafeMultisigPlugin).multisigContract.getOwners())
+
+    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_3_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+
+    console.log('signatures: ', transaction.multisigPlugin.signatures)
+    console.log('missing signatures: ', transaction.missingSignatures)
+    console.log('missing signatures: ', (transaction.multisigPlugin as GnosisSafeMultisigPlugin).safeTransaction)
+    // TODO: Investigate wrapper signer, and how transaction fees distributed
+    // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_testAccount_PRIVATE_KEY)])
     console.log('Trx result: ', await transaction.send())
   } catch (error) {
     console.log(error)

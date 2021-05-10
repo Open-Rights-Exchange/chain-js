@@ -9,25 +9,26 @@ import {
 } from '../ethConstants'
 import { EthereumGnosisSafeMultisigOptions } from '../plugins/gnosisSafe/models'
 import { toEthereumPrivateKey } from '../helpers'
+
+require('dotenv').config()
 ;(async () => {
   try {
     const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
+    // deterministic address: 0x3269AEa53C23E496292259F51e24725D0fBa78A2
     const multisigOptions: EthereumGnosisSafeMultisigOptions = {
-      addrs: ['0x31DF49653c72933A4b99aF6fb5d5b77Cc169346a', '0x76d1b5dCFE51dbeB3C489977Faf2643272AaD901'],
+      addrs: [
+        process.env.GOERLI_multisigOwner_1,
+        process.env.GOERLI_multisigOwner_2,
+        process.env.GOERLI_multisigOwner_3,
+      ],
       weight: 2,
       pluginOptions: {
-        nonce: 10,
+        nonce: 2,
         chainUrl: goerliEndpoints[0].url,
         gnosisSafeMasterAddress: DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
         proxyFactoryAddress: DEFAULT_PROXY_FACTORY_ADDRESS,
         fallbackHandlerAddress: DEFAULT_FALLBACK_HANDLER_ADDRESS,
         // initializerAction?: InitializerAction;
-        // operation?: number;
-        // refundReceiver?: string;
-        // safeTxGas?: number | string;
-        // baseGas?: number | string;
-        // gasPrice?: number | string;
-        // gasToken?: string;
       },
     }
 
@@ -43,9 +44,7 @@ import { toEthereumPrivateKey } from '../helpers'
       await createAccount.composeTransaction()
       console.log('IsMultisig: ', createAccount.transaction.isMultisig)
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
-      await createAccount.transaction.sign([
-        toEthereumPrivateKey('0x9c58fafab2feb46838efdba78e108d2be13ec0064496889677f32044acf0bbc6'),
-      ])
+      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_testAccount_PRIVATE_KEY)])
       console.log('Txresult: ', await createAccount.transaction.send())
     }
     console.log('createAccountTransaction: ', createAccount.transaction.actions)
