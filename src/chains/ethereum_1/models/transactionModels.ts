@@ -1,8 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
 import BN from 'bn.js'
-
-import { TxExecutionPriority } from '../../../models'
+import { MultisigOptions, TxExecutionPriority } from '../../../models'
 import { EthereumMultiValue } from './generalModels'
 
 export type EthereumAbi = any[]
@@ -96,6 +95,7 @@ export type EthereumTransactionOptions = {
   hardfork: string
   maxFeeIncreasePercentage?: number
   executionPriority?: TxExecutionPriority
+  multisigOptions?: MultisigOptions
 }
 
 export type EthereumSetDesiredFeeOptions = {

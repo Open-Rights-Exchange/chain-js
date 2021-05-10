@@ -155,7 +155,7 @@ class ChainEthereumV1 implements Chain {
     return account
   }
 
-  private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
+  private newCreateAccount = (options?: EthereumCreateAccountOptions): EthereumCreateAccount => {
     this.assertIsConnected()
     return new EthereumCreateAccount(this._chainState, options)
   }
