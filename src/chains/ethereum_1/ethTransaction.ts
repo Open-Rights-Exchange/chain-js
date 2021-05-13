@@ -33,6 +33,7 @@ import {
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
+  privateKeyToAddress,
   toEthBuffer,
   toEthereumPublicKey,
   toEthereumSignature,
@@ -40,8 +41,8 @@ import {
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { EthereumMultisigPlugin } from './plugins/ethereumMultisigPlugin'
-import { setMultisigPlugin } from './helpers/plugin'
+import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
+import { setMultisigPlugin } from './plugins/multisig/helpers'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -55,9 +56,6 @@ export class EthereumTransaction implements Transaction {
   /** estimated gas for transacton - encoded as string to handle big numbers */
   private _estimatedGas: string
 
-  /** Transaction object (using ethereumjs-tx library) */
-  private _ethereumJsTx: EthereumJsTx
-
   private _executionPriority: TxExecutionPriority
 
   private _maxFeeIncreasePercentage: number
@@ -65,8 +63,6 @@ export class EthereumTransaction implements Transaction {
   private _isValidated: boolean
 
   private _options: EthereumTransactionOptions
-
-  private _signBuffer: Buffer
 
   private _multisigPlugin: EthereumMultisigPlugin
 
@@ -108,10 +104,10 @@ export class EthereumTransaction implements Transaction {
 
   /** Address retrieved from attached signature - Returns null if no signature attached */
   get signedByAddress(): EthereumAddress {
-    if (!this._ethereumJsTx) return null
+    if (isNullOrEmpty(this.signatures)) return null
     try {
       // getSenderAddress throws if sig not attached - so we catch that and return null in that case
-      return bufferToHex(this._ethereumJsTx.getSenderAddress())
+      return bufferToHex(this.ethereumJsTx.getSenderAddress())
     } catch (error) {
       return null
     }
@@ -119,10 +115,10 @@ export class EthereumTransaction implements Transaction {
 
   /** Public Key retrieved from attached signature - Returns null if no from value or signature attached */
   get signedByPublicKey(): EthereumPublicKey {
-    if (!this._ethereumJsTx) return null
+    if (isNullOrEmpty(this.signatures)) return null
     try {
       // getSenderPublicKey throws if sig not attached - so we catch that and return null in that case
-      return toEthereumPublicKey(bufferToHex(this._ethereumJsTx.getSenderPublicKey()))
+      return toEthereumPublicKey(bufferToHex(this.ethereumJsTx.getSenderPublicKey()))
     } catch (error) {
       return null
     }
@@ -148,23 +144,29 @@ export class EthereumTransaction implements Transaction {
 
   /** Raw transaction body - all values are Buffer types */
   get raw(): EthereumRawTransaction {
-    if (!this.hasRaw) {
-      throwNewError(
-        'Transaction has no action. Set action or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
-      )
+    if (this.isMultisig) {
+      // Ethereum raw transaction includes both action realted properties (to, value, data)
+      //  and option related properties (nonce, gasLimit, gasPrice)
+      //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
+      //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
+      return { ...this._actionHelper?.raw, ...this.multisigPlugin?.rawTransaction }
     }
-    const { nonce, gasLimit, gasPrice, to, value, data, v, r, s } = this._ethereumJsTx
-    return { nonce, gasLimit, gasPrice, to, value, data, v, r, s }
+    return this._actionHelper?.raw
   }
 
   /** Whether the raw transaction body has been set (via setting action or setFromRaw()) */
   get hasRaw(): boolean {
-    return !!this._ethereumJsTx
+    return !!this.raw
+  }
+
+  get ethereumJsTx(): EthereumJsTx {
+    const trxOptions = this.getOptionsForEthereumJsTx()
+    return new EthereumJsTx(this.raw, trxOptions)
   }
 
   /** Ethereum doesn't have any native multi-sig functionality */
   get supportsMultisigTransaction(): boolean {
-    return false
+    return true
   }
 
   /**
@@ -199,20 +201,20 @@ export class EthereumTransaction implements Transaction {
     }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
-    this.updateEthTxFromAction()
+    // this.updateEthTxFromAction()
   }
 
   private get multisigRawTransactionWithOptions() {
     return { ...this._actionHelper.raw, ...this.multisigPlugin.rawTransaction }
   }
 
-  /** update locally cached EthereumJsTx from action helper data */
-  updateEthTxFromAction() {
-    const trxOptions = this.getOptionsForEthereumJsTx()
-    const rawAction = this.isMultisig ? this.multisigRawTransactionWithOptions : this._actionHelper.raw
-    this._ethereumJsTx = new EthereumJsTx(rawAction, trxOptions)
-    this.setSignBuffer()
-  }
+  // /** update locally cached EthereumJsTx from action helper data */
+  // updateEthTxFromAction() {
+  //   const trxOptions = this.getOptionsForEthereumJsTx()
+  //   const rawAction = this.isMultisig ? this.multisigRawTransactionWithOptions : this._actionHelper.raw
+  //   this._ethereumJsTx = new EthereumJsTx(rawAction, trxOptions)
+  //   this.setSignBuffer()
+  // }
 
   /**
    *  Updates nonce and gas fees (if necessary) - these values must be present
@@ -220,17 +222,16 @@ export class EthereumTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertHasAction()
-    await this.setNonceIfEmpty(this.senderAddress)
     // set gasLimit if not already set, set it using the execution Priority specified for this transaction
     if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
       const gasFee = await this.getSuggestedFee(this._executionPriority)
       await this.setDesiredFee(gasFee)
     }
-    if (this.isMultisig) {
+    if (!this.isMultisig) {
+      await this.setNonceIfEmpty(this.senderAddress)
+    } else {
       await this.multisigPlugin.prepareToBeSigned(this._actionHelper.action)
     }
-    // TODO: consider how to setTransactionId()
-    this.updateEthTxFromAction()
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
@@ -244,22 +245,15 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
-  /** Creates a sign buffer using raw transaction body */
-  private setSignBuffer() {
-    this.assertIsConnected()
-    this.assertHasRaw()
-    this._signBuffer = this._ethereumJsTx.hash(false)
-  }
-
   /** calculates a unique nonce value for the tx (if not already set) by using the chain transaction count for a given address */
   async setNonceIfEmpty(fromAddress: EthereumAddress | EthereumAddressBuffer) {
     if (isNullOrEmpty(fromAddress)) return
     this.assertHasRaw()
     const address = convertBufferToHexStringIfNeeded(fromAddress)
+
     if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
       const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)
       this._actionHelper.nonce = txCount.toString()
-      this.updateEthTxFromAction()
     }
   }
 
@@ -324,7 +318,7 @@ export class EthereumTransaction implements Transaction {
     if (this.isMultisig) {
       this.multisigPlugin.validate()
     } else {
-      const { gasPrice, gasLimit } = this._ethereumJsTx
+      const { gasPrice, gasLimit } = this.ethereumJsTx
       if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
         throwNewError(
           'Transaction validation failure.Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
@@ -333,9 +327,6 @@ export class EthereumTransaction implements Transaction {
     }
     // make sure the from address is a valid Eth address
     this.assertFromIsValid()
-    // if (this.isMultisig) {
-    //   this._multisigPlugin =
-    // }
     this._isValidated = true
   }
 
@@ -343,7 +334,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Get signature attached to transaction - returns null if no signature */
   get signatures(): EthereumSignature[] {
-    const { v, r, s } = this._ethereumJsTx || {}
+    const { v, r, s } = this._actionHelper?.raw || {}
     if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
       return null // return null instead of empty array
     }
@@ -364,19 +355,14 @@ export class EthereumTransaction implements Transaction {
   /** Add signature to raw transaction - Accepts array with exactly one signature */
   addSignatures = (signatures: EthereumSignature[]): void => {
     if (isNullOrEmpty(signatures) && this.hasRaw) {
-      this._ethereumJsTx.v = null
-      this._ethereumJsTx.r = null
-      this._ethereumJsTx.s = null
+      this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignature
     } else if (!isArrayLengthOne(signatures)) {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     } else {
       this.assertHasRaw()
       const signature = signatures[0]
       this.assertValidSignature(signature)
-      const { v, r, s } = signature
-      this._ethereumJsTx.v = toEthBuffer(v)
-      this._ethereumJsTx.r = r
-      this._ethereumJsTx.s = s
+      this._actionHelper.signature = signature
     }
   }
 
@@ -542,7 +528,7 @@ export class EthereumTransaction implements Transaction {
       return null
       // throwNewError('Cant determine transaction ID - missing transaction signature')
     }
-    return ensureHexPrefix(this._ethereumJsTx.hash(true).toString('hex'))
+    return ensureHexPrefix(this.ethereumJsTx.hash(true).toString('hex'))
   }
 
   /** get the actual cost (in Ether) for executing the transaction */
@@ -609,7 +595,15 @@ export class EthereumTransaction implements Transaction {
   public get signBuffer(): Buffer {
     this.assertIsValidated()
     this.assertHasSignature()
-    return this._signBuffer
+    return this.ethereumJsTx.hash(false)
+  }
+
+  private signAndAddSignatures(privateKey: string) {
+    const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
+    const ethJsTx = this.ethereumJsTx
+    ethJsTx.sign(privateKeyBuffer)
+    const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignature
+    this.addSignatures([signature])
   }
 
   /** Sign the transaction body with private key and add to attached signatures
@@ -618,30 +612,26 @@ export class EthereumTransaction implements Transaction {
    *  This parent signature can be overriden by calling sign after all multisig signing is done.
    */
   public async sign(privateKeys: EthereumPrivateKey[]): Promise<void> {
-    if (!this.isMultisig && !isArrayLengthOne(privateKeys)) {
-      throwNewError('If ethereum transaction is not multisig, sign() requires privateKeys array of length one')
+    if (isNullOrEmpty(privateKeys)) {
+      throwNewError('privateKeys[] cannot be empty')
     }
-    let multisigMissingSignatures = this.isMultisig ? this.multisigPlugin?.missingSignatures : null
-    if (!isNullOrEmpty(multisigMissingSignatures)) {
-      const missingPrivates = privateKeys.filter(privateKey => {
-        multisigMissingSignatures.includes(privateToAddress(Buffer.from(removeHexPrefix(privateKey), 'hex')))
-        return privateKeys
-      })
-      if (isNullOrEmpty(missingPrivates)) {
-        throwNewError(
-          `Multisig signatures is below threshold. Make sure you sign transaction with one of these addresses: ${this.multisigPlugin.missingSignatures}`,
-        )
+    const [firstPrivateKey] = privateKeys
+    if (!this.isMultisig) {
+      if (!isArrayLengthOne(privateKeys)) {
+        throwNewError('If ethereum transaction is not multisig, sign() requires privateKeys array of length one')
       }
-      await this.multisigPlugin.sign(missingPrivates)
-      multisigMissingSignatures = this.multisigPlugin?.missingSignatures
-    }
-    if (isNullOrEmpty(multisigMissingSignatures)) {
-      this.updateEthTxFromAction()
-      const privateKey = privateKeys[0]
-      const privateKeyBuffer = toEthBuffer(privateKey)
-      // generate nonce (using privateKey) if not already present
-      await this.setNonceIfEmpty(bufferToHex(privateToAddress(privateKeyBuffer)))
-      this._ethereumJsTx?.sign(privateKeyBuffer)
+
+      await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
+      this.signAndAddSignatures(firstPrivateKey)
+    } else {
+      if (!isNullOrEmpty(this.multisigPlugin?.missingSignatures)) {
+        await this.multisigPlugin.sign(privateKeys)
+      }
+      if (isNullOrEmpty(this.multisigPlugin?.missingSignatures)) {
+        // generate nonce (using privateKey) if not already present
+        await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
+        this.signAndAddSignatures(firstPrivateKey)
+      }
     }
   }
 
@@ -656,7 +646,7 @@ export class EthereumTransaction implements Transaction {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
     // Serialize the entire transaction for sending to chain (prepared transaction that includes signatures { v, r , s })
-    const signedTransaction = bufferToHex(this._ethereumJsTx.serialize())
+    const signedTransaction = bufferToHex(this.ethereumJsTx.serialize())
     const response = await this._chainState.sendTransaction(signedTransaction, waitForConfirm, communicationSettings)
     return response
   }
@@ -682,10 +672,13 @@ export class EthereumTransaction implements Transaction {
   /** Whether action.from (if present) is a valid ethereum address - also checks that from is provided if data was */
   private assertFromIsValid(): void {
     // if data is provided in the action, then there must be a from value
-    // TODO: resolve checking from issue
-    // if (!isNullOrEmptyEthereumValue(this?.action?.data) && isNullOrEmptyEthereumValue(this?.action?.from)) {
-    //   throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
-    // }
+    if (
+      !this.isMultisig &&
+      !isNullOrEmptyEthereumValue(this?.action?.data) &&
+      isNullOrEmptyEthereumValue(this?.action?.from)
+    ) {
+      throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
+    }
     if (!this.isFromEmptyOrNullAddress() && !isValidEthereumAddress(this?.action?.from)) {
       throwNewError('Transaction action.from address is not valid.')
     }
