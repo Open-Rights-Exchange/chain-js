@@ -1,4 +1,4 @@
-import { AlgorandAddress } from '../../models'
+import { AlgorandAddress } from '../../../models'
 
 export type AlgorandNativeMultisigOptions = {
   pluginOptions: { version: number }
