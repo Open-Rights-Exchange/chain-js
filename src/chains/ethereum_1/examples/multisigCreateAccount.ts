@@ -7,7 +7,7 @@ import {
   DEFAULT_PROXY_FACTORY_ADDRESS,
   DEFAULT_FALLBACK_HANDLER_ADDRESS,
 } from '../ethConstants'
-import { EthereumGnosisSafeMultisigOptions } from '../plugins/gnosisSafe/models'
+import { EthereumGnosisSafeMultisigOptions } from '../plugins/multisig/gnosisSafe/models'
 import { toEthereumPrivateKey } from '../helpers'
 
 require('dotenv').config()
@@ -18,12 +18,12 @@ require('dotenv').config()
     const multisigOptions: EthereumGnosisSafeMultisigOptions = {
       addrs: [
         process.env.GOERLI_multisigOwner_1,
-        process.env.GOERLI_multisigOwner_2,
         process.env.GOERLI_multisigOwner_3,
+        process.env.GOERLI_multisigOwner_2,
       ],
-      weight: 2,
+      weight: 3,
       pluginOptions: {
-        nonce: 2,
+        nonce: 1,
         chainUrl: goerliEndpoints[0].url,
         gnosisSafeMasterAddress: DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
         proxyFactoryAddress: DEFAULT_PROXY_FACTORY_ADDRESS,
@@ -44,7 +44,7 @@ require('dotenv').config()
       await createAccount.composeTransaction()
       console.log('IsMultisig: ', createAccount.transaction.isMultisig)
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
-      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_testAccount_PRIVATE_KEY)])
+      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
       console.log('Txresult: ', await createAccount.transaction.send())
     }
     console.log('createAccountTransaction: ', createAccount.transaction.actions)

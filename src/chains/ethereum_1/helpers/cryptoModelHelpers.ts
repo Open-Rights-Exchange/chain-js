@@ -1,4 +1,12 @@
-import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
+import {
+  isValidPrivate,
+  isValidPublic,
+  isValidAddress,
+  ECDSASignature,
+  BN,
+  bufferToHex,
+  privateToAddress,
+} from 'ethereumjs-util'
 import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString, jsonParseAndRevive } from '../../../helpers'
 import {
   EthereumSignature,
@@ -137,4 +145,9 @@ export function toEthUnit(unit: string): EthUnit {
 /** accepts a hexstring or Buffer and returns hexstring (converts buffer to hexstring) */
 export function convertBufferToHexStringIfNeeded(value: string | Buffer) {
   return isABuffer(value) ? bufferToHex(value as Buffer) : (value as string)
+}
+
+export function privateKeyToAddress(privateKey: string): EthereumAddress {
+  const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
+  return bufferToHex(privateToAddress(privateKeyBuffer))
 }

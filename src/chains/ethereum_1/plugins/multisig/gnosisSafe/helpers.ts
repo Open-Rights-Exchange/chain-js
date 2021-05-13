@@ -15,7 +15,7 @@ import {
 import { EMPTY_DATA, SENTINEL_ADDRESS, ZERO_ADDRESS } from '../../../ethConstants'
 import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../../helpers'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
-// TODO: move to a more generic directory
+// TODO: move to a more generic directory (Consider using EthersJs)
 export function getEthersJsonRpcProvider(url: string) {
   return new ethers.providers.JsonRpcProvider(url)
 }
@@ -167,7 +167,7 @@ export async function rawTransactionToSafeTx(
     gasPrice: safeGasPice || 0,
     gasToken: gasToken || ZERO_ADDRESS,
     refundReceiver: refundReceiver || ZERO_ADDRESS,
-    nonce: nonce || 0,
+    nonce,
   }
 }
 
@@ -179,6 +179,7 @@ export async function getSafeTransactionHash(
   const { chainUrl, multisigAddress } = pluginOptions
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
+  const nonce = safeTx?.nonce || (await multisigContract.nonce())
   const hash = await multisigContract.getTransactionHash(
     safeTx.to,
     safeTx.value,
@@ -189,7 +190,7 @@ export async function getSafeTransactionHash(
     safeTx.gasPrice,
     safeTx.gasToken,
     safeTx.refundReceiver,
-    safeTx.nonce,
+    nonce,
   )
   return hash
 }

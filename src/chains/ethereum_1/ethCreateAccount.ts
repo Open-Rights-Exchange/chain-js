@@ -12,8 +12,8 @@ import {
   EthereumNewAccountType,
   EthereumPublicKey,
 } from './models'
-import { setMultisigPlugin } from './helpers/plugin'
-import { EthereumMultisigPlugin } from './plugins/ethereumMultisigPlugin'
+import { setMultisigPlugin } from './plugins/multisig/helpers'
+import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 import { EthereumTransaction } from './ethTransaction'
 
 /** Helper class to compose a transction for creating a new chain account
