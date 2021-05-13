@@ -46,8 +46,8 @@ import {
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
-import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
-import { setMultisigPlugin } from './helpers/plugin'
+import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { setMultisigPlugin } from './plugins/multisig/helpers'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -78,6 +78,16 @@ export class AlgorandTransaction implements Transaction {
 
   get multisigPlugin(): AlgorandMultisigPlugin {
     return this._multisigPlugin
+  }
+
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultisig(): boolean {
+    return !isNullOrEmpty(this.multisigPlugin)
+  }
+
+  /** Multisig transaction options */
+  public get multisigOptions(): MultisigOptions {
+    return this.isMultisig ? this.multisigPlugin.multisigOptions : null
   }
 
   /** Chain-specific values included in the transaction sent to the chain */
@@ -376,11 +386,6 @@ export class AlgorandTransaction implements Transaction {
     return isNullOrEmpty(this.missingSignatures)
   }
 
-  /** Returns whether the transaction is a multisig transaction */
-  public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.multisigPlugin)
-  }
-
   /** Returns address, for which, a matching signature must be attached to transaction */
   public get missingSignatures(): AlgorandAddress[] {
     this.assertIsValidated()
@@ -392,11 +397,6 @@ export class AlgorandTransaction implements Transaction {
     const missingSignatures =
       this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
-  }
-
-  /** Multisig transaction options */
-  private get multisigOptions(): MultisigOptions {
-    return this.isMultisig ? this.multisigPlugin.multisigOptions : null
   }
 
   /** Get the raw transaction (either regular or multisig) */

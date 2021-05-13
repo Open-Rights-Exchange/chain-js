@@ -11,8 +11,8 @@ import {
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
-import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
-import { setMultisigPlugin } from './helpers/plugin'
+import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { setMultisigPlugin } from './plugins/multisig/helpers'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -27,8 +27,6 @@ export class AlgorandCreateAccount implements CreateAccount {
   private _accountType: AlgorandNewAccountType
 
   private _options: AlgorandCreateAccountOptions
-
-  requiresTransaction: boolean = false
 
   private _generatedKeys: AlgorandGeneratedKeys
 
@@ -45,14 +43,14 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** Returns whether the transaction is a multisig transaction */
-  public get isMultiSig(): boolean {
+  public get isMultisig(): boolean {
     return !isNullOrEmpty(this.multisigPlugin)
   }
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
-    if (this.isMultiSig) {
+    if (this.isMultisig) {
       return this.multisigPlugin.accountName
     }
     if (this._publicKey) {
@@ -91,13 +89,16 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Algorand does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
-    return false
+    return this.isMultisig ? this.multisigPlugin.requiresTransaction : false
   }
 
   /** Algorand account creation doesn't require any on chain transactions.
    * Hence there is no transaction object attached to AlgorandCreateAccount class
    */
   get transaction(): any {
+    if (this.isMultisig) {
+      return this.multisigPlugin.transaction
+    }
     throwNewError(
       'Algorand account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
     )
@@ -143,7 +144,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
-      if (!this.isMultiSig) {
+      if (!this.isMultisig) {
         await this.generateAccountKeys()
       }
     }
