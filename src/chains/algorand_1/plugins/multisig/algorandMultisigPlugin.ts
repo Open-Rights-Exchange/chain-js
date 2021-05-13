@@ -1,4 +1,4 @@
-import { MultisigOptions } from '../../../models'
+import { MultisigOptions } from '../../../../models'
 import {
   AlgorandAddress,
   AlgorandEntityName,
@@ -6,12 +6,9 @@ import {
   AlgorandPublicKey,
   AlgorandRawTransactionMultisigStruct,
   AlgorandSignature,
-  AlgorandTxAction,
-  AlgorandTxActionRaw,
-  AlgorandTxActionSdkEncoded,
   AlgorandTxEncodedForChain,
-} from '../models'
-import { MultisigPlugin } from '../../../interfaces'
+} from '../../models'
+import { MultisigPlugin } from '../../../../interfaces'
 
 export interface AlgorandMultisigPluginInput {
   multisigOptions?: MultisigOptions
@@ -19,41 +16,45 @@ export interface AlgorandMultisigPluginInput {
 }
 
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
-  /** Transaction's actions */
+  // ----- TRANSACTION Members
+
   multisigOptions: MultisigOptions
-  /** Chain-specific and time-sensitive transaction header */
-  multisigOptionsFromRaw: MultisigOptions
+
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
   rawTransaction: AlgorandRawTransactionMultisigStruct
+
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
 
   missingSignatures: AlgorandAddress[]
+
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: AlgorandAddress[]
+
   /** Signatures attached to transaction */
   signatures: AlgorandSignature[]
-
-  assertMultisigFromMatchesOptions(
-    action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded | AlgorandRawTransactionMultisigStruct,
-  ): void
 
   getPublicKeysForSignaturesFromRawTx(): AlgorandPublicKey[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: AlgorandSignature[]): void
 
-  validate(): void
-
   prepareToBeSigned(trxEncodedForChain: AlgorandTxEncodedForChain): Promise<void>
+
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: AlgorandPrivateKey[]): Promise<void>
+
+  validate(): void
+
+  // ----- CREATE ACCOUNT Members
 
   accountName: AlgorandEntityName
 
   /** Not supported */
   transaction: any
+
+  requiresTransaction: boolean
 
   generateKeysIfNeeded(): Promise<void>
 }

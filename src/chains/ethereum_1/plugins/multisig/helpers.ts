@@ -1,5 +1,5 @@
-import { EthereumMultisigPlugin, EthereumMultisigPluginInput } from '../plugins/ethereumMultisigPlugin'
-import { GnosisSafeMultisigPlugin } from '../plugins/gnosisSafe/multisigGnosisSafe'
+import { EthereumMultisigPlugin, EthereumMultisigPluginInput } from './ethereumMultisigPlugin'
+import { GnosisSafeMultisigPlugin } from './gnosisSafe/multisigGnosisSafe'
 
 export function setMultisigPlugin(input: EthereumMultisigPluginInput): EthereumMultisigPlugin {
   const { multisigOptions } = input

@@ -3,7 +3,7 @@ import { ethers, Contract, ContractInterface, BigNumberish, utils, PopulatedTran
 import GnosisSafeSol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json'
 import ProxyFactorySol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafeProxyFactory.json'
 
-import { EthereumAddress, EthereumTransactionAction } from '../../models'
+import { EthereumAddress, EthereumTransactionAction } from '../../../models'
 import {
   EthereumGnosisSafeMultisigOptions,
   InitializerAction,
@@ -12,9 +12,9 @@ import {
   GnosisSafeSignature,
   EthereumMultisigRawTransaction,
 } from './models'
-import { EMPTY_DATA, SENTINEL_ADDRESS, ZERO_ADDRESS } from '../../ethConstants'
-import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../helpers'
-import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../helpers'
+import { EMPTY_DATA, SENTINEL_ADDRESS, ZERO_ADDRESS } from '../../../ethConstants'
+import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../../helpers'
+import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
 // TODO: move to a more generic directory
 export function getEthersJsonRpcProvider(url: string) {
   return new ethers.providers.JsonRpcProvider(url)
@@ -62,6 +62,7 @@ export async function getCreateProxyInitializerData(multisigOptions: EthereumGno
     initializerAction,
   )
   const sortedAddrs = sortHexStrings(addrs)
+  console.log('sorted: ', sortedAddrs)
   const { data } = await gnosisSafeMasterContract.populateTransaction.setup(
     sortedAddrs,
     threshold,

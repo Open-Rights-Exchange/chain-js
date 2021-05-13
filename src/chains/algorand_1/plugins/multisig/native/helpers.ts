@@ -1,7 +1,7 @@
 import * as algosdk from 'algosdk'
-import { isNullOrEmpty } from '../../../../helpers'
-import { MultisigOptions } from '../../../../models'
-import { AlgorandMultiSigAccount } from '../../models'
+import { isNullOrEmpty } from '../../../../../helpers'
+import { MultisigOptions } from '../../../../../models'
+import { AlgorandMultiSigAccount } from '../../../models'
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
 export function determineMultiSigAddress(multisigOptions: MultisigOptions): AlgorandMultiSigAccount {

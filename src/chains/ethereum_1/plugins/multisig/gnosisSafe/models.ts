@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { ethers } from 'ethers'
-import { EthereumAddress, EthereumTransactionAction } from '../../models'
+import { EthereumAddress, EthereumTransactionAction } from '../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumTransactionAction
 
