@@ -5,6 +5,7 @@ import { Account } from './account'
 import { Asymmetric, GenericCrypto } from '../crypto'
 import {
   ChainDate,
+  ChainEndpoint,
   ChainEntityName,
   ChainInfo,
   ChainSymbol,
@@ -29,6 +30,8 @@ export interface Chain {
   chainType: ChainType
   /** Returns chain plug-in name */
   description: string
+  /** Returns chain rpc endpoints */
+  endpoints: ChainEndpoint[]
   /** Returns the native (default) asset symbol for the chain and default token address (if any) */
   nativeToken: { defaultUnit: string; symbol: ChainSymbol; tokenAddress: any }
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */

@@ -35,3 +35,10 @@ export enum ConfirmType {
   /** After final block */
   Final = 999999,
 }
+
+export type MultisigOptions = {
+  pluginOptions: any
+  weight: number
+  addrs: string[]
+  plugin?: any
+}

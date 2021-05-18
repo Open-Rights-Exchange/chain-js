@@ -2,10 +2,10 @@
 
 import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../..'
-import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
 import { multisigChainSerialized } from './mockups/multisig'
-import { AlgorandMultiSigOptions } from '../models'
-import { ChainActionType, ValueTransferParams } from '../../../models'
+import { ChainActionType, MultisigOptions, ValueTransferParams } from '../../../models'
+import { toAlgorandPrivateKey } from '../helpers'
+import { determineMultiSigAddress } from '../plugins/native/helpers'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -42,6 +42,7 @@ describe('Test Algorand Multisig Transactions', () => {
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
+    expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
     expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
@@ -56,16 +57,16 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const multiSigOptions: AlgorandMultiSigOptions = {
-      version: 1,
-      threshold: 3,
+    const multisigOptions: MultisigOptions = {
+      pluginOptions: { version: 1 },
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
         childAcct3, // 3
       ],
     }
-    const transaction = algoTest.new.Transaction({ multiSigOptions })
+    const transaction = algoTest.new.Transaction({ multisigOptions })
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
@@ -87,17 +88,17 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const multiSigOptions: AlgorandMultiSigOptions = {
-      version: 1,
-      threshold: 3,
+    const multisigOptions: MultisigOptions = {
+      pluginOptions: { version: 1 },
+      weight: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
         childAcct3, // 3
       ],
     }
-    const multisigAddress = determineMultiSigAddress(multiSigOptions)
-    const transaction = algoTest.new.Transaction({ multiSigOptions })
+    const multisigAddress = determineMultiSigAddress(multisigOptions)
+    const transaction = algoTest.new.Transaction({ multisigOptions })
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()

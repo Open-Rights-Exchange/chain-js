@@ -15,7 +15,7 @@ import {
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
+import { ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
 
 export type PublicKeyMapCache = {
@@ -335,7 +335,7 @@ export class EosTransaction implements Transaction {
   }
 
   /** TODO: Implement support for eos multi-sig transactions */
-  public get isMultiSig(): boolean {
+  public get isMultisig(): boolean {
     return false
   }
 
@@ -529,11 +529,11 @@ export class EosTransaction implements Transaction {
     notImplemented()
   }
 
-  public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
+  public async setDesiredFee(): Promise<any> {
     notSupported('setDesiredFee')
   }
 
-  public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
+  public async getSuggestedFee(): Promise<any> {
     notSupported('getSuggestedFee')
   }
 

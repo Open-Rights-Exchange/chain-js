@@ -1,22 +1,18 @@
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
-import { notSupported } from '../../helpers'
+import { isNullOrEmpty, notSupported } from '../../helpers'
 import {
   AlgorandCreateAccountOptions,
   AlgorandEntityName,
   AlgorandGeneratedKeys,
-  AlgorandMultiSigOptions,
   AlgorandNewAccountType,
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
-import {
-  isValidAlgorandPublicKey,
-  determineMultiSigAddress,
-  toAddressFromPublicKey,
-  toAlgorandEntityName,
-} from './helpers'
+import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
+import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
+import { setMultisigPlugin } from './helpers/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -24,7 +20,7 @@ import {
 export class AlgorandCreateAccount implements CreateAccount {
   private _publicKey: AlgorandPublicKey
 
-  private _multiSigOptions: AlgorandMultiSigOptions
+  private _multisigPlugin: AlgorandMultisigPlugin
 
   private _chainState: AlgorandChainState
 
@@ -40,21 +36,28 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._chainState = chainState
     this._options = options
     this._publicKey = options?.publicKey
-    this._multiSigOptions = options?.multiSigOptions || null
+    this._multisigPlugin = setMultisigPlugin({ multisigOptions: options?.multisigOptions })
+  }
+  // ---- Interface implementation
+
+  get multisigPlugin(): AlgorandMultisigPlugin {
+    return this._multisigPlugin
   }
 
-  // ---- Interface implementation
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultiSig(): boolean {
+    return !isNullOrEmpty(this.multisigPlugin)
+  }
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
-    if (this._multiSigOptions) {
-      return toAlgorandEntityName(determineMultiSigAddress(this._multiSigOptions))
+    if (this.isMultiSig) {
+      return this.multisigPlugin.accountName
     }
     if (this._publicKey) {
       return toAlgorandEntityName(toAddressFromPublicKey(this._publicKey))
     }
-
     return null
   }
 
@@ -130,7 +133,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     return this.accountName as string
   }
 
-  /** Checks create options - if both publicKey and multiSigOptions are missing,
+  /** Checks create options - if both publicKey and multisigOptions are missing,
    *  autogenerate the public and private key pair and add them to options
    *  Algorand keys are represented as hex strings in chainjs.
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
@@ -140,7 +143,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
-      if (!this._multiSigOptions) {
+      if (!this.isMultiSig) {
         await this.generateAccountKeys()
       }
     }
