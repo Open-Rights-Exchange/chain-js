@@ -46,6 +46,8 @@ import {
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 import { Asymmetric } from '../../crypto'
+import { ChainJsPlugin } from '../../interfaces/plugin'
+import { isNullOrEmpty } from '../../helpers'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -56,6 +58,8 @@ class ChainEthereumV1 implements Chain {
   private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
+
+  private _plugins: any[]
 
   constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
@@ -89,6 +93,10 @@ class ChainEthereumV1 implements Chain {
 
   public get endpoints(): EthereumChainEndpoint[] {
     return this._endpoints
+  }
+
+  public get plugins(): ChainJsPlugin[] {
+    return this._plugins
   }
 
   public composeAction = async (
@@ -157,12 +165,12 @@ class ChainEthereumV1 implements Chain {
 
   private newCreateAccount = (options?: EthereumCreateAccountOptions): EthereumCreateAccount => {
     this.assertIsConnected()
-    return new EthereumCreateAccount(this._chainState, options)
+    return new EthereumCreateAccount(this._chainState, this._plugins, options)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
     this.assertIsConnected()
-    return new EthereumTransaction(this._chainState, options)
+    return new EthereumTransaction(this._chainState, this._plugins, options)
   }
 
   public new = {
@@ -295,6 +303,28 @@ class ChainEthereumV1 implements Chain {
   public assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
+    }
+  }
+
+  /** Install an already iniatlized plugin to this chain connection */
+  public async installPlugin(plugin: any) {
+    this.assertValidPlugin(plugin)
+    const newPlugin = plugin
+    newPlugin.chainState = this._chainState
+    if (isNullOrEmpty(this.plugins)) {
+      this._plugins = [newPlugin]
+    } else {
+      this._plugins.push(newPlugin)
+    }
+  }
+
+  /** rules to check tha plugin is well-formed and supported */
+  private assertValidPlugin(plugin: any) {
+    // TODO: We might check if type is supported in the future
+    const types = this._plugins?.map(plg => plg.type)
+    const includes = types?.includes(plugin?.type)
+    if (includes) {
+      throwNewError(`Type ${plugin.type} is already installed!`)
     }
   }
 
