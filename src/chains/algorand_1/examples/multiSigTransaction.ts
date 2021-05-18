@@ -36,16 +36,6 @@ const algoBetanetEndpoints = [
   },
 ]
 
-export const CreateAccountOptions = {
-  newKeysOptions: {
-    password: '2233',
-    encryptionOptions: {
-      salt: 'salt',
-      N: 65536,
-    },
-  },
-}
-
 export const multisigOptions: AlgorandNativeMultisigOptions = {
   version: 1,
   threshold: 2,
@@ -55,9 +45,18 @@ export const multisigOptions: AlgorandNativeMultisigOptions = {
     env.ALGOTESTNET_mulitsig_child_account3,
   ],
 }
-export const CreateMultiSigAccountOptions = {
-  ...CreateAccountOptions,
+
+export const CreateAccountOptions = {
+  newKeysOptions: {
+    password: '2233',
+    encryptionOptions: {
+      salt: 'salt',
+      N: 65536,
+    },
+  },
+  multisigOptions,
 }
+
 
 const composeValueTransferParams: ValueTransferParams = {
   // fromAccountName: ... // from will be calculated from hash of multisigOptions
@@ -75,14 +74,13 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
 
-  const multisigNativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
 
-  algoTest.installPlugin(multisigNativePlugin)
+  // TODO: Basar - remove createAccount reference
 
-  /** Create Algorand multisig account */
-  const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
-  await createMultiSigAccount.generateKeysIfNeeded()
-  const { accountName: multisigAccountName } = createMultiSigAccount
+  /** Use Account class to determine Algorand multisig account name */
+  const multiSigAccount = algoTest.new.CreateAccount(CreateAccountOptions)
+  // await multiSigAccount.generateKeysIfNeeded()
+  const { accountName: multisigAccountName } = multiSigAccount
   console.log('mulitsig account: %o', multisigAccountName)
 
   const transaction = await algoTest.new.Transaction()
