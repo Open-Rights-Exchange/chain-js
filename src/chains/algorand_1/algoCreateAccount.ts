@@ -14,15 +14,12 @@ import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName 
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
 import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
 import { AlgorandNativeMultisigOptions } from './plugins/multisig/native/models'
-import { PluginType } from '../../interfaces/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
  *  Generates new account keys if not provide */
 export class AlgorandCreateAccount implements CreateAccount {
   private _publicKey: AlgorandPublicKey
-
-  private _multisigPlugin: AlgorandMultisigPlugin
 
   private _chainState: AlgorandChainState
 
@@ -32,22 +29,23 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _generatedKeys: AlgorandGeneratedKeys
 
-  private _plugins: any[]
+  private _multisigPlugin: AlgorandMultisigPlugin
 
   private setDefaultMultisigPlugin(multisigOptions: AlgorandNativeMultisigOptions) {
-    // If multisigPlugin is not providen, create multisigPlugin
     if (isNullOrEmpty(this.multisigPlugin)) {
       const nativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
-      this._plugins.push(nativePlugin)
+      this._multisigPlugin = nativePlugin
       // If native plugin is already initialized, but multisigOptions are providen, initialize multisigOptions
+      // TODO Basar: Assert that plugin is type 'multisig', specfiic 'native multisig'
     } else if (this.multisigPlugin.name === 'Algorand Native Multisig Plugin') {
       this.multisigPlugin.init({ multisigOptions })
     }
   }
 
+  //TODO: Basar - do this in algoTransaction too (and Eth)
+
   constructor(chainState: AlgorandChainState, plugins?: any[], options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
-    this._plugins = plugins || []
     if (!isNullOrEmpty(options?.multisigOptions)) {
       // If multisigOptions are providen and multisigPlugin is Null or Native, initialize Native Plugin with multisigOptions
       this.setDefaultMultisigPlugin(options?.multisigOptions)
@@ -57,8 +55,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   // ---- Interface implementation
 
   get multisigPlugin(): AlgorandMultisigPlugin {
-    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
-    return multisigPlugin
+    return this._multisigPlugin
   }
 
   /** Returns whether the transaction is a multisig transaction */
