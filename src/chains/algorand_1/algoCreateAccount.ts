@@ -12,7 +12,9 @@ import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
-import { setMultisigPlugin } from './plugins/multisig/helpers'
+import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
+import { AlgorandNativeMultisigOptions } from './plugins/multisig/native/models'
+import { PluginType } from '../../interfaces/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -30,16 +32,33 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _generatedKeys: AlgorandGeneratedKeys
 
-  constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions) {
+  private _plugins: any[]
+
+  private setDefaultMultisigPlugin(multisigOptions: AlgorandNativeMultisigOptions) {
+    // If multisigPlugin is not providen, create multisigPlugin
+    if (isNullOrEmpty(this.multisigPlugin)) {
+      const nativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
+      this._plugins.push(nativePlugin)
+      // If native plugin is already initialized, but multisigOptions are providen, initialize multisigOptions
+    } else if (this.multisigPlugin.name === 'Algorand Native Multisig Plugin') {
+      this.multisigPlugin.init({ multisigOptions })
+    }
+  }
+
+  constructor(chainState: AlgorandChainState, plugins?: any[], options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
-    this._options = options
-    this._publicKey = options?.publicKey
-    this._multisigPlugin = setMultisigPlugin({ multisigOptions: options?.multisigOptions })
+    this._plugins = plugins || []
+    if (!isNullOrEmpty(options?.multisigOptions)) {
+      // If multisigOptions are providen and multisigPlugin is Null or Native, initialize Native Plugin with multisigOptions
+      this.setDefaultMultisigPlugin(options?.multisigOptions)
+    }
+    this._options = options || {}
   }
   // ---- Interface implementation
 
   get multisigPlugin(): AlgorandMultisigPlugin {
-    return this._multisigPlugin
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin
   }
 
   /** Returns whether the transaction is a multisig transaction */
