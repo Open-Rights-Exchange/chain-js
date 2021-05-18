@@ -42,7 +42,7 @@ import {
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
-import { setMultisigPlugin } from './plugins/multisig/helpers'
+import { PluginType } from '../../interfaces/plugin'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -64,11 +64,12 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthereumTransactionOptions
 
-  private _multisigPlugin: EthereumMultisigPlugin
+  private _plugins: any[]
 
-  constructor(chainState: EthereumChainState, options?: EthereumTransactionOptions) {
+  constructor(chainState: EthereumChainState, plugins?: any[], options?: EthereumTransactionOptions) {
     this._chainState = chainState
     this._options = options
+    this._plugins = plugins
     this.applyDefaultOptions()
   }
 
@@ -80,11 +81,11 @@ export class EthereumTransaction implements Transaction {
       this._options?.executionPriority ??
       this._chainState?.chainSettings?.defaultTransactionSettings?.executionPriority ??
       TxExecutionPriority.Average
-    this._multisigPlugin = setMultisigPlugin({ multisigOptions: this._options?.multisigOptions })
   }
 
   get multisigPlugin(): EthereumMultisigPlugin {
-    return this._multisigPlugin
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -203,18 +204,6 @@ export class EthereumTransaction implements Transaction {
     this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
     // this.updateEthTxFromAction()
   }
-
-  private get multisigRawTransactionWithOptions() {
-    return { ...this._actionHelper.raw, ...this.multisigPlugin.rawTransaction }
-  }
-
-  // /** update locally cached EthereumJsTx from action helper data */
-  // updateEthTxFromAction() {
-  //   const trxOptions = this.getOptionsForEthereumJsTx()
-  //   const rawAction = this.isMultisig ? this.multisigRawTransactionWithOptions : this._actionHelper.raw
-  //   this._ethereumJsTx = new EthereumJsTx(rawAction, trxOptions)
-  //   this.setSignBuffer()
-  // }
 
   /**
    *  Updates nonce and gas fees (if necessary) - these values must be present
@@ -412,7 +401,7 @@ export class EthereumTransaction implements Transaction {
       return isSameEthHexValue(this.signedByAddress, this.action?.from)
     }
     if (this.isMultisig) {
-      if (this.multisigPlugin.missingSignatures) return false
+      if (isNullOrEmpty(this.multisigPlugin.missingSignatures)) return true
     }
     // if no specific action.from, just confirm any signature is attached
     return this.hasAnySignatures
@@ -671,14 +660,14 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether action.from (if present) is a valid ethereum address - also checks that from is provided if data was */
   private assertFromIsValid(): void {
-    // if data is provided in the action, then there must be a from value
-    if (
-      !this.isMultisig &&
-      !isNullOrEmptyEthereumValue(this?.action?.data) &&
-      isNullOrEmptyEthereumValue(this?.action?.from)
-    ) {
-      throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
-    }
+    // Checking from field removed. Because of multisih account creation
+    // if (
+    //   !this.isMultisig &&
+    //   !isNullOrEmptyEthereumValue(this?.action?.data) &&
+    //   isNullOrEmptyEthereumValue(this?.action?.from)
+    // ) {
+    //   throwNewError('Transaction action.from must be provided to call a contract (since action.data was provided).')
+    // }
     if (!this.isFromEmptyOrNullAddress() && !isValidEthereumAddress(this?.action?.from)) {
       throwNewError('Transaction action.from address is not valid.')
     }

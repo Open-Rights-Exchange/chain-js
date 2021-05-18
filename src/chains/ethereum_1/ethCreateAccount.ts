@@ -12,9 +12,9 @@ import {
   EthereumNewAccountType,
   EthereumPublicKey,
 } from './models'
-import { setMultisigPlugin } from './plugins/multisig/helpers'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 import { EthereumTransaction } from './ethTransaction'
+import { PluginType } from '../../interfaces/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -24,7 +24,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _chainState: EthereumChainState
 
-  private _multisigPlugin: EthereumMultisigPlugin
+  private _plugins: any[]
 
   private _accountType: EthereumNewAccountType
 
@@ -34,10 +34,10 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _transaction: EthereumTransaction
 
-  constructor(chainState: EthereumChainState, options?: EthereumCreateAccountOptions) {
+  constructor(chainState: EthereumChainState, plugins?: any[], options?: EthereumCreateAccountOptions) {
     this._chainState = chainState
-    this._options = options
-    this._multisigPlugin = setMultisigPlugin({ multisigOptions: this._options?.multisigOptions })
+    this._options = options || {}
+    this._plugins = plugins
   }
 
   // ---- Interface implementation
@@ -82,7 +82,8 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   get multisigPlugin(): EthereumMultisigPlugin {
-    return this._multisigPlugin
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -155,9 +156,7 @@ export class EthereumCreateAccount implements CreateAccount {
    *  autogenerate the public and private key pair and add them to options */
   async generateKeysIfNeeded() {
     if (this.isMultisig) {
-      if (!this.multisigPlugin.accountName) {
-        await this.multisigPlugin.generateKeysIfNeeded()
-      }
+      await this.multisigPlugin.generateKeysIfNeeded()
       this._accountName = this.multisigPlugin.accountName
     } else {
       let publicKey: EthereumPublicKey
