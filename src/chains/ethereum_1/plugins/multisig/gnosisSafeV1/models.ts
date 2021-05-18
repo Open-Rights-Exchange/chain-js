@@ -4,24 +4,30 @@ import { EthereumAddress, EthereumTransactionAction } from '../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumTransactionAction
 
-export type EthereumGnosisSafeMultisigOptions = {
-  pluginOptions: {
-    nonce?: number
-    chainUrl: string
-    multisigAddress?: EthereumAddress
-    gnosisSafeMasterAddress?: EthereumAddress
-    proxyFactoryAddress?: EthereumAddress
-    fallbackHandlerAddress?: EthereumAddress
-    initializerAction?: InitializerAction
-    operation?: number
-    refundReceiver?: string
-    safeTxGas?: number | string
-    baseGas?: number | string
-    gasPrice?: number | string
-    gasToken?: string
-  }
-  weight: number
-  addrs: EthereumAddress[]
+export type EthereumGnosisMultisigOptions = {
+  owners: string[]
+  threshold: number
+  nonce: number
+  gnosisSafeMaster?: string
+  proxyFactory?: string
+  fallbackHandler?: string
+  initializerAction?: InitializerAction
+}
+
+export type EthereumGnosisTransactionOptions = {
+  operation?: number
+  refundReceiver?: string
+  safeTxGas?: number | string
+  baseGas?: number | string
+  gasPrice?: number | string
+  gasToken?: string
+  nonce?: number
+}
+
+export type EthereumGnosisPluginOptions = {
+  multisigAddress?: EthereumAddress
+  multisigOptions?: EthereumGnosisMultisigOptions
+  safeTransactionOptions?: EthereumGnosisTransactionOptions
 }
 
 /** Ethereum action will be called automatically as proxy multisig contract is created
