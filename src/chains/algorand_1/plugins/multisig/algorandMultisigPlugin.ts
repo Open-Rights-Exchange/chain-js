@@ -51,12 +51,12 @@ export interface AlgorandMultisigPlugin extends MultisigPlugin {
 
   // ----- CREATE ACCOUNT Members
 
-  accountName: AlgorandEntityName
+  createAccountName: AlgorandEntityName
 
   /** Not supported */
-  transaction: any
+  createAccountTransactionAction: any
 
-  requiresTransaction: boolean
+  createAccountRequiresTransaction: boolean
 
-  generateKeysIfNeeded(): Promise<void>
+  createAccountGenerateKeysIfNeeded(): Promise<void>
 }

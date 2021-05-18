@@ -52,7 +52,7 @@ export class AlgorandMultisigNativePlugin extends ChainJsPlugin implements Algor
 
   private _actionHelper: AlgorandActionHelper
 
-  public requiresTransaction = false
+  public createAccountRequiresTransaction = false
 
   public name = 'Algorand Native Multisig Plugin'
 
@@ -325,15 +325,15 @@ export class AlgorandMultisigNativePlugin extends ChainJsPlugin implements Algor
     }
   }
 
-  get accountName(): AlgorandEntityName {
+  get createAccountName(): AlgorandEntityName {
     return toAlgorandEntityName(determineMultiSigAddress(this.multisigOptions))
   }
 
-  async generateKeysIfNeeded() {
+  async createAccountGenerateKeysIfNeeded() {
     return throwNewError('Not supported')
   }
 
-  get transaction(): any {
+  get createAccountTransactionAction(): any {
     throwNewError(
       'Algorand account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
     )
