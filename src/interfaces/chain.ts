@@ -151,4 +151,7 @@ export interface Chain {
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError
+
+  /** adds a plugin (instantiated seperately) to the chain */
+  installPlugin(plugin: any): Promise<void>
 }

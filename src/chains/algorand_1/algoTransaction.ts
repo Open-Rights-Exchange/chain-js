@@ -1,7 +1,7 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
 import { Transaction } from '../../interfaces'
-import { ChainErrorType, ConfirmType, MultisigOptions, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ConfirmType, TxExecutionPriority } from '../../models'
 import { mapChainError } from './algoErrors'
 import { throwNewError } from '../../errors'
 import {
@@ -46,8 +46,10 @@ import {
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
-import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
-import { setMultisigPlugin } from './helpers/plugin'
+import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { PluginType } from '../../interfaces/plugin'
+import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
+import { AlgorandNativeMultisigOptions } from './plugins/multisig/native/models'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -67,17 +69,32 @@ export class AlgorandTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  private _multisigPlugin: AlgorandMultisigPlugin
+  private _plugins: any[]
 
-  constructor(chainState: AlgorandChainState, options?: AlgorandTransactionOptions) {
+  constructor(chainState: AlgorandChainState, plugins?: any[], options?: AlgorandTransactionOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
+    this._plugins = plugins || []
+    if (!isNullOrEmpty(options?.multisigOptions)) {
+      // If multisigOptions are providen and multisigPlugin is Null or Native, initialize Native Plugin with multisigOptions
+      this.setDefaultMultisigPlugin(options?.multisigOptions)
+    }
     this._options = options || {}
-    this._multisigPlugin = setMultisigPlugin({ multisigOptions: options?.multisigOptions })
   }
 
   get multisigPlugin(): AlgorandMultisigPlugin {
-    return this._multisigPlugin
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin
+  }
+
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultisig(): boolean {
+    return !isNullOrEmpty(this.multisigPlugin)
+  }
+
+  /** Multisig transaction options */
+  public get multisigOptions(): any {
+    return this.isMultisig ? this.multisigPlugin.multisigOptions : null
   }
 
   /** Chain-specific values included in the transaction sent to the chain */
@@ -103,6 +120,36 @@ export class AlgorandTransaction implements Transaction {
   /** Whether the raw transaction body has been set or prepared */
   get hasRaw(): boolean {
     return !!this.rawTransaction
+  }
+
+  /** If multisigOptions are providen and multisigPlugin is Null or Native, initialize Native Plugin with multisigOptions
+   *  Ignore if multisigPlugin name is different than 'Algorand Native Multisig Plugin'
+   */
+  private setDefaultMultisigPlugin(multisigOptions: AlgorandNativeMultisigOptions) {
+    // If multisigPlugin is not providen, create multisigPlugin
+    if (isNullOrEmpty(this.multisigPlugin)) {
+      const nativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
+      this._plugins.push(nativePlugin)
+      // If native plugin is already initialized, but multisigOptions are providen, initialize multisigOptions
+    } else if (this.multisigPlugin.name === 'Algorand Native Multisig Plugin') {
+      this.multisigPlugin.init({ multisigOptions })
+    }
+  }
+
+  /** Initialize Native multisigPlugin with raw transaction
+   *  Throw if multisigPlugin is already set with different name than 'Algorand Native Multisig Plugin'
+   */
+  private setMultisigFromRaw(raw: AlgorandRawTransactionMultisigStruct) {
+    // If multisigPlugin is not providen, create multisigPlugin
+    if (isNullOrEmpty(this.multisigPlugin)) {
+      const nativePlugin = new AlgorandMultisigNativePlugin({ raw })
+      this._plugins.push(nativePlugin)
+      // If native plugin is already initialized, but multisigOptions are providen, initialize multisigOptions
+    } else if (this.multisigPlugin.name === 'Algorand Native Multisig Plugin') {
+      this.multisigPlugin.init({ raw })
+    } else {
+      throwNewError('Cannot set multisigPlugin form raw if multisigPlugin is not named Algorand Native Multisig Plugin')
+    }
   }
 
   /** Generate the raw transaction body using the actions attached
@@ -376,11 +423,6 @@ export class AlgorandTransaction implements Transaction {
     return isNullOrEmpty(this.missingSignatures)
   }
 
-  /** Returns whether the transaction is a multisig transaction */
-  public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.multisigPlugin)
-  }
-
   /** Returns address, for which, a matching signature must be attached to transaction */
   public get missingSignatures(): AlgorandAddress[] {
     this.assertIsValidated()
@@ -392,11 +434,6 @@ export class AlgorandTransaction implements Transaction {
     const missingSignatures =
       this.requiredAuthorizations?.filter(auth => !this.hasSignatureForPublicKey(toPublicKeyFromAddress(auth))) || []
     return isNullOrEmpty(missingSignatures) ? null : missingSignatures // if no values, return null instead of empty array
-  }
-
-  /** Multisig transaction options */
-  private get multisigOptions(): MultisigOptions {
-    return this.isMultisig ? this.multisigPlugin.multisigOptions : null
   }
 
   /** Get the raw transaction (either regular or multisig) */
@@ -429,7 +466,7 @@ export class AlgorandTransaction implements Transaction {
   public get requiredAuthorizations(): AlgorandAddress[] {
     this.assertFromIsValidAddress()
     if (this.isMultisig) {
-      return this?.multisigOptions?.addrs || []
+      return this?.multisigPlugin?.owners || []
     }
     // The signerPublicKey is usually based on the from address (or the spending key for a rekeyed account)
     return this.signerPublicKey ? [toAddressFromPublicKey(this.signerPublicKey)] : []
@@ -529,7 +566,7 @@ export class AlgorandTransaction implements Transaction {
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      this._multisigPlugin = setMultisigPlugin({ raw: transaction as AlgorandRawTransactionMultisigStruct })
+      this.setMultisigFromRaw(transaction as AlgorandRawTransactionMultisigStruct)
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }

@@ -25,6 +25,7 @@ import {
   EthereumTxData,
   EthereumTransactionAction,
   EthUnit,
+  EthereumSignature,
 } from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
@@ -166,6 +167,16 @@ export class EthereumActionHelper {
   set nonce(value: string) {
     const valueHex = decimalToHexString(value)
     this.updateActionProperty('nonce', valueHex)
+  }
+
+  /** set signature */
+  set signature(signature: EthereumSignature) {
+    const actionInput: EthereumTransactionAction & IndexedObject = this.action
+    const { v, r, s } = signature
+    actionInput.v = v
+    actionInput.r = r
+    actionInput.s = s
+    this.assertAndValidateEthereumActionInput(actionInput)
   }
 
   /** update a single property in this action */

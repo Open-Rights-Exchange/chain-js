@@ -19,6 +19,8 @@ export const DEFAULT_ETH_UNIT = EthUnit.Wei
 // address realted
 export const ZERO_HEX = '0x00'
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const EMPTY_DATA = '0x'
+export const SENTINEL_ADDRESS = '0x0000000000000000000000000000000000000001'
 export const EMPTY_HEX = '0x'
 
 // token related

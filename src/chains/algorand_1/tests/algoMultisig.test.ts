@@ -3,9 +3,10 @@
 import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../..'
 import { multisigChainSerialized } from './mockups/multisig'
-import { ChainActionType, MultisigOptions, ValueTransferParams } from '../../../models'
+import { ChainActionType, ValueTransferParams } from '../../../models'
 import { toAlgorandPrivateKey } from '../helpers'
-import { determineMultiSigAddress } from '../plugins/native/helpers'
+import { determineMultiSigAddress } from '../plugins/multisig/native/helpers'
+import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -57,9 +58,9 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const multisigOptions: MultisigOptions = {
-      pluginOptions: { version: 1 },
-      weight: 3,
+    const multisigOptions: AlgorandNativeMultisigOptions = {
+      version: 1,
+      threshold: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2
@@ -88,9 +89,9 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const multisigOptions: MultisigOptions = {
-      pluginOptions: { version: 1 },
-      weight: 3,
+    const multisigOptions: AlgorandNativeMultisigOptions = {
+      version: 1,
+      threshold: 3,
       addrs: [
         childAcct1, // 1
         childAcct2, // 2

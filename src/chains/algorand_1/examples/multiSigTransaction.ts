@@ -5,10 +5,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, ValueTransferParams, MultisigOptions } from '../../../models'
+import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
+import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
+import { AlgorandMultisigNativePlugin } from '../plugins/multisig/native/multisigNative'
 
 require('dotenv').config()
 
@@ -37,22 +39,24 @@ const algoBetanetEndpoints = [
 export const CreateAccountOptions = {
   newKeysOptions: {
     password: '2233',
+    encryptionOptions: {
+      salt: 'salt',
+      N: 65536,
+    },
   },
 }
 
-export const multisigOptions: MultisigOptions = {
-  pluginOptions: { version: 1 },
-  weight: 2,
+export const multisigOptions: AlgorandNativeMultisigOptions = {
+  version: 1,
+  threshold: 2,
   addrs: [
-    env.ALGOTESTNET_mulitsig_child_account1, // 1
-    env.ALGOTESTNET_mulitsig_child_account2, // 2
-    env.ALGOTESTNET_mulitsig_child_account3, // 3
+    env.ALGOTESTNET_mulitsig_child_account1,
+    env.ALGOTESTNET_mulitsig_child_account2,
+    env.ALGOTESTNET_mulitsig_child_account3,
   ],
 }
-
 export const CreateMultiSigAccountOptions = {
   ...CreateAccountOptions,
-  multisigOptions,
 }
 
 const composeValueTransferParams: ValueTransferParams = {
@@ -71,13 +75,17 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
 
+  const multisigNativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
+
+  algoTest.installPlugin(multisigNativePlugin)
+
   /** Create Algorand multisig account */
   const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
   await createMultiSigAccount.generateKeysIfNeeded()
   const { accountName: multisigAccountName } = createMultiSigAccount
   console.log('mulitsig account: %o', multisigAccountName)
 
-  const transaction = await algoTest.new.Transaction({ multisigOptions })
+  const transaction = await algoTest.new.Transaction()
   composeValueTransferParams.fromAccountName = multisigAccountName
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]

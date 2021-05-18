@@ -11,8 +11,10 @@ import {
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
-import { AlgorandMultisigPlugin } from './plugins/algorandMultisigPlugin'
-import { setMultisigPlugin } from './helpers/plugin'
+import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
+import { AlgorandNativeMultisigOptions } from './plugins/multisig/native/models'
+import { PluginType } from '../../interfaces/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -28,31 +30,46 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _options: AlgorandCreateAccountOptions
 
-  requiresTransaction: boolean = false
-
   private _generatedKeys: AlgorandGeneratedKeys
 
-  constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions) {
+  private _plugins: any[]
+
+  private setDefaultMultisigPlugin(multisigOptions: AlgorandNativeMultisigOptions) {
+    // If multisigPlugin is not providen, create multisigPlugin
+    if (isNullOrEmpty(this.multisigPlugin)) {
+      const nativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
+      this._plugins.push(nativePlugin)
+      // If native plugin is already initialized, but multisigOptions are providen, initialize multisigOptions
+    } else if (this.multisigPlugin.name === 'Algorand Native Multisig Plugin') {
+      this.multisigPlugin.init({ multisigOptions })
+    }
+  }
+
+  constructor(chainState: AlgorandChainState, plugins?: any[], options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
-    this._options = options
-    this._publicKey = options?.publicKey
-    this._multisigPlugin = setMultisigPlugin({ multisigOptions: options?.multisigOptions })
+    this._plugins = plugins || []
+    if (!isNullOrEmpty(options?.multisigOptions)) {
+      // If multisigOptions are providen and multisigPlugin is Null or Native, initialize Native Plugin with multisigOptions
+      this.setDefaultMultisigPlugin(options?.multisigOptions)
+    }
+    this._options = options || {}
   }
   // ---- Interface implementation
 
   get multisigPlugin(): AlgorandMultisigPlugin {
-    return this._multisigPlugin
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin
   }
 
   /** Returns whether the transaction is a multisig transaction */
-  public get isMultiSig(): boolean {
+  public get isMultisig(): boolean {
     return !isNullOrEmpty(this.multisigPlugin)
   }
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
-    if (this.isMultiSig) {
+    if (this.isMultisig) {
       return this.multisigPlugin.accountName
     }
     if (this._publicKey) {
@@ -91,13 +108,16 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Algorand does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
-    return false
+    return this.isMultisig ? this.multisigPlugin.requiresTransaction : false
   }
 
   /** Algorand account creation doesn't require any on chain transactions.
    * Hence there is no transaction object attached to AlgorandCreateAccount class
    */
   get transaction(): any {
+    if (this.isMultisig) {
+      return this.multisigPlugin.transaction
+    }
     throwNewError(
       'Algorand account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
     )
@@ -143,7 +163,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
-      if (!this.isMultiSig) {
+      if (!this.isMultisig) {
         await this.generateAccountKeys()
       }
     }

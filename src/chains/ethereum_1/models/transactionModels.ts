@@ -1,7 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TransactionReceipt } from 'web3-core'
 import BN from 'bn.js'
-
 import { TxExecutionPriority } from '../../../models'
 import { EthereumMultiValue } from './generalModels'
 

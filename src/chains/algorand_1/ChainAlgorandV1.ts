@@ -1,4 +1,4 @@
-import { notImplemented } from '../../helpers'
+import { isNullOrEmpty, notImplemented } from '../../helpers'
 import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
@@ -33,6 +33,7 @@ import {
   toAlgorandSignature,
 } from './helpers'
 import { Asymmetric } from '../../crypto'
+import { ChainJsPlugin } from '../../interfaces/plugin'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
@@ -40,6 +41,8 @@ class ChainAlgorandV1 implements Chain {
   private _settings: AlgorandChainSettings
 
   private _chainState: AlgorandChainState
+
+  private _plugins: ChainJsPlugin[]
 
   constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -66,6 +69,10 @@ class ChainAlgorandV1 implements Chain {
 
   public get endpoints(): AlgorandChainEndpoint[] {
     return this._endpoints
+  }
+
+  public get plugins(): ChainJsPlugin[] {
+    return this._plugins
   }
 
   /** Fetch data from an on-chain contract table */
@@ -97,13 +104,13 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainAccount class used to perform any function with the chain account */
   private newCreateAccount(options?: AlgorandCreateAccountOptions): AlgorandCreateAccount {
     this.assertIsConnected()
-    return new AlgorandCreateAccount(this._chainState, options)
+    return new AlgorandCreateAccount(this._chainState, this.plugins, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
   private newTransaction(options?: AlgorandTransactionOptions): any {
     this.assertIsConnected()
-    return new AlgorandTransaction(this._chainState, options)
+    return new AlgorandTransaction(this._chainState, this.plugins, options)
   }
 
   public new = {
@@ -267,6 +274,28 @@ class ChainAlgorandV1 implements Chain {
   public assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
+    }
+  }
+
+  /** Install an already iniatlized plugin to this chain connection */
+  public async installPlugin(plugin: any) {
+    this.assertValidPlugin(plugin)
+    const newPlugin = plugin
+    newPlugin.chainState = this._chainState
+    if (isNullOrEmpty(this.plugins)) {
+      this._plugins = [newPlugin]
+    } else {
+      this._plugins.push(newPlugin)
+    }
+  }
+
+  /** rules to check tha plugin is well-formed and supported */
+  private assertValidPlugin(plugin: any) {
+    // TODO: We might check if type is supported in the future
+    const types = this._plugins?.map(plg => plg.type)
+    const includes = types?.includes(plugin?.type)
+    if (includes) {
+      throwNewError(`Type ${plugin.type} is already installed!`)
     }
   }
 
