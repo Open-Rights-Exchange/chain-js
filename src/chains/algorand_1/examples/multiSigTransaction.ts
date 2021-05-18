@@ -10,6 +10,7 @@ import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
+import { AlgorandMultisigNativePlugin } from '../plugins/multisig/native/multisigNative'
 
 require('dotenv').config()
 
@@ -38,6 +39,10 @@ const algoBetanetEndpoints = [
 export const CreateAccountOptions = {
   newKeysOptions: {
     password: '2233',
+    encryptionOptions: {
+      salt: 'salt',
+      N: 65536,
+    },
   },
 }
 
@@ -52,7 +57,6 @@ export const multisigOptions: AlgorandNativeMultisigOptions = {
 }
 export const CreateMultiSigAccountOptions = {
   ...CreateAccountOptions,
-  multisigOptions,
 }
 
 const composeValueTransferParams: ValueTransferParams = {
@@ -71,13 +75,17 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
 
+  const multisigNativePlugin = new AlgorandMultisigNativePlugin({ multisigOptions })
+
+  algoTest.installPlugin(multisigNativePlugin)
+
   /** Create Algorand multisig account */
   const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
   await createMultiSigAccount.generateKeysIfNeeded()
   const { accountName: multisigAccountName } = createMultiSigAccount
   console.log('mulitsig account: %o', multisigAccountName)
 
-  const transaction = await algoTest.new.Transaction({ multisigOptions })
+  const transaction = await algoTest.new.Transaction()
   composeValueTransferParams.fromAccountName = multisigAccountName
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]

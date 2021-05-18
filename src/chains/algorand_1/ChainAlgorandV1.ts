@@ -1,4 +1,4 @@
-import { notImplemented } from '../../helpers'
+import { isNullOrEmpty, notImplemented } from '../../helpers'
 import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
@@ -282,14 +282,18 @@ class ChainAlgorandV1 implements Chain {
     this.assertValidPlugin(plugin)
     const newPlugin = plugin
     newPlugin.chainState = this._chainState
-    this._plugins.push(newPlugin)
+    if (isNullOrEmpty(this.plugins)) {
+      this._plugins = [newPlugin]
+    } else {
+      this._plugins.push(newPlugin)
+    }
   }
 
   /** rules to check tha plugin is well-formed and supported */
   private assertValidPlugin(plugin: any) {
     // TODO: We might check if type is supported in the future
-    const types = this._plugins.map(plg => plg.type)
-    const includes = types.includes(plugin?.type)
+    const types = this._plugins?.map(plg => plg.type)
+    const includes = types?.includes(plugin?.type)
     if (includes) {
       throwNewError(`Type ${plugin.type} is already installed!`)
     }
