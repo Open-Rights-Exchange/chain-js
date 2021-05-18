@@ -5,6 +5,7 @@ export interface MultisigPlugin {
   name: string
 
   init(options: any): Promise<void>
+
   // ----- TRANSACTION Members
 
   multisigOptions: any
@@ -40,11 +41,14 @@ export interface MultisigPlugin {
 
   // ----- CREATE ACCOUNT Members
 
-  accountName: ChainEntityName
+  /** Account named used when creating the account */
+  createAccountName: ChainEntityName
 
-  transaction: Transaction
+  /** Compose the transaction action needed to create the account */
+  createAccountTransactionAction: Transaction
 
-  requiresTransaction: boolean
+  /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
+  createAccountRequiresTransaction: boolean
 
-  generateKeysIfNeeded(): Promise<void>
+  createAccountGenerateKeysIfNeeded(): Promise<void>
 }
