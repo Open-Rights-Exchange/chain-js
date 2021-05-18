@@ -21,10 +21,6 @@ export class ChainJsPlugin {
   /** Chainstate - will be set automatically when plugin installed - do not set this */
   public chainState: Chain
 
-  constructor(options: any) {
-    this._options = options
-  }
-
   get options() {
     return this._options
   }
