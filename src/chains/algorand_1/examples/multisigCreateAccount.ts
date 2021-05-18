@@ -5,10 +5,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
-import { toAlgorandPrivateKey } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+import { ChainEndpoint } from '../../../models'
+import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
 import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
@@ -35,32 +33,29 @@ const algoBetanetEndpoints = [
   },
 ]
 
-export const CreateAccountOptions = {
+export const createAccountOptions = {
   newKeysOptions: {
     password: '2233',
+    encryptionOptions: {
+      salt: 'salt',
+      N: 65536,
+    },
   },
 }
 
 export const multisigOptions: AlgorandNativeMultisigOptions = {
   version: 1,
-  threshold: 2,
+  threshold: 3,
   addrs: [
     env.ALGOTESTNET_mulitsig_child_account1,
     env.ALGOTESTNET_mulitsig_child_account2,
     env.ALGOTESTNET_mulitsig_child_account3,
   ],
 }
-export const CreateMultiSigAccountOptions = {
-  ...CreateAccountOptions,
-  multisigOptions,
-}
 
-const composeValueTransferParams: ValueTransferParams = {
-  // fromAccountName: ... // from will be calculated from hash of multisigOptions
-  toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
-  amount: '1000000',
-  symbol: AlgorandUnit.Microalgo,
-  memo: 'Hello World',
+export const createMultiSigAccountOptions = {
+  ...createAccountOptions,
+  multisigOptions,
 }
 
 async function run() {
@@ -72,31 +67,10 @@ async function run() {
   }
 
   /** Create Algorand multisig account */
-  const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
+  const createMultiSigAccount = algoTest.new.CreateAccount(createMultiSigAccountOptions)
   await createMultiSigAccount.generateKeysIfNeeded()
   const { accountName: multisigAccountName } = createMultiSigAccount
   console.log('mulitsig account: %o', multisigAccountName)
-
-  const transaction = await algoTest.new.Transaction({ multisigOptions })
-  composeValueTransferParams.fromAccountName = multisigAccountName
-  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
-  transaction.actions = [action]
-  console.log('transaction actions: ', transaction.actions[0])
-  const decomposed = await algoTest.decomposeAction(transaction.actions[0])
-  console.log('decomposed actions: ', decomposed)
-  await transaction.prepareToBeSigned()
-  await transaction.validate()
-  // add signatures seperately
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
-  await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
-  // OR add them as a group
-  // await transaction.sign([
-  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
-  //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY),
-  // ])
-
-  console.log('missing signatures: ', transaction.missingSignatures)
-  console.log('send response: %o', JSON.stringify(await transaction.send()))
 }
 
 ;(async () => {

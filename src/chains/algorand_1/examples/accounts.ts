@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, MultisigOptions } from '../../../models'
+import { ChainEndpoint } from '../../../models'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
 
 require('dotenv').config()
@@ -42,19 +42,8 @@ export const createAccountOptions = {
   },
 }
 
-export const multisigOptions: MultisigOptions = {
-  pluginOptions: { version: 1 },
-  weight: 2,
-  addrs: [
-    env.ALGOTESTNET_mulitsig_child_account1,
-    env.ALGOTESTNET_mulitsig_child_account2,
-    env.ALGOTESTNET_mulitsig_child_account3,
-  ],
-}
-
 export const createMultiSigAccountOptions = {
   ...createAccountOptions,
-  multisigOptions,
 }
 
 async function run() {
@@ -73,11 +62,6 @@ async function run() {
   console.log('account name: %o', accountName)
   const account = await algoTest.new.Account(accountName)
   console.log('account: %o', account.name)
-  // /** Create Algorand multisig account */
-  // const createMultiSigAccount = algoTest.new.CreateAccount(createMultiSigAccountOptions)
-  // await createMultiSigAccount.generateKeysIfNeeded()
-  // const { accountName: multisigAccountName } = createMultiSigAccount
-  // console.log('mulitsig account: %o', multisigAccountName)
 }
 
 ;(async () => {
