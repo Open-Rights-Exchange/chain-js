@@ -1,7 +1,11 @@
-import { AlgorandAddress } from '../../../models'
-
 export type AlgorandNativeMultisigOptions = {
-  pluginOptions: { version: number }
-  weight: number
-  addrs: AlgorandAddress[]
+  version: number
+  threshold: number
+  addrs: string[]
+}
+
+export type AlgorandMultisigNativePluginOptions = {
+  multisigAddress?: string
+  raw?: any
+  multisigOptions?: AlgorandNativeMultisigOptions
 }

@@ -1,4 +1,3 @@
-import { MultisigOptions } from '../../../../models'
 import {
   AlgorandAddress,
   AlgorandEntityName,
@@ -9,16 +8,19 @@ import {
   AlgorandTxEncodedForChain,
 } from '../../models'
 import { MultisigPlugin } from '../../../../interfaces'
-
-export interface AlgorandMultisigPluginInput {
-  multisigOptions?: MultisigOptions
-  raw?: AlgorandRawTransactionMultisigStruct
-}
+// import { AlgorandNativeMultisigOptions } from './native/models'
 
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
+  name: string
+
+  init(options: any): Promise<void>
   // ----- TRANSACTION Members
 
-  multisigOptions: MultisigOptions
+  multisigOptions: any
+
+  owners: string[]
+
+  threshold: number
 
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */

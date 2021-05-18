@@ -1,10 +1,17 @@
 import { Transaction } from '../transaction'
-import { ChainEntityName, MultisigOptions, PrivateKey, Signature } from '../../models'
+import { ChainEntityName, PrivateKey, Signature } from '../../models'
 
 export interface MultisigPlugin {
+  name: string
+
+  init(options: any): Promise<void>
   // ----- TRANSACTION Members
 
-  multisigOptions: MultisigOptions
+  multisigOptions: any
+
+  owners: any[]
+
+  threshold: number
 
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */

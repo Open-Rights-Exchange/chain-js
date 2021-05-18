@@ -1,17 +1,20 @@
-import { MultisigOptions } from '../../../../models'
 import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
 
-export interface EthereumMultisigPluginInput {
-  multisigOptions?: MultisigOptions
-}
-
 export interface EthereumMultisigPlugin extends MultisigPlugin {
+  name: string
+
+  init(options: any): Promise<void>
+
   // ----- TRANSACTION Members
 
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
 
   multisigOptions: any
+
+  owners: string[]
+
+  threshold: number
 
   missingSignatures: any[]
 
@@ -29,6 +32,7 @@ export interface EthereumMultisigPlugin extends MultisigPlugin {
   addSignatures(signature: any[]): Promise<void>
 
   prepareToBeSigned(trxEncodedForChain: any): Promise<void>
+
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: any[]): Promise<void>
 
