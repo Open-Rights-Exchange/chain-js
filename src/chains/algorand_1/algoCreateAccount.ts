@@ -12,7 +12,6 @@ import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import { isValidAlgorandPublicKey, toAddressFromPublicKey, toAlgorandEntityName } from './helpers'
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
-import { AlgorandMultisigNativePluginInput } from './plugins/multisig/native/models'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -36,6 +35,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     options?: AlgorandCreateAccountOptions,
   ) {
     this._chainState = chainState
+    this.assertValidOptions(options)
     this._options = options || {}
     if (!isNullOrEmpty(this.options?.multisigOptions)) {
       this._multisigPlugin = multisigPlugin
@@ -47,12 +47,14 @@ export class AlgorandCreateAccount implements CreateAccount {
     return this._multisigPlugin
   }
 
-  public async ensureMultisigPluginInitialized() {
-    if (!this.multisigPlugin.isInitialized) {
-      const input: AlgorandMultisigNativePluginInput = {
-        multisigOptions: this.options?.multisigOptions,
-      }
-      await this.multisigPlugin.init(input)
+  public async init() {
+    if (this.multisigPlugin && !this.multisigPlugin.isInitialized) {
+      // TOOD: call this.multisigPlugin.newCreateAccount(...)
+      // ...
+      // const input: AlgorandMultisigNativePluginInput = {
+      //   multisigOptions: this.options?.multisigOptions,
+      // }
+      // await this.multisigPlugin.init(input)
     }
   }
 
@@ -154,16 +156,12 @@ export class AlgorandCreateAccount implements CreateAccount {
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
    */
   async generateKeysIfNeeded() {
-    this.assertValidOptionPublicKeys()
+    this.assertMultisigPlugIsInitialized()
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
       if (!this.isMultisig) {
         await this.generateAccountKeys()
-      } else {
-        // Might be misleading to have this under generateKeysIfNeeded
-        // This is always called in our standard pattern, also the only async function in class
-        await this.ensureMultisigPluginInitialized()
       }
     }
     this._accountType = AlgorandNewAccountType.Native
@@ -177,14 +175,27 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
-  private assertValidOptionPublicKeys() {
-    const { publicKey } = this._options
+  /** make sure all options passed-in are valid */
+  private assertValidOptions(options: AlgorandCreateAccountOptions) {
+    const { publicKey } = options
     if (publicKey && !isValidAlgorandPublicKey(publicKey)) {
       throwNewError('Invalid Option - Provided publicKey isnt valid')
     }
   }
 
+  /** Before encrypting keys, check for required options (password and salt) */
   private assertValidOptionNewKeys() {
-    // nothing to check
+    const { newKeysOptions } = this._options || {}
+    const { password, encryptionOptions } = newKeysOptions || {}
+    if (!password || !encryptionOptions) {
+      throwNewError('Invalid Option - Missing password or encryptionOptions to use for generateKeysIfNeeded')
+    }
+  }
+
+  /** Before encrypting keys, check for required options (password and salt) */
+  private assertMultisigPlugIsInitialized() {
+    if (!this._multisigPlugin.isInitialized) {
+      throwNewError('AlgorandCreateAccount error - multisig plugin is not initialized')
+    }
   }
 }
