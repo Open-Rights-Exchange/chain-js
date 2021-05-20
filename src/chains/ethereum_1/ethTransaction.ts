@@ -42,7 +42,6 @@ import {
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
-import { PluginType } from '../../interfaces/plugin'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -64,12 +63,18 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthereumTransactionOptions
 
-  private _plugins: any[]
+  private _multisigPlugin: EthereumMultisigPlugin
 
-  constructor(chainState: EthereumChainState, plugins?: any[], options?: EthereumTransactionOptions) {
+  constructor(
+    chainState: EthereumChainState,
+    multisigPlugin?: EthereumMultisigPlugin,
+    options?: EthereumTransactionOptions,
+  ) {
     this._chainState = chainState
     this._options = options
-    this._plugins = plugins
+    if (!isNullOrEmpty(options?.multisigPluginInput)) {
+      this._multisigPlugin = multisigPlugin
+    }
     this.applyDefaultOptions()
   }
 
@@ -84,8 +89,13 @@ export class EthereumTransaction implements Transaction {
   }
 
   get multisigPlugin(): EthereumMultisigPlugin {
-    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
-    return multisigPlugin
+    return this._multisigPlugin
+  }
+
+  private async ensureMultisigPluginInitialized() {
+    if (!this.multisigPlugin.isInitialized) {
+      await this.multisigPlugin.init(this.options?.multisigPluginInput)
+    }
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -139,7 +149,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Options provided when the transaction class was created */
-  get options() {
+  get options(): EthereumTransactionOptions {
     return this._options
   }
 
@@ -219,6 +229,7 @@ export class EthereumTransaction implements Transaction {
     if (!this.isMultisig) {
       await this.setNonceIfEmpty(this.senderAddress)
     } else {
+      await this.ensureMultisigPluginInitialized()
       await this.multisigPlugin.prepareToBeSigned(this._actionHelper.action)
     }
   }
@@ -305,6 +316,7 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
     }
     if (this.isMultisig) {
+      await this.ensureMultisigPluginInitialized()
       this.multisigPlugin.validate()
     } else {
       const { gasPrice, gasLimit } = this.ethereumJsTx
@@ -613,6 +625,7 @@ export class EthereumTransaction implements Transaction {
       await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
       this.signAndAddSignatures(firstPrivateKey)
     } else {
+      await this.ensureMultisigPluginInitialized()
       if (!isNullOrEmpty(this.multisigPlugin?.missingSignatures)) {
         await this.multisigPlugin.sign(privateKeys)
       }

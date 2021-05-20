@@ -14,7 +14,6 @@ import {
 } from './models'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 import { EthereumTransaction } from './ethTransaction'
-import { PluginType } from '../../interfaces/plugin'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -24,7 +23,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _chainState: EthereumChainState
 
-  private _plugins: any[]
+  private _multisigPlugin: EthereumMultisigPlugin
 
   private _accountType: EthereumNewAccountType
 
@@ -34,10 +33,16 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _transaction: EthereumTransaction
 
-  constructor(chainState: EthereumChainState, plugins?: any[], options?: EthereumCreateAccountOptions) {
+  constructor(
+    chainState: EthereumChainState,
+    multisigPlugin?: EthereumMultisigPlugin,
+    options?: EthereumCreateAccountOptions,
+  ) {
     this._chainState = chainState
     this._options = options || {}
-    this._plugins = plugins
+    if (!isNullOrEmpty(options?.multisigPluginInput)) {
+      this._multisigPlugin = multisigPlugin
+    }
   }
 
   // ---- Interface implementation
@@ -82,8 +87,13 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   get multisigPlugin(): EthereumMultisigPlugin {
-    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
-    return multisigPlugin
+    return this._multisigPlugin
+  }
+
+  private async ensureMultisigPluginInitialized() {
+    if (!this.multisigPlugin.isInitialized) {
+      await this.multisigPlugin.init(this.options?.multisigPluginInput)
+    }
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -119,6 +129,7 @@ export class EthereumCreateAccount implements CreateAccount {
    */
   async composeTransaction(): Promise<void> {
     if (this.isMultisig) {
+      await this.ensureMultisigPluginInitialized()
       const multisigTransactionAction = this.multisigPlugin.createAccountTransactionAction
       const newTransaction = new EthereumTransaction(this._chainState)
       newTransaction.actions = [multisigTransactionAction]
@@ -156,6 +167,7 @@ export class EthereumCreateAccount implements CreateAccount {
    *  autogenerate the public and private key pair and add them to options */
   async generateKeysIfNeeded() {
     if (this.isMultisig) {
+      await this.ensureMultisigPluginInitialized()
       await this.multisigPlugin.createAccountGenerateKeysIfNeeded()
       this._accountName = this.multisigPlugin.createAccountName
     } else {
