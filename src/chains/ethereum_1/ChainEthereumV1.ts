@@ -46,8 +46,9 @@ import {
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin } from '../../interfaces/plugin'
+import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
 import { isNullOrEmpty } from '../../helpers'
+import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -165,12 +166,12 @@ class ChainEthereumV1 implements Chain {
 
   private newCreateAccount = (options?: EthereumCreateAccountOptions): EthereumCreateAccount => {
     this.assertIsConnected()
-    return new EthereumCreateAccount(this._chainState, this._plugins, options)
+    return new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
   }
 
   private newTransaction = (options?: any): EthereumTransaction => {
     this.assertIsConnected()
-    return new EthereumTransaction(this._chainState, this._plugins, options)
+    return new EthereumTransaction(this._chainState, this.multisigPlugin, options)
   }
 
   public new = {
@@ -316,6 +317,10 @@ class ChainEthereumV1 implements Chain {
     } else {
       this._plugins.push(newPlugin)
     }
+  }
+
+  public get multisigPlugin(): EthereumMultisigPlugin {
+    return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
   }
 
   /** rules to check tha plugin is well-formed and supported */
