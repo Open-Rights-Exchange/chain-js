@@ -4,10 +4,10 @@ import { EthereumAddress, EthereumTransactionAction } from '../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumTransactionAction
 
-export type EthereumGnosisMultisigOptions = {
+export type EthereumGnosisCreateAccountOptions = {
   owners: string[]
   threshold: number
-  nonce: number
+  nonce?: number
   gnosisSafeMaster?: string
   proxyFactory?: string
   fallbackHandler?: string
@@ -24,10 +24,10 @@ export type EthereumGnosisTransactionOptions = {
   nonce?: number
 }
 
-export type EthereumGnosisPluginOptions = {
+export type EthereumGnosisPluginInput = {
   multisigAddress?: EthereumAddress
-  multisigOptions?: EthereumGnosisMultisigOptions
-  safeTransactionOptions?: EthereumGnosisTransactionOptions
+  createAccountOptions?: EthereumGnosisCreateAccountOptions
+  gnosisSafeTrxOptions?: EthereumGnosisTransactionOptions
 }
 
 /** Ethereum action will be called automatically as proxy multisig contract is created

@@ -6,7 +6,8 @@ import { multisigChainSerialized } from './mockups/multisig'
 import { ChainActionType, ValueTransferParams } from '../../../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { determineMultiSigAddress } from '../plugins/multisig/native/helpers'
-import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
+import { AlgorandMultisigNativeOptions } from '../plugins/multisig/native/models'
+import { AlgorandTransaction } from '../algoTransaction'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -38,7 +39,6 @@ describe('Test Algorand Multisig Transactions', () => {
   it('setFromRaw() using chain serialized', async () => {
     await algoTest.connect()
     expect(algoTest.isConnected).toBeTruthy()
-
     const transaction = algoTest.new.Transaction()
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
@@ -58,7 +58,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const multisigOptions: AlgorandNativeMultisigOptions = {
+    const multisigOptions: AlgorandMultisigNativeOptions = {
       version: 1,
       threshold: 3,
       addrs: [
@@ -67,7 +67,8 @@ describe('Test Algorand Multisig Transactions', () => {
         childAcct3, // 3
       ],
     }
-    const transaction = algoTest.new.Transaction({ multisigOptions })
+
+    const transaction = algoTest.new.Transaction({ multisigOptions }) as AlgorandTransaction
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
@@ -89,7 +90,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const multisigOptions: AlgorandNativeMultisigOptions = {
+    const multisigOptions: AlgorandMultisigNativeOptions = {
       version: 1,
       threshold: 3,
       addrs: [

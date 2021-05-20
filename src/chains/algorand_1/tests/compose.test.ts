@@ -59,7 +59,6 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.fee = 387000
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
-    console.log('AcTACTION: ', actAction?.flatFee)
 
     expect(actAction).toEqual(JSON.parse(composedAssetCreate))
   })

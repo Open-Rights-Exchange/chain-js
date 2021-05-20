@@ -11,11 +11,13 @@ import {
   GnosisSafeSignature,
   EthereumMultisigRawTransaction,
   EthereumGnosisTransactionOptions,
-  EthereumGnosisMultisigOptions,
+  EthereumGnosisCreateAccountOptions,
 } from './models'
 import { EMPTY_DATA, SENTINEL_ADDRESS, ZERO_ADDRESS } from '../../../ethConstants'
 import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../../helpers'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
+import { throwNewError } from '../../../../../errors'
+
 // TODO: move to a more generic directory (Consider using EthersJs)
 export function getEthersJsonRpcProvider(url: string) {
   return new ethers.providers.JsonRpcProvider(url)
@@ -54,7 +56,10 @@ export function sortHexStrings(hexArray: string[]) {
   return hexArray
 }
 
-export async function getCreateProxyInitializerData(multisigOptions: EthereumGnosisMultisigOptions, chainUrl: string) {
+export async function getCreateProxyInitializerData(
+  multisigOptions: EthereumGnosisCreateAccountOptions,
+  chainUrl: string,
+) {
   const { gnosisSafeMaster, fallbackHandler, initializerAction, threshold, owners } = multisigOptions
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const gnosisSafeMasterContract = getGnosisSafeContract(ethersProvier, gnosisSafeMaster)
@@ -75,11 +80,28 @@ export async function getCreateProxyInitializerData(multisigOptions: EthereumGno
   return data
 }
 
+/** Throws if any options missing that are needed for proxy */
+export function assertMultisigOptionsForProxyArePresent(multisigOptions: EthereumGnosisCreateAccountOptions) {
+  if (
+    isNullOrEmpty(multisigOptions?.owners) ||
+    isNullOrEmpty(multisigOptions?.threshold) ||
+    isNullOrEmptyEthereumValue(multisigOptions?.gnosisSafeMaster) ||
+    isNullOrEmptyEthereumValue(multisigOptions?.proxyFactory) ||
+    isNullOrEmpty(multisigOptions?.nonce)
+  ) {
+    throwNewError(
+      'Missing one or more required options: (owners, threshold, gnosisSafeMaster, or proxyFactory) for proxy contract.',
+    )
+  }
+}
+
 /** Simulates creating new multisigAccount deterministicly by using nonce
  *  Returns the contract address that will be assigned for multisigAccount
  */
-export async function calculateProxyAddress(multisigOptions: EthereumGnosisMultisigOptions, chainUrl: string) {
+export async function calculateProxyAddress(multisigOptions: EthereumGnosisCreateAccountOptions, chainUrl: string) {
+  assertMultisigOptionsForProxyArePresent(multisigOptions)
   const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
+
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const proxyFactoryContract = getProxyFactoryEthersContract(ethersProvier, proxyFactory)
   const initializerData = await getCreateProxyInitializerData(multisigOptions, chainUrl)
@@ -88,31 +110,19 @@ export async function calculateProxyAddress(multisigOptions: EthereumGnosisMulti
 
 /** Returns transaction object including ({to, data, ...}) for creating multisig proxy contract
  */
-export async function getCreateProxyTransaction(multisigOptions: EthereumGnosisMultisigOptions, chainUrl: string) {
+export async function getCreateProxyTransaction(multisigOptions: EthereumGnosisCreateAccountOptions, chainUrl: string) {
+  assertMultisigOptionsForProxyArePresent(multisigOptions)
   const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
-  const ethersProvier = getEthersJsonRpcProvider(chainUrl)
-  const proxyFactoryContract = getProxyFactoryEthersContract(ethersProvier, proxyFactory)
-  const initializerData = await getCreateProxyInitializerData(multisigOptions, chainUrl)
-  return proxyFactoryContract.populateTransaction.createProxyWithNonce(gnosisSafeMaster, initializerData, nonce)
-}
 
-/** Calculates proxy multisig contract's address and returns transaction object
- */
-export async function getCreateProxyAddressAndTransaction(
-  multisigOptions: EthereumGnosisMultisigOptions,
-  chainUrl: string,
-) {
-  const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const proxyFactoryContract = getProxyFactoryEthersContract(ethersProvier, proxyFactory)
   const initializerData = await getCreateProxyInitializerData(multisigOptions, chainUrl)
-  const address = await proxyFactoryContract.callStatic.createProxyWithNonce(gnosisSafeMaster, initializerData, nonce)
   const { to, data, value } = await proxyFactoryContract.populateTransaction.createProxyWithNonce(
     gnosisSafeMaster,
     initializerData,
     nonce,
   )
-  return { address, transaction: { to, data: toEthereumTxData(data), value: value ? value.toString() : 0 } }
+  return { to, data: toEthereumTxData(data), value: value ? value.toString() : 0 }
 }
 
 export function calculateSafeTransactionHash(
@@ -305,8 +315,8 @@ export const DEFAULT_FALLBACK_HANDLER_ADDRESS = '0x7Be1e66Ce7Eab24BEa42521cc6bBC
 export const DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS = '0x6851D6fDFAfD08c0295C392436245E5bc78B0185'
 export const DEFAULT_PROXY_FACTORY_ADDRESS = '0x76E2cFc1F5Fa8F6a5b3fC4c8F4788F0116861F9B'
 
-export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisMultisigOptions) {
-  const detaultOptions: Partial<EthereumGnosisMultisigOptions> = {
+export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisCreateAccountOptions) {
+  const detaultOptions: Partial<EthereumGnosisCreateAccountOptions> = {
     gnosisSafeMaster: DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
     proxyFactory: DEFAULT_PROXY_FACTORY_ADDRESS,
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,

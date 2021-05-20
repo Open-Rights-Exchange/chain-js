@@ -13,7 +13,9 @@ import { MultisigPlugin } from '../../../../interfaces'
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
   name: string
 
-  init(options: any): Promise<void>
+  init(input: any): Promise<void>
+
+  isInitialized: boolean
   // ----- TRANSACTION Members
 
   multisigOptions: any
@@ -51,12 +53,12 @@ export interface AlgorandMultisigPlugin extends MultisigPlugin {
 
   // ----- CREATE ACCOUNT Members
 
-  accountName: AlgorandEntityName
+  createAccountName: AlgorandEntityName
 
   /** Not supported */
-  transaction: any
+  createAccountTransactionAction: any
 
-  requiresTransaction: boolean
+  createAccountRequiresTransaction: boolean
 
-  generateKeysIfNeeded(): Promise<void>
+  createAccountGenerateKeysIfNeeded(): Promise<void>
 }

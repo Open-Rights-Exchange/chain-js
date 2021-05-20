@@ -95,6 +95,7 @@ export type EthereumTransactionOptions = {
   hardfork: string
   maxFeeIncreasePercentage?: number
   executionPriority?: TxExecutionPriority
+  multisigPluginInput?: any
 }
 
 export type EthereumSetDesiredFeeOptions = {

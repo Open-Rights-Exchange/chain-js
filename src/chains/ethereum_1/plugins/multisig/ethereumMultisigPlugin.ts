@@ -1,9 +1,18 @@
 import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
+import { EthereumAddress } from '../../models'
+
+type EthereumMultisigPluginInput = {
+  multisigAddress?: EthereumAddress
+  createAccountOptions?: any
+  transactionOptions?: any
+}
 
 export interface EthereumMultisigPlugin extends MultisigPlugin {
   name: string
 
-  init(options: any): Promise<void>
+  init(input: EthereumMultisigPluginInput): Promise<void>
+
+  isInitialized: boolean
 
   // ----- TRANSACTION Members
 
@@ -40,11 +49,14 @@ export interface EthereumMultisigPlugin extends MultisigPlugin {
 
   // ----- CREATE ACCOUNT Members
 
-  accountName: any
+  /** Account named used when creating the account */
+  createAccountName: any
 
-  transaction: any
+  /** Compose the transaction action needed to create the account */
+  createAccountTransactionAction: any
 
-  requiresTransaction: boolean
+  /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
+  createAccountRequiresTransaction: boolean
 
-  generateKeysIfNeeded(): Promise<void>
+  createAccountGenerateKeysIfNeeded(): Promise<void>
 }

@@ -4,6 +4,7 @@ import { EthereumPublicKey } from './cryptoModels'
 export type EthereumCreateAccountOptions = {
   publicKey?: EthereumPublicKey
   newKeysOptions?: EthereumNewKeysOptions
+  multisigPluginInput?: any
 }
 
 /** Type of account to create */

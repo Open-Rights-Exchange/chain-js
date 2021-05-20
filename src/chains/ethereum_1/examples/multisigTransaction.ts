@@ -6,37 +6,37 @@ import { EthereumTransactionOptions } from '../models'
 import { toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/multisigGnosisSafe'
-import { EthereumGnosisPluginOptions } from '../plugins/multisig/gnosisSafeV1/models'
+import { EthereumGnosisPluginInput } from '../plugins/multisig/gnosisSafeV1/models'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
-    const gnosisOptions: EthereumGnosisPluginOptions = {
+    const multisigPluginInput: EthereumGnosisPluginInput = {
       multisigAddress: '0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764',
     }
 
-    const gnosisSafePlugin = new GnosisSafeMultisigPlugin(gnosisOptions)
+    const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
 
     const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
 
     await goerli.installPlugin(gnosisSafePlugin)
 
-    const defaultEthTxOptions: EthereumTransactionOptions = {
+    const transactionOptions: EthereumTransactionOptions = {
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
+      multisigPluginInput,
     }
 
     const sampleSetFromRawTrx = {
       to: '0xA200c9fe7F747E10dBccA5f85A0A126c9bffe400',
       // from: '0xfE331024D0D8b1C41B6d6203426f4B717E5C8aF3',
       value: 2000,
-      // data: toEthereumTxData('0x00'),
       gasLimit: 100000,
     } // =>  // data: 0x... All safe transaction data
 
-    const transaction = goerli.new.Transaction(defaultEthTxOptions)
+    const transaction = goerli.new.Transaction(transactionOptions)
 
     await transaction.setFromRaw(sampleSetFromRawTrx)
 
@@ -55,7 +55,7 @@ require('dotenv').config()
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log('safeTransaction: ', (transaction.multisigPlugin as GnosisSafeMultisigPlugin).safeTransaction)
     // console.log('Transaction: ', transaction.toJson())
-    // console.log('Trx result: ', await transaction.send())
+    console.log('Trx result: ', await transaction.send())
   } catch (error) {
     console.log(error)
   }

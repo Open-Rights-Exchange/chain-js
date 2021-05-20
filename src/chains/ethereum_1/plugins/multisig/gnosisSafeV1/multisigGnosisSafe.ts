@@ -1,12 +1,13 @@
 import { isNullOrEmpty } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
-import { isNullOrEmptyEthereumValue, toEthereumEntityName } from '../../../helpers'
+import { toEthereumEntityName } from '../../../helpers'
 import { EthereumAddress, EthereumEntityName, EthereumPrivateKey, EthereumTransactionAction } from '../../../models'
 import { EthereumMultisigPlugin } from '../ethereumMultisigPlugin'
 import {
   applyDefaultAndSetCreateOptions,
   approveSafeTransactionHash,
-  getCreateProxyAddressAndTransaction,
+  calculateProxyAddress,
+  getCreateProxyTransaction,
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
   getSafeExecuteTransaction,
@@ -15,8 +16,8 @@ import {
   signSafeTransactionHash,
 } from './helpers'
 import {
-  EthereumGnosisMultisigOptions,
-  EthereumGnosisPluginOptions,
+  EthereumGnosisPluginInput,
+  EthereumGnosisCreateAccountOptions,
   EthereumGnosisTransactionOptions,
   EthereumMultisigRawTransaction,
   GnosisSafeSignature,
@@ -25,7 +26,7 @@ import {
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
 
 export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumMultisigPlugin {
-  private _multisigOptions: EthereumGnosisMultisigOptions
+  private _multisigOptions: EthereumGnosisCreateAccountOptions
 
   private _multisigAddress: EthereumAddress
 
@@ -35,36 +36,60 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
 
   private _signatures: GnosisSafeSignature[]
 
-  private _createTransaction: EthereumTransactionAction
+  private _createAccountTransactionAction: EthereumTransactionAction
 
-  private _owners: EthereumAddress[]
-
-  private _threshold: number
-
-  public requiresTransaction = true
+  public createAccountRequiresTransaction = true
 
   public name = 'Gnosis V1 Multisig Plugin'
 
   public type = PluginType.MultiSig
 
-  private setOptions(options: EthereumGnosisPluginOptions) {
-    const { multisigAddress, multisigOptions } = options
-    this._multisigOptions = applyDefaultAndSetCreateOptions(multisigOptions)
-    this._multisigAddress = multisigAddress
+  private assertValidInput(input: EthereumGnosisPluginInput) {
+    const { multisigAddress, createAccountOptions, gnosisSafeTrxOptions: transactionOptions } = input
+
+    if (!isNullOrEmpty(createAccountOptions) && !isNullOrEmpty(transactionOptions)) {
+      throwNewError('Both createAccountOptions and transaction cannot be passed')
+    }
+    if (isNullOrEmpty(createAccountOptions) && isNullOrEmpty(multisigAddress)) {
+      throwNewError('If plugin is initialized for transaction, multisigAddress field must exists')
+    }
   }
 
-  constructor(options: EthereumGnosisPluginOptions) {
-    super(options)
-    this.setOptions(options)
+  private async setupMultisigPlugin(input: EthereumGnosisPluginInput) {
+    this.assertValidInput(input)
+    this._input = input
+    const { multisigAddress, createAccountOptions } = input
+
+    if (!isNullOrEmpty(createAccountOptions)) {
+      // CreateAccount setup
+      this._multisigOptions = applyDefaultAndSetCreateOptions(createAccountOptions)
+      this._multisigAddress = await this.getMultisigAddressFromOptions()
+      this._createAccountTransactionAction = await this.getTransactionFromOptions()
+    } else {
+      // Transaction setup
+      this._multisigAddress = multisigAddress
+      const { owners, threshold } = await getSafeOwnersAndThreshold(this.multisigContract)
+      this._multisigOptions = { owners, threshold }
+    }
   }
 
   /** Allows parent class to (re)initialize options */
-  async init(options: EthereumGnosisPluginOptions) {
-    super.init(options)
-    this.setOptions(options)
+  async init(input: EthereumGnosisPluginInput) {
+    super.init(input)
+    await this.setupMultisigPlugin(this._input)
   }
 
-  get multisigOptions(): EthereumGnosisMultisigOptions {
+  get isInitialized() {
+    return this._isInitialized
+  }
+
+  private get input(): EthereumGnosisPluginInput {
+    return this._input
+  }
+
+  // ----------------------- TRANSACTION Members ----------------------------
+
+  get multisigOptions(): EthereumGnosisCreateAccountOptions {
     return this._multisigOptions
   }
 
@@ -87,30 +112,25 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
   }
 
   get owners(): string[] {
-    this._owners = this._owners || this.multisigOptions?.owners
-    if (isNullOrEmpty(this._owners)) {
-      throwNewError('Owners is not set. Call prepareToBeSigned()')
-    }
-    return this._owners
+    return this.multisigOptions?.owners
   }
 
   get threshold(): number {
-    if (isNullOrEmpty(this._owners)) {
-      throwNewError('Threshold is not set. Call prepareToBeSigned()')
-    }
-    return this._threshold
+    return this.multisigOptions?.threshold
   }
 
-  get options(): EthereumGnosisPluginOptions {
-    // protected property from ChainJsPlugin class
-    return this._options
+  /** Optional parameters to specify safeTransaction options
+   * E.g { refundReceiver, safeTxGas, baseGas, gasPrice, gasToken... }
+   */
+  get createAccountOptions(): EthereumGnosisTransactionOptions {
+    return this.input?.createAccountOptions
   }
 
   /** Optional parameters to specify safeTransaction options
    * E.g { refundReceiver, safeTxGas, baseGas, gasPrice, gasToken... }
    */
   get transactionOptions(): EthereumGnosisTransactionOptions {
-    return this.options?.safeTransactionOptions
+    return this.input?.gnosisSafeTrxOptions
   }
 
   get chainUrl(): string {
@@ -189,8 +209,7 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
    * Set safeTransaction from rawTransaction that has passed from ethTransaction class.
    */
   public async prepareToBeSigned(rawTransaction: EthereumMultisigRawTransaction): Promise<void> {
-    await this.verifyAndSetMultisigAddress()
-    await this.verifyAndSetMultisigOwners()
+    // adds transactionOptions into input that is provided from constructor
     this._safeTransaction = await rawTransactionToSafeTx(rawTransaction, this.transactionOptions)
   }
 
@@ -224,59 +243,59 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
     }
   }
 
-  /** Calculate and set address using multisigOptions and assert equal if multisigAddress is explicitely providen. */
-  public async verifyAndSetMultisigAddress() {
+  /** If multisigAddress is provided in options, verify that it matches address calculated using the other multisigOptions
+   *  Calls the multisig contract on chain to get the calculated address */
+  public async getMultisigAddressFromOptions() {
     const { multisigOptions } = this
-    const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions || {}
+    const { owners, threshold, nonce } = multisigOptions
     let calculatedAddress = this.multisigAddress
-    if (
-      !isNullOrEmpty(this.chainUrl) &&
-      !isNullOrEmptyEthereumValue(gnosisSafeMaster) &&
-      !isNullOrEmptyEthereumValue(proxyFactory) &&
-      !isNullOrEmpty(nonce)
-    ) {
-      const { address } = await getCreateProxyAddressAndTransaction(this.multisigOptions, this.chainUrl)
-      if (!isNullOrEmptyEthereumValue(this.multisigAddress) && address !== this.multisigAddress) {
-        throwNewError('multisigAddress and multisigOptions does not match!')
+
+    // if ANY multisigOptions is provided, then calculate the multisig address
+    if (!isNullOrEmpty(owners) || !isNullOrEmpty(threshold) || !isNullOrEmpty(nonce)) {
+      calculatedAddress = await calculateProxyAddress(this.multisigOptions, this.chainUrl)
+      if (this.multisigAddress && calculatedAddress !== this.multisigAddress) {
+        throwNewError('multisigAddress and multisigOptions do not match!')
       }
-      calculatedAddress = address
+    } else if (!this.multisigAddress) {
+      throwNewError('must provide either multisigAddress or multisigOptions (to calculate multisig address)')
     }
-    this._multisigAddress = calculatedAddress
+
+    return calculatedAddress
   }
 
-  /** Get and set owners and threshold values from multisigContract, assert equal if those values are explicitly providen. */
-  async verifyAndSetMultisigOwners() {
-    let owners = this._owners
-    if (!isNullOrEmptyEthereumValue(this.multisigAddress)) {
-      const { owners: contractOwners, threshold } = await getSafeOwnersAndThreshold(this.multisigContract)
-      if (this.multisigOptions?.threshold && threshold !== this.multisigOptions?.threshold) {
-        throwNewError(' multisigOptions.threshold does not match with threshold on contract')
-      }
-      this._threshold = threshold
-      owners?.forEach(ownr => {
-        if (!contractOwners.includes(ownr))
-          throwNewError(' multisigOptions.owners does not match with owners on contract')
-      })
-      owners = contractOwners
-    }
-    this._owners = owners
-  }
+  // ----------------------- CREATE ACCOUNT Members ----------------------------
 
-  get accountName(): EthereumEntityName {
+  get createAccountName(): EthereumEntityName {
     if (!this._multisigAddress) {
       return null
     }
     return toEthereumEntityName(this._multisigAddress)
   }
 
-  get transaction(): EthereumTransactionAction {
-    if (!this._createTransaction) throwNewError('Transaction needs to be set using generateKeysIfNeeded() function')
-    return this._createTransaction
+  get createAccountTransactionAction(): EthereumTransactionAction {
+    if (!this._createAccountTransactionAction)
+      throwNewError('createAccountTransactionAction is missing. Make sure you init() with createAccountOptions')
+    return this._createAccountTransactionAction
   }
 
-  public async generateKeysIfNeeded() {
-    const { address, transaction } = await getCreateProxyAddressAndTransaction(this.multisigOptions, this.chainUrl)
-    this._multisigAddress = address
-    this._createTransaction = transaction
+  /**  Calls the multisig contract on chain to get the calculated transaction data to create proxy multisigAccount */
+  public async getTransactionFromOptions() {
+    const { multisigOptions } = this
+    const { owners, threshold, nonce } = multisigOptions
+    let transaction
+
+    // if ANY multisigOptions is provided, then calculate the multisig address
+    if (!isNullOrEmpty(owners) || !isNullOrEmpty(threshold) || !isNullOrEmpty(nonce)) {
+      transaction = await getCreateProxyTransaction(this.multisigOptions, this.chainUrl)
+    } else {
+      throwNewError('must provide either multisigAddress or multisigOptions (to calculate multisig address)')
+    }
+
+    return transaction
+  }
+
+  /** nothing to do for this plugin */
+  public async createAccountGenerateKeysIfNeeded() {
+    // nothing to do
   }
 }

@@ -33,7 +33,9 @@ import {
   toAlgorandSignature,
 } from './helpers'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin } from '../../interfaces/plugin'
+import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
+import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
@@ -42,7 +44,7 @@ class ChainAlgorandV1 implements Chain {
 
   private _chainState: AlgorandChainState
 
-  private _plugins: ChainJsPlugin[]
+  private _plugins: any[]
 
   constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -104,13 +106,13 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainAccount class used to perform any function with the chain account */
   private newCreateAccount(options?: AlgorandCreateAccountOptions): AlgorandCreateAccount {
     this.assertIsConnected()
-    return new AlgorandCreateAccount(this._chainState, this.plugins, options)
+    return new AlgorandCreateAccount(this._chainState, this.multisigPlugin, options)
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
   private newTransaction(options?: AlgorandTransactionOptions): any {
     this.assertIsConnected()
-    return new AlgorandTransaction(this._chainState, this.plugins, options)
+    return new AlgorandTransaction(this._chainState, this.multisigPlugin, options)
   }
 
   public new = {
@@ -287,6 +289,11 @@ class ChainAlgorandV1 implements Chain {
     } else {
       this._plugins.push(newPlugin)
     }
+  }
+
+  public get multisigPlugin(): AlgorandMultisigPlugin {
+    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+    return multisigPlugin || new AlgorandMultisigNativePlugin()
   }
 
   /** rules to check tha plugin is well-formed and supported */
