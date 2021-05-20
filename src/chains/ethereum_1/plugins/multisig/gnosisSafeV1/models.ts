@@ -27,7 +27,7 @@ export type EthereumGnosisTransactionOptions = {
 export type EthereumGnosisPluginInput = {
   multisigAddress?: EthereumAddress
   createAccountOptions?: EthereumGnosisCreateAccountOptions
-  gnosisSafeTrxOptions?: EthereumGnosisTransactionOptions
+  transactionOptions?: EthereumGnosisTransactionOptions
 }
 
 /** Ethereum action will be called automatically as proxy multisig contract is created

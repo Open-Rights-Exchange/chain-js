@@ -45,7 +45,7 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
   public type = PluginType.MultiSig
 
   private assertValidInput(input: EthereumGnosisPluginInput) {
-    const { multisigAddress, createAccountOptions, gnosisSafeTrxOptions: transactionOptions } = input
+    const { multisigAddress, createAccountOptions, transactionOptions } = input
 
     if (!isNullOrEmpty(createAccountOptions) && !isNullOrEmpty(transactionOptions)) {
       throwNewError('Both createAccountOptions and transaction cannot be passed')
@@ -55,10 +55,10 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
     }
   }
 
-  private async setupMultisigPlugin(input: EthereumGnosisPluginInput) {
-    this.assertValidInput(input)
-    this._input = input
-    const { multisigAddress, createAccountOptions } = input
+  private async setupMultisigPlugin(options: EthereumGnosisPluginInput) {
+    this.assertValidInput(options)
+    this._options = options
+    const { multisigAddress, createAccountOptions } = options
 
     if (!isNullOrEmpty(createAccountOptions)) {
       // CreateAccount setup
@@ -76,7 +76,7 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
   /** Allows parent class to (re)initialize options */
   async init(input: EthereumGnosisPluginInput) {
     super.init(input)
-    await this.setupMultisigPlugin(this._input)
+    await this.setupMultisigPlugin(this._options)
   }
 
   get isInitialized() {
@@ -84,7 +84,7 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
   }
 
   private get input(): EthereumGnosisPluginInput {
-    return this._input
+    return this._options
   }
 
   // ----------------------- TRANSACTION Members ----------------------------
@@ -130,7 +130,7 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
    * E.g { refundReceiver, safeTxGas, baseGas, gasPrice, gasToken... }
    */
   get transactionOptions(): EthereumGnosisTransactionOptions {
-    return this.input?.gnosisSafeTrxOptions
+    return this.input?.transactionOptions
   }
 
   get chainUrl(): string {
