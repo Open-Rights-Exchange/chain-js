@@ -49,7 +49,6 @@ import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
 import { isNullOrEmpty } from '../../helpers'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
-
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -164,14 +163,18 @@ class ChainEthereumV1 implements Chain {
     return account
   }
 
-  private newCreateAccount = (options?: EthereumCreateAccountOptions): EthereumCreateAccount => {
+  private newCreateAccount = async (options?: EthereumCreateAccountOptions): Promise<EthereumCreateAccount> => {
     this.assertIsConnected()
-    return new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
+    const createAccount = new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
+    await createAccount.init()
+    return createAccount
   }
 
-  private newTransaction = (options?: any): EthereumTransaction => {
+  private newTransaction = async (options?: any): Promise<EthereumTransaction> => {
     this.assertIsConnected()
-    return new EthereumTransaction(this._chainState, this.multisigPlugin, options)
+    const transaction = new EthereumTransaction(this._chainState, this.multisigPlugin, options)
+    await transaction.init()
+    return transaction
   }
 
   public new = {

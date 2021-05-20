@@ -6,13 +6,14 @@ import { EthereumTransactionOptions } from '../models'
 import { toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/multisigGnosisSafe'
-import { EthereumGnosisPluginInput } from '../plugins/multisig/gnosisSafeV1/models'
+import { EthereumGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
+import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transactionPlugin'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
-    const multisigPluginInput: EthereumGnosisPluginInput = {
+    const multisigPluginOptions: EthereumGnosisTransactionOptions = {
       multisigAddress: '0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764',
     }
 
@@ -26,7 +27,7 @@ require('dotenv').config()
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
-      multisigPluginInput,
+      multisigPluginOptions,
     }
 
     const sampleSetFromRawTrx = {
@@ -36,7 +37,7 @@ require('dotenv').config()
       gasLimit: 100000,
     } // =>  // data: 0x... All safe transaction data
 
-    const transaction = goerli.new.Transaction(transactionOptions)
+    const transaction = await goerli.new.Transaction(transactionOptions)
 
     await transaction.setFromRaw(sampleSetFromRawTrx)
 
@@ -44,16 +45,19 @@ require('dotenv').config()
     console.log('Beforevalidate')
     await transaction.validate()
 
-    console.log('owners: ', transaction.multisigPlugin.owners)
-    console.log('threshold: ', transaction.multisigPlugin.threshold)
+    console.log('owners: ', transaction.multisigTransaction.owners)
+    console.log('threshold: ', transaction.multisigTransaction.threshold)
 
     await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_3_PRIVATE_KEY)])
     await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
 
-    console.log('signatures: ', transaction.multisigPlugin.signatures)
+    console.log('signatures: ', transaction.multisigTransaction.signatures)
     console.log('missing signatures: ', transaction.missingSignatures)
-    console.log('safeTransaction: ', (transaction.multisigPlugin as GnosisSafeMultisigPlugin).safeTransaction)
+    console.log(
+      'safeTransaction: ',
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).safeTransaction,
+    )
     // console.log('Transaction: ', transaction.toJson())
     console.log('Trx result: ', await transaction.send())
   } catch (error) {
