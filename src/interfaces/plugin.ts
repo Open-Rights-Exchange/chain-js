@@ -16,16 +16,17 @@ export class ChainJsPlugin {
   public type: PluginType
 
   /** Plugin options */
-  protected _input: any
+  protected _options: any
 
   protected _isInitialized: boolean = false
 
   /** Chainstate - will be set automatically when plugin installed - do not set this */
   public chainState: Chain
 
-  /** Initializes plugin using options */
-  init(input: any) {
-    this._input = input
+  /** Initializes plugin using options
+   *  If a plugin doesnt need to be inited, then hardcode protected _isInitialized = true */
+  init(options: any) {
+    this._options = options
     this._isInitialized = true
   } // eslint-disable-line @typescript-eslint/no-unused-vars
 }
