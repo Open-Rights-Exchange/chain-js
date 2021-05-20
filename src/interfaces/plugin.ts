@@ -29,4 +29,8 @@ export class ChainJsPlugin {
     this._options = options
     this._isInitialized = true
   } // eslint-disable-line @typescript-eslint/no-unused-vars
+
+  public get isInitialized() {
+    return this._isInitialized
+  }
 }

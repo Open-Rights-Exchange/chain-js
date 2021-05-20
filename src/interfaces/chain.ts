@@ -64,9 +64,9 @@ export interface Chain {
      * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
     Account(accountName?: string): Promise<Account>
     /** Return a new CreateAccount object used to help with creating a new chain account */
-    CreateAccount(options?: any): CreateAccount
+    CreateAccount(options?: any): Promise<CreateAccount>
     /** Return a chain Transaction object used to compose and send transactions */
-    Transaction(options?: TransactionOptions): Transaction
+    Transaction(options?: TransactionOptions): Promise<Transaction>
   }
 
   // Chain Crypto functions
