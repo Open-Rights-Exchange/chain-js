@@ -307,10 +307,18 @@ class ChainEthereumV1 implements Chain {
     }
   }
 
+  // TODO: type the plugin type
   /** Install an already iniatlized plugin to this chain connection */
-  public async installPlugin(plugin: any) {
+  public async installPlugin(plugin: any, options?: any) {
+    // Change to use helper this._plugsins = installPluginUtil(this._plugsins, plugin, options, this._chainState)
+
+    // TODO: Move to helpers
     this.assertValidPlugin(plugin)
     const newPlugin = plugin
+    // call init if we have options
+    if (!isNullOrEmpty(options)) {
+      plugin.init(options)
+    }
     newPlugin.chainState = this._chainState
     if (isNullOrEmpty(this.plugins)) {
       this._plugins = [newPlugin]
@@ -323,6 +331,7 @@ class ChainEthereumV1 implements Chain {
     return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
   }
 
+  // TODO: Move to helpers
   /** rules to check tha plugin is well-formed and supported */
   private assertValidPlugin(plugin: any) {
     // TODO: We might check if type is supported in the future
