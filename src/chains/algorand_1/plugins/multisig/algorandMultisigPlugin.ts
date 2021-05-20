@@ -13,7 +13,9 @@ import { MultisigPlugin } from '../../../../interfaces'
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
   name: string
 
-  init(options: any): Promise<void>
+  init(input: any): Promise<void>
+
+  isInitialized: boolean
   // ----- TRANSACTION Members
 
   multisigOptions: any

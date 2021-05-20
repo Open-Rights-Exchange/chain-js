@@ -1,9 +1,18 @@
 import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
+import { EthereumAddress } from '../../models'
+
+type EthereumMultisigPluginInput = {
+  multisigAddress?: EthereumAddress
+  createAccountOptions?: any
+  transactionOptions?: any
+}
 
 export interface EthereumMultisigPlugin extends MultisigPlugin {
   name: string
 
-  init(options: any): Promise<void>
+  init(input: EthereumMultisigPluginInput): Promise<void>
+
+  isInitialized: boolean
 
   // ----- TRANSACTION Members
 
