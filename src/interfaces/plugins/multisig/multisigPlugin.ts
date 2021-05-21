@@ -14,7 +14,7 @@ export interface MultisigPlugin extends ChainJsPlugin {
 
   type: PluginType
 
-  init(input: MultisigPluginOptions): Promise<void>
+  init(options: MultisigPluginOptions): Promise<void>
 
   new: {
     /** Return a new CreateAccount object used to help with creating a new chain account */
