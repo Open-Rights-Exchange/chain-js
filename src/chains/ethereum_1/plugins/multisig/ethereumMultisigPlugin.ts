@@ -1,5 +1,5 @@
 import { PluginType, ChainJsPlugin } from '../../../../interfaces/plugin'
-import { MultisigPluginTransaction, MultisigPluginCreateAccount } from '../../../../interfaces'
+import { MultisigPluginTransaction, MultisigPluginCreateAccount } from '../../../../interfaces/plugins/multisig'
 import { EthereumAddress } from '../../models'
 
 type EthereumMultisigPluginOptions = {

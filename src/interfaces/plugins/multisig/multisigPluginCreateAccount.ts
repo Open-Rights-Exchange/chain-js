@@ -1,5 +1,5 @@
-import { Transaction } from '../transaction'
-import { ChainEntityName } from '../../models'
+import { Transaction } from '../../transaction'
+import { ChainEntityName } from '../../../models'
 
 export interface MultisigPluginCreateAccount {
   init(options: any): Promise<void>

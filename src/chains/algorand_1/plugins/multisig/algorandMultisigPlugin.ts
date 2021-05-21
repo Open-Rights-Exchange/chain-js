@@ -7,7 +7,7 @@ import {
   AlgorandSignature,
   AlgorandTxEncodedForChain,
 } from '../../models'
-import { MultisigPlugin } from '../../../../interfaces'
+import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
 // import { AlgorandNativeMultisigOptions } from './native/models'
 
 export interface AlgorandMultisigPlugin extends MultisigPlugin {
