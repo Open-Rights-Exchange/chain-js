@@ -162,15 +162,19 @@ class ChainEosV2 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(options?: EosCreateAccountOptions): EosCreateAccount {
+  private async newCreateAccount(options?: EosCreateAccountOptions): Promise<EosCreateAccount> {
     this.assertIsConnected()
-    return new EosCreateAccount(this._chainState, options)
+    const createAccount = new EosCreateAccount(this._chainState, options)
+    await createAccount.init()
+    return createAccount
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newTransaction(options?: TransactionOptions): EosTransaction {
+  private async newTransaction(options?: TransactionOptions): Promise<EosTransaction> {
     this.assertIsConnected()
-    return new EosTransaction(this._chainState, options)
+    const transaction = new EosTransaction(this._chainState, options)
+    await transaction.init()
+    return transaction
   }
 
   public new = {

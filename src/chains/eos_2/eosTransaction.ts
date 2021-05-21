@@ -59,6 +59,10 @@ export class EosTransaction implements Transaction {
     this._options = { blocksBehind, expireSeconds }
   }
 
+  public async init(): Promise<void> {
+    return null
+  }
+
   // header
 
   /** The header that is included when the transaction is sent to the chain
