@@ -1,14 +1,14 @@
 import { isNullOrEmpty } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
-import { EthereumAddress, EthereumPrivateKey } from '../../../models'
+import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../../models'
 import { EthereumMultisigPluginTransaction } from '../ethereumMultisigPlugin'
 import {
   approveSafeTransactionHash,
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
-  getSafeExecuteTransaction,
+  getSafeExecuteRawTransaction,
   getSafeOwnersAndThreshold,
-  rawTransactionToSafeTx,
+  transactionToSafeTx,
   signSafeTransactionHash,
 } from './helpers'
 import {
@@ -167,9 +167,9 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Verify and set multisigAddress, owners and threshold.
    * Set safeTransaction from rawTransaction that has passed from ethTransaction class.
    */
-  public async prepareToBeSigned(rawTransaction: EthereumMultisigRawTransaction): Promise<void> {
+  public async prepareToBeSigned(transactionAction: EthereumTransactionAction): Promise<void> {
     // adds transactionOptions into input that is provided from constructor
-    this._safeTransaction = await rawTransactionToSafeTx(rawTransaction, this.options)
+    this._safeTransaction = await transactionToSafeTx(transactionAction, this.options)
   }
 
   public async sign(privateKeys: EthereumPrivateKey[]) {
@@ -188,7 +188,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   /** Generates ethereum chain transaction properties (to, data..) from safeTransaction body */
   private async setRawTransaction() {
-    this._rawTransaction = await getSafeExecuteTransaction(
+    this._rawTransaction = await getSafeExecuteRawTransaction(
       this.multisigAddress,
       this.safeTransaction,
       this.chainUrl,

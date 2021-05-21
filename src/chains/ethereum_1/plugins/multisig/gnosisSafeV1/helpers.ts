@@ -1,13 +1,17 @@
 import { ethers, Contract, ContractInterface, BigNumberish, utils, PopulatedTransaction } from 'ethers'
 import GnosisSafeSol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json'
 import ProxyFactorySol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafeProxyFactory.json'
-import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../../models'
+import {
+  EthereumAddress,
+  EthereumPrivateKey,
+  EthereumRawTransactionAction,
+  EthereumTransactionAction,
+} from '../../../models'
 import {
   InitializerAction,
   GnosisSafeTransaction,
   EIP712_SAFE_TX_TYPE,
   GnosisSafeSignature,
-  EthereumMultisigRawTransaction,
   EthereumGnosisTransactionOptions,
   EthereumGnosisCreateAccountOptions,
 } from './models'
@@ -31,8 +35,9 @@ import {
   toEthereumEntityName,
   toEthereumTxData,
   toEthereumAddress,
+  toEthBuffer,
 } from '../../../helpers'
-import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
+import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 
 // TODO: move to a more generic directory (Consider using EthersJs)
@@ -159,11 +164,11 @@ export async function getSafeNonce(multisigAddress: EthereumAddress, chainUrl: s
   return multisigContract.nonce()
 }
 
-export async function rawTransactionToSafeTx(
-  rawTransaction: EthereumMultisigRawTransaction,
+export async function transactionToSafeTx(
+  transactionAction: EthereumTransactionAction,
   transactionOptions: EthereumGnosisTransactionOptions,
 ): Promise<GnosisSafeTransaction> {
-  const { to, value, data, contract } = rawTransaction
+  const { to, value, data, contract } = transactionAction
   const { operation, refundReceiver, safeTxGas, baseGas, gasPrice: safeGasPice, gasToken, nonce } =
     transactionOptions || {}
 
@@ -263,28 +268,33 @@ export function buildSignatureBytes(signatures: GnosisSafeSignature[]): string {
   return signatureBytes
 }
 
-export function populatedToEthereumTransaction(populatedTrx: PopulatedTransaction): EthereumTransactionAction {
+export function populatedToRawEthereumTransaction(populatedTrx: PopulatedTransaction): EthereumRawTransactionAction {
   const { from, to, value, data, gasPrice, gasLimit, nonce } = populatedTrx
+
+  const valueHex = ethers.BigNumber.isBigNumber(value) ? (value as ethers.BigNumber).toHexString() : value
+  const gasPriceHex = ethers.BigNumber.isBigNumber(gasPrice) ? (gasPrice as ethers.BigNumber).toHexString() : gasPrice
+  const gasLimitHex = ethers.BigNumber.isBigNumber(gasLimit) ? (gasLimit as ethers.BigNumber).toHexString() : gasLimit
+
   const transactionObject = {
-    from: toEthereumAddress(from),
-    to: toEthereumAddress(to),
-    value: ethers.BigNumber.isBigNumber(value) ? (value as ethers.BigNumber).toHexString() : value,
-    data: toEthereumTxData(data),
-    gasPrice: ethers.BigNumber.isBigNumber(gasPrice) ? (gasPrice as ethers.BigNumber).toHexString() : gasPrice,
-    gasLimit: ethers.BigNumber.isBigNumber(gasLimit) ? (gasLimit as ethers.BigNumber).toHexString() : gasLimit,
-    nonce: nonce ? nonce.toString() : undefined,
+    from: nullifyIfEmpty(toEthBuffer(from)),
+    to: nullifyIfEmpty(toEthBuffer(to)),
+    value: nullifyIfEmpty(toEthBuffer(valueHex)),
+    data: nullifyIfEmpty(toEthBuffer(data)),
+    gasPrice: nullifyIfEmpty(toEthBuffer(gasPriceHex)),
+    gasLimit: nullifyIfEmpty(toEthBuffer(gasLimitHex)),
+    nonce: nullifyIfEmpty(toEthBuffer(nonce)),
   }
   removeEmptyValuesInJsonObject(transactionObject)
   return transactionObject
 }
 
-export async function getSafeExecuteTransaction(
+export async function getSafeExecuteRawTransaction(
   multisigAddress: EthereumAddress,
   safeTx: GnosisSafeTransaction,
   chainUrl: string,
   signatures: GnosisSafeSignature[],
   overrides?: any,
-): Promise<EthereumTransactionAction> {
+): Promise<EthereumRawTransactionAction> {
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
   const signatureBytes = buildSignatureBytes(signatures)
@@ -301,7 +311,7 @@ export async function getSafeExecuteTransaction(
     signatureBytes,
     overrides || {},
   )
-  return populatedToEthereumTransaction(populatedTrx)
+  return populatedToRawEthereumTransaction(populatedTrx)
 }
 
 export async function executeSafeTransaction(

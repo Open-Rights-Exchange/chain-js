@@ -94,8 +94,9 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     }
   }
 
-  public validate(): void {
+  public validate(): Promise<void> {
     this.verifyAndGetMultisigOptionsFromRaw(this.rawTransaction)
+    return null
   }
 
   /** Generate the raw transaction body using the actions attached

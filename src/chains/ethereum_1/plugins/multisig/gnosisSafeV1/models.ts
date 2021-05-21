@@ -1,8 +1,8 @@
 import BN from 'bn.js'
 import { ethers } from 'ethers'
-import { EthereumAddress, EthereumTransactionAction, EthereumTxData } from '../../../models'
+import { EthereumAddress, EthereumRawTransactionAction, EthereumTxData } from '../../../models'
 
-export type EthereumMultisigRawTransaction = EthereumTransactionAction
+export type EthereumMultisigRawTransaction = EthereumRawTransactionAction
 
 export type EthereumGnosisCreateAccountOptions = {
   owners: EthereumAddress[]
