@@ -473,12 +473,8 @@ export class EosTransaction implements Transaction {
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    this._sendReceipt = this._chainState.sendTransaction(
-      this._raw,
-      this.signatures,
-      waitForConfirm,
-      communicationSettings,
-    )
+    const signedTransaction = { serializedTransaction: this._raw, signatures: this.signatures }
+    this._sendReceipt = this._chainState.sendTransaction(signedTransaction, waitForConfirm, communicationSettings)
     this.setTransactionId(this._sendReceipt)
     return this._sendReceipt
   }
