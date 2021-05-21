@@ -104,7 +104,6 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   public get missingSignatures(): EthereumAddress[] {
     const missingSignatures =
       this.requiredAuthorizations?.filter(address => !this.hasSignatureForAddress(address)) || []
-    console.log('GNOSISMISSINGSIGH: ', missingSignatures)
     const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
