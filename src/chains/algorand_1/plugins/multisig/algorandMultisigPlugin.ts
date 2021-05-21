@@ -31,7 +31,7 @@ export interface AlgorandMultisigPluginCreateAccount extends MultisigPluginCreat
 }
 
 export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransaction {
-  init(input: any): Promise<void>
+  init(options: any): Promise<void>
 
   options: any
 
@@ -64,9 +64,7 @@ export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransac
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: AlgorandPrivateKey[]): Promise<void>
 
-  validate(): void
-
-  init(input: any): Promise<void>
+  validate(): Promise<void>
 }
 
 export interface AlgorandMultisigPlugin extends ChainJsPlugin {
