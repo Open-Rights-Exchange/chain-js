@@ -6,7 +6,7 @@ export type AlgorandMultisigNativeOptions = {
   addrs: string[]
 }
 
-export type AlgorandMultisigNativePluginInput = {
+export type AlgorandMultisigNativePluginOptions = {
   multisigOptions?: AlgorandMultisigNativeOptions
   rawTransaction?: AlgorandRawTransactionMultisigStruct
 }
