@@ -1,9 +1,7 @@
 import { ethers, Contract, ContractInterface, BigNumberish, utils, PopulatedTransaction } from 'ethers'
-
 import GnosisSafeSol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json'
 import ProxyFactorySol from '@gnosis.pm/safe-contracts/build/contracts/GnosisSafeProxyFactory.json'
-
-import { EthereumAddress, EthereumTransactionAction } from '../../../models'
+import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../../models'
 import {
   InitializerAction,
   GnosisSafeTransaction,
@@ -27,7 +25,13 @@ import {
   EMPTY_TX_VALUE,
 } from './constants'
 
-import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../../helpers'
+import {
+  isNullOrEmptyEthereumValue,
+  generateDataFromContractAction,
+  toEthereumEntityName,
+  toEthereumTxData,
+  toEthereumAddress,
+} from '../../../helpers'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 
@@ -123,7 +127,10 @@ export async function calculateProxyAddress(multisigOptions: EthereumGnosisCreat
 
 /** Returns transaction object including ({to, data, ...}) for creating multisig proxy contract
  */
-export async function getCreateProxyTransaction(multisigOptions: EthereumGnosisCreateAccountOptions, chainUrl: string) {
+export async function getCreateProxyTransaction(
+  multisigOptions: EthereumGnosisCreateAccountOptions,
+  chainUrl: string,
+): Promise<EthereumTransactionAction> {
   assertMultisigOptionsForProxyArePresent(multisigOptions)
   const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
 
@@ -135,7 +142,7 @@ export async function getCreateProxyTransaction(multisigOptions: EthereumGnosisC
     initializerData,
     nonce,
   )
-  return { to, data: toEthereumTxData(data), value: value ? value.toString() : 0 }
+  return { to: toEthereumAddress(to), data: toEthereumTxData(data), value: value ? value.toString() : 0 }
 }
 
 export function calculateSafeTransactionHash(
@@ -206,27 +213,27 @@ export async function getSafeTransactionHash(
 
 /** Generates GnosisSafe signature object, that is gonne be passed in as serialized for executeTransaction  */
 export async function signSafeTransactionHash(
-  privateKey: string,
+  privateKey: EthereumPrivateKey,
   multisigAddress: EthereumAddress,
   safeTx: GnosisSafeTransaction,
   chainUrl: string,
-) {
+): Promise<GnosisSafeSignature> {
   const signerWallet = getEthersWallet(privateKey)
   const trxHash = await getSafeTransactionHash(multisigAddress, safeTx, chainUrl)
   const typedDataHash = utils.arrayify(trxHash)
   return {
-    signer: signerWallet.address,
+    signer: toEthereumAddress(signerWallet.address),
     data: (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20'),
   }
 }
 
 /** Sends approveHash call for gnosis and returns signature placeholder that indicates approval */
 export async function approveSafeTransactionHash(
-  privateKey: string,
+  privateKey: EthereumPrivateKey,
   multisigAddress: EthereumAddress,
   safeTx: GnosisSafeTransaction,
   chainUrl: string,
-) {
+): Promise<GnosisSafeSignature> {
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
   const { chainId } = await ethersProvier.getNetwork()
@@ -239,7 +246,7 @@ export async function approveSafeTransactionHash(
   await signerSafe.approveHash(typedDataHash)
 
   return {
-    signer: signerWallet.address,
+    signer: toEthereumEntityName(signerWallet.address),
     data: `0x000000000000000000000000${signerWallet.address.slice(
       2,
     )}000000000000000000000000000000000000000000000000000000000000000001`,
@@ -259,8 +266,8 @@ export function buildSignatureBytes(signatures: GnosisSafeSignature[]): string {
 export function populatedToEthereumTransaction(populatedTrx: PopulatedTransaction): EthereumTransactionAction {
   const { from, to, value, data, gasPrice, gasLimit, nonce } = populatedTrx
   const transactionObject = {
-    from,
-    to,
+    from: toEthereumAddress(from),
+    to: toEthereumAddress(to),
     value: ethers.BigNumber.isBigNumber(value) ? (value as ethers.BigNumber).toHexString() : value,
     data: toEthereumTxData(data),
     gasPrice: ethers.BigNumber.isBigNumber(gasPrice) ? (gasPrice as ethers.BigNumber).toHexString() : gasPrice,
