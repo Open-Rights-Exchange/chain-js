@@ -62,7 +62,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
-  get accountName(): any {
+  get accountName(): EthereumAddress {
     return this._accountName
   }
 
