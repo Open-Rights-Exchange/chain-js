@@ -44,7 +44,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
     return this._multisigAddress
   }
 
-  get owners(): string[] {
+  get owners(): EthereumAddress[] {
     return this._options?.owners
   }
 
