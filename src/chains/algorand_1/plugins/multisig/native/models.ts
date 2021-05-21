@@ -1,14 +1,14 @@
 import { AlgorandRawTransactionMultisigStruct } from '../../../models/algoStructures'
 
-export type AlgorandNativeMultisigOptions = {
+export type AlgorandMultisigNativeOptions = {
   version: number
   threshold: number
   addrs: string[]
 }
 
-export type AlgorandNativeMultisigCreateAccountOptions = AlgorandNativeMultisigOptions
+export type AlgorandNativeMultisigCreateAccountOptions = AlgorandMultisigNativeOptions
 
 export type AlgorandNativeMultisigTransactionOptions = {
-  multisigOptions?: AlgorandNativeMultisigOptions
+  multisigOptions?: AlgorandMultisigNativeOptions
   rawTransaction?: AlgorandRawTransactionMultisigStruct
 }
