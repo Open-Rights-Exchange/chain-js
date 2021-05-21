@@ -4,9 +4,10 @@ import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
 import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ConfirmType } from '../../models'
+import { ChainErrorDetailCode, ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, objectHasProperty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
+import { ChainState } from '../../interfaces/chainState'
 import {
   ChainFunctionCategory,
   EthereumAddress,
@@ -15,7 +16,6 @@ import {
   EthereumChainEndpoint,
   EthereumChainInfo,
   EthereumChainSettings,
-  EthereumChainSettingsCommunicationSettings,
   EthereumSymbol,
   EthereumTxResult,
   EthereumTxChainResponse,
@@ -31,7 +31,7 @@ import {
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
 
-export class EthereumChainState {
+export class EthereumChainState implements ChainState {
   private ethChainInfo: BlockTransactionString
 
   private _activeEndpoint: EthereumChainEndpoint
@@ -197,6 +197,16 @@ export class EthereumChainState {
     }
   }
 
+  /** Fetches data from a contract table */
+  fetchContractData(): Promise<any> {
+    throw new Error('Not Implemented')
+  }
+
+  /** Fetches data from a contract table */
+  fetchContractTable(): Promise<any> {
+    throw new Error('Not Implemented')
+  }
+
   /** Get the balance for an account from the chain
    *  If tokenAddress is provided, returns balance for ERC20 token
    *  If symbol = 'eth', returns Eth balance (in units of Ether)
@@ -270,10 +280,11 @@ export class EthereumChainState {
     return false
   }
 
-  /** Check if a block includes a transaction
-   * if includes return transaction, if not return null
-   */
-  public blockHasTransaction = (block: BlockTransactionString, transactionId: string): Promise<TransactionReceipt> => {
+  /** Return a transaction if its included in a block */
+  public findBlockInTransaction = (
+    block: BlockTransactionString,
+    transactionId: string,
+  ): Promise<TransactionReceipt> => {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction === transactionId)
     if (isNullOrEmpty(result)) {
@@ -315,7 +326,7 @@ export class EthereumChainState {
     signedTransaction: string,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<EthereumTxResult> {
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
@@ -352,7 +363,7 @@ export class EthereumChainState {
     transactionResult: EthereumTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: EthereumChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ): Promise<EthereumTxResult> {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
@@ -422,7 +433,7 @@ export class EthereumChainState {
         possibleTransactionBlock = await this.getBlock(blockNumToCheck)
       }
 
-      transactionResponse = await this.blockHasTransaction(possibleTransactionBlock, transactionId)
+      transactionResponse = await this.findBlockInTransaction(possibleTransactionBlock, transactionId)
       if (!isNullOrEmpty(transactionResponse)) {
         transactionBlockNumber = possibleTransactionBlock?.number
       }

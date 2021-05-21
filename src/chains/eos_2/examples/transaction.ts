@@ -18,7 +18,7 @@ require('dotenv').config()
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV2).new.Transaction()
+  const transaction = await (chain as ChainEosV2).new.Transaction()
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
@@ -103,7 +103,7 @@ async function run() {
   await kylin.connect()
 
   //  ---> set transaction from serialized
-  // const transaction = kylin.new.Transaction({ blocksBehind: 10 })
+  // const transaction = await kylin.new.Transaction({ blocksBehind: 10 })
   // await transaction.setFromRaw(serializedTransaction)
   // await transaction.validate()
   // console.log('missing signatures:', transaction.missingSignatures)
@@ -117,7 +117,7 @@ async function run() {
   // ----<
 
   // ---> set transaction from actions
-  // const transaction = kylin.new.Transaction()
+  // const transaction = await kylin.new.Transaction()
   // transaction.actions = [sampleActionFirstAuth]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
@@ -128,7 +128,7 @@ async function run() {
   // console.log('send response:', JSON.stringify(txResponse))
 
   // ---> send token
-  const transaction = kylin.new.Transaction()
+  const transaction = await kylin.new.Transaction()
   // transaction.actions = [await kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
   transaction.actions = [sampleActionsDemoApp]
   transaction.addAction(sampleActionFirstAuth, true)
@@ -148,7 +148,7 @@ async function run() {
   // ----<
 
   // ---> demo transaction
-  // const transaction = kylin.new.Transaction()
+  // const transaction = await kylin.new.Transaction()
   // transaction.actions = [sampleActionsDemoApp]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()

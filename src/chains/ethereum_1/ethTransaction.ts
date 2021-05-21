@@ -4,7 +4,7 @@ import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
 import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -16,7 +16,6 @@ import {
   EthereumAddressBuffer,
   EthereumPublicKey,
   EthereumBlockType,
-  EthereumChainSettingsCommunicationSettings,
   EthereumActionHelperInput,
   EthereumSetDesiredFeeOptions,
   EthereumTransactionCost,
@@ -41,7 +40,8 @@ import {
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
+import { EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
+import { MultisigPlugin } from '../../interfaces/plugins/multisig'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -63,19 +63,31 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthereumTransactionOptions
 
-  private _multisigPlugin: EthereumMultisigPlugin
+  private _multisigPlugin: MultisigPlugin
 
-  constructor(
-    chainState: EthereumChainState,
-    multisigPlugin?: EthereumMultisigPlugin,
-    options?: EthereumTransactionOptions,
-  ) {
+  private _multisigTransaction: EthereumMultisigPluginTransaction
+
+  constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumTransactionOptions) {
     this._chainState = chainState
     this._options = options
-    if (!isNullOrEmpty(options?.multisigPluginInput)) {
+    if (!isNullOrEmpty(options?.multisigPluginOptions)) {
       this._multisigPlugin = multisigPlugin
     }
     this.applyDefaultOptions()
+  }
+
+  public async init() {
+    if (this.multisigPlugin) {
+      this._multisigTransaction = await this.multisigPlugin.new.Transaction(this.options?.multisigPluginOptions)
+    }
+  }
+
+  get multisigPlugin(): MultisigPlugin {
+    return this._multisigPlugin
+  }
+
+  get multisigTransaction(): EthereumMultisigPluginTransaction {
+    return this._multisigTransaction
   }
 
   private applyDefaultOptions() {
@@ -86,16 +98,6 @@ export class EthereumTransaction implements Transaction {
       this._options?.executionPriority ??
       this._chainState?.chainSettings?.defaultTransactionSettings?.executionPriority ??
       TxExecutionPriority.Average
-  }
-
-  get multisigPlugin(): EthereumMultisigPlugin {
-    return this._multisigPlugin
-  }
-
-  private async ensureMultisigPluginInitialized() {
-    if (!this.multisigPlugin.isInitialized) {
-      await this.multisigPlugin.init(this.options?.multisigPluginInput)
-    }
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -160,7 +162,7 @@ export class EthereumTransaction implements Transaction {
       //  and option related properties (nonce, gasLimit, gasPrice)
       //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
       //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
-      return { ...this._actionHelper?.raw, ...this.multisigPlugin?.rawTransaction }
+      return { ...this._actionHelper?.raw, ...this.multisigTransaction?.rawTransaction }
     }
     return this._actionHelper?.raw
   }
@@ -229,8 +231,7 @@ export class EthereumTransaction implements Transaction {
     if (!this.isMultisig) {
       await this.setNonceIfEmpty(this.senderAddress)
     } else {
-      await this.ensureMultisigPluginInitialized()
-      await this.multisigPlugin.prepareToBeSigned(this._actionHelper.action)
+      await this.multisigTransaction.prepareToBeSigned(this._actionHelper.action)
     }
   }
 
@@ -316,8 +317,7 @@ export class EthereumTransaction implements Transaction {
       throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
     }
     if (this.isMultisig) {
-      await this.ensureMultisigPluginInitialized()
-      this.multisigPlugin.validate()
+      this.multisigTransaction.validate()
     } else {
       const { gasPrice, gasLimit } = this.ethereumJsTx
       if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
@@ -413,7 +413,7 @@ export class EthereumTransaction implements Transaction {
       return isSameEthHexValue(this.signedByAddress, this.action?.from)
     }
     if (this.isMultisig) {
-      if (isNullOrEmpty(this.multisigPlugin.missingSignatures)) return true
+      if (isNullOrEmpty(this.multisigTransaction.missingSignatures)) return true
     }
     // if no specific action.from, just confirm any signature is attached
     return this.hasAnySignatures
@@ -435,7 +435,7 @@ export class EthereumTransaction implements Transaction {
     this.assertIsValidated()
     let missingSignatures = []
     if (this.isMultisig) {
-      missingSignatures = this.multisigPlugin.missingSignatures
+      missingSignatures = this.multisigTransaction.missingSignatures
     } else {
       if (isNullOrEmpty(this.requiredAuthorization)) {
         throwNewError('Cant determine signatures required - set a from address or attach a signature')
@@ -625,11 +625,10 @@ export class EthereumTransaction implements Transaction {
       await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
       this.signAndAddSignatures(firstPrivateKey)
     } else {
-      await this.ensureMultisigPluginInitialized()
-      if (!isNullOrEmpty(this.multisigPlugin?.missingSignatures)) {
-        await this.multisigPlugin.sign(privateKeys)
+      if (!isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
+        await this.multisigTransaction.sign(privateKeys)
       }
-      if (isNullOrEmpty(this.multisigPlugin?.missingSignatures)) {
+      if (isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
         // generate nonce (using privateKey) if not already present
         await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
         this.signAndAddSignatures(firstPrivateKey)
@@ -643,7 +642,7 @@ export class EthereumTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
   public async send(
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()

@@ -13,7 +13,20 @@ import {
   EthereumGnosisTransactionOptions,
   EthereumGnosisCreateAccountOptions,
 } from './models'
-import { EMPTY_DATA, SENTINEL_ADDRESS, ZERO_ADDRESS } from '../../../ethConstants'
+import { EMPTY_DATA, SENTINEL_ADDRESS } from '../../../ethConstants'
+import {
+  DEFAULT_FALLBACK_HANDLER_ADDRESS,
+  DEFAULT_GAS_TOKEN,
+  DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
+  DEFAULT_PROXY_FACTORY_ADDRESS,
+  DEFAULT_REFUND_RECIEVER,
+  DEFAULT_TX_BASE_GAS,
+  DEFAULT_TX_GAS_PRICE,
+  DEFAULT_TX_SAFE_GAS,
+  EMPTY_TX_OPERATION,
+  EMPTY_TX_VALUE,
+} from './constants'
+
 import { isNullOrEmptyEthereumValue, toEthereumTxData, generateDataFromContractAction } from '../../../helpers'
 import { isNullOrEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
@@ -153,16 +166,17 @@ export async function rawTransactionToSafeTx(
   } else {
     safeTxData = data
   }
+
   return {
     to,
-    value: value || 0,
-    data: safeTxData || '0x',
-    operation: operation || 0,
-    safeTxGas: safeTxGas || 0,
-    baseGas: baseGas || 0,
-    gasPrice: safeGasPice || 0,
-    gasToken: gasToken || ZERO_ADDRESS,
-    refundReceiver: refundReceiver || ZERO_ADDRESS,
+    value: value || EMPTY_TX_VALUE,
+    data: safeTxData || EMPTY_DATA,
+    operation: operation || EMPTY_TX_OPERATION,
+    safeTxGas: safeTxGas || DEFAULT_TX_SAFE_GAS,
+    baseGas: baseGas || DEFAULT_TX_BASE_GAS,
+    gasPrice: safeGasPice || DEFAULT_TX_GAS_PRICE,
+    gasToken: gasToken || DEFAULT_GAS_TOKEN,
+    refundReceiver: refundReceiver || DEFAULT_REFUND_RECIEVER,
     nonce,
   }
 }
@@ -310,10 +324,6 @@ export async function getSafeOwnersAndThreshold(multisigContract: Contract) {
   const threshold = await multisigContract.getThreshold()
   return { owners, threshold }
 }
-
-export const DEFAULT_FALLBACK_HANDLER_ADDRESS = '0x7Be1e66Ce7Eab24BEa42521cc6bBCf60a30Fa15E'
-export const DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS = '0x6851D6fDFAfD08c0295C392436245E5bc78B0185'
-export const DEFAULT_PROXY_FACTORY_ADDRESS = '0x76E2cFc1F5Fa8F6a5b3fC4c8F4788F0116861F9B'
 
 export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisCreateAccountOptions) {
   const detaultOptions: Partial<EthereumGnosisCreateAccountOptions> = {

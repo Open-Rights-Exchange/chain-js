@@ -1,14 +1,9 @@
-import { Transaction } from '../transaction'
-import { ChainEntityName, PrivateKey, Signature } from '../../models'
+import { PrivateKey, Signature } from '../../../models'
 
-export interface MultisigPlugin {
-  name: string
-
+export interface MultisigPluginTransaction {
   init(options: any): Promise<void>
 
-  // ----- TRANSACTION Members
-
-  multisigOptions: any
+  options: any
 
   owners: any[]
 
@@ -38,17 +33,4 @@ export interface MultisigPlugin {
   sign(privateKeys: PrivateKey[]): Promise<void>
 
   validate(): void
-
-  // ----- CREATE ACCOUNT Members
-
-  /** Account named used when creating the account */
-  createAccountName: ChainEntityName
-
-  /** Compose the transaction action needed to create the account */
-  createAccountTransactionAction: Transaction
-
-  /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
-  createAccountRequiresTransaction: boolean
-
-  createAccountGenerateKeysIfNeeded(): Promise<void>
 }

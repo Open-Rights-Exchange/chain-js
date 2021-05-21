@@ -1,25 +1,33 @@
-import { MultisigPlugin } from '../../../../interfaces/plugins/multisig'
-import { EthereumAddress } from '../../models'
+import { MultisigPluginTransaction, MultisigPluginCreateAccount } from '../../../../interfaces/plugins/multisig'
 
-type EthereumMultisigPluginInput = {
-  multisigAddress?: EthereumAddress
-  createAccountOptions?: any
-  transactionOptions?: any
+export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreateAccount {
+  init(input: any): Promise<void>
+
+  options: any
+
+  owners: string[]
+
+  threshold: number
+
+  /** Account named used when creating the account */
+  accountName: any
+
+  /** Compose the transaction action needed to create the account */
+  transactionAction: any
+
+  /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
+  requiresTransaction: boolean
+
+  generateKeysIfNeeded(): Promise<void>
 }
 
-export interface EthereumMultisigPlugin extends MultisigPlugin {
-  name: string
-
-  init(input: EthereumMultisigPluginInput): Promise<void>
-
-  isInitialized: boolean
-
-  // ----- TRANSACTION Members
+export interface EthereumMultisigPluginTransaction extends MultisigPluginTransaction {
+  init(input: any): Promise<void>
 
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
 
-  multisigOptions: any
+  options: any
 
   owners: string[]
 
@@ -38,7 +46,7 @@ export interface EthereumMultisigPlugin extends MultisigPlugin {
   signatures: any[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: any[]): Promise<void>
+  addSignatures(signature: any[]): void
 
   prepareToBeSigned(trxEncodedForChain: any): Promise<void>
 
@@ -46,17 +54,4 @@ export interface EthereumMultisigPlugin extends MultisigPlugin {
   sign(privateKeys: any[]): Promise<void>
 
   validate(): void
-
-  // ----- CREATE ACCOUNT Members
-
-  /** Account named used when creating the account */
-  createAccountName: any
-
-  /** Compose the transaction action needed to create the account */
-  createAccountTransactionAction: any
-
-  /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
-  createAccountRequiresTransaction: boolean
-
-  createAccountGenerateKeysIfNeeded(): Promise<void>
 }

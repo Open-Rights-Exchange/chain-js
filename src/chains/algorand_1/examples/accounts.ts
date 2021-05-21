@@ -55,7 +55,7 @@ async function run() {
   }
 
   /** Create Algorand account */
-  const createAccount = algoTest.new.CreateAccount(createAccountOptions)
+  const createAccount = await algoTest.new.CreateAccount(createAccountOptions)
   await createAccount.generateKeysIfNeeded()
   const { accountName, generatedKeys } = createAccount
   console.log('generatedKeys: %o', generatedKeys)

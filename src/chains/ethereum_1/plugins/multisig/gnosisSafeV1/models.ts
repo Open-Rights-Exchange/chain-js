@@ -7,7 +7,7 @@ export type EthereumMultisigRawTransaction = EthereumTransactionAction
 export type EthereumGnosisCreateAccountOptions = {
   owners: string[]
   threshold: number
-  nonce?: number
+  nonce: number
   gnosisSafeMaster?: string
   proxyFactory?: string
   fallbackHandler?: string
@@ -15,6 +15,7 @@ export type EthereumGnosisCreateAccountOptions = {
 }
 
 export type EthereumGnosisTransactionOptions = {
+  multisigAddress: string
   operation?: number
   refundReceiver?: string
   safeTxGas?: number | string
@@ -22,12 +23,6 @@ export type EthereumGnosisTransactionOptions = {
   gasPrice?: number | string
   gasToken?: string
   nonce?: number
-}
-
-export type EthereumGnosisPluginInput = {
-  multisigAddress?: EthereumAddress
-  createAccountOptions?: EthereumGnosisCreateAccountOptions
-  transactionOptions?: EthereumGnosisTransactionOptions
 }
 
 /** Ethereum action will be called automatically as proxy multisig contract is created

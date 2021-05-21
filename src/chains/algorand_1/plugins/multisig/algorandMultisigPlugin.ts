@@ -1,24 +1,39 @@
 import {
   AlgorandAddress,
-  AlgorandEntityName,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransactionMultisigStruct,
   AlgorandSignature,
   AlgorandTxEncodedForChain,
 } from '../../models'
-import { MultisigPlugin } from '../../../../interfaces'
-// import { AlgorandNativeMultisigOptions } from './native/models'
+import { MultisigPluginCreateAccount, MultisigPluginTransaction } from '../../../../interfaces/plugins/multisig'
+import { ChainJsPlugin, PluginType } from '../../../../interfaces/plugin'
 
-export interface AlgorandMultisigPlugin extends MultisigPlugin {
-  name: string
-
+export interface AlgorandMultisigPluginCreateAccount extends MultisigPluginCreateAccount {
   init(input: any): Promise<void>
 
-  isInitialized: boolean
-  // ----- TRANSACTION Members
+  options: any
 
-  multisigOptions: any
+  owners: string[]
+
+  threshold: number
+
+  /** Account named used when creating the account */
+  accountName: any
+
+  /** Compose the transaction action needed to create the account */
+  transactionAction: any
+
+  /** If true, an transaction must be sent to chain to create account - use transactionAction for action needed */
+  requiresTransaction: boolean
+
+  generateKeysIfNeeded(): Promise<void>
+}
+
+export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransaction {
+  init(input: any): Promise<void>
+
+  options: any
 
   owners: string[]
 
@@ -51,14 +66,20 @@ export interface AlgorandMultisigPlugin extends MultisigPlugin {
 
   validate(): void
 
-  // ----- CREATE ACCOUNT Members
+  init(input: any): Promise<void>
+}
 
-  createAccountName: AlgorandEntityName
+export interface AlgorandMultisigPlugin extends ChainJsPlugin {
+  name: string
 
-  /** Not supported */
-  createAccountTransactionAction: any
+  type: PluginType
 
-  createAccountRequiresTransaction: boolean
+  init(input: any): Promise<void>
 
-  createAccountGenerateKeysIfNeeded(): Promise<void>
+  new: {
+    /** Return a new CreateAccount object used to help with creating a new chain account */
+    CreateAccount(options?: any): Promise<AlgorandMultisigPluginCreateAccount>
+    /** Return a chain Transaction object used to compose and send transactions */
+    Transaction(options?: any): Promise<AlgorandMultisigPluginTransaction>
+  }
 }

@@ -7,7 +7,7 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
-import { AlgorandMultisigNativeOptions, AlgorandMultisigNativePluginInput } from '../plugins/multisig/native/models'
+import { AlgorandNativeMultisigOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
 
@@ -33,7 +33,7 @@ const algoBetanetEndpoints = [
   },
 ]
 
-const multisigOptions: AlgorandMultisigNativeOptions = {
+const multisigOptions: AlgorandNativeMultisigOptions = {
   version: 1,
   threshold: 2,
   addrs: [
@@ -63,7 +63,7 @@ async function run() {
   }
 
   /** Create Algorand multisig account */
-  const createMultiSigAccount = algoTest.new.CreateAccount(createAccountOptions)
+  const createMultiSigAccount = await algoTest.new.CreateAccount(createAccountOptions)
   await createMultiSigAccount.generateKeysIfNeeded()
   const { accountName: multisigAccountName } = createMultiSigAccount
   console.log('mulitsig account: %o', multisigAccountName)
