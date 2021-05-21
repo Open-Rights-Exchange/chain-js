@@ -1,27 +1,27 @@
 import BN from 'bn.js'
 import { ethers } from 'ethers'
-import { EthereumAddress, EthereumTransactionAction } from '../../../models'
+import { EthereumAddress, EthereumTransactionAction, EthereumTxData } from '../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumTransactionAction
 
 export type EthereumGnosisCreateAccountOptions = {
-  owners: string[]
+  owners: EthereumAddress[]
   threshold: number
   nonce: number
-  gnosisSafeMaster?: string
-  proxyFactory?: string
-  fallbackHandler?: string
+  gnosisSafeMaster?: EthereumAddress
+  proxyFactory?: EthereumAddress
+  fallbackHandler?: EthereumAddress
   initializerAction?: InitializerAction
 }
 
 export type EthereumGnosisTransactionOptions = {
-  multisigAddress: string
+  multisigAddress: EthereumAddress
   operation?: number
-  refundReceiver?: string
+  refundReceiver?: EthereumAddress
   safeTxGas?: number | string
   baseGas?: number | string
   gasPrice?: number | string
-  gasToken?: string
+  gasToken?: EthereumAddress
   nonce?: number
 }
 
@@ -30,7 +30,7 @@ export type EthereumGnosisTransactionOptions = {
  */
 export type InitializerAction = {
   initializerTo?: EthereumAddress
-  initializerData?: string
+  initializerData?: EthereumTxData
   paymentToken?: EthereumAddress
   paymentAmount?: number
   paymentReceiver?: EthereumAddress
