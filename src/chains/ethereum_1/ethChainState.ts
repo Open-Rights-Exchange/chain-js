@@ -4,7 +4,7 @@ import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
 import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ConfirmType } from '../../models'
+import { ChainErrorDetailCode, ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, objectHasProperty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import {
@@ -15,7 +15,6 @@ import {
   EthereumChainEndpoint,
   EthereumChainInfo,
   EthereumChainSettings,
-  EthereumChainSettingsCommunicationSettings,
   EthereumSymbol,
   EthereumTxResult,
   EthereumTxChainResponse,
@@ -315,7 +314,7 @@ export class EthereumChainState {
     signedTransaction: string,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<EthereumTxResult> {
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
@@ -352,7 +351,7 @@ export class EthereumChainState {
     transactionResult: EthereumTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: EthereumChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ): Promise<EthereumTxResult> {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {

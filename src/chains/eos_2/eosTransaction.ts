@@ -6,7 +6,6 @@ import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './hel
 import {
   EosAuthorization,
   EosActionStruct,
-  EosChainSettingsCommunicationSettings,
   EosPublicKey,
   EosEntityName,
   EosSignature,
@@ -15,7 +14,7 @@ import {
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { ConfirmType } from '../../models'
+import { ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
 
 export type PublicKeyMapCache = {
@@ -470,7 +469,7 @@ export class EosTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
   public async send(
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EosChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()

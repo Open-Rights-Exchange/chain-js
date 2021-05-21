@@ -2,7 +2,7 @@ import { PluginType, ChainJsPlugin } from '../../../../interfaces/plugin'
 import { MultisigPluginTransaction, MultisigPluginCreateAccount } from '../../../../interfaces'
 import { EthereumAddress } from '../../models'
 
-type EthereumMultisigPluginInput = {
+type EthereumMultisigPluginOptions = {
   multisigAddress?: EthereumAddress
   createAccountOptions?: any
   transactionOptions?: any
@@ -13,7 +13,7 @@ export interface EthereumMultisigPlugin extends ChainJsPlugin {
 
   type: PluginType
 
-  init(input: EthereumMultisigPluginInput): Promise<void>
+  init(input: EthereumMultisigPluginOptions): Promise<void>
 
   newCreateAccount(options: any): Promise<EthereumMultisigPluginCreateAccount>
 
@@ -21,7 +21,7 @@ export interface EthereumMultisigPlugin extends ChainJsPlugin {
 }
 
 export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreateAccount {
-  init(input: EthereumMultisigPluginInput): Promise<void>
+  init(input: EthereumMultisigPluginOptions): Promise<void>
 
   options: any
 
@@ -42,7 +42,7 @@ export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreat
 }
 
 export interface EthereumMultisigPluginTransaction extends MultisigPluginTransaction {
-  init(input: EthereumMultisigPluginInput): Promise<void>
+  init(input: EthereumMultisigPluginOptions): Promise<void>
 
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean

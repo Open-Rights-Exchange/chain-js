@@ -28,7 +28,7 @@ import {
 import { throwNewError } from '../../../../../errors'
 import { AlgorandMultisigPlugin } from '../algorandMultisigPlugin'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { AlgorandMultisigNativePluginInput, AlgorandMultisigNativeOptions } from './models'
+import { AlgorandMultisigNativePluginOptions, AlgorandMultisigNativeOptions } from './models'
 import { determineMultiSigAddress } from './helpers'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
 
@@ -48,12 +48,12 @@ export class AlgorandMultisigNativePlugin extends ChainJsPlugin implements Algor
   public type = PluginType.MultiSig
 
   /** Allows parent class to (re)initialize options */
-  async init(options: AlgorandMultisigNativePluginInput) {
+  async init(options: AlgorandMultisigNativePluginOptions) {
     super.init(options)
     this.initMultisigPlugin(options)
   }
 
-  private async initMultisigPlugin(input: AlgorandMultisigNativePluginInput) {
+  private async initMultisigPlugin(input: AlgorandMultisigNativePluginOptions) {
     const { multisigOptions, rawTransaction } = input
     if (!isNullOrEmpty(rawTransaction)) {
       this._multisigOptions = this.verifyAndGetMultisigOptionsFromRaw(rawTransaction)

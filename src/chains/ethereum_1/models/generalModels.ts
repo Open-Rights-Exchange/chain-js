@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js'
 import {
   ChainDateBrand,
   ChainEntityNameBrand,
+  ChainSettingsCommunicationSettings,
   ChainSymbolBrand,
   ModelsCryptoAes,
   TxExecutionPriority,
@@ -27,7 +28,7 @@ export enum EthereumBlockType {
 /** Chain configuation for creating a new chain connection and sending transaction */
 export type EthereumChainSettings = {
   chainForkType?: EthereumChainForkType
-  communicationSettings?: EthereumChainSettingsCommunicationSettings
+  communicationSettings?: ChainSettingsCommunicationSettings
   defaultTransactionSettings: {
     executionPriority: TxExecutionPriority
     maxFeeIncreasePercentage?: number

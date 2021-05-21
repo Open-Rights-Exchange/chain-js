@@ -3,14 +3,19 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
+import {
+  ChainInfo,
+  ConfirmType,
+  ChainErrorType,
+  ChainErrorDetailCode,
+  ChainSettingsCommunicationSettings,
+} from '../../models'
 import { fetchWrapper, trimTrailingChars, isAString, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
   EosSignature,
   EosEntityName,
   EOSGetTableRowsParams,
   EosChainSettings,
-  EosChainSettingsCommunicationSettings,
   EosTxResult,
   EosChainEndpoint,
   EosSymbol,
@@ -276,7 +281,7 @@ export class EosChainState {
     serializedTransaction: any,
     signatures: EosSignature[],
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EosChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<EosTxResult> {
     if (
       waitForConfirm !== ConfirmType.None &&
@@ -330,7 +335,7 @@ export class EosChainState {
     transactionResult: EosTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: EosChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ) {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {

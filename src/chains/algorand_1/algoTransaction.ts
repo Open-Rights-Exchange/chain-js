@@ -1,7 +1,7 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
 import { Transaction } from '../../interfaces'
-import { ChainErrorType, ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import { mapChainError } from './algoErrors'
 import { throwNewError } from '../../errors'
 import {
@@ -15,7 +15,6 @@ import {
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
-  AlgorandChainSettingsCommunicationSettings,
   AlgorandPrivateKey,
   AlgorandPublicKey,
   AlgorandRawTransactionMultisigStruct,
@@ -47,7 +46,7 @@ import {
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
-import { AlgorandMultisigNativePluginInput } from './plugins/multisig/native/models'
+import { AlgorandMultisigNativePluginOptions } from './plugins/multisig/native/models'
 import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
 
 export class AlgorandTransaction implements Transaction {
@@ -89,7 +88,7 @@ export class AlgorandTransaction implements Transaction {
 
   public async ensureMultisigPluginInitialized() {
     if (!this.multisigPlugin.isInitialized) {
-      const input: AlgorandMultisigNativePluginInput = {
+      const input: AlgorandMultisigNativePluginOptions = {
         multisigOptions: this.options?.multisigOptions,
       }
       await this.multisigPlugin.init(input)
@@ -489,7 +488,7 @@ export class AlgorandTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
   public send(
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: AlgorandChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
@@ -546,7 +545,7 @@ export class AlgorandTransaction implements Transaction {
   private async setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      const input: AlgorandMultisigNativePluginInput = {
+      const input: AlgorandMultisigNativePluginOptions = {
         rawTransaction: transaction as AlgorandRawTransactionMultisigStruct,
       }
       this._multisigPlugin = new AlgorandMultisigNativePlugin()

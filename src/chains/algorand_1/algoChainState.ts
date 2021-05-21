@@ -1,6 +1,12 @@
 import algosdk from 'algosdk'
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
+import {
+  ChainErrorDetailCode,
+  ChainErrorType,
+  ChainInfo,
+  ChainSettingsCommunicationSettings,
+  ConfirmType,
+} from '../../models'
 import {
   AlgorandAddress,
   AlgoClient,
@@ -9,7 +15,6 @@ import {
   AlgorandChainEndpoint,
   AlgorandChainInfo,
   AlgorandChainSettings,
-  AlgorandChainSettingsCommunicationSettings,
   AlgorandChainTransactionParamsStruct,
   AlgorandSymbol,
   AlgorandTxChainResponse,
@@ -226,7 +231,7 @@ export class AlgorandChainState {
     signedTransaction: string,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    communicationSettings?: AlgorandChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
@@ -263,7 +268,7 @@ export class AlgorandChainState {
     transactionResult: AlgorandTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: AlgorandChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {

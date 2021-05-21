@@ -4,7 +4,7 @@ import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
 import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -16,7 +16,6 @@ import {
   EthereumAddressBuffer,
   EthereumPublicKey,
   EthereumBlockType,
-  EthereumChainSettingsCommunicationSettings,
   EthereumActionHelperInput,
   EthereumSetDesiredFeeOptions,
   EthereumTransactionCost,
@@ -646,7 +645,7 @@ export class EthereumTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block before returning */
   public async send(
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EthereumChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
