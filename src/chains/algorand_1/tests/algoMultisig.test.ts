@@ -6,8 +6,9 @@ import { multisigChainSerialized } from './mockups/multisig'
 import { ChainActionType, ValueTransferParams } from '../../../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { determineMultiSigAddress } from '../plugins/multisig/native/helpers'
-import { AlgorandMultisigNativeOptions } from '../plugins/multisig/native/models'
+import { AlgorandNativeMultisigTransactionOptions } from '../plugins/multisig/native/models'
 import { AlgorandTransaction } from '../algoTransaction'
+import { AlgorandTransactionOptions } from '../models'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -58,17 +59,23 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const multisigOptions: AlgorandMultisigNativeOptions = {
-      version: 1,
-      threshold: 3,
-      addrs: [
-        childAcct1, // 1
-        childAcct2, // 2
-        childAcct3, // 3
-      ],
+    const transactionMultisigOptions: AlgorandNativeMultisigTransactionOptions = {
+      multisigOptions: {
+        version: 1,
+        threshold: 3,
+        addrs: [
+          childAcct1, // 1
+          childAcct2, // 2
+          childAcct3, // 3
+        ],
+      },
     }
 
-    const transaction = (await algoTest.new.Transaction({ multisigOptions })) as AlgorandTransaction
+    const transactionOptions: AlgorandTransactionOptions = {
+      multisigOptions: transactionMultisigOptions,
+    }
+
+    const transaction = (await algoTest.new.Transaction(transactionOptions)) as AlgorandTransaction
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
@@ -90,17 +97,22 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const multisigOptions: AlgorandMultisigNativeOptions = {
-      version: 1,
-      threshold: 3,
-      addrs: [
-        childAcct1, // 1
-        childAcct2, // 2
-        childAcct3, // 3
-      ],
+    const transactionMultisigOptions: AlgorandNativeMultisigTransactionOptions = {
+      multisigOptions: {
+        version: 1,
+        threshold: 3,
+        addrs: [
+          childAcct1, // 1
+          childAcct2, // 2
+          childAcct3, // 3
+        ],
+      },
     }
-    const multisigAddress = determineMultiSigAddress(multisigOptions)
-    const transaction = await algoTest.new.Transaction({ multisigOptions })
+    const transactionOptions: AlgorandTransactionOptions = {
+      multisigOptions: transactionMultisigOptions,
+    }
+    const multisigAddress = determineMultiSigAddress(transactionMultisigOptions.multisigOptions)
+    const transaction = await algoTest.new.Transaction(transactionOptions)
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
