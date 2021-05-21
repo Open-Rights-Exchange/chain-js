@@ -1,6 +1,7 @@
 import { ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
 import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
+import { AlgorandMultisigNativeOptions } from '../plugins/multisig/native/models'
 
 export type AlgoClient = any
 export type AlgoClientIndexer = any
@@ -69,3 +70,4 @@ export enum AlgorandUnit {
 /** Algorand general value type */
 export type AlgorandValue = string | number | Buffer | Uint8Array
 export type AlgorandSymbol = string & ChainSymbolBrand
+export declare type AlgorandMultisigOptions = AlgorandMultisigNativeOptions

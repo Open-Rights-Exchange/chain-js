@@ -40,8 +40,8 @@ async function run() {
 
   // crypto
   // encrypt/decrypt with password string
-  const encrypted1 = kylin.encryptWithPassword('mystring', '2233', { salt: 'asdasd asdasd' })
-  const decrypted1 = kylin.decryptWithPassword(encrypted1, '2233', { salt: 'asdasd asdasd' })
+  const encrypted1 = kylin.encryptWithPassword('mystring', '2233', { salt: 'mysalt' })
+  const decrypted1 = kylin.decryptWithPassword(encrypted1, '2233', { salt: 'mysalt' })
 
   console.log('encrypted text:', encrypted1)
   // const decrypted1 = kylin.decryptWithPassword(encrypted1, 'password', {salt:'mysalt'})
