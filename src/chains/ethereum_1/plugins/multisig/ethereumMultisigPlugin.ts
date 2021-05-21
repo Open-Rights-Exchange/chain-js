@@ -5,8 +5,12 @@ import {
   MultisigPlugin,
   MultisigPluginOptions,
 } from '../../../../interfaces/plugins/multisig'
-import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../models'
-import { EthereumMultisigRawTransaction } from './gnosisSafeV1/models'
+import {
+  EthereumAddress,
+  EthereumPrivateKey,
+  EthereumRawTransactionAction,
+  EthereumTransactionAction,
+} from '../../models'
 
 export type EthereumMultisigTransactionOptions = any
 export type EthereumMultisigCreateAccountOptions = any
@@ -63,7 +67,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   /** Raw transaction body
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: EthereumMultisigRawTransaction
+  rawTransaction: EthereumRawTransactionAction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: EthereumAddress[]
@@ -74,7 +78,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: any[]): void
 
-  prepareToBeSigned(trxEncodedForChain: any): Promise<void>
+  prepareToBeSigned(transactionAction: EthereumTransactionAction): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>

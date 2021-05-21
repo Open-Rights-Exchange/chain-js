@@ -34,6 +34,7 @@ import {
   nullifyIfEmptyEthereumValue,
   privateKeyToAddress,
   toEthBuffer,
+  toEthereumAddress,
   toEthereumPublicKey,
   toEthereumSignature,
   toGweiFromWei,
@@ -120,7 +121,7 @@ export class EthereumTransaction implements Transaction {
     if (isNullOrEmpty(this.signatures)) return null
     try {
       // getSenderAddress throws if sig not attached - so we catch that and return null in that case
-      return bufferToHex(this.ethereumJsTx.getSenderAddress())
+      return toEthereumAddress(bufferToHex(this.ethereumJsTx.getSenderAddress()))
     } catch (error) {
       return null
     }
@@ -250,7 +251,7 @@ export class EthereumTransaction implements Transaction {
   async setNonceIfEmpty(fromAddress: EthereumAddress | EthereumAddressBuffer) {
     if (isNullOrEmpty(fromAddress)) return
     this.assertHasRaw()
-    const address = convertBufferToHexStringIfNeeded(fromAddress)
+    const address = toEthereumAddress(convertBufferToHexStringIfNeeded(fromAddress))
 
     if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
       const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)

@@ -17,6 +17,7 @@ import {
   GnosisSafeSignature,
   GnosisSafeTransaction,
 } from './models'
+import { toEthereumAddress } from '../../../helpers'
 
 export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPluginTransaction {
   private _options: EthereumGnosisTransactionOptions
@@ -103,6 +104,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   public get missingSignatures(): EthereumAddress[] {
     const missingSignatures =
       this.requiredAuthorizations?.filter(address => !this.hasSignatureForAddress(address)) || []
+    console.log('GNOSISMISSINGSIGH: ', missingSignatures)
     const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
@@ -159,8 +161,12 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   public hasSignatureForAddress(address: EthereumAddress): boolean {
     let includes = false
     this.gnosisSignatures?.forEach(signature => {
-      if (signature.signer === address) includes = true
+      // Ensure check is case insensitive
+      if (toEthereumAddress(signature.signer) === toEthereumAddress(address)) {
+        includes = true
+      }
     })
+
     return includes
   }
 

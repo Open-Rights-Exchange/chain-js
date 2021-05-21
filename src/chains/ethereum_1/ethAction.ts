@@ -16,6 +16,7 @@ import {
   toEthereumTxData,
   toEthBuffer,
   toWeiString,
+  toEthereumAddress,
 } from './helpers'
 import {
   EthereumActionContract,
@@ -108,7 +109,7 @@ export class EthereumActionHelper {
     }
 
     // convert from param into an address string (and chack for validity)
-    const fromAddress = convertBufferToHexStringIfNeeded(from)
+    const fromAddress = toEthereumAddress(convertBufferToHexStringIfNeeded(from))
     if (isNullOrEmpty(fromAddress)) {
       this._from = ZERO_ADDRESS
     } else if (isValidEthereumAddress(fromAddress)) {
@@ -143,7 +144,7 @@ export class EthereumActionHelper {
     this._nonce = bufferToHex(ethJsTx.nonce)
     this._gasLimit = bufferToHex(ethJsTx.gasLimit)
     this._gasPrice = bufferToHex(ethJsTx.gasPrice)
-    this._to = bufferToHex(ethJsTx.to)
+    this._to = toEthereumAddress(bufferToHex(ethJsTx.to))
     this._value = bufferToHex(ethJsTx.value)
     this._data = toEthereumTxData(bufferToHex(ethJsTx.data))
     this._v = bufferToHex(ethJsTx.v)

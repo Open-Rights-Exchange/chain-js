@@ -14,7 +14,7 @@ import {
   ValueTransferParams,
 } from '../../../models'
 import { ChainEthereumV1 } from '../ChainEthereumV1'
-import { toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
+import { toEthereumAddress, toEthereumPrivateKey, toEthereumSymbol } from '../helpers'
 import { fromTokenValueString, toChainEntityName } from '../../../helpers'
 import {
   EthereumChainSettings,
@@ -62,7 +62,7 @@ const { env } = process
     // EthereumRawTransaction type input for setFromRaw()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
     const sampleSetFromRawTrx = {
-      to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
+      to: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
       value: '0x01',
       data: '0x00',
     }
@@ -87,23 +87,23 @@ const { env } = process
     }
 
     const composeERC20TransferParams: Erc20TransferParams = {
-      contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      from: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+      from: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      to: toEthereumAddress('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       precision: 18, // precision should be provided if possible
       value: '20',
     }
 
     const composeERC20IssueParams: Erc20IssueParams = {
-      contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+      contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
       precision: 18, // precision should be provided if possible
       value: '20',
     }
 
     const composeERC721TransferFromParams: Erc721TransferFromParams = {
-      contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-      transferFrom: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+      transferFrom: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+      to: toEthereumAddress('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       tokenId: 1,
     }
 

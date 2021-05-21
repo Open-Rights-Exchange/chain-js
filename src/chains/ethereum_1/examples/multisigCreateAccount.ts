@@ -5,7 +5,7 @@
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 
 import { EthereumGnosisCreateAccountOptions } from '../plugins/multisig/gnosisSafeV1/models'
-import { toEthereumPrivateKey } from '../helpers'
+import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 
 require('dotenv').config()
@@ -15,9 +15,9 @@ require('dotenv').config()
     // address with nonce 0: 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764
     const multisigPluginOptions: EthereumGnosisCreateAccountOptions = {
       owners: [
-        process.env.GOERLI_multisigOwner_1,
-        process.env.GOERLI_multisigOwner_3,
-        process.env.GOERLI_multisigOwner_2,
+        toEthereumAddress(process.env.GOERLI_multisigOwner_1),
+        toEthereumAddress(process.env.GOERLI_multisigOwner_3),
+        toEthereumAddress(process.env.GOERLI_multisigOwner_2),
       ],
       threshold: 2,
       nonce: 4,

@@ -3,7 +3,7 @@
 /* eslint-disable max-len */
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
-import { toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
+import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
@@ -14,7 +14,7 @@ require('dotenv').config()
 ;(async () => {
   try {
     const multisigPluginOptions: EthereumGnosisTransactionOptions = {
-      multisigAddress: '0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764',
+      multisigAddress: toEthereumAddress('0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764'),
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
@@ -31,7 +31,7 @@ require('dotenv').config()
     }
 
     const sampleSetFromRawTrx = {
-      to: '0xA200c9fe7F747E10dBccA5f85A0A126c9bffe400',
+      to: toEthereumAddress('0xA200c9fe7F747E10dBccA5f85A0A126c9bffe400'),
       // from: '0xfE331024D0D8b1C41B6d6203426f4B717E5C8aF3',
       value: 2000,
       gasLimit: 100000,
@@ -52,7 +52,10 @@ require('dotenv').config()
     await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
 
-    console.log('signatures: ', transaction.multisigTransaction.signatures)
+    console.log(
+      'signatures: ',
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).gnosisSignatures,
+    )
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log(
       'safeTransaction: ',
