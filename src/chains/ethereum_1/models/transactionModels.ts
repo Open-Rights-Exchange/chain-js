@@ -2,7 +2,7 @@
 import { TransactionReceipt } from 'web3-core'
 import BN from 'bn.js'
 import { TxExecutionPriority } from '../../../models'
-import { EthereumMultiValue } from './generalModels'
+import { EthereumEntityName, EthereumMultiValue } from './generalModels'
 
 export type EthereumAbi = any[]
 /** Information needed to generate Trx Data to invoke desired smart contract action */
@@ -13,7 +13,7 @@ export type EthereumActionContract = {
 }
 
 /** Ethereum address encoded as a Hex String */
-export type EthereumAddress = string
+export type EthereumAddress = EthereumEntityName
 
 /** Ethereum address encoded as a Buffer */
 export type EthereumAddressBuffer = Buffer
