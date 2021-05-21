@@ -23,7 +23,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   private _chainUrl: string
 
-  private _owners: string[]
+  private _owners: EthereumAddress[]
 
   private _threshold: number
 
@@ -33,7 +33,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   private _safeTransaction: GnosisSafeTransaction
 
-  private _signatures: GnosisSafeSignature[]
+  private _gnosisSignatures: GnosisSafeSignature[]
 
   private assertValidOptions(options: EthereumGnosisTransactionOptions) {
     const { multisigAddress } = options
@@ -82,7 +82,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     return this._multisigAddress
   }
 
-  get owners(): string[] {
+  get owners(): EthereumAddress[] {
     return this._owners
   }
 
@@ -103,17 +103,20 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   public get missingSignatures(): EthereumAddress[] {
     const missingSignatures =
       this.requiredAuthorizations?.filter(address => !this.hasSignatureForAddress(address)) || []
-
     const signaturesAttachedCount = (this.requiredAuthorizations?.length || 0) - missingSignatures.length
-
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
     return signaturesAttachedCount >= this.threshold ? null : missingSignatures
   }
 
   /** Signatures array of safeTransaction that will be passed in executeSafeTransaction */
-  get signatures(): GnosisSafeSignature[] {
-    return this._signatures
+  get gnosisSignatures(): GnosisSafeSignature[] {
+    return this._gnosisSignatures
+  }
+
+  /** Signatures - implementation required by interface */
+  get signatures(): any[] {
+    throw new Error('Invalid usage - Gnosis plugin hold signatures in the TX data')
   }
 
   /** Returns array of the required addresses for a transaction/multisig transaction
@@ -129,7 +132,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
       if (!this.owners.includes(signature.signer))
         throwNewError(`Signature data:${signature.data} does not belong to any of the multisig owner addresses`)
     })
-    this._signatures.concat(signaturesIn)
+    this._gnosisSignatures.concat(signaturesIn)
     if (isNullOrEmpty(this.missingSignatures)) {
       await this.setRawTransaction()
     }
@@ -139,12 +142,12 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
    * Then add metadata indicates that approval into signatures array.
    */
   async approveAndAddApprovalSignature(privateKeys: EthereumPrivateKey[]) {
-    const signResults = this._signatures
+    const signResults = this.gnosisSignatures
     privateKeys.forEach(async pk => {
       const result = await approveSafeTransactionHash(pk, this.multisigAddress, this.safeTransaction, this.chainUrl)
       signResults.push(result)
     })
-    this._signatures = signResults
+    this._gnosisSignatures = signResults
   }
 
   public async getNonce(): Promise<number> {
@@ -155,7 +158,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Whether there is an attached signature for the provided address */
   public hasSignatureForAddress(address: EthereumAddress): boolean {
     let includes = false
-    this.signatures?.forEach(signature => {
+    this.gnosisSignatures?.forEach(signature => {
       if (signature.signer === address) includes = true
     })
     return includes
@@ -170,14 +173,14 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   }
 
   public async sign(privateKeys: EthereumPrivateKey[]) {
-    const signResults = this._signatures || []
+    const signResults = this.gnosisSignatures || []
     await Promise.all(
       privateKeys.map(async pk => {
         const result = await signSafeTransactionHash(pk, this.multisigAddress, this.safeTransaction, this.chainUrl)
         signResults.push(result)
       }),
     )
-    this._signatures = signResults
+    this._gnosisSignatures = signResults
     if (isNullOrEmpty(this.missingSignatures)) {
       await this.setRawTransaction()
     }
@@ -189,13 +192,14 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
       this.multisigAddress,
       this.safeTransaction,
       this.chainUrl,
-      this.signatures,
+      this.gnosisSignatures,
     )
   }
 
-  public validate(): void {
+  public validate(): Promise<void> {
     if (!this.safeTransaction) {
       throwNewError('safeTransaction is missing. Call prepareToBeSigned()')
     }
+    return null
   }
 }
