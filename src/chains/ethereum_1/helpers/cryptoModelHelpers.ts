@@ -7,7 +7,14 @@ import {
   bufferToHex,
   privateToAddress,
 } from 'ethereumjs-util'
-import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString, jsonParseAndRevive } from '../../../helpers'
+import {
+  ensureHexPrefix,
+  isNullOrEmpty,
+  isABuffer,
+  isAString,
+  jsonParseAndRevive,
+  toChainEntityName,
+} from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -127,9 +134,10 @@ export function toEthereumSignature(value: string | ECDSASignature): EthereumSig
  *  Returns EthereumAddress with prefix
  */
 export function toEthereumAddress(value: string): EthereumAddress {
+  if (isNullOrEmpty(value)) return null
   const prefixedValue = ensureHexPrefix(value)
   if (isValidEthereumAddress(prefixedValue)) {
-    return prefixedValue
+    return toChainEntityName(prefixedValue)
   }
   throw new Error(`Not a valid ethereum address:${value}.`)
 }
@@ -149,5 +157,5 @@ export function convertBufferToHexStringIfNeeded(value: string | Buffer) {
 
 export function privateKeyToAddress(privateKey: string): EthereumAddress {
   const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
-  return bufferToHex(privateToAddress(privateKeyBuffer))
+  return toEthereumAddress(bufferToHex(privateToAddress(privateKeyBuffer)))
 }
