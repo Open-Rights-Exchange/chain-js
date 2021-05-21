@@ -39,7 +39,7 @@ describe('Test Algorand Multisig Transactions', () => {
   it('setFromRaw() using chain serialized', async () => {
     await algoTest.connect()
     expect(algoTest.isConnected).toBeTruthy()
-    const transaction = algoTest.new.Transaction()
+    const transaction = await algoTest.new.Transaction()
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
@@ -68,7 +68,7 @@ describe('Test Algorand Multisig Transactions', () => {
       ],
     }
 
-    const transaction = algoTest.new.Transaction({ multisigOptions }) as AlgorandTransaction
+    const transaction = (await algoTest.new.Transaction({ multisigOptions })) as AlgorandTransaction
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
@@ -100,7 +100,7 @@ describe('Test Algorand Multisig Transactions', () => {
       ],
     }
     const multisigAddress = determineMultiSigAddress(multisigOptions)
-    const transaction = algoTest.new.Transaction({ multisigOptions })
+    const transaction = await algoTest.new.Transaction({ multisigOptions })
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
