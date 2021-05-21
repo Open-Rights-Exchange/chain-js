@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
+import { ChainState } from '../../interfaces/chainState'
 import {
   ChainErrorDetailCode,
   ChainErrorType,
@@ -33,7 +34,7 @@ import {
 import { toAlgo } from './helpers'
 import { mapChainError } from './algoErrors'
 
-export class AlgorandChainState {
+export class AlgorandChainState implements ChainState {
   private _activeEndpoint: AlgorandChainEndpoint
 
   private _chainInfo: AlgorandChainInfo
@@ -150,6 +151,16 @@ export class AlgorandChainState {
     this.assertIsConnected()
     const block = await this._algoClientIndexer.lookupBlock(blockNumber).do()
     return block
+  }
+
+  /** Fetches data from a contract table */
+  fetchContractData(): Promise<any> {
+    throw new Error('Not Implemented')
+  }
+
+  /** Fetches data from a contract table */
+  fetchContractTable(): Promise<any> {
+    throw new Error('Not Implemented')
   }
 
   /** Get the balance for an account from the chain
@@ -345,7 +356,7 @@ export class AlgorandChainState {
         possibleTransactionBlock = await this.getBlock(blockNumToCheck)
       }
 
-      transactionResponse = this.blockHasTransaction(possibleTransactionBlock, transactionId)
+      transactionResponse = this.findBlockInTransaction(possibleTransactionBlock, transactionId)
       if (!isNullOrEmpty(transactionResponse)) {
         transactionBlockNumber = possibleTransactionBlock.round
       }
@@ -448,8 +459,8 @@ export class AlgorandChainState {
     }
   }
 
-  /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse => {
+  /** Return a transaction if its included in a block */
+  public findBlockInTransaction(block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction?.id === transactionId)
     return result
