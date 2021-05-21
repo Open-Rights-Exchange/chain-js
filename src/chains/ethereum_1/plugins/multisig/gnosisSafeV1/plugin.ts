@@ -1,11 +1,11 @@
 import { EthereumGnosisCreateAccountOptions, EthereumGnosisTransactionOptions } from './models'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
-import { GnosisSafeMultisigPluginCreateAccount } from './createAccountPlugin'
-import { GnosisSafeMultisigPluginTransaction } from './transactionPlugin'
+import { GnosisSafeMultisigPluginCreateAccount } from './createAccount'
+import { GnosisSafeMultisigPluginTransaction } from './transaction'
 import { throwNewError } from '../../../../../errors'
-import { EthereumMultisigPlugin } from '../ethereumMultisigPlugin'
+import { MultisigPlugin } from '../../../../../interfaces/plugins/multisig'
 
-export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumMultisigPlugin {
+export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements MultisigPlugin {
   public name = 'Gnosis Multisig Plugin V1'
 
   public type = PluginType.MultiSig
@@ -25,17 +25,22 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements EthereumM
     }
   }
 
-  public newCreateAccount = async (options?: EthereumGnosisCreateAccountOptions) => {
+  private newCreateAccount = async (options?: EthereumGnosisCreateAccountOptions) => {
     this.assertInitialized()
     const createAccountPlugin = new GnosisSafeMultisigPluginCreateAccount(options, this.chainState.activeEndpoint.url)
     await createAccountPlugin.init()
     return createAccountPlugin
   }
 
-  public newTransaction = async (options?: EthereumGnosisTransactionOptions) => {
+  private newTransaction = async (options?: EthereumGnosisTransactionOptions) => {
     this.assertInitialized()
     const transactionPlugin = new GnosisSafeMultisigPluginTransaction(options, this.chainState.activeEndpoint.url)
     await transactionPlugin.init()
     return transactionPlugin
+  }
+
+  public new = {
+    CreateAccount: this.newCreateAccount.bind(this),
+    Transaction: this.newTransaction.bind(this),
   }
 }

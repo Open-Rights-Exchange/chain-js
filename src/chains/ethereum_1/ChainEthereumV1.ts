@@ -48,7 +48,7 @@ import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
 import { isNullOrEmpty } from '../../helpers'
-import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
+import { MultisigPlugin } from '../../interfaces/plugins/multisig'
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -330,7 +330,7 @@ class ChainEthereumV1 implements Chain {
     }
   }
 
-  public get multisigPlugin(): EthereumMultisigPlugin {
+  public get multisigPlugin(): MultisigPlugin {
     return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
   }
 

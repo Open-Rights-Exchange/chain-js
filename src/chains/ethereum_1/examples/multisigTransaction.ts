@@ -5,9 +5,9 @@ import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
-import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/multisigGnosisSafe'
+import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
-import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transactionPlugin'
+import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import

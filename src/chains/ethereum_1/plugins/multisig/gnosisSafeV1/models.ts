@@ -7,7 +7,7 @@ export type EthereumMultisigRawTransaction = EthereumTransactionAction
 export type EthereumGnosisCreateAccountOptions = {
   owners: string[]
   threshold: number
-  nonce?: number
+  nonce: number
   gnosisSafeMaster?: string
   proxyFactory?: string
   fallbackHandler?: string

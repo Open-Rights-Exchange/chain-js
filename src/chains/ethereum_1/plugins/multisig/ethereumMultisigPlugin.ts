@@ -1,27 +1,7 @@
-import { PluginType, ChainJsPlugin } from '../../../../interfaces/plugin'
 import { MultisigPluginTransaction, MultisigPluginCreateAccount } from '../../../../interfaces/plugins/multisig'
-import { EthereumAddress } from '../../models'
-
-type EthereumMultisigPluginOptions = {
-  multisigAddress?: EthereumAddress
-  createAccountOptions?: any
-  transactionOptions?: any
-}
-
-export interface EthereumMultisigPlugin extends ChainJsPlugin {
-  name: string
-
-  type: PluginType
-
-  init(input: EthereumMultisigPluginOptions): Promise<void>
-
-  newCreateAccount(options: any): Promise<EthereumMultisigPluginCreateAccount>
-
-  newTransaction(options: any): Promise<EthereumMultisigPluginTransaction>
-}
 
 export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreateAccount {
-  init(input: EthereumMultisigPluginOptions): Promise<void>
+  init(input: any): Promise<void>
 
   options: any
 
@@ -42,7 +22,7 @@ export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreat
 }
 
 export interface EthereumMultisigPluginTransaction extends MultisigPluginTransaction {
-  init(input: EthereumMultisigPluginOptions): Promise<void>
+  init(input: any): Promise<void>
 
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
@@ -66,7 +46,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   signatures: any[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: any[]): Promise<void>
+  addSignatures(signature: any[]): void
 
   prepareToBeSigned(trxEncodedForChain: any): Promise<void>
 

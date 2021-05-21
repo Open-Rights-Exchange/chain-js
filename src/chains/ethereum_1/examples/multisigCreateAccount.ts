@@ -6,7 +6,7 @@ import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/net
 
 import { EthereumGnosisCreateAccountOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { toEthereumPrivateKey } from '../helpers'
-import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/multisigGnosisSafe'
+import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 
 require('dotenv').config()
 ;(async () => {

@@ -12,8 +12,9 @@ import {
   EthereumNewAccountType,
   EthereumPublicKey,
 } from './models'
-import { EthereumMultisigPlugin, EthereumMultisigPluginCreateAccount } from './plugins/multisig/ethereumMultisigPlugin'
+import { EthereumMultisigPluginCreateAccount } from './plugins/multisig/ethereumMultisigPlugin'
 import { EthereumTransaction } from './ethTransaction'
+import { MultisigPlugin } from '../../interfaces/plugins/multisig'
 
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
@@ -23,7 +24,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _chainState: EthereumChainState
 
-  private _multisigPlugin: EthereumMultisigPlugin
+  private _multisigPlugin: MultisigPlugin
 
   private _multisigCreateAccount: EthereumMultisigPluginCreateAccount
 
@@ -35,11 +36,7 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _transaction: EthereumTransaction
 
-  constructor(
-    chainState: EthereumChainState,
-    multisigPlugin?: EthereumMultisigPlugin,
-    options?: EthereumCreateAccountOptions,
-  ) {
+  constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumCreateAccountOptions) {
     this._chainState = chainState
     this._options = options || {}
     if (!isNullOrEmpty(options?.multisigPluginOptions)) {
@@ -49,11 +46,11 @@ export class EthereumCreateAccount implements CreateAccount {
 
   public async init() {
     if (this.multisigPlugin) {
-      this._multisigCreateAccount = await this.multisigPlugin.newCreateAccount(this.options?.multisigPluginOptions)
+      this._multisigCreateAccount = await this.multisigPlugin.new.CreateAccount(this.options?.multisigPluginOptions)
     }
   }
 
-  get multisigPlugin(): EthereumMultisigPlugin {
+  get multisigPlugin(): MultisigPlugin {
     return this._multisigPlugin
   }
 

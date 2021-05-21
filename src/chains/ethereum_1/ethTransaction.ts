@@ -40,7 +40,8 @@ import {
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { EthereumMultisigPlugin, EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
+import { EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
+import { MultisigPlugin } from '../../interfaces/plugins/multisig'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -62,15 +63,11 @@ export class EthereumTransaction implements Transaction {
 
   private _options: EthereumTransactionOptions
 
-  private _multisigPlugin: EthereumMultisigPlugin
+  private _multisigPlugin: MultisigPlugin
 
   private _multisigTransaction: EthereumMultisigPluginTransaction
 
-  constructor(
-    chainState: EthereumChainState,
-    multisigPlugin?: EthereumMultisigPlugin,
-    options?: EthereumTransactionOptions,
-  ) {
+  constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumTransactionOptions) {
     this._chainState = chainState
     this._options = options
     if (!isNullOrEmpty(options?.multisigPluginOptions)) {
@@ -81,11 +78,11 @@ export class EthereumTransaction implements Transaction {
 
   public async init() {
     if (this.multisigPlugin) {
-      this._multisigTransaction = await this.multisigPlugin.newTransaction(this.options?.multisigPluginOptions)
+      this._multisigTransaction = await this.multisigPlugin.new.Transaction(this.options?.multisigPluginOptions)
     }
   }
 
-  get multisigPlugin(): EthereumMultisigPlugin {
+  get multisigPlugin(): MultisigPlugin {
     return this._multisigPlugin
   }
 
