@@ -1,7 +1,9 @@
-import { PrivateKey, Signature } from '../../models'
+import { PrivateKey, Signature } from '../../../models'
 
 export interface MultisigPluginTransaction {
   init(options: any): Promise<void>
+
+  options: any
 
   owners: any[]
 

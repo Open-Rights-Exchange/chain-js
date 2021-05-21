@@ -9,7 +9,7 @@ import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../mo
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
-import { AlgorandMultisigNativePluginOptions } from '../plugins/multisig/native/models'
+import { AlgorandNativeMultisigTransactionOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
 
@@ -35,7 +35,7 @@ const algoBetanetEndpoints = [
   },
 ]
 
-const multisigOptions: AlgorandMultisigNativePluginOptions = {
+const transactionMultisigOptions: AlgorandNativeMultisigTransactionOptions = {
   multisigOptions: {
     version: 1,
     threshold: 2,
@@ -48,7 +48,7 @@ const multisigOptions: AlgorandMultisigNativePluginOptions = {
 }
 
 export const transactionOptions = {
-  multisigOptions,
+  multisigOptions: transactionMultisigOptions,
 }
 
 const composeValueTransferParams: ValueTransferParams = {

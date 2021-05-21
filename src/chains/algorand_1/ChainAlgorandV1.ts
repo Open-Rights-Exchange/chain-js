@@ -35,7 +35,7 @@ import {
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
-import { AlgorandMultisigNativePlugin } from './plugins/multisig/native/multisigNative'
+import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
@@ -104,15 +104,19 @@ class ChainAlgorandV1 implements Chain {
   }
 
   /** Return a ChainAccount class used to perform any function with the chain account */
-  private newCreateAccount(options?: AlgorandCreateAccountOptions): AlgorandCreateAccount {
+  private async newCreateAccount(options?: AlgorandCreateAccountOptions): Promise<AlgorandCreateAccount> {
     this.assertIsConnected()
-    return new AlgorandCreateAccount(this._chainState, this.multisigPlugin, options)
+    const createAccount = new AlgorandCreateAccount(this._chainState, this.multisigPlugin, options)
+    await createAccount.init()
+    return createAccount
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newTransaction(options?: AlgorandTransactionOptions): any {
+  private async newTransaction(options?: AlgorandTransactionOptions): Promise<AlgorandTransaction> {
     this.assertIsConnected()
-    return new AlgorandTransaction(this._chainState, this.multisigPlugin, options)
+    const transaction = new AlgorandTransaction(this._chainState, this.multisigPlugin, options)
+    await transaction.init()
+    return transaction
   }
 
   public new = {
@@ -293,7 +297,7 @@ class ChainAlgorandV1 implements Chain {
 
   public get multisigPlugin(): AlgorandMultisigPlugin {
     const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
-    return multisigPlugin || new AlgorandMultisigNativePlugin()
+    return multisigPlugin || new NativeMultisigPlugin()
   }
 
   /** rules to check tha plugin is well-formed and supported */
