@@ -1,4 +1,3 @@
-import { Transaction } from '../../transaction'
 import { ChainEntityName } from '../../../models'
 
 export interface MultisigPluginCreateAccount {
@@ -14,7 +13,7 @@ export interface MultisigPluginCreateAccount {
   accountName: ChainEntityName
 
   /** Compose the transaction action needed to create the account */
-  transactionAction: Transaction
+  transactionAction: any
 
   /** If true, an transaction must be sent to chain to create account - use createAccountTransactionAction for action needed */
   requiresTransaction: boolean
