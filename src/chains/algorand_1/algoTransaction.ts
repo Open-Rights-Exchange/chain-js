@@ -47,7 +47,7 @@ import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from '.
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultisigPluginTransaction, AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
 import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
-import { AlgorandMultisigTransactionOptions } from './plugins/multisig/native/models'
+import { AlgorandNativeTransactionOptions } from './plugins/multisig/native/models'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -542,7 +542,7 @@ export class AlgorandTransaction implements Transaction {
   private async setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      const options: AlgorandMultisigTransactionOptions = {
+      const options: AlgorandNativeTransactionOptions = {
         rawTransaction: transaction as AlgorandRawTransactionMultisigStruct,
       }
       this._multisigPlugin = new NativeMultisigPlugin()

@@ -7,7 +7,7 @@
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
-import { AlgorandMultisigCreateAccountOptions } from '../plugins/multisig/native/models'
+import { AlgorandNativeCreateAccountOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
 
@@ -33,7 +33,7 @@ const algoBetanetEndpoints = [
   },
 ]
 
-const multisigOptions: AlgorandMultisigCreateAccountOptions = {
+const multisigOptions: AlgorandNativeCreateAccountOptions = {
   version: 1,
   threshold: 2,
   addrs: [
