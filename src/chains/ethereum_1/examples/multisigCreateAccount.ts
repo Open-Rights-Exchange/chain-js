@@ -13,7 +13,7 @@ require('dotenv').config()
   try {
     const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
     // address with nonce 0: 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764
-    const multisigPluginOptions: EthereumGnosisCreateAccountOptions = {
+    const multisigOptions: EthereumGnosisCreateAccountOptions = {
       owners: [
         toEthereumAddress(process.env.GOERLI_multisigOwner_1),
         toEthereumAddress(process.env.GOERLI_multisigOwner_3),
@@ -28,7 +28,7 @@ require('dotenv').config()
     await goerli.installPlugin(gnosisSafePlugin) // auto init the plugin
     // await gnosisSafePlugin.init(options)
 
-    const createAccount = await goerli.new.CreateAccount({ multisigPluginOptions })
+    const createAccount = await goerli.new.CreateAccount({ multisigOptions })
 
     console.log('accountName: ', createAccount.accountName)
 

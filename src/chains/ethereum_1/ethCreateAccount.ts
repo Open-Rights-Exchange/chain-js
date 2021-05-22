@@ -39,14 +39,14 @@ export class EthereumCreateAccount implements CreateAccount {
   constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumCreateAccountOptions) {
     this._chainState = chainState
     this._options = options || {}
-    if (!isNullOrEmpty(options?.multisigPluginOptions)) {
+    if (!isNullOrEmpty(options?.multisigOptions)) {
       this._multisigPlugin = multisigPlugin
     }
   }
 
   public async init() {
     if (this.multisigPlugin) {
-      this._multisigCreateAccount = await this.multisigPlugin.new.CreateAccount(this.options?.multisigPluginOptions)
+      this._multisigCreateAccount = await this.multisigPlugin.new.CreateAccount(this.options?.multisigOptions)
     }
   }
 
