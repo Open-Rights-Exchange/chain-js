@@ -10,7 +10,7 @@ import {
   EosEntityName,
   EosSignature,
   EosPrivateKey,
-  EosTxOptions,
+  EosTransactionOptions,
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
@@ -34,7 +34,7 @@ export class EosTransaction implements Transaction {
 
   private _header: any
 
-  private _options: EosTxOptions
+  private _options: EosTransactionOptions
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
@@ -51,7 +51,7 @@ export class EosTransaction implements Transaction {
 
   private _transactionId: string
 
-  constructor(chainState: EosChainState, options?: EosTxOptions) {
+  constructor(chainState: EosChainState, options?: EosTransactionOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
     blocksBehind = blocksBehind ?? this._chainState?.chainSettings?.defaultTransactionSettings?.blocksBehind
