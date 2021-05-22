@@ -46,7 +46,7 @@ export interface GnosisSafeTransaction {
   baseGas: number | string
   gasPrice: number | string
   gasToken: EthereumAddress
-  nonce: string | number
+  nonce: number
 }
 
 export const EIP712_SAFE_TX_TYPE = {
