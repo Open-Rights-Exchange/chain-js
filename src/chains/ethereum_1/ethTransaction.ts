@@ -71,7 +71,7 @@ export class EthereumTransaction implements Transaction {
   constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumTransactionOptions) {
     this._chainState = chainState
     this._options = options
-    if (!isNullOrEmpty(options?.multisigPluginOptions)) {
+    if (!isNullOrEmpty(options?.multisigOptions)) {
       this._multisigPlugin = multisigPlugin
     }
     this.applyDefaultOptions()
@@ -79,7 +79,7 @@ export class EthereumTransaction implements Transaction {
 
   public async init() {
     if (this.multisigPlugin) {
-      this._multisigTransaction = await this.multisigPlugin.new.Transaction(this.options?.multisigPluginOptions)
+      this._multisigTransaction = await this.multisigPlugin.new.Transaction(this.options?.multisigOptions)
     }
   }
 

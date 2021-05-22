@@ -13,7 +13,7 @@ require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
-    const multisigPluginOptions: EthereumGnosisTransactionOptions = {
+    const multisigOptions: EthereumGnosisTransactionOptions = {
       multisigAddress: toEthereumAddress('0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764'),
     }
 
@@ -27,7 +27,7 @@ require('dotenv').config()
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
-      multisigPluginOptions,
+      multisigOptions,
     }
 
     const sampleSetFromRawTrx = {
