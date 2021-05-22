@@ -26,11 +26,11 @@ import {
 import { throwNewError } from '../../../../../errors'
 import { AlgorandMultisigPluginTransaction } from '../algorandMultisigPlugin'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { AlgorandNativeMultisigTransactionOptions, AlgorandMultisigNativeOptions } from './models'
+import { AlgorandMultisigTransactionOptions, AlgorandNativePluginOptions } from './models'
 import { determineMultiSigAddress } from './helpers'
 
 export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTransaction {
-  private _options: AlgorandNativeMultisigTransactionOptions
+  private _options: AlgorandMultisigTransactionOptions
 
   private _multisigAddress: AlgorandAddress
 
@@ -38,7 +38,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
   private _actionHelper: AlgorandActionHelper
 
-  constructor(options: AlgorandNativeMultisigTransactionOptions) {
+  constructor(options: AlgorandMultisigTransactionOptions) {
     this._options = options
   }
 
@@ -57,7 +57,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     return this._multisigAddress
   }
 
-  get options(): AlgorandNativeMultisigTransactionOptions {
+  get options(): AlgorandMultisigTransactionOptions {
     return this._options
   }
 
@@ -123,7 +123,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   /** Determine standard multisig options from raw msig struct */
   private multisigOptionsFromRawTransactionMultisig(
     msig: AlgorandMultiSignatureMsigStruct,
-  ): AlgorandMultisigNativeOptions {
+  ): AlgorandNativePluginOptions {
     if (isNullOrEmpty(msig)) return null
     const addrs = msig.subsig?.map(sig => toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(sig.pk))))
     return {
@@ -270,7 +270,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   /** extract 'from' address from various action types and confirm it matches multisig options */
   public verifyAndGetMultisigOptionsFromRaw(
     rawTransaction?: AlgorandRawTransactionMultisigStruct,
-  ): AlgorandMultisigNativeOptions {
+  ): AlgorandNativePluginOptions {
     const multisigOptions = !isNullOrEmpty(rawTransaction?.msig)
       ? this.multisigOptionsFromRawTransactionMultisig(rawTransaction.msig)
       : null

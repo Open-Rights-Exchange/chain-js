@@ -6,7 +6,7 @@ import { multisigChainSerialized } from './mockups/multisig'
 import { ChainActionType, ValueTransferParams } from '../../../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { determineMultiSigAddress } from '../plugins/multisig/native/helpers'
-import { AlgorandNativeMultisigTransactionOptions } from '../plugins/multisig/native/models'
+import { AlgorandMultisigTransactionOptions } from '../plugins/multisig/native/models'
 import { AlgorandTransaction } from '../algoTransaction'
 import { AlgorandTransactionOptions } from '../models'
 
@@ -59,7 +59,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const transactionMultisigOptions: AlgorandNativeMultisigTransactionOptions = {
+    const transactionMultisigOptions: AlgorandMultisigTransactionOptions = {
       multisigOptions: {
         version: 1,
         threshold: 3,
@@ -97,7 +97,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const transactionMultisigOptions: AlgorandNativeMultisigTransactionOptions = {
+    const transactionMultisigOptions: AlgorandMultisigTransactionOptions = {
       multisigOptions: {
         version: 1,
         threshold: 3,

@@ -37,15 +37,15 @@ export type InitializerAction = {
 }
 
 export interface GnosisSafeTransaction {
-  to: string
+  to: EthereumAddress
   value: string | number | BN | ethers.BigNumber
   data: string
   operation: number
-  safeTxGas: string | number
-  baseGas: string | number
-  gasPrice: string | number
-  gasToken: string
-  refundReceiver: string
+  refundReceiver: EthereumAddress
+  safeTxGas: number | string
+  baseGas: number | string
+  gasPrice: number | string
+  gasToken: EthereumAddress
   nonce: string | number
 }
 
