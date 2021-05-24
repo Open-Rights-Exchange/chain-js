@@ -1,4 +1,4 @@
-import { isNullOrEmpty, notImplemented } from '../../helpers'
+import { initializePlugin, notImplemented } from '../../helpers'
 import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
@@ -33,7 +33,7 @@ import {
   toAlgorandSignature,
 } from './helpers'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
+import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
 import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
 import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
 
@@ -283,16 +283,12 @@ class ChainAlgorandV1 implements Chain {
     }
   }
 
-  /** Install an already iniatlized plugin to this chain connection */
-  public async installPlugin(plugin: any) {
+  /** Install a plugin to this chain connection */
+  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
     this.assertValidPlugin(plugin)
-    const newPlugin = plugin
-    newPlugin.chainState = this._chainState
-    if (isNullOrEmpty(this.plugins)) {
-      this._plugins = [newPlugin]
-    } else {
-      this._plugins.push(newPlugin)
-    }
+    this._plugins = this._plugins || []
+    const newPlugin = await initializePlugin(this._chainState, plugin, options)
+    this._plugins.push(newPlugin)
   }
 
   public get multisigPlugin(): AlgorandMultisigPlugin {

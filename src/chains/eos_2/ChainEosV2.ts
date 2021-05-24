@@ -36,6 +36,7 @@ import {
   toEosDate,
   toEosSymbol,
 } from './helpers'
+import { initializePlugin } from '../../helpers'
 import {
   EosActionStruct,
   EosChainSettings,
@@ -47,7 +48,7 @@ import {
   EosSymbol,
 } from './models'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin } from '../../interfaces/plugin'
+import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -367,11 +368,11 @@ class ChainEosV2 implements Chain {
     }
   }
 
-  /** Install an already iniatlized plugin to this chain connection */
-  public async installPlugin(plugin: any) {
+  /** Install a plugin to this chain connection */
+  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
     this.assertValidPlugin(plugin)
-    const newPlugin = plugin
-    newPlugin.chainState = this._chainState
+    this._plugins = this._plugins || []
+    const newPlugin = await initializePlugin(this._chainState, plugin, options)
     this._plugins.push(newPlugin)
   }
 

@@ -9,7 +9,6 @@ import {
   ChainType,
   CryptoCurve,
 } from '../../models'
-// import { ChainState } from './chainState';
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
 import { composeAction } from './ethCompose'
@@ -46,9 +45,12 @@ import {
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin, PluginType } from '../../interfaces/plugin'
-import { isNullOrEmpty } from '../../helpers'
+import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
+import { initializePlugin } from '../../helpers'
 import { MultisigPlugin } from '../../interfaces/plugins/multisig'
+
+// TODO: Comsolidate use of Ethereum libraries
+
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
  *  Also includes some features only available on this platform */
@@ -310,24 +312,12 @@ class ChainEthereumV1 implements Chain {
     }
   }
 
-  // TODO: type the plugin type
-  /** Install an already iniatlized plugin to this chain connection */
-  public async installPlugin(plugin: any, options?: any) {
-    // Change to use helper this._plugsins = installPluginUtil(this._plugsins, plugin, options, this._chainState)
-
-    // TODO: Move to helpers
+  /** Install a plugin to this chain connection */
+  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
     this.assertValidPlugin(plugin)
-    const newPlugin = plugin
-    // call init if we have options
-    if (!isNullOrEmpty(options)) {
-      plugin.init(options)
-    }
-    newPlugin.chainState = this._chainState
-    if (isNullOrEmpty(this.plugins)) {
-      this._plugins = [newPlugin]
-    } else {
-      this._plugins.push(newPlugin)
-    }
+    this._plugins = this._plugins || []
+    const newPlugin = await initializePlugin(this._chainState, plugin, options)
+    this._plugins.push(newPlugin)
   }
 
   public get multisigPlugin(): MultisigPlugin {
