@@ -42,7 +42,6 @@ require('dotenv').config()
     await transaction.setFromRaw(sampleSetFromRawTrx)
 
     await transaction.prepareToBeSigned()
-    console.log('Beforevalidate')
     await transaction.validate()
 
     console.log('owners: ', transaction.multisigTransaction.owners)

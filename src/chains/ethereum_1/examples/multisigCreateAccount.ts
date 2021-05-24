@@ -20,16 +20,16 @@ require('dotenv').config()
         toEthereumAddress(process.env.GOERLI_multisigOwner_2),
       ],
       threshold: 2,
-      nonce: 4,
+      nonce: 1, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
 
-    await goerli.installPlugin(gnosisSafePlugin) // auto init the plugin
-    // await gnosisSafePlugin.init(options)
+    const pluginOptions = {}
+    await goerli.installPlugin(gnosisSafePlugin, pluginOptions) // auto init the plugin
+    // await gnosisSafePlugin.init(pluginOptions)
 
     const createAccount = await goerli.new.CreateAccount({ multisigOptions })
-
     console.log('accountName: ', createAccount.accountName)
 
     if (createAccount.supportsTransactionToCreateAccount) {
