@@ -1,5 +1,5 @@
 import { throwNewError } from '../../../../../errors'
-import { AlgorandNativeCreateAccountOptions, AlgorandNativeTransactionOptions } from './models'
+import { AlgorandMultisigNativeCreateAccountOptions, AlgorandMultisigNativeTransactionOptions } from './models'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
 import { NativeMultisigPluginCreateAccount } from './createAccount'
 import { NativeMultisigPluginTransaction } from './transaction'
@@ -25,14 +25,14 @@ export class NativeMultisigPlugin extends ChainJsPlugin implements MultisigPlugi
     }
   }
 
-  private newCreateAccount = async (options?: AlgorandNativeCreateAccountOptions) => {
+  private newCreateAccount = async (options?: AlgorandMultisigNativeCreateAccountOptions) => {
     this.assertInitialized()
     const createAccountPlugin = new NativeMultisigPluginCreateAccount(options)
     await createAccountPlugin.init()
     return createAccountPlugin
   }
 
-  private newTransaction = async (options?: AlgorandNativeTransactionOptions) => {
+  private newTransaction = async (options?: AlgorandMultisigNativeTransactionOptions) => {
     this.assertInitialized()
     const transactionPlugin = new NativeMultisigPluginTransaction(options)
     await transactionPlugin.init()

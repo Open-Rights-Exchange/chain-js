@@ -3,17 +3,17 @@ import { toAlgorandEntityName } from '../../../helpers'
 import { throwNewError } from '../../../../../errors'
 import { AlgorandMultisigPluginCreateAccount } from '../algorandMultisigPlugin'
 
-import { AlgorandNativeCreateAccountOptions } from './models'
+import { AlgorandMultisigNativeCreateAccountOptions } from './models'
 import { determineMultiSigAddress } from './helpers'
 
 export class NativeMultisigPluginCreateAccount implements AlgorandMultisigPluginCreateAccount {
-  private _options: AlgorandNativeCreateAccountOptions
+  private _options: AlgorandMultisigNativeCreateAccountOptions
 
   private _multisigAddress: AlgorandAddress
 
   public requiresTransaction = false
 
-  constructor(options: AlgorandNativeCreateAccountOptions) {
+  constructor(options: AlgorandMultisigNativeCreateAccountOptions) {
     this._options = options
   }
 
@@ -25,7 +25,7 @@ export class NativeMultisigPluginCreateAccount implements AlgorandMultisigPlugin
     return this._multisigAddress
   }
 
-  get options(): AlgorandNativeCreateAccountOptions {
+  get options(): AlgorandMultisigNativeCreateAccountOptions {
     return this._options
   }
 
