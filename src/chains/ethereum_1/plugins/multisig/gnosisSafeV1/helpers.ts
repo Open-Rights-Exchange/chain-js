@@ -74,7 +74,7 @@ export function setupInitilaizerAction(initializerAction?: InitializerAction) {
 }
 
 export function sortHexStrings(hexArray: string[]) {
-  hexArray?.sort((left, right) => left.toLowerCase().localeCompare(right.toLowerCase()))
+  hexArray?.sort((left, right) => left?.toLowerCase().localeCompare(right?.toLowerCase()))
   return hexArray
 }
 
