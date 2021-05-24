@@ -107,7 +107,8 @@ const { env } = process
       tokenId: 1,
     }
 
-    const defaultEthTxOptions: EthereumTransactionOptions = {
+    // null: Multisig plugin not specified
+    const defaultEthTxOptions: EthereumTransactionOptions<null> = {
       chain: 'ropsten',
       hardfork: 'istanbul',
     }

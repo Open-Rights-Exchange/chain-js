@@ -1,10 +1,10 @@
 import { EthereumNewKeysOptions } from './generalModels'
 import { EthereumPublicKey } from './cryptoModels'
 
-export type EthereumCreateAccountOptions = {
+export type EthereumCreateAccountOptions<PluginMultisigOptions> = {
   publicKey?: EthereumPublicKey
   newKeysOptions?: EthereumNewKeysOptions
-  multisigOptions?: any
+  multisigOptions?: PluginMultisigOptions
 }
 
 /** Type of account to create */

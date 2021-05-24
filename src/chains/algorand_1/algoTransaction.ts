@@ -57,7 +57,7 @@ export class AlgorandTransaction implements Transaction {
 
   private _chainState: AlgorandChainState
 
-  private _options: AlgorandTransactionOptions
+  private _options: AlgorandTransactionOptions<any>
 
   /** Raw transaction object including signature (if any) */
   private _rawTransaction: AlgorandRawTransactionStruct
@@ -74,7 +74,7 @@ export class AlgorandTransaction implements Transaction {
   constructor(
     chainState: AlgorandChainState,
     multisigPlugin?: AlgorandMultisigPlugin,
-    options?: AlgorandTransactionOptions,
+    options?: AlgorandTransactionOptions<any>,
   ) {
     this._chainState = chainState
     this.assertValidOptions(options)
@@ -109,7 +109,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Options provided when the transaction class was created */
-  get options(): AlgorandTransactionOptions {
+  get options(): AlgorandTransactionOptions<any> {
     return this._options
   }
 
@@ -530,7 +530,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Throws if from is not null or empty algorand argument */
-  private assertValidOptions(options: AlgorandTransactionOptions): void {
+  private assertValidOptions(options: AlgorandTransactionOptions<any>): void {
     if (options?.multisigOptions && options?.signerPublicKey) {
       throwNewError(
         'Invalid transaction options: Provide multisigOptions OR signerPublicKey - not both. The signerPublicKey is for non-multisig transasctions only',

@@ -55,10 +55,10 @@ export type AlgorandSuggestedParams = {
 }
 
 /** Transaction 'header' options set to chain along with the content type */
-export type AlgorandTransactionOptions = {
+export type AlgorandTransactionOptions<PluginMultisigOptions> = {
   fee?: AlgorandValue
   flatFee?: boolean
-  multisigOptions?: any
+  multisigOptions?: PluginMultisigOptions
   /** (optional) The publicKey used to sign the transaction - if an account has been rekeyed, use the signing key here
    * if not provided, defaults to 'from' address's publicKey */
   signerPublicKey?: AlgorandPublicKey

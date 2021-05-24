@@ -30,13 +30,17 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private _accountType: EthereumNewAccountType
 
-  private _options: EthereumCreateAccountOptions
+  private _options: EthereumCreateAccountOptions<any>
 
   private _generatedKeys: EthereumGeneratedKeys
 
   private _transaction: EthereumTransaction
 
-  constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumCreateAccountOptions) {
+  constructor(
+    chainState: EthereumChainState,
+    multisigPlugin?: MultisigPlugin,
+    options?: EthereumCreateAccountOptions<any>,
+  ) {
     this._chainState = chainState
     this._options = options || {}
     if (!isNullOrEmpty(options?.multisigOptions)) {

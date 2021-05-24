@@ -2,10 +2,10 @@
 import { AlgorandPublicKey } from './cryptoModels'
 import { AlgorandNewKeysOptions } from './generalModels'
 
-export type AlgorandCreateAccountOptions = {
+export type AlgorandCreateAccountOptions<PluginMultisigOptions> = {
   publicKey?: AlgorandPublicKey
   newKeysOptions?: AlgorandNewKeysOptions
-  multisigOptions?: any
+  multisigOptions?: PluginMultisigOptions
 }
 
 /** Type of account to create */

@@ -163,7 +163,7 @@ class ChainEthereumV1 implements Chain {
     return account
   }
 
-  private newCreateAccount = async (options?: EthereumCreateAccountOptions): Promise<EthereumCreateAccount> => {
+  private newCreateAccount = async (options?: EthereumCreateAccountOptions<any>): Promise<EthereumCreateAccount> => {
     this.assertIsConnected()
     const createAccount = new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
     await createAccount.init()

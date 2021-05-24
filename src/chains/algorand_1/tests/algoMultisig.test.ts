@@ -71,7 +71,7 @@ describe('Test Algorand Multisig Transactions', () => {
       },
     }
 
-    const transactionOptions: AlgorandTransactionOptions = {
+    const transactionOptions: AlgorandTransactionOptions<AlgorandNativeTransactionOptions> = {
       multisigOptions: transactionMultisigOptions,
     }
 
@@ -108,7 +108,7 @@ describe('Test Algorand Multisig Transactions', () => {
         ],
       },
     }
-    const transactionOptions: AlgorandTransactionOptions = {
+    const transactionOptions: AlgorandTransactionOptions<AlgorandNativeTransactionOptions> = {
       multisigOptions: transactionMultisigOptions,
     }
     const multisigAddress = determineMultiSigAddress(transactionMultisigOptions.multisigOptions)

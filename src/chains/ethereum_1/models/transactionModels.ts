@@ -87,7 +87,7 @@ export type EthereumTransactionHeader = {
 }
 
 /** Transaction 'header' options set to chain along with transaction */
-export type EthereumTransactionOptions = {
+export type EthereumTransactionOptions<PluginMultisigOptions> = {
   nonce?: string
   gasPrice?: string
   gasLimit?: string
@@ -95,7 +95,7 @@ export type EthereumTransactionOptions = {
   hardfork: string
   maxFeeIncreasePercentage?: number
   executionPriority?: TxExecutionPriority
-  multisigOptions?: any
+  multisigOptions?: PluginMultisigOptions
 }
 
 export type EthereumSetDesiredFeeOptions = {

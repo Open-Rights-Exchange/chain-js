@@ -62,13 +62,17 @@ export class EthereumTransaction implements Transaction {
 
   private _isValidated: boolean
 
-  private _options: EthereumTransactionOptions
+  private _options: EthereumTransactionOptions<any>
 
   private _multisigPlugin: MultisigPlugin
 
   private _multisigTransaction: EthereumMultisigPluginTransaction
 
-  constructor(chainState: EthereumChainState, multisigPlugin?: MultisigPlugin, options?: EthereumTransactionOptions) {
+  constructor(
+    chainState: EthereumChainState,
+    multisigPlugin?: MultisigPlugin,
+    options?: EthereumTransactionOptions<any>,
+  ) {
     this._chainState = chainState
     this._options = options
     if (!isNullOrEmpty(options?.multisigOptions)) {
@@ -152,7 +156,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Options provided when the transaction class was created */
-  get options(): EthereumTransactionOptions {
+  get options(): EthereumTransactionOptions<any> {
     return this._options
   }
 

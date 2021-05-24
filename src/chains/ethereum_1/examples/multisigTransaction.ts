@@ -23,7 +23,7 @@ require('dotenv').config()
 
     await goerli.installPlugin(gnosisSafePlugin)
 
-    const transactionOptions: EthereumTransactionOptions = {
+    const transactionOptions: EthereumTransactionOptions<EthereumGnosisTransactionOptions> = {
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
