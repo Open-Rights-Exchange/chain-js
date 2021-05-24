@@ -42,6 +42,13 @@ export type AlgorandChainInfo = {
  * Once any such parameter is there, change the type from any to an object containing specific properties */
 export type AlgorandChainSettings = any
 
+/**  Multisig options required to create a multisignature account for Algorand */
+export type AlgorandMultisigOptions = {
+  version: number
+  threshold: number
+  addrs: AlgorandAddress[]
+}
+
 /**  Algorand multisig account is similar to a native algorand address */
 export type AlgorandMultiSigAccount = AlgorandAddress
 
