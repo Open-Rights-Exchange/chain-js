@@ -8,7 +8,7 @@ export enum PluginType {
   MultiSig = 'multisig',
 }
 
-export type PluginOptions = any
+export type ChainJsPluginOptions = any
 
 export class ChainJsPlugin {
   /** Plugin name */
@@ -18,7 +18,7 @@ export class ChainJsPlugin {
   public type: PluginType
 
   /** Plugin options */
-  protected _options: PluginOptions
+  protected _options: ChainJsPluginOptions
 
   protected _isInitialized: boolean = false
 
@@ -27,7 +27,7 @@ export class ChainJsPlugin {
 
   /** Initializes plugin using options
    *  If a plugin doesnt need to be inited, then hardcode protected _isInitialized = true */
-  init(options: PluginOptions) {
+  init(options: ChainJsPluginOptions) {
     this._options = options
     this._isInitialized = true
   } // eslint-disable-line @typescript-eslint/no-unused-vars
