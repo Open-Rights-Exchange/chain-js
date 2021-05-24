@@ -30,6 +30,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
 
   /** Allows parent class to (re)initialize options */
   async init() {
+    // TODO: Check whether account has already been created using the same params (and nonce) - throw if so
     this._multisigAddress = await this.getMultisigAddressFromOptions()
     this._createAccountTransactionAction = await this.getTransactionFromOptions()
   }
