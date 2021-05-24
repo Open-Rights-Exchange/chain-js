@@ -47,7 +47,7 @@ import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from '.
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 import { AlgorandMultisigPluginTransaction, AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
 import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
-import { AlgorandNativeTransactionOptions } from './plugins/multisig/native/models'
+import { AlgorandMultisigNativeTransactionOptions } from './plugins/multisig/native/models'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -57,7 +57,7 @@ export class AlgorandTransaction implements Transaction {
 
   private _chainState: AlgorandChainState
 
-  private _options: AlgorandTransactionOptions<any>
+  private _options: AlgorandTransactionOptions
 
   /** Raw transaction object including signature (if any) */
   private _rawTransaction: AlgorandRawTransactionStruct
@@ -74,7 +74,7 @@ export class AlgorandTransaction implements Transaction {
   constructor(
     chainState: AlgorandChainState,
     multisigPlugin?: AlgorandMultisigPlugin,
-    options?: AlgorandTransactionOptions<any>,
+    options?: AlgorandTransactionOptions,
   ) {
     this._chainState = chainState
     this.assertValidOptions(options)
@@ -109,7 +109,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Options provided when the transaction class was created */
-  get options(): AlgorandTransactionOptions<any> {
+  get options(): AlgorandTransactionOptions {
     return this._options
   }
 
@@ -530,7 +530,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   /** Throws if from is not null or empty algorand argument */
-  private assertValidOptions(options: AlgorandTransactionOptions<any>): void {
+  private assertValidOptions(options: AlgorandTransactionOptions): void {
     if (options?.multisigOptions && options?.signerPublicKey) {
       throwNewError(
         'Invalid transaction options: Provide multisigOptions OR signerPublicKey - not both. The signerPublicKey is for non-multisig transasctions only',
@@ -542,7 +542,7 @@ export class AlgorandTransaction implements Transaction {
   private async setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
-      const options: AlgorandNativeTransactionOptions = {
+      const options: AlgorandMultisigNativeTransactionOptions = {
         rawTransaction: transaction as AlgorandRawTransactionMultisigStruct,
       }
       this._multisigPlugin = new NativeMultisigPlugin()

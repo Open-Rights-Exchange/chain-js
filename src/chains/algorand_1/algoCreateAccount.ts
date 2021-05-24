@@ -24,7 +24,7 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _accountType: AlgorandNewAccountType
 
-  private _options: AlgorandCreateAccountOptions<any>
+  private _options: AlgorandCreateAccountOptions
 
   private _generatedKeys: AlgorandGeneratedKeys
 
@@ -32,11 +32,7 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _multisigCreateAccount: AlgorandMultisigPluginCreateAccount
 
-  constructor(
-    chainState: AlgorandChainState,
-    multisigPlugin?: MultisigPlugin,
-    options?: AlgorandCreateAccountOptions<any>,
-  ) {
+  constructor(chainState: AlgorandChainState, multisigPlugin?: MultisigPlugin, options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
@@ -99,7 +95,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** Account creation options */
-  get options(): AlgorandCreateAccountOptions<any> {
+  get options(): AlgorandCreateAccountOptions {
     return this._options
   }
 
@@ -177,7 +173,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** make sure all options passed-in are valid */
-  private assertValidOptions(options: AlgorandCreateAccountOptions<any>) {
+  private assertValidOptions(options: AlgorandCreateAccountOptions) {
     const { publicKey } = options
     if (publicKey && !isValidAlgorandPublicKey(publicKey)) {
       throwNewError('Invalid Option - Provided publicKey isnt valid')
