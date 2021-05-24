@@ -6,14 +6,14 @@ import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
-import { EthereumGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
+import { EthereumMultisigGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
-    const multisigOptions: EthereumGnosisTransactionOptions = {
+    const multisigOptions: EthereumMultisigGnosisTransactionOptions = {
       multisigAddress: toEthereumAddress('0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764'),
     }
 
@@ -23,7 +23,7 @@ require('dotenv').config()
 
     await goerli.installPlugin(gnosisSafePlugin)
 
-    const transactionOptions: EthereumTransactionOptions<EthereumGnosisTransactionOptions> = {
+    const transactionOptions: EthereumTransactionOptions<EthereumMultisigGnosisTransactionOptions> = {
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,

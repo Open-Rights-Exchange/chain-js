@@ -12,7 +12,7 @@ import {
   signSafeTransactionHash,
 } from './helpers'
 import {
-  EthereumGnosisTransactionOptions,
+  EthereumMultisigGnosisTransactionOptions,
   EthereumMultisigRawTransaction,
   GnosisSafeSignature,
   GnosisSafeTransaction,
@@ -20,7 +20,7 @@ import {
 import { toEthereumAddress } from '../../../helpers'
 
 export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPluginTransaction {
-  private _options: EthereumGnosisTransactionOptions
+  private _options: EthereumMultisigGnosisTransactionOptions
 
   private _chainUrl: string
 
@@ -36,7 +36,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   private _gnosisSignatures: GnosisSafeSignature[]
 
-  private assertValidOptions(options: EthereumGnosisTransactionOptions) {
+  private assertValidOptions(options: EthereumMultisigGnosisTransactionOptions) {
     const { multisigAddress } = options
 
     if (isNullOrEmpty(multisigAddress)) {
@@ -44,7 +44,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     }
   }
 
-  constructor(options: EthereumGnosisTransactionOptions, chainUrl: string) {
+  constructor(options: EthereumMultisigGnosisTransactionOptions, chainUrl: string) {
     this.assertValidOptions(options)
     this._options = options
     this._chainUrl = chainUrl
@@ -61,7 +61,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   // ----------------------- TRANSACTION Members ----------------------------
 
-  get options(): EthereumGnosisTransactionOptions {
+  get options(): EthereumMultisigGnosisTransactionOptions {
     return this._options
   }
 

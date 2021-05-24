@@ -10,10 +10,10 @@ import {
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
 } from './helpers'
-import { EthereumGnosisCreateAccountOptions } from './models'
+import { EthereumMultisigGnosisCreateAccountOptions } from './models'
 
 export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPluginCreateAccount {
-  private _options: EthereumGnosisCreateAccountOptions
+  private _options: EthereumMultisigGnosisCreateAccountOptions
 
   private _chainUrl: string
 
@@ -23,7 +23,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
 
   public requiresTransaction = true
 
-  constructor(options: EthereumGnosisCreateAccountOptions, chainUrl: string) {
+  constructor(options: EthereumMultisigGnosisCreateAccountOptions, chainUrl: string) {
     this._chainUrl = chainUrl
     this._options = applyDefaultAndSetCreateOptions(options)
   }
@@ -37,7 +37,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
 
   // ----------------------- TRANSACTION Members ----------------------------
 
-  get options(): EthereumGnosisCreateAccountOptions {
+  get options(): EthereumMultisigGnosisCreateAccountOptions {
     return this._options
   }
 

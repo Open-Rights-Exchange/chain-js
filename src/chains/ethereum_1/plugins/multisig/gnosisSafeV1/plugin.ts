@@ -1,4 +1,4 @@
-import { EthereumGnosisCreateAccountOptions, EthereumGnosisTransactionOptions } from './models'
+import { EthereumMultisigGnosisCreateAccountOptions, EthereumMultisigGnosisTransactionOptions } from './models'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
 import { GnosisSafeMultisigPluginCreateAccount } from './createAccount'
 import { GnosisSafeMultisigPluginTransaction } from './transaction'
@@ -25,14 +25,14 @@ export class GnosisSafeMultisigPlugin extends ChainJsPlugin implements MultisigP
     }
   }
 
-  private newCreateAccount = async (options?: EthereumGnosisCreateAccountOptions) => {
+  private newCreateAccount = async (options?: EthereumMultisigGnosisCreateAccountOptions) => {
     this.assertInitialized()
     const createAccountPlugin = new GnosisSafeMultisigPluginCreateAccount(options, this.chainState.activeEndpoint.url)
     await createAccountPlugin.init()
     return createAccountPlugin
   }
 
-  private newTransaction = async (options?: EthereumGnosisTransactionOptions) => {
+  private newTransaction = async (options?: EthereumMultisigGnosisTransactionOptions) => {
     this.assertInitialized()
     const transactionPlugin = new GnosisSafeMultisigPluginTransaction(options, this.chainState.activeEndpoint.url)
     await transactionPlugin.init()

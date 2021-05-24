@@ -9,11 +9,11 @@ import {
 } from '../../../models'
 import {
   InitializerAction,
-  GnosisSafeTransaction,
   EIP712_SAFE_TX_TYPE,
+  EthereumMultisigGnosisCreateAccountOptions,
+  EthereumMultisigGnosisTransactionOptions,
   GnosisSafeSignature,
-  EthereumGnosisTransactionOptions,
-  EthereumGnosisCreateAccountOptions,
+  GnosisSafeTransaction,
 } from './models'
 import { EMPTY_DATA, SENTINEL_ADDRESS } from '../../../ethConstants'
 import {
@@ -79,7 +79,7 @@ export function sortHexStrings(hexArray: string[]) {
 }
 
 export async function getCreateProxyInitializerData(
-  multisigOptions: EthereumGnosisCreateAccountOptions,
+  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
   chainUrl: string,
 ) {
   const { gnosisSafeMaster, fallbackHandler, initializerAction, threshold, owners } = multisigOptions
@@ -103,7 +103,7 @@ export async function getCreateProxyInitializerData(
 }
 
 /** Throws if any options missing that are needed for proxy */
-export function assertMultisigOptionsForProxyArePresent(multisigOptions: EthereumGnosisCreateAccountOptions) {
+export function assertMultisigOptionsForProxyArePresent(multisigOptions: EthereumMultisigGnosisCreateAccountOptions) {
   if (
     isNullOrEmpty(multisigOptions?.owners) ||
     isNullOrEmpty(multisigOptions?.threshold) ||
@@ -120,7 +120,10 @@ export function assertMultisigOptionsForProxyArePresent(multisigOptions: Ethereu
 /** Simulates creating new multisigAccount deterministicly by using nonce
  *  Returns the contract address that will be assigned for multisigAccount
  */
-export async function calculateProxyAddress(multisigOptions: EthereumGnosisCreateAccountOptions, chainUrl: string) {
+export async function calculateProxyAddress(
+  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
+  chainUrl: string,
+) {
   assertMultisigOptionsForProxyArePresent(multisigOptions)
   const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
 
@@ -133,7 +136,7 @@ export async function calculateProxyAddress(multisigOptions: EthereumGnosisCreat
 /** Returns transaction object including ({to, data, ...}) for creating multisig proxy contract
  */
 export async function getCreateProxyTransaction(
-  multisigOptions: EthereumGnosisCreateAccountOptions,
+  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
   chainUrl: string,
 ): Promise<EthereumTransactionAction> {
   assertMultisigOptionsForProxyArePresent(multisigOptions)
@@ -166,7 +169,7 @@ export async function getSafeNonce(multisigAddress: EthereumAddress, chainUrl: s
 
 export async function transactionToSafeTx(
   transactionAction: EthereumTransactionAction,
-  transactionOptions: EthereumGnosisTransactionOptions,
+  transactionOptions: EthereumMultisigGnosisTransactionOptions,
 ): Promise<GnosisSafeTransaction> {
   const { to, value, data, contract } = transactionAction
   const { operation, refundReceiver, safeTxGas, baseGas, gasPrice: safeGasPice, gasToken, nonce } =
@@ -342,8 +345,8 @@ export async function getSafeOwnersAndThreshold(multisigContract: Contract) {
   return { owners, threshold }
 }
 
-export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisCreateAccountOptions) {
-  const detaultOptions: Partial<EthereumGnosisCreateAccountOptions> = {
+export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumMultisigGnosisCreateAccountOptions) {
+  const detaultOptions: Partial<EthereumMultisigGnosisCreateAccountOptions> = {
     gnosisSafeMaster: DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
     proxyFactory: DEFAULT_PROXY_FACTORY_ADDRESS,
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
