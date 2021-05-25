@@ -4,10 +4,10 @@ import { toEthereumAddress } from '../../../helpers'
 
 export const ZERO_ADDRESS = toEthereumAddress('0x0000000000000000000000000000000000000000')
 
-export const DEFAULT_NONCE = 1
-export const DEFAULT_TX_SAFE_GAS = 1
-export const DEFAULT_TX_BASE_GAS = 1
-export const DEFAULT_TX_GAS_PRICE = 1
+export const DEFAULT_CREATE_ACCOUNT_SALT_NONCE = 1
+export const DEFAULT_TX_SAFE_GAS = 0
+export const DEFAULT_TX_BASE_GAS = 0
+export const DEFAULT_TX_GAS_PRICE = 0
 export const EMPTY_TX_VALUE = 0
 export const EMPTY_TX_OPERATION = 0
 export const DEFAULT_REFUND_RECIEVER = ZERO_ADDRESS
