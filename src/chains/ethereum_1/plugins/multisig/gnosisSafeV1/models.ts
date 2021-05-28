@@ -4,17 +4,17 @@ import { EthereumAddress, EthereumRawTransactionAction, EthereumTxData } from '.
 
 export type EthereumMultisigRawTransaction = EthereumRawTransactionAction
 
-export type EthereumMultisigGnosisCreateAccountOptions = {
+export type EthereumGnosisMultisigCreateAccountOptions = {
   owners: EthereumAddress[]
   threshold: number
-  nonce: number
+  saltNonce: number
   gnosisSafeMaster?: EthereumAddress
   proxyFactory?: EthereumAddress
   fallbackHandler?: EthereumAddress
   initializerAction?: InitializerAction
 }
 
-export type EthereumMultisigGnosisTransactionOptions = {
+export type EthereumGnosisMultisigTransactionOptions = {
   multisigAddress: EthereumAddress
   operation?: number
   refundReceiver?: EthereumAddress
@@ -36,7 +36,7 @@ export type InitializerAction = {
   paymentReceiver?: EthereumAddress
 }
 
-export interface GnosisSafeTransaction {
+export type GnosisSafeTransaction = {
   to: string
   value: string | number | BN | ethers.BigNumber
   data: string
@@ -47,6 +47,21 @@ export interface GnosisSafeTransaction {
   gasPrice: number | string
   gasToken: string
   nonce: number | string
+}
+
+/** GnosisSafeTransaction + strinfigied GnosisSignatures[] */
+export type GnosisSafeRawTransaction = {
+  to: string
+  value: string | number | BN | ethers.BigNumber
+  data: string
+  operation: number
+  refundReceiver: string
+  safeTxGas: number | string
+  baseGas: number | string
+  gasPrice: number | string
+  gasToken: string
+  nonce: number | string
+  signatures?: string
 }
 
 export const EIP712_SAFE_TX_TYPE = {

@@ -54,9 +54,6 @@ export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreat
 export interface EthereumMultisigPluginTransaction extends MultisigPluginTransaction {
   init(options: EthereumMultisigTransactionOptions): Promise<void>
 
-  /** Whether transaction has been prepared for signing (has raw body) */
-  hasRaw: boolean
-
   options: EthereumMultisigTransactionOptions // depends on plug-in
 
   owners: EthereumAddress[]
@@ -65,9 +62,17 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   missingSignatures: EthereumAddress[]
 
-  /** Raw transaction body
+  requiresParentTransaction?: boolean
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasRawTransaction: boolean
+  /** Raw transaction body type is dependent on each plugin
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: EthereumRawTransactionAction
+  rawTransaction: any
+
+  hasParentTransaction: boolean
+
+  parentTransaction: EthereumRawTransactionAction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: EthereumAddress[]
@@ -79,6 +84,8 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   addSignatures(signature: any[]): void
 
   prepareToBeSigned(transactionAction: EthereumTransactionAction): Promise<void>
+
+  setFromRaw(rawTransaction: any): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>

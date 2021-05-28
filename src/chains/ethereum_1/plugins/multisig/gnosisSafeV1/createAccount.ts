@@ -10,10 +10,10 @@ import {
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
 } from './helpers'
-import { EthereumMultisigGnosisCreateAccountOptions } from './models'
+import { EthereumGnosisMultisigCreateAccountOptions } from './models'
 
 export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPluginCreateAccount {
-  private _options: EthereumMultisigGnosisCreateAccountOptions
+  private _options: EthereumGnosisMultisigCreateAccountOptions
 
   private _chainUrl: string
 
@@ -23,7 +23,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
 
   public requiresTransaction = true
 
-  constructor(options: EthereumMultisigGnosisCreateAccountOptions, chainUrl: string) {
+  constructor(options: EthereumGnosisMultisigCreateAccountOptions, chainUrl: string) {
     this._chainUrl = chainUrl
     this._options = applyDefaultAndSetCreateOptions(options)
   }
@@ -37,7 +37,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
 
   // ----------------------- TRANSACTION Members ----------------------------
 
-  get options(): EthereumMultisigGnosisCreateAccountOptions {
+  get options(): EthereumGnosisMultisigCreateAccountOptions {
     return this._options
   }
 
@@ -66,7 +66,7 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
    *  Calls the multisig contract on chain to get the calculated address */
   public async getMultisigAddressFromOptions() {
     const { options } = this
-    const { owners, threshold, nonce } = options
+    const { owners, threshold, saltNonce: nonce } = options
     let calculatedAddress = this.multisigAddress
 
     // if ANY multisigOptions is provided, then calculate the multisig address
@@ -100,11 +100,11 @@ export class GnosisSafeMultisigPluginCreateAccount implements EthereumMultisigPl
   /**  Calls the multisig contract on chain to get the calculated transaction data to create proxy multisigAccount */
   public async getTransactionFromOptions() {
     const { options } = this
-    const { owners, threshold, nonce } = options
+    const { owners, threshold, saltNonce } = options
     let transaction
 
     // if ANY multisigOptions is provided, then calculate the multisig address
-    if (!isNullOrEmpty(owners) || !isNullOrEmpty(threshold) || !isNullOrEmpty(nonce)) {
+    if (!isNullOrEmpty(owners) || !isNullOrEmpty(threshold) || !isNullOrEmpty(saltNonce)) {
       transaction = await getCreateProxyTransaction(this.options, this.chainUrl)
     } else {
       throwNewError('must provide either multisigAddress or multisigOptions (to calculate multisig address)')

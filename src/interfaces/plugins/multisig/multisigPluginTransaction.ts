@@ -9,12 +9,21 @@ export interface MultisigPluginTransaction {
 
   threshold: number
 
-  /** Raw transaction body
+  /** True if multisigPlugin's rawTransaction needs to be wrapped into it's native chain transaction
+   * Used for platforms that doesn't support multisig natively
+   */
+  requiresParentTransaction?: boolean
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasRawTransaction: boolean
+  /** Raw transaction body type is dependent on each plugin
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
   rawTransaction: any
 
-  /** Whether transaction has been prepared for signing (has raw body) */
-  hasRaw: boolean
+  hasParentTransaction: boolean
+
+  /** Parent transaction that contains serialized multisig rawTransaction */
+  parentTransaction: any
 
   missingSignatures: any[]
 
@@ -28,6 +37,8 @@ export interface MultisigPluginTransaction {
   addSignatures(signature: any[]): void
 
   prepareToBeSigned(rawTransaction: any): Promise<void>
+
+  setFromRaw(rawTransaction: any): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>

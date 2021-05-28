@@ -6,14 +6,14 @@ import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
-import { EthereumMultisigGnosisTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
+import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
 ;(async () => {
   try {
-    const multisigOptions: EthereumMultisigGnosisTransactionOptions = {
+    const multisigOptions: EthereumGnosisMultisigTransactionOptions = {
       multisigAddress: toEthereumAddress('0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764'),
     }
 
@@ -23,7 +23,7 @@ require('dotenv').config()
 
     await goerli.installPlugin(gnosisSafePlugin)
 
-    const transactionOptions: EthereumTransactionOptions<EthereumMultisigGnosisTransactionOptions> = {
+    const transactionOptions: EthereumTransactionOptions<EthereumGnosisMultisigTransactionOptions> = {
       chain: 'goerli',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
@@ -58,7 +58,7 @@ require('dotenv').config()
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log(
       'safeTransaction: ',
-      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).safeTransaction,
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).rawTransaction,
     )
     // console.log('Transaction: ', transaction.toJson())
     console.log('Trx result: ', await transaction.send())

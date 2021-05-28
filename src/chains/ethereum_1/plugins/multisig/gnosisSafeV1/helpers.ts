@@ -10,8 +10,8 @@ import {
 import {
   InitializerAction,
   EIP712_SAFE_TX_TYPE,
-  EthereumMultisigGnosisCreateAccountOptions,
-  EthereumMultisigGnosisTransactionOptions,
+  EthereumGnosisMultisigCreateAccountOptions,
+  EthereumGnosisMultisigTransactionOptions,
   GnosisSafeSignature,
   GnosisSafeTransaction,
 } from './models'
@@ -79,7 +79,7 @@ export function sortHexStrings(hexArray: string[]) {
 }
 
 export async function getCreateProxyInitializerData(
-  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
+  multisigOptions: EthereumGnosisMultisigCreateAccountOptions,
   chainUrl: string,
 ) {
   const { gnosisSafeMaster, fallbackHandler, initializerAction, threshold, owners } = multisigOptions
@@ -103,13 +103,13 @@ export async function getCreateProxyInitializerData(
 }
 
 /** Throws if any options missing that are needed for proxy */
-export function assertMultisigOptionsForProxyArePresent(multisigOptions: EthereumMultisigGnosisCreateAccountOptions) {
+export function assertMultisigOptionsForProxyArePresent(multisigOptions: EthereumGnosisMultisigCreateAccountOptions) {
   if (
     isNullOrEmpty(multisigOptions?.owners) ||
     isNullOrEmpty(multisigOptions?.threshold) ||
     isNullOrEmptyEthereumValue(multisigOptions?.gnosisSafeMaster) ||
     isNullOrEmptyEthereumValue(multisigOptions?.proxyFactory) ||
-    isNullOrEmpty(multisigOptions?.nonce)
+    isNullOrEmpty(multisigOptions?.saltNonce)
   ) {
     throwNewError(
       'Missing one or more required options: (owners, threshold, gnosisSafeMaster, or proxyFactory) for proxy contract.',
@@ -121,26 +121,32 @@ export function assertMultisigOptionsForProxyArePresent(multisigOptions: Ethereu
  *  Returns the contract address that will be assigned for multisigAccount
  */
 export async function calculateProxyAddress(
-  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
+  multisigOptions: EthereumGnosisMultisigCreateAccountOptions,
   chainUrl: string,
 ) {
   assertMultisigOptionsForProxyArePresent(multisigOptions)
-  const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
+  const { gnosisSafeMaster, proxyFactory, saltNonce } = multisigOptions
 
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const proxyFactoryContract = getProxyFactoryEthersContract(ethersProvier, proxyFactory)
   const initializerData = await getCreateProxyInitializerData(multisigOptions, chainUrl)
-  return proxyFactoryContract.callStatic.createProxyWithNonce(gnosisSafeMaster, initializerData, nonce)
+  let address
+  try {
+    address = await proxyFactoryContract.callStatic.createProxyWithNonce(gnosisSafeMaster, initializerData, saltNonce)
+  } catch (err) {
+    throwNewError('Invalid create options. Try increasing saltNonce')
+  }
+  return address
 }
 
 /** Returns transaction object including ({to, data, ...}) for creating multisig proxy contract
  */
 export async function getCreateProxyTransaction(
-  multisigOptions: EthereumMultisigGnosisCreateAccountOptions,
+  multisigOptions: EthereumGnosisMultisigCreateAccountOptions,
   chainUrl: string,
 ): Promise<EthereumTransactionAction> {
   assertMultisigOptionsForProxyArePresent(multisigOptions)
-  const { gnosisSafeMaster, proxyFactory, nonce } = multisigOptions
+  const { gnosisSafeMaster, proxyFactory, saltNonce } = multisigOptions
 
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const proxyFactoryContract = getProxyFactoryEthersContract(ethersProvier, proxyFactory)
@@ -148,7 +154,7 @@ export async function getCreateProxyTransaction(
   const { to, data, value } = await proxyFactoryContract.populateTransaction.createProxyWithNonce(
     gnosisSafeMaster,
     initializerData,
-    nonce,
+    saltNonce,
   )
   return { to: toEthereumAddress(to), data: toEthereumTxData(data), value: value ? value.toString() : 0 }
 }
@@ -169,7 +175,7 @@ export async function getSafeNonce(multisigAddress: EthereumAddress, chainUrl: s
 
 export async function transactionToSafeTx(
   transactionAction: EthereumTransactionAction,
-  transactionOptions: EthereumMultisigGnosisTransactionOptions,
+  transactionOptions: EthereumGnosisMultisigTransactionOptions,
 ): Promise<GnosisSafeTransaction> {
   const { to, value, data, contract } = transactionAction
   const { operation, refundReceiver, safeTxGas, baseGas, gasPrice: safeGasPice, gasToken, nonce } =
@@ -219,20 +225,25 @@ export async function getSafeTransactionHash(
   return hash
 }
 
+export async function signSafeHash(privateKey: EthereumPrivateKey, hash: string): Promise<GnosisSafeSignature> {
+  const signerWallet = getEthersWallet(privateKey)
+  const typedDataHash = utils.arrayify(hash)
+  const data = (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20')
+  return {
+    signer: toEthereumAddress(signerWallet.address),
+    data,
+  }
+}
+
 /** Generates GnosisSafe signature object, that is gonne be passed in as serialized for executeTransaction  */
-export async function signSafeTransactionHash(
+export async function signSafeTransaction(
   privateKey: EthereumPrivateKey,
   multisigAddress: EthereumAddress,
   safeTx: GnosisSafeTransaction,
   chainUrl: string,
 ): Promise<GnosisSafeSignature> {
-  const signerWallet = getEthersWallet(privateKey)
   const trxHash = await getSafeTransactionHash(multisigAddress, safeTx, chainUrl)
-  const typedDataHash = utils.arrayify(trxHash)
-  return {
-    signer: toEthereumAddress(signerWallet.address),
-    data: (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20'),
-  }
+  return signSafeHash(privateKey, trxHash)
 }
 
 /** Sends approveHash call for gnosis and returns signature placeholder that indicates approval */
@@ -345,8 +356,8 @@ export async function getSafeOwnersAndThreshold(multisigContract: Contract) {
   return { owners, threshold }
 }
 
-export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumMultisigGnosisCreateAccountOptions) {
-  const detaultOptions: Partial<EthereumMultisigGnosisCreateAccountOptions> = {
+export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisMultisigCreateAccountOptions) {
+  const detaultOptions: Partial<EthereumGnosisMultisigCreateAccountOptions> = {
     gnosisSafeMaster: DEFAULT_GNOSIS_SAFE_SINGLETION_ADDRESS,
     proxyFactory: DEFAULT_PROXY_FACTORY_ADDRESS,
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
