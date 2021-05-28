@@ -36,15 +36,13 @@ const algoBetanetEndpoints = [
 ]
 
 const transactionMultisigOptions: AlgorandMultisigNativeTransactionOptions = {
-  multisigOptions: {
-    version: 1,
-    threshold: 2,
-    addrs: [
-      env.ALGOTESTNET_mulitsig_child_account1,
-      env.ALGOTESTNET_mulitsig_child_account2,
-      env.ALGOTESTNET_mulitsig_child_account3,
-    ],
-  },
+  version: 1,
+  threshold: 2,
+  addrs: [
+    env.ALGOTESTNET_mulitsig_child_account1,
+    env.ALGOTESTNET_mulitsig_child_account2,
+    env.ALGOTESTNET_mulitsig_child_account3,
+  ],
 }
 
 export const transactionOptions = {

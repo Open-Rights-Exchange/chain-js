@@ -2,7 +2,6 @@ import {
   AlgorandAddress,
   AlgorandPrivateKey,
   AlgorandPublicKey,
-  AlgorandRawTransactionMultisigStruct,
   AlgorandSignature,
   AlgorandTxEncodedForChain,
 } from '../../models'
@@ -39,12 +38,8 @@ export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransac
 
   threshold: number
 
-  /** Raw transaction body
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: AlgorandRawTransactionMultisigStruct
-
   /** Whether transaction has been prepared for signing (has raw body) */
-  hasRaw: boolean
+  hasRawTransaction: boolean
 
   missingSignatures: AlgorandAddress[]
 

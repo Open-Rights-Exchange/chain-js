@@ -60,15 +60,13 @@ describe('Test Algorand Multisig Transactions', () => {
       amount: '1',
     }
     const transactionMultisigOptions: AlgorandMultisigNativeTransactionOptions = {
-      multisigOptions: {
-        version: 1,
-        threshold: 3,
-        addrs: [
-          childAcct1, // 1
-          childAcct2, // 2
-          childAcct3, // 3
-        ],
-      },
+      version: 1,
+      threshold: 3,
+      addrs: [
+        childAcct1, // 1
+        childAcct2, // 2
+        childAcct3, // 3
+      ],
     }
 
     const transactionOptions: AlgorandTransactionOptions = {
@@ -98,20 +96,18 @@ describe('Test Algorand Multisig Transactions', () => {
       amount: '1',
     }
     const transactionMultisigOptions: AlgorandMultisigNativeTransactionOptions = {
-      multisigOptions: {
-        version: 1,
-        threshold: 3,
-        addrs: [
-          childAcct1, // 1
-          childAcct2, // 2
-          childAcct3, // 3
-        ],
-      },
+      version: 1,
+      threshold: 3,
+      addrs: [
+        childAcct1, // 1
+        childAcct2, // 2
+        childAcct3, // 3
+      ],
     }
     const transactionOptions: AlgorandTransactionOptions = {
       multisigOptions: transactionMultisigOptions,
     }
-    const multisigAddress = determineMultiSigAddress(transactionMultisigOptions.multisigOptions)
+    const multisigAddress = determineMultiSigAddress(transactionMultisigOptions)
     const transaction = await algoTest.new.Transaction(transactionOptions)
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
