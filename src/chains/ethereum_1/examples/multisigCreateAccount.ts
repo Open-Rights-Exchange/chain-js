@@ -4,8 +4,8 @@
 
 import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
 
-import { EthereumMultisigGnosisCreateAccountOptions } from '../plugins/multisig/gnosisSafeV1/models'
-import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
+import { EthereumGnosisMultisigCreateAccountOptions } from '../plugins/multisig/gnosisSafeV1/models'
+import { toEthereumAddress } from '../helpers'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 
 require('dotenv').config()
@@ -13,14 +13,14 @@ require('dotenv').config()
   try {
     const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
     // address with nonce 0: 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764
-    const multisigOptions: EthereumMultisigGnosisCreateAccountOptions = {
+    const multisigOptions: EthereumGnosisMultisigCreateAccountOptions = {
       owners: [
         toEthereumAddress(process.env.GOERLI_multisigOwner_1),
         toEthereumAddress(process.env.GOERLI_multisigOwner_3),
         toEthereumAddress(process.env.GOERLI_multisigOwner_2),
       ],
       threshold: 2,
-      nonce: 1, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
+      saltNonce: 1, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
@@ -36,8 +36,8 @@ require('dotenv').config()
       await createAccount.composeTransaction()
       console.log('IsMultisig: ', createAccount.transaction.isMultisig)
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
-      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
-      console.log('Txresult: ', await createAccount.transaction.send())
+      // await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
+      // console.log('Txresult: ', await createAccount.transaction.send())
     }
   } catch (error) {
     console.log(error)
