@@ -48,8 +48,8 @@ require('dotenv').config()
     console.log('threshold: ', transaction.multisigTransaction.threshold)
 
     await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_3_PRIVATE_KEY)])
-    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
-    // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+    // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
 
     console.log(
       'signatures: ',
@@ -60,8 +60,19 @@ require('dotenv').config()
       'safeTransaction: ',
       (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).rawTransaction,
     )
+    console.log(
+      'parentTransaction: ',
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentTransaction,
+    )
     // console.log('Transaction: ', transaction.toJson())
-    console.log('Trx result: ', await transaction.send())
+    let txToSend = transaction
+    if (transaction.requiresParentTransaction) {
+      txToSend = await transaction.getParentTransaction()
+      await txToSend.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+      console.log('Cost', await txToSend.getEstimatedCost())
+      console.log('ParentTransaction: ', txToSend.actions[0])
+    }
+    console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }
