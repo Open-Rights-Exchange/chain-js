@@ -3,6 +3,7 @@ import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
   hasHexPrefix,
+  isABuffer,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
@@ -88,16 +89,27 @@ export class EthereumActionHelper {
       contract,
     } = actionInput
 
-    // if value is hex encoded string, then it doesnt need to be converted (already in units of Wei)
-    // otherwise, a decimal string value is expected to be in units of Gwei - we convert to Wei
-    const gasPriceInWei = hasHexPrefix(gasPriceInput)
-      ? gasPriceInput
-      : toWeiString(gasPriceInput as string, EthUnit.Gwei)
+    let gasPrice
 
-    // convert decimal strings to hex strings
-    const gasPrice = toHexStringIfNeeded(gasPriceInWei)
-    const gasLimit = toHexStringIfNeeded(gasLimitInput)
-    const value = toHexStringIfNeeded(valueInput)
+    if (isABuffer(gasPriceInput)) {
+      gasPrice = convertBufferToHexStringIfNeeded(gasPriceInput as Buffer)
+    } else {
+      // if value is hex encoded string, then it doesnt need to be converted (already in units of Wei)
+      // otherwise, a decimal string value is expected to be in units of Gwei - we convert to Wei
+      const gasPriceInWei = hasHexPrefix(gasPriceInput)
+        ? gasPriceInput
+        : toWeiString(gasPriceInput as string, EthUnit.Gwei)
+
+      // convert decimal strings to hex strings
+      gasPrice = toHexStringIfNeeded(gasPriceInWei)
+    }
+
+    const gasLimit = isABuffer(gasLimitInput)
+      ? convertBufferToHexStringIfNeeded(gasLimitInput as Buffer)
+      : toHexStringIfNeeded(gasLimitInput)
+    const value = isABuffer(valueInput)
+      ? convertBufferToHexStringIfNeeded(valueInput as Buffer)
+      : toHexStringIfNeeded(valueInput)
 
     // cant provide both contract and data properties
     if (!isNullOrEmptyEthereumValue(contract) && !isNullOrEmptyEthereumValue(data)) {
