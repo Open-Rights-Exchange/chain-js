@@ -170,6 +170,9 @@ export class EthereumTransaction implements Transaction {
 
   /** Raw transaction body - all values are Buffer types */
   get raw(): EthereumRawTransaction {
+    if (this.isMultisig) {
+      return this.multisigTransaction.rawTransaction
+    }
     return this._actionHelper?.raw
   }
 

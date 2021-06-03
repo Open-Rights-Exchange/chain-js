@@ -129,7 +129,8 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Signatures array of safeTransaction that will be passed in executeSafeTransaction */
   get gnosisSignatures(): GnosisSafeSignature[] {
     const { signatures } = this.rawTransaction
-    const parsedSignatures = jsonParseAndRevive(signatures)
+
+    const parsedSignatures = !isNullOrEmpty(signatures) ? jsonParseAndRevive(signatures) : []
     return parsedSignatures
   }
 
@@ -147,12 +148,14 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   /** Checks if signature addresses match with multisig owners and adds to the signatures array */
   async addSignatures(signaturesIn: GnosisSafeSignature[]) {
+    // Case insensitive
+    const lowercaseOwners = this.owners.map(owner => owner.toLowerCase())
     signaturesIn.forEach(signature => {
-      if (!this.owners.includes(signature.signer))
+      if (!lowercaseOwners.includes(signature.signer.toLowerCase())) {
         throwNewError(`Signature data:${signature.data} does not belong to any of the multisig owner addresses`)
+      }
     })
-    const signatures = this.gnosisSignatures
-    signatures.concat(signaturesIn)
+    const signatures = this.gnosisSignatures.concat(signaturesIn)
     this._rawTransaction.signatures = JSON.stringify(signatures)
     await this.setParentTransactionIfReady()
   }
@@ -177,9 +180,9 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Whether there is an attached signature for the provided address */
   public hasSignatureForAddress(address: EthereumAddress): boolean {
     let includes = false
-    this.gnosisSignatures?.forEach(signature => {
+    this.gnosisSignatures?.map(signature => {
       // Ensure check is case insensitive
-      if (toEthereumAddress(signature.signer) === toEthereumAddress(address)) {
+      if (toEthereumAddress(signature.signer).toLowerCase() === toEthereumAddress(address).toLowerCase()) {
         includes = true
       }
     })
