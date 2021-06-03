@@ -49,19 +49,16 @@ export type GnosisSafeTransaction = {
   nonce: number | string
 }
 
-/** GnosisSafeTransaction + strinfigied GnosisSignatures[] */
-export type GnosisSafeRawTransaction = {
-  to: string
-  value: string | number | BN | ethers.BigNumber
-  data: string
-  operation: number
-  refundReceiver: string
-  safeTxGas: number | string
-  baseGas: number | string
-  gasPrice: number | string
-  gasToken: string
-  nonce: number | string
+/** Adds signatures to GnosisSafeTransaction to support setFromRaw() */
+export type GnosisSafeRawTransaction = GnosisSafeTransaction & {
+  /** stringified GnosisSafeSignature[] */
   signatures?: string
+}
+
+/** Signature object that are gonna be serialized passed for executing sign trx */
+export interface GnosisSafeSignature {
+  signer: EthereumAddress
+  data: string
 }
 
 export const EIP712_SAFE_TX_TYPE = {
@@ -78,10 +75,4 @@ export const EIP712_SAFE_TX_TYPE = {
     { type: 'address', name: 'refundReceiver' },
     { type: 'uint256', name: 'nonce' },
   ],
-}
-
-/** Signature object that are gonna be serialized passed for executing sign trx */
-export interface GnosisSafeSignature {
-  signer: EthereumAddress
-  data: string
 }

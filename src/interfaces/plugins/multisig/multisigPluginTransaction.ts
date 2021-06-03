@@ -9,8 +9,8 @@ export interface MultisigPluginTransaction {
 
   threshold: number
 
-  /** True if multisigPlugin's rawTransaction needs to be wrapped into it's native chain transaction
-   * Used for platforms that doesn't support multisig natively
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
+   * For chains that don't support multisig natively
    */
   requiresParentTransaction?: boolean
 
@@ -22,7 +22,9 @@ export interface MultisigPluginTransaction {
 
   hasParentTransaction: boolean
 
-  /** Parent transaction that contains serialized multisig rawTransaction */
+  /** Parent transaction is what gets sent to chain
+   * Actual transaction (child in this case) is embedded in parent transaction data
+   */
   parentTransaction: any
 
   missingSignatures: any[]

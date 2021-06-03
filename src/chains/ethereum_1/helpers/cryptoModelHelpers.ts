@@ -14,6 +14,7 @@ import {
   isAString,
   jsonParseAndRevive,
   toChainEntityName,
+  toHexStringIfNeeded,
 } from '../../../helpers'
 import {
   EthereumSignature,
@@ -152,7 +153,7 @@ export function toEthUnit(unit: string): EthUnit {
 
 /** accepts a hexstring or Buffer and returns hexstring (converts buffer to hexstring) */
 export function convertBufferToHexStringIfNeeded(value: string | Buffer) {
-  return isABuffer(value) ? bufferToHex(value as Buffer) : (value as string)
+  return isABuffer(value) ? bufferToHex(value as Buffer) : toHexStringIfNeeded(value)
 }
 
 export function privateKeyToAddress(privateKey: string): EthereumAddress {

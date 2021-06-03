@@ -62,6 +62,9 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   missingSignatures: EthereumAddress[]
 
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
+   * For chains that don't support multisig natively
+   */
   requiresParentTransaction?: boolean
 
   /** Whether transaction has been prepared for signing (has raw body) */
@@ -72,6 +75,9 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   hasParentTransaction: boolean
 
+  /** Parent transaction is what gets sent to chain
+   * Actual transaction (child in this case) is embedded in parent transaction data
+   */
   parentTransaction: EthereumRawTransactionAction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
