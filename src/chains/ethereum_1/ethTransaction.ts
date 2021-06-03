@@ -186,13 +186,7 @@ export class EthereumTransaction implements Transaction {
    */
   get ethereumJsTx(): EthereumJsTx {
     const trxOptions = this.getOptionsForEthereumJsTx()
-    let transaction
-    if (this.requiresParentTransaction) {
-      transaction = this.parentTransaction
-    } else {
-      transaction = this.raw
-    }
-    return new EthereumJsTx(transaction, trxOptions)
+    return new EthereumJsTx(this.raw, trxOptions)
   }
 
   /** Ethereum doesn't have any native multi-sig functionality */
@@ -636,16 +630,36 @@ export class EthereumTransaction implements Transaction {
     return false
   }
 
-  public get parentTransaction(): EthereumRawTransactionAction {
-    if (this.requiresParentTransaction) {
-      // Ethereum raw transaction includes both action realted properties (to, value, data)
-      //  and option related properties (nonce, gasLimit, gasPrice)
-      //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
-      //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
-      return { ...this._actionHelper?.raw, ...this.multisigTransaction?.parentTransaction }
+  /** ParentTransaction is the transaction sent to chain - e.g. sent to multisig contract.
+   * Action (e.g transfer token) is embedded as data in parent transaction
+   */
+  public async getParentTransaction(): Promise<EthereumTransaction> {
+    if (!this.requiresParentTransaction) {
+      throwNewError('ParentTransaction is not required')
     }
-    throwNewError('ParentTransaction is not required')
-    return null
+
+    // Ethereum raw transaction includes both action realted properties (to, value, data)
+    //  and option related properties (gasLimit, gasPrice)
+    //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
+    //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
+
+    if (isNullOrEmpty(this.multisigTransaction?.parentTransaction)) {
+      throwNewError(
+        'ParentTransaction is not yet set. It is set by multisigPlugin when enough signatures are attached. Check required signatures using transaction.missingSignatures().',
+      )
+    }
+    const rawParent = {
+      gasLimit: this._actionHelper?.raw?.gasLimit,
+      gasPrice: this._actionHelper?.raw?.gasPrice,
+      ...this.multisigTransaction?.parentTransaction,
+    }
+    const parentTransaction = new EthereumTransaction(this._chainState, null, {
+      ...this._options,
+      multisigOptions: null,
+    })
+    await parentTransaction.setFromRaw(rawParent)
+    await parentTransaction.validate()
+    return parentTransaction
   }
 
   /** Sign the transaction body with private key and add to attached signatures
@@ -658,25 +672,20 @@ export class EthereumTransaction implements Transaction {
       throwNewError('privateKeys[] cannot be empty')
     }
     const [firstPrivateKey] = privateKeys
-    if (!this.isMultisig) {
+
+    if (this.isMultisig) {
+      if (!isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
+        await this.multisigTransaction.sign(privateKeys)
+      }
+    } else {
       if (!isArrayLengthOne(privateKeys)) {
         throwNewError('If ethereum transaction is not multisig, sign() requires privateKeys array of length one')
       }
 
       await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
       this.signAndAddSignatures(firstPrivateKey)
-    } else {
-      if (!isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
-        await this.multisigTransaction.sign(privateKeys)
-      }
-      if (isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
-        // generate nonce (using privateKey) if not already present
-        await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
-        this.signAndAddSignatures(firstPrivateKey)
-      }
     }
   }
-
   // send
 
   /** Broadcast a signed transaction to the chain
