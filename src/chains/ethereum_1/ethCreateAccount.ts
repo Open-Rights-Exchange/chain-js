@@ -67,6 +67,9 @@ export class EthereumCreateAccount implements CreateAccount {
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): EthereumAddress {
+    if (this.isMultisig) {
+      return this.multisigCreateAccount.accountName
+    }
     return this._accountName
   }
 
@@ -174,7 +177,6 @@ export class EthereumCreateAccount implements CreateAccount {
   async generateKeysIfNeeded() {
     if (this.isMultisig) {
       await this.multisigCreateAccount.generateKeysIfNeeded()
-      this._accountName = this.multisigCreateAccount.accountName
     } else {
       let publicKey: EthereumPublicKey
       this.assertValidOptionPublicKeys()
