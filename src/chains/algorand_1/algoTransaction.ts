@@ -415,7 +415,7 @@ export class AlgorandTransaction implements Transaction {
   get rawTransaction(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     let rawTransaction
     if (this.isMultisig) {
-      rawTransaction = this.multisigTransaction.parentTransaction
+      rawTransaction = this.multisigTransaction.rawTransaction
     } else {
       rawTransaction = this._rawTransaction
     }
@@ -543,7 +543,7 @@ export class AlgorandTransaction implements Transaction {
     if ((transaction as AlgorandRawTransactionMultisigStruct)?.msig) {
       this._multisigPlugin = new NativeMultisigPlugin()
       this._multisigTransaction = await this.multisigPlugin.new.Transaction({})
-      this.multisigTransaction.setFromRaw(transaction)
+      await this.multisigTransaction.setFromRaw(transaction)
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }

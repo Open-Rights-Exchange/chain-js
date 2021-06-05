@@ -35,8 +35,6 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
   private _rawTransaction: AlgorandRawTransactionMultisigStruct
 
-  private _actionHelper: AlgorandActionHelper
-
   public requiresParentTransaction = false
 
   constructor(options: AlgorandMultisigNativeTransactionOptions) {
@@ -73,6 +71,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
   /** Get the raw transaction (either regular or multisig) */
   get parentTransaction(): AlgorandRawTransactionMultisigStruct {
+    throwNewError('Algorand multisig doesnt require parentTransaction')
     return null
   }
 
@@ -86,8 +85,12 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     return this._rawTransaction
   }
 
+  get actionHelper(): AlgorandActionHelper {
+    return new AlgorandActionHelper(this._rawTransaction)
+  }
+
   get algoSdkTransaction() {
-    return new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk)
+    return new AlgoTransactionClass(this.actionHelper.actionEncodedForSdk)
   }
 
   /** Throws if no raw transaction body */
@@ -98,7 +101,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   }
 
   public validate(): Promise<void> {
-    this.verifyAndGetMultisigOptionsFromRaw(this.parentTransaction)
+    this.verifyAndGetMultisigOptionsFromRaw(this.rawTransaction)
     return null
   }
 
@@ -120,12 +123,11 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
       txn: rawTransaction,
       msig,
     }
-    this._actionHelper = new AlgorandActionHelper(this._rawTransaction)
   }
 
   /** Signatures attached to transaction */
   get signatures(): AlgorandSignature[] {
-    const signatures = (this.parentTransaction as AlgorandRawTransactionMultisigStruct)?.msig?.subsig
+    const signatures = (this.rawTransaction as AlgorandRawTransactionMultisigStruct)?.msig?.subsig
       ?.filter(subsig => !!subsig.s)
       ?.map(subsig => toAlgorandSignatureFromRawSig(subsig.s))
 
@@ -152,7 +154,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   /** Returns public keys of the signatures attached to the signed transaction
    *  For a typical transaction, there is only signature, multisig transactions can have more */
   public getPublicKeysForSignaturesFromRawTx(): AlgorandPublicKey[] {
-    const { msig } = this._rawTransaction
+    const { msig } = this.rawTransaction
     // drop empty values in subsig
     const multisigs = msig?.subsig?.filter((sig: AlgorandMultiSignatureStruct) => !!sig?.s) || []
     return multisigs?.map((sig: AlgorandMultiSignatureStruct) => toAlgorandPublicKey(byteArrayToHexString(sig.pk)))
@@ -160,7 +162,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
   private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
-    if (!this.parentTransaction) return false
+    if (!this.rawTransaction) return false
     const transactionBytesToSign = this.algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
     return verifySignedWithPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
@@ -173,9 +175,9 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     this.assertHasRaw()
     assertValidSignatures(signatures)
     // Handle multisig transaction
-    if (isNullOrEmpty(signatures) && this?._rawTransaction?.msig) {
+    if (isNullOrEmpty(signatures) && this?.rawTransaction?.msig) {
       // wipe out all the signatures in the subsig array (just set the public key)
-      this._rawTransaction.msig.subsig = this._rawTransaction.msig.subsig.map((ss: any) => ({
+      this._rawTransaction.msig.subsig = this.rawTransaction.msig.subsig.map((ss: any) => ({
         pk: ss.pk,
       }))
     }
@@ -223,7 +225,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     if (!isNullOrEmpty(this.signatures)) {
       signedTransactionResults.push({
         txID: this.transactionId,
-        blob: algosdk.encodeObj(this.parentTransaction),
+        blob: algosdk.encodeObj(this.rawTransaction),
       })
     }
     // add signatures for each private key provided
@@ -237,7 +239,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
       }
 
       const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
-        this._actionHelper.actionEncodedForSdk,
+        this.actionHelper?.actionEncodedForSdk,
         this.options,
         privateKey,
       )
