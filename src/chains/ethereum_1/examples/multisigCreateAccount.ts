@@ -21,9 +21,9 @@ require('dotenv').config()
     // address with nonce 0: 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764
     const multisigOptions: EthereumGnosisMultisigCreateAccountOptions = {
       owners: [
-        toEthereumAddress(process.env.GOERLI_multisigOwner_1),
-        toEthereumAddress(process.env.GOERLI_multisigOwner_3),
-        toEthereumAddress(process.env.GOERLI_multisigOwner_2),
+        toEthereumAddress(process.env.TESTNET_multisigOwner_1),
+        toEthereumAddress(process.env.TESTNET_multisigOwner_3),
+        toEthereumAddress(process.env.TESTNET_multisigOwner_2),
       ],
       threshold: 2,
       saltNonce: 3, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
@@ -42,7 +42,7 @@ require('dotenv').config()
       await createAccount.composeTransaction()
       console.log('IsMultisig: ', createAccount.transaction.isMultisig)
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
-      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
+      await createAccount.transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
       console.log('Txresult: ', await createAccount.transaction.send())
     }

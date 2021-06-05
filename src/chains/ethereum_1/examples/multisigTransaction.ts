@@ -53,9 +53,9 @@ require('dotenv').config()
     console.log('owners: ', transaction.multisigTransaction.owners)
     console.log('threshold: ', transaction.multisigTransaction.threshold)
 
-    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_3_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
-    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_2_PRIVATE_KEY)])
 
     console.log(
       'signatures: ',
@@ -75,7 +75,7 @@ require('dotenv').config()
     if (transaction.requiresParentTransaction) {
       txToSend = await transaction.getParentTransaction()
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
-      await txToSend.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
+      await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('Cost', await txToSend.getEstimatedCost())
       console.log('ParentTransaction: ', txToSend.actions[0])
     }
