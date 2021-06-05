@@ -4,7 +4,13 @@
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
-import { connectChain, goerliChainOptions, goerliEndpoints } from './helpers/networks'
+import {
+  connectChain,
+  goerliChainOptions,
+  goerliEndpoints,
+  ropstenChainOptions,
+  ropstenEndpoints,
+} from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
@@ -14,17 +20,17 @@ require('dotenv').config()
 ;(async () => {
   try {
     const multisigOptions: EthereumGnosisMultisigTransactionOptions = {
-      multisigAddress: toEthereumAddress('0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764'),
+      multisigAddress: toEthereumAddress('0xE5B218cc277BB9907d91B3B8695931963b411f2A'),
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
 
-    const goerli = await connectChain(goerliEndpoints, goerliChainOptions)
+    const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
 
-    await goerli.installPlugin(gnosisSafePlugin)
+    await ropsten.installPlugin(gnosisSafePlugin)
 
     const transactionOptions: EthereumTransactionOptions<EthereumGnosisMultisigTransactionOptions> = {
-      chain: 'goerli',
+      chain: 'ropsten',
       hardfork: 'istanbul',
       executionPriority: TxExecutionPriority.Fast,
       multisigOptions,
@@ -37,7 +43,7 @@ require('dotenv').config()
       gasLimit: 100000,
     } // =>  // data: 0x... All safe transaction data
 
-    const transaction = await goerli.new.Transaction(transactionOptions)
+    const transaction = await ropsten.new.Transaction(transactionOptions)
 
     await transaction.setFromRaw(sampleSetFromRawTrx)
 
@@ -47,9 +53,9 @@ require('dotenv').config()
     console.log('owners: ', transaction.multisigTransaction.owners)
     console.log('threshold: ', transaction.multisigTransaction.threshold)
 
-    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_3_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
-    await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+    await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_2_PRIVATE_KEY)])
 
     console.log(
       'signatures: ',
@@ -68,7 +74,8 @@ require('dotenv').config()
     let txToSend = transaction
     if (transaction.requiresParentTransaction) {
       txToSend = await transaction.getParentTransaction()
-      await txToSend.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_2_PRIVATE_KEY)])
+      // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
+      await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('Cost', await txToSend.getEstimatedCost())
       console.log('ParentTransaction: ', txToSend.actions[0])
     }
