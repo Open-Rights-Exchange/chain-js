@@ -88,9 +88,19 @@ export class EosTransaction implements Transaction {
     return this._raw
   }
 
+  /** Whether parent transaction has been set yet */
+  public get hasParentTransaction(): boolean {
+    return false // Currently always false for Eos (multisig doesnt require it)
+  }
+
   /** Whether the raw transaction has been prepared */
   get hasRaw(): boolean {
     return !!this._raw
+  }
+
+  /** Wether a transaction must be wrapped in a parent transaction */
+  public get requiresParentTransaction(): boolean {
+    return false // Currently always false for Eos (multisig doesnt require it)
   }
 
   get sendReceipt() {
@@ -100,6 +110,12 @@ export class EosTransaction implements Transaction {
   /** TODO: Implement support for eos multi-sig transactions */
   get supportsMultisigTransaction(): boolean {
     return false
+  }
+
+  /** Parent transaction is what gets sent to chain
+   * Note: Eos doesnt use a parent transaction */
+  public getParentTransaction(): Promise<EosTransaction> {
+    return notSupported('Eos doesnt use a parent transaction')
   }
 
   /** Generate the raw transaction body using the actions attached

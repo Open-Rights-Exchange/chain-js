@@ -11,6 +11,7 @@ import {
   isAUint8Array,
   isNullOrEmpty,
   notImplemented,
+  notSupported,
 } from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
@@ -89,22 +90,32 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultisig(): boolean {
+    return !isNullOrEmpty(this.multisigPlugin)
+  }
+
+  /** Whether parent transaction has been set yet */
+  public get hasParentTransaction(): boolean {
+    return false // Currently always false for algorand (multisig doesnt require it)
+  }
+
+  /** Whether the raw transaction body has been set or prepared */
+  get hasRaw(): boolean {
+    return !!this.rawTransaction
+  }
+
+  /** Chain-specific values included in the transaction sent to the chain */
+  get header(): AlgorandTxHeaderParams {
+    return this._actionHelper.transactionHeaderParams
+  }
+
   get multisigPlugin(): AlgorandMultisigPlugin {
     return this._multisigPlugin
   }
 
   get multisigTransaction(): AlgorandMultisigPluginTransaction {
     return this._multisigTransaction
-  }
-
-  /** Returns whether the transaction is a multisig transaction */
-  public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.multisigPlugin)
-  }
-
-  /** Chain-specific values included in the transaction sent to the chain */
-  get header(): AlgorandTxHeaderParams {
-    return this._actionHelper.transactionHeaderParams
   }
 
   /** Options provided when the transaction class was created */
@@ -122,9 +133,15 @@ export class AlgorandTransaction implements Transaction {
     return this.rawTransaction
   }
 
-  /** Whether the raw transaction body has been set or prepared */
-  get hasRaw(): boolean {
-    return !!this.rawTransaction
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction */
+  public get requiresParentTransaction(): boolean {
+    return false // Currently always false for algorand (multisig doesnt require it)
+  }
+
+  /** Parent transaction is what gets sent to chain
+   * Note: Algorand doesnt use a parent transaction */
+  public getParentTransaction(): Promise<AlgorandTransaction> {
+    return notSupported('Algorand doesnt use a parent transaction')
   }
 
   /** Generate the raw transaction body using the actions attached
