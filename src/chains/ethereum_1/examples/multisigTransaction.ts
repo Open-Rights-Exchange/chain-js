@@ -4,13 +4,7 @@
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
-import {
-  connectChain,
-  goerliChainOptions,
-  goerliEndpoints,
-  ropstenChainOptions,
-  ropstenEndpoints,
-} from './helpers/networks'
+import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
@@ -68,7 +62,7 @@ require('dotenv').config()
     )
     console.log(
       'parentTransaction: ',
-      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentTransaction,
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentRawTransaction,
     )
     // console.log('Transaction: ', transaction.toJson())
     let txToSend = transaction

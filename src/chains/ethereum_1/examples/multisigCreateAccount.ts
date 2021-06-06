@@ -2,13 +2,7 @@
 /* eslint-disable import/newline-after-import */
 /* eslint-disable max-len */
 
-import {
-  connectChain,
-  // goerliChainOptions,
-  // goerliEndpoints,
-  ropstenChainOptions,
-  ropstenEndpoints,
-} from './helpers/networks'
+import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 
 import { EthereumGnosisMultisigCreateAccountOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
