@@ -34,7 +34,7 @@ require('dotenv').config()
       to: toEthereumAddress('0xA200c9fe7F747E10dBccA5f85A0A126c9bffe400'),
       // from: '0xfE331024D0D8b1C41B6d6203426f4B717E5C8aF3',
       value: 2000,
-      gasLimit: '100000',
+      gasLimit: '1000000',
     } // =>  // data: 0x... All safe transaction data
 
     const transaction = await ropsten.new.Transaction(transactionOptions)
