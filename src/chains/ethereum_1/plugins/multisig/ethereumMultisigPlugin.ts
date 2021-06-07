@@ -56,6 +56,8 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   threshold: number
 
+  transactionHash: string
+
   /** Whether parent transaction has been set yet */
   hasParentTransaction: boolean
 

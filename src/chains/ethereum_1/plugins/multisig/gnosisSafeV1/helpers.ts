@@ -226,7 +226,10 @@ export async function getSafeTransactionHash(
   return hash
 }
 
-export async function signSafeHash(privateKey: EthereumPrivateKey, hash: string): Promise<GnosisSafeSignature> {
+export async function signSafeTransactionHash(
+  privateKey: EthereumPrivateKey,
+  hash: string,
+): Promise<GnosisSafeSignature> {
   const signerWallet = getEthersWallet(privateKey)
   const typedDataHash = utils.arrayify(hash)
   const data = (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20')
@@ -244,11 +247,11 @@ export async function signSafeTransaction(
   chainUrl: string,
 ): Promise<GnosisSafeSignature> {
   const trxHash = await getSafeTransactionHash(multisigAddress, safeTx, chainUrl)
-  return signSafeHash(privateKey, trxHash)
+  return signSafeTransactionHash(privateKey, trxHash)
 }
 
 /** Sends approveHash call for gnosis and returns signature placeholder that indicates approval */
-export async function approveSafeTransactionHash(
+export async function approveSafeTransaction(
   privateKey: EthereumPrivateKey,
   multisigAddress: EthereumAddress,
   safeTx: GnosisSafeTransaction,
