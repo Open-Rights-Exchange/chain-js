@@ -335,7 +335,7 @@ export class EthereumTransaction implements Transaction {
       const { gasPrice, gasLimit } = this.ethereumJsTx
       if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
         throwNewError(
-          'Transaction validation failure.Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
+          'Transaction validation failure. Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
         )
       }
     }

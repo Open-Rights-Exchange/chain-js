@@ -20,7 +20,7 @@ require('dotenv').config()
         toEthereumAddress(process.env.TESTNET_multisigOwner_2),
       ],
       threshold: 2,
-      saltNonce: 3, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
+      saltNonce: 5, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
@@ -34,7 +34,8 @@ require('dotenv').config()
 
     if (createAccount.supportsTransactionToCreateAccount) {
       await createAccount.composeTransaction()
-      console.log('IsMultisig: ', createAccount.transaction.isMultisig)
+      console.log('createAccount.transaction.isMultisig:', createAccount.transaction.isMultisig)
+      console.log('createAccount.transaction.missingSignatures:', createAccount.transaction.missingSignatures)
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
       await createAccount.transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
