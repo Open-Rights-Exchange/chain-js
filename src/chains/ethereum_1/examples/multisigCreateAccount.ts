@@ -36,7 +36,7 @@ require('dotenv').config()
     if (createAccount.supportsTransactionToCreateAccount) {
       await createAccount.composeTransaction()
       console.log('createAccount.transaction.isMultisig:', createAccount.transaction.isMultisig)
-      // console.log('createAccount.transaction.missingSignatures:', createAccount.transaction.missingSignatures)
+      console.log('createAccount.transaction.missingSignatures:', createAccount.transaction.missingSignatures)
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
       await createAccount.transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('createAccount.transaction: ', createAccount.transaction.toJson())
