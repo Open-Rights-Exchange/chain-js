@@ -62,6 +62,8 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   missingSignatures: EthereumAddress[]
 
+  transactionHash: string
+
   /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
    * For chains that don't support multisig natively
    */

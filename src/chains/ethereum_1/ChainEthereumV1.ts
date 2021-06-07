@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import {
-  ChainActionType,
-  ChainDate,
-  ChainEndpoint,
-  ChainEntityName,
-  ChainInfo,
-  ChainType,
-  CryptoCurve,
-} from '../../models'
+import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
 import { composeAction } from './ethCompose'
@@ -47,7 +39,7 @@ import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
 import { initializePlugin } from '../../helpers'
-import { MultisigPlugin } from '../../interfaces/plugins/multisig'
+import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 
 // TODO: Comsolidate use of Ethereum libraries
 
@@ -320,7 +312,7 @@ class ChainEthereumV1 implements Chain {
     this._plugins.push(newPlugin)
   }
 
-  public get multisigPlugin(): MultisigPlugin {
+  public get multisigPlugin(): EthereumMultisigPlugin {
     return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
   }
 

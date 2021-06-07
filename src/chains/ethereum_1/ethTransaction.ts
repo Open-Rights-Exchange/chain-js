@@ -95,7 +95,7 @@ export class EthereumTransaction implements Transaction {
     }
   }
 
-  get multisigPlugin(): MultisigPlugin {
+  get multisigPlugin(): EthereumMultisigPlugin {
     return this._multisigPlugin
   }
 
