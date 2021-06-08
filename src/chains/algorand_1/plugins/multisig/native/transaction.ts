@@ -1,6 +1,12 @@
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
-import { byteArrayToHexString, hexStringToByteArray, isNullOrEmpty, uint8ArraysAreEqual } from '../../../../../helpers'
+import {
+  byteArrayToHexString,
+  hexStringToByteArray,
+  isNullOrEmpty,
+  notSupported,
+  uint8ArraysAreEqual,
+} from '../../../../../helpers'
 import {
   AlgorandAddress,
   AlgorandMultiSignatureStruct,
@@ -35,8 +41,6 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
   private _rawTransaction: AlgorandRawTransactionMultisigStruct
 
-  public requiresParentTransaction = false
-
   constructor(options: AlgorandMultisigNativeTransactionOptions) {
     this._options = options
   }
@@ -65,25 +69,29 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
     return this.options?.version
   }
 
+  /** Algorand multisig does not use a parent transaction */
   get hasParentTransaction(): boolean {
     return false
   }
 
-  /** Get the raw transaction (either regular or multisig) */
-  get parentTransaction(): AlgorandRawTransactionMultisigStruct {
-    throwNewError('Algorand multisig doesnt require parentTransaction')
-    return null
-  }
-
   /** Whether the raw transaction body has been set or prepared */
   get hasRawTransaction(): boolean {
-    return !!this.parentTransaction
+    return !!this.rawTransaction
+  }
+
+  /** Algorand multisig does not use a parent transaction */
+  get parentRawTransaction(): void {
+    notSupported('Algorand multisig doesnt use a parent transaction')
+    return null
   }
 
   /** Whether the raw transaction body has been set or prepared */
   get rawTransaction(): AlgorandRawTransactionMultisigStruct {
     return this._rawTransaction
   }
+
+  /** Algorand multisig does not use a parent transaction */
+  public requiresParentTransaction = false
 
   get actionHelper(): AlgorandActionHelper {
     return new AlgorandActionHelper(this._rawTransaction)

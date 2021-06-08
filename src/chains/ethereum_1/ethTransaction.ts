@@ -181,9 +181,7 @@ export class EthereumTransaction implements Transaction {
     return !!this.raw
   }
 
-  /** Ethereum chain module, returns a transaction instance that provides helper functions to sign, serialize etc...
-   * If requiresParentTransaction, use it. Because parent is the native trasnaction that is gonna be sent to chain if exists
-   */
+  /** Ethereum chain module, returns a transaction instance that provides helper functions to sign, serialize etc... */
   get ethereumJsTx(): EthereumJsTx {
     const trxOptions = this.getOptionsForEthereumJsTx()
     return new EthereumJsTx(this.raw, trxOptions)
@@ -337,7 +335,7 @@ export class EthereumTransaction implements Transaction {
       const { gasPrice, gasLimit } = this.ethereumJsTx
       if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
         throwNewError(
-          'Transaction validation failure.Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
+          'Transaction validation failure. Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
         )
       }
     }
@@ -622,6 +620,16 @@ export class EthereumTransaction implements Transaction {
     this.addSignatures([signature])
   }
 
+  /** Whether parent transaction has been set yet */
+  public get hasParentTransaction(): boolean {
+    if (this.isMultisig) {
+      return this.multisigTransaction.hasParentTransaction
+    }
+    // Ethereum natively does not use parent transaction
+    return false
+  }
+
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction */
   public get requiresParentTransaction(): boolean {
     if (this.isMultisig) {
       return this.multisigTransaction.requiresParentTransaction
@@ -643,7 +651,7 @@ export class EthereumTransaction implements Transaction {
     //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
     //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
 
-    if (isNullOrEmpty(this.multisigTransaction?.parentTransaction)) {
+    if (isNullOrEmpty(this.multisigTransaction?.parentRawTransaction)) {
       throwNewError(
         'ParentTransaction is not yet set. It is set by multisigPlugin when enough signatures are attached. Check required signatures using transaction.missingSignatures().',
       )
@@ -651,7 +659,7 @@ export class EthereumTransaction implements Transaction {
     const rawParent = {
       gasLimit: this._actionHelper?.raw?.gasLimit,
       gasPrice: this._actionHelper?.raw?.gasPrice,
-      ...this.multisigTransaction?.parentTransaction,
+      ...this.multisigTransaction?.parentRawTransaction,
     }
     const parentTransaction = new EthereumTransaction(this._chainState, null, {
       ...this._options,

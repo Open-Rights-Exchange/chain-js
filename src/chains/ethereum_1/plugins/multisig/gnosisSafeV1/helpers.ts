@@ -12,6 +12,7 @@ import {
   EIP712_SAFE_TX_TYPE,
   EthereumGnosisMultisigCreateAccountOptions,
   EthereumGnosisMultisigTransactionOptions,
+  EthereumMultisigRawTransaction,
   GnosisSafeSignature,
   GnosisSafeTransaction,
 } from './models'
@@ -311,7 +312,7 @@ export async function getSafeExecuteRawTransaction(
   chainUrl: string,
   signatures: GnosisSafeSignature[],
   overrides?: any,
-): Promise<EthereumRawTransactionAction> {
+): Promise<EthereumMultisigRawTransaction> {
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const multisigContract = getGnosisSafeContract(ethersProvier, multisigAddress)
   const signatureBytes = buildSignatureBytes(signatures)

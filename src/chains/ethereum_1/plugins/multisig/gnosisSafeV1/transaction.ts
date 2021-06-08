@@ -32,7 +32,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   private _multisigAddress: EthereumAddress
 
-  private _parentTransaction: EthereumMultisigRawTransaction
+  private _parentRawTransaction: EthereumMultisigRawTransaction
 
   private _rawTransaction: GnosisSafeRawTransaction
 
@@ -80,12 +80,12 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   /** Whether the raw transaction body has been set or prepared */
   get hasParentTransaction(): boolean {
-    return !!this._parentTransaction
+    return !!this._parentRawTransaction
   }
 
   /** Get the raw transaction (either regular or multisig) */
-  get parentTransaction(): EthereumMultisigRawTransaction {
-    return this._parentTransaction
+  get parentRawTransaction(): EthereumMultisigRawTransaction {
+    return this._parentRawTransaction
   }
 
   /** Whether the raw transaction body has been set or prepared */
@@ -181,6 +181,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     this.addSignatures(signResults)
   }
 
+  /** Determine the Nonce to use for the transaction - automatically advances by Gnosis contract if needed */
   public async getNonce(): Promise<number> {
     const nonce = (await this.multisigContract.nonce()).toNumber()
     return nonce
@@ -231,9 +232,9 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   }
 
   /** Generates ethereum chain transaction properties (to, data..) from safeTransaction body */
-  private async setParentTransactionIfReady() {
+  private async setParentTransactionIfReady(): Promise<void> {
     if (isNullOrEmpty(this.missingSignatures)) {
-      this._parentTransaction = await getSafeExecuteRawTransaction(
+      this._parentRawTransaction = await getSafeExecuteRawTransaction(
         this.multisigAddress,
         this.safeTransaction,
         this.chainUrl,
