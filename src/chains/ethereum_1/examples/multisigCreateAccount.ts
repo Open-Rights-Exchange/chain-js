@@ -14,6 +14,8 @@ require('dotenv').config()
     const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
     // address with nonce 0: 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764
     // address with nonde 5: 0x1462A78A1bb1982078fbba599e0C929243BC1135
+
+    const saltNonce = new Date().getTime()
     const multisigOptions: EthereumGnosisMultisigCreateAccountOptions = {
       owners: [
         toEthereumAddress(process.env.TESTNET_multisigOwner_1),
@@ -21,7 +23,7 @@ require('dotenv').config()
         toEthereumAddress(process.env.TESTNET_multisigOwner_2),
       ],
       threshold: 2,
-      saltNonce: 6, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
+      saltNonce, // you can't create the multisig account more than once unless you increment the nonce (otherwise you'll see a "reason: 'Create2 call failed'"" error from Gnosis)
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
