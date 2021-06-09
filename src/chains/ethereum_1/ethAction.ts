@@ -3,6 +3,7 @@ import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
 import {
   decimalToHexString,
   hasHexPrefix,
+  isABuffer,
   isNullOrEmpty,
   nullifyIfEmpty,
   removeEmptyValuesInJsonObject,
@@ -16,6 +17,7 @@ import {
   toEthereumTxData,
   toEthBuffer,
   toWeiString,
+  toEthereumAddress,
 } from './helpers'
 import {
   EthereumActionContract,
@@ -25,6 +27,7 @@ import {
   EthereumTxData,
   EthereumTransactionAction,
   EthUnit,
+  EthereumSignature,
 } from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
@@ -86,16 +89,27 @@ export class EthereumActionHelper {
       contract,
     } = actionInput
 
-    // if value is hex encoded string, then it doesnt need to be converted (already in units of Wei)
-    // otherwise, a decimal string value is expected to be in units of Gwei - we convert to Wei
-    const gasPriceInWei = hasHexPrefix(gasPriceInput)
-      ? gasPriceInput
-      : toWeiString(gasPriceInput as string, EthUnit.Gwei)
+    let gasPrice
 
-    // convert decimal strings to hex strings
-    const gasPrice = toHexStringIfNeeded(gasPriceInWei)
-    const gasLimit = toHexStringIfNeeded(gasLimitInput)
-    const value = toHexStringIfNeeded(valueInput)
+    if (isABuffer(gasPriceInput)) {
+      gasPrice = convertBufferToHexStringIfNeeded(gasPriceInput as Buffer)
+    } else {
+      // if value is hex encoded string, then it doesnt need to be converted (already in units of Wei)
+      // otherwise, a decimal string value is expected to be in units of Gwei - we convert to Wei
+      const gasPriceInWei = hasHexPrefix(gasPriceInput)
+        ? gasPriceInput
+        : toWeiString(gasPriceInput as string, EthUnit.Gwei)
+
+      // convert decimal strings to hex strings
+      gasPrice = toHexStringIfNeeded(gasPriceInWei)
+    }
+
+    const gasLimit = isABuffer(gasLimitInput)
+      ? convertBufferToHexStringIfNeeded(gasLimitInput as Buffer)
+      : toHexStringIfNeeded(gasLimitInput)
+    const value = isABuffer(valueInput)
+      ? convertBufferToHexStringIfNeeded(valueInput as Buffer)
+      : toHexStringIfNeeded(valueInput)
 
     // cant provide both contract and data properties
     if (!isNullOrEmptyEthereumValue(contract) && !isNullOrEmptyEthereumValue(data)) {
@@ -107,7 +121,7 @@ export class EthereumActionHelper {
     }
 
     // convert from param into an address string (and chack for validity)
-    const fromAddress = convertBufferToHexStringIfNeeded(from)
+    const fromAddress = toEthereumAddress(convertBufferToHexStringIfNeeded(from))
     if (isNullOrEmpty(fromAddress)) {
       this._from = ZERO_ADDRESS
     } else if (isValidEthereumAddress(fromAddress)) {
@@ -142,7 +156,7 @@ export class EthereumActionHelper {
     this._nonce = bufferToHex(ethJsTx.nonce)
     this._gasLimit = bufferToHex(ethJsTx.gasLimit)
     this._gasPrice = bufferToHex(ethJsTx.gasPrice)
-    this._to = bufferToHex(ethJsTx.to)
+    this._to = toEthereumAddress(bufferToHex(ethJsTx.to))
     this._value = bufferToHex(ethJsTx.value)
     this._data = toEthereumTxData(bufferToHex(ethJsTx.data))
     this._v = bufferToHex(ethJsTx.v)
@@ -166,6 +180,16 @@ export class EthereumActionHelper {
   set nonce(value: string) {
     const valueHex = decimalToHexString(value)
     this.updateActionProperty('nonce', valueHex)
+  }
+
+  /** set signature */
+  set signature(signature: EthereumSignature) {
+    const actionInput: EthereumTransactionAction & IndexedObject = this.action
+    const { v, r, s } = signature
+    actionInput.v = v
+    actionInput.r = r
+    actionInput.s = s
+    this.assertAndValidateEthereumActionInput(actionInput)
   }
 
   /** update a single property in this action */
