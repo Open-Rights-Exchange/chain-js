@@ -30,7 +30,9 @@ export function throwNewError(message: string, code?: string, parentError?: Erro
     messageToReturn = `${message} - Parent Error: ${parentError?.message} ${stringifySafe(parentError)}`
   }
   const error = new Error(messageToReturn)
-  error.name = code
+  if (code) {
+    error.name = code
+  }
   throw error
 }
 

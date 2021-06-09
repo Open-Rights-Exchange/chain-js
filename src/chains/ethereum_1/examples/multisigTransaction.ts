@@ -4,13 +4,7 @@
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
-import {
-  connectChain,
-  goerliChainOptions,
-  goerliEndpoints,
-  ropstenChainOptions,
-  ropstenEndpoints,
-} from './helpers/networks'
+import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
@@ -20,7 +14,7 @@ require('dotenv').config()
 ;(async () => {
   try {
     const multisigOptions: EthereumGnosisMultisigTransactionOptions = {
-      multisigAddress: toEthereumAddress('0xE5B218cc277BB9907d91B3B8695931963b411f2A'),
+      multisigAddress: toEthereumAddress('0xE5B218cc277BB9907d91B3B8695931963b411f2A'), // 0x6E94F570f5639bAb0DD3d9ab050CAf1Ad45BB764 for goerli
     }
 
     const gnosisSafePlugin = new GnosisSafeMultisigPlugin()
@@ -36,16 +30,16 @@ require('dotenv').config()
       multisigOptions,
     }
 
-    const sampleSetFromRawTrx = {
+    const sampleAction = {
       to: toEthereumAddress('0xA200c9fe7F747E10dBccA5f85A0A126c9bffe400'),
       // from: '0xfE331024D0D8b1C41B6d6203426f4B717E5C8aF3',
       value: 2000,
-      gasLimit: 100000,
+      gasLimit: '1000000',
     } // =>  // data: 0x... All safe transaction data
 
     const transaction = await ropsten.new.Transaction(transactionOptions)
 
-    await transaction.setFromRaw(sampleSetFromRawTrx)
+    transaction.actions = [sampleAction]
 
     await transaction.prepareToBeSigned()
     await transaction.validate()
@@ -68,7 +62,7 @@ require('dotenv').config()
     )
     console.log(
       'parentTransaction: ',
-      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentTransaction,
+      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentRawTransaction,
     )
     // console.log('Transaction: ', transaction.toJson())
     let txToSend = transaction

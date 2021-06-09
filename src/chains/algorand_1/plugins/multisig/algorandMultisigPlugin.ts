@@ -2,6 +2,7 @@ import {
   AlgorandAddress,
   AlgorandPrivateKey,
   AlgorandPublicKey,
+  AlgorandRawTransactionMultisigStruct,
   AlgorandSignature,
   AlgorandTxEncodedForChain,
 } from '../../models'
@@ -38,13 +39,29 @@ export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransac
 
   threshold: number
 
+  /** Whether parent transaction has been set yet
+   * Always False for Algorand */
+  hasParentTransaction: boolean
+
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRawTransaction: boolean
 
+  /** List of accounts transaction can be signed by - but have not signed yet */
   missingSignatures: AlgorandAddress[]
+
+  /** Parent transaction is what gets sent to chain
+   * Always False for Algorand */
+  parentRawTransaction: void
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  rawTransaction: AlgorandRawTransactionMultisigStruct
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: AlgorandAddress[]
+
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
+   * Always False for Algorand */
+  requiresParentTransaction?: boolean
 
   /** Signatures attached to transaction */
   signatures: AlgorandSignature[]

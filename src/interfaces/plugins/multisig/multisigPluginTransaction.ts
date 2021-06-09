@@ -9,28 +9,30 @@ export interface MultisigPluginTransaction {
 
   threshold: number
 
+  /** Whether parent transaction has been set yet */
+  hasParentTransaction: boolean
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasRawTransaction: boolean
+
+  /** List of accounts transaction can be signed by - but have not signed yet */
+  missingSignatures: any[]
+
+  /** Parent transaction is what gets sent to chain
+   * Actual transaction actions are embedded in parent transaction data
+   */
+  parentRawTransaction: any
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  rawTransaction: any
+
+  /** An array of the unique set of authorizations needed for all actions in transaction */
+  requiredAuthorizations: any[]
+
   /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
    * For chains that don't support multisig natively
    */
   requiresParentTransaction?: boolean
-
-  /** Whether transaction has been prepared for signing (has raw body) */
-  hasRawTransaction: boolean
-  /** Raw transaction body type is dependent on each plugin
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: any
-
-  hasParentTransaction: boolean
-
-  /** Parent transaction is what gets sent to chain
-   * Actual transaction (child in this case) is embedded in parent transaction data
-   */
-  parentTransaction: any
-
-  missingSignatures: any[]
-
-  /** An array of the unique set of authorizations needed for all actions in transaction */
-  requiredAuthorizations: any[]
 
   /** Signatures attached to transaction */
   signatures: any[]

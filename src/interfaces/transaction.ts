@@ -26,6 +26,10 @@ export interface Transaction {
   hasAllRequiredSignatures: boolean
   /** Whether there are any signatures attached */
   hasAnySignatures: boolean
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
+   * For chains that don't support multisig natively
+   */
+  hasParentTransaction: boolean
   /** Whether transaction has been prepared for signing (has raw body) */
   hasRaw: boolean
   /** Whether the transaction is a multi-signature transaction */
@@ -38,6 +42,8 @@ export interface Transaction {
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: any[]
   /** Signatures attached to transaction */
+  requiresParentTransaction: boolean
+  /** Whether parent transaction has been set yet */
   signatures: string[]
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
@@ -64,6 +70,8 @@ export interface Transaction {
    * Return format is string of chain's default native currency unit
    * Throws if transaction not found on-chain */
   getActualCost(): Promise<string>
+  /** Gets Parent transaction for this transaction (if any) */
+  getParentTransaction(): Promise<Transaction>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.

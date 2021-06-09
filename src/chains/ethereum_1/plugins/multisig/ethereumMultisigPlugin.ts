@@ -5,12 +5,8 @@ import {
   MultisigPlugin,
   MultisigPluginOptions,
 } from '../../../../interfaces/plugins/multisig'
-import {
-  EthereumAddress,
-  EthereumPrivateKey,
-  EthereumRawTransactionAction,
-  EthereumTransactionAction,
-} from '../../models'
+import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../models'
+import { EthereumMultisigRawTransaction } from './gnosisSafeV1/models'
 
 export type EthereumMultisigTransactionOptions = any
 export type EthereumMultisigCreateAccountOptions = any
@@ -60,28 +56,33 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   threshold: number
 
+  transactionHash: string
+
+  /** Whether parent transaction has been set yet */
+  hasParentTransaction: boolean
+
+  /** Whether transaction has been prepared for signing (has raw body) */
+  hasRawTransaction: boolean
+
+  /** List of accounts transaction can be signed by - but have not signed yet */
   missingSignatures: EthereumAddress[]
+
+  /** Parent transaction is what gets sent to chain
+   * Actual transaction actions are embedded in parent transaction data
+   */
+  parentRawTransaction: EthereumMultisigRawTransaction
+
+  /** Raw transaction body type is dependent on each plugin
+   *  Note: Set via prepareToBeSigned() or setFromRaw() */
+  rawTransaction: any
+
+  /** An array of the unique set of authorizations needed for all actions in transaction */
+  requiredAuthorizations: EthereumAddress[]
 
   /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction
    * For chains that don't support multisig natively
    */
   requiresParentTransaction?: boolean
-
-  /** Whether transaction has been prepared for signing (has raw body) */
-  hasRawTransaction: boolean
-  /** Raw transaction body type is dependent on each plugin
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: any
-
-  hasParentTransaction: boolean
-
-  /** Parent transaction is what gets sent to chain
-   * Actual transaction (child in this case) is embedded in parent transaction data
-   */
-  parentTransaction: EthereumRawTransactionAction
-
-  /** An array of the unique set of authorizations needed for all actions in transaction */
-  requiredAuthorizations: EthereumAddress[]
 
   /** Ethereum only supports one signature on a transaction so transaction wont ask multisig plugin for signature list - those are data in the contract */
   // signatures: EthereumSignature[]
