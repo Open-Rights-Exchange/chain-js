@@ -75,7 +75,7 @@ const chainSendCurrencyData = {
 
 /** Transfer token between accounts (uses most popular token type for each chain - e.g. ERC20 on Ethereum) */
 async function sendToken(chain: Chain, options: any) {
-  const sendTokenTx = chain.new.Transaction()
+  const sendTokenTx = await chain.new.Transaction()
   sendTokenTx.actions = [await chain.composeAction(ChainActionType.TokenTransfer, options.composeTokenTransferParams)]
   await sendTokenTx.prepareToBeSigned()
   await sendTokenTx.validate()
@@ -86,8 +86,10 @@ async function sendToken(chain: Chain, options: any) {
 
 /** Send 'cryptocurrency' (value) between accounts on the chain */
 async function sendCurrency(chain: Chain, options: any) {
-  const sendCurrencyTx = chain.new.Transaction()
-  sendCurrencyTx.actions = [await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams)]
+  const sendCurrencyTx = await chain.new.Transaction()
+  sendCurrencyTx.actions = [
+    await chain.composeAction(ChainActionType.ValueTransfer, options.composeValueTransferParams),
+  ]
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()
   await sendCurrencyTx.sign([options.privateKey])
@@ -112,7 +114,7 @@ async function runFunctionsForMultipleChains() {
   // Send Tokens - for each chain, we'll get token option and call the generic sendToken function
   await Promise.all(
     chains.map(async chain => {
-      const {chainType} = chain
+      const { chainType } = chain
       const tokenData = chainType === ChainType.EosV2 ? chainSendTokenData.eos : chainSendTokenData.ethereum
       const response = await sendToken(chain, tokenData)
       console.log(`---> sendToken ${chain.chainType} response:`, JSON.stringify(response))
@@ -122,7 +124,7 @@ async function runFunctionsForMultipleChains() {
   // Send 'Currency' - for each chain, sends the native currency for the chain (e.g. 'eth' for Ethereum)
   await Promise.all(
     chains.map(async chain => {
-      const {chainType} = chain
+      const { chainType } = chain
       const currencyData = chainType === ChainType.EosV2 ? chainSendCurrencyData.eos : chainSendCurrencyData.ethereum
       const response = await sendCurrency(chain, currencyData)
       console.log(`---> sendCurrency ${chain.chainType} response:`, JSON.stringify(response))
