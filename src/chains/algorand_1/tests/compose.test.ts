@@ -60,7 +60,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAssetCreate)
+    expect(actAction).toEqual(JSON.parse(composedAssetCreate))
   })
 
   it('creates asset config action object', async () => {
@@ -81,7 +81,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAssetConfig)
+    expect(actAction).toEqual(JSON.parse(composedAssetConfig))
   })
 
   it('creates asset freeze action object', async () => {
@@ -99,7 +99,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAssetFreeze)
+    expect(actAction).toEqual(JSON.parse(composedAssetFreeze))
   })
 
   it('creates asset transfer action object', async () => {
@@ -119,7 +119,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAssetTransfer)
+    expect(actAction).toEqual(JSON.parse(composedAssetTransfer))
   })
 
   it('creates asset destroy action object', async () => {
@@ -135,7 +135,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAssetDestroy)
+    expect(actAction).toEqual(JSON.parse(composedAssetDestroy))
   })
 
   it('creates key registration action object', async () => {
@@ -155,7 +155,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedKeyRegistration)
+    expect(actAction).toEqual(JSON.parse(composedKeyRegistration))
   })
 
   it('creates payment action object', async () => {
@@ -173,7 +173,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedPayment)
+    expect(actAction).toEqual(JSON.parse(composedPayment))
   })
 
   it('creates app create action object', async () => {
@@ -193,7 +193,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppCreate)
+    expect(actAction).toEqual(JSON.parse(composedAppCreate))
   })
 
   it('creates app update action object', async () => {
@@ -210,7 +210,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppUpdate)
+    expect(actAction).toEqual(JSON.parse(composedAppUpdate))
   })
 
   it('creates app optIn action object', async () => {
@@ -226,7 +226,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppOptIn)
+    expect(actAction).toEqual(JSON.parse(composedAppOptIn))
   })
 
   it('creates app close out action object', async () => {
@@ -242,7 +242,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppCloseOut)
+    expect(actAction).toEqual(JSON.parse(composedAppCloseOut))
   })
 
   it('creates app noOp base64 & UintArray appArgs action object', async () => {
@@ -259,7 +259,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+    expect(actAction).toEqual(JSON.parse(composedAppNoOp))
   })
 
   it('creates app noOp hex appArgs action object', async () => {
@@ -275,7 +275,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+    expect(actAction).toEqual(JSON.parse(composedAppNoOp))
   })
 
   it('creates app noOp readable appArgs action object', async () => {
@@ -291,7 +291,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppNoOp)
+    expect(actAction).toEqual(JSON.parse(composedAppNoOp))
   })
 
   it('creates app clear action object', async () => {
@@ -307,7 +307,7 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppClear)
+    expect(actAction).toEqual(JSON.parse(composedAppClear))
   })
 
   it('creates app delete action object', async () => {
@@ -323,6 +323,6 @@ describe('Compose Algorand Chain Actions', () => {
     actAction.firstRound = 8322719
     actAction.lastRound = 8323719
 
-    expect(JSON.stringify(actAction)).toEqual(composedAppDelete)
+    expect(actAction).toEqual(JSON.parse(composedAppDelete))
   })
 })
