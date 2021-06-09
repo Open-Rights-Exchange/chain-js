@@ -9,7 +9,6 @@ import {
   TransactionCost,
   TxExecutionPriority,
 } from '../models'
-
 /**
  * The Transaction interface declares the operations that all concrete chain (chain)transaction classes must implement
  */

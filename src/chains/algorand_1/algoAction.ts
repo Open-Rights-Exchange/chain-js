@@ -195,7 +195,10 @@ export class AlgorandActionHelper {
   /** Convert raw, compressed format to our decompressed raw format */
   private actionRawCompressedToRaw(action: any) {
     const compressedTxn = action?.txn
-    return AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
+    const rawTrx = AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
+    // CompressedTrx.fee is always flatFee but from_obj_for_encoding only converts fields.
+    rawTrx.flatFee = true
+    return rawTrx
   }
 
   /** Always returns 'none' for Algorand chain */

@@ -41,6 +41,16 @@
       }
     },
     {
+      "name": "Debug Algo Examples - transaction.ts",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/chains/algorand_1/examples/transaction.ts",
+      "cwd": "${workspaceRoot}/src/chains/algorand_1/examples",
+      "env": {
+        "TS_NODE_IGNORE": "false"
+      }
+    },
+    {
       "name": "Debug EOS Examples - misc.ts",
       "type": "node",
       "request": "launch",
