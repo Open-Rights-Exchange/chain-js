@@ -6,16 +6,15 @@ import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './hel
 import {
   EosAuthorization,
   EosActionStruct,
-  EosChainSettingsCommunicationSettings,
   EosPublicKey,
   EosEntityName,
   EosSignature,
   EosPrivateKey,
-  EosTxOptions,
+  EosTransactionOptions,
 } from './models'
 import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
-import { ConfirmType, TransactionCost, TxExecutionPriority } from '../../models'
+import { ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
 
 export type PublicKeyMapCache = {
@@ -35,7 +34,7 @@ export class EosTransaction implements Transaction {
 
   private _header: any
 
-  private _options: EosTxOptions
+  private _options: EosTransactionOptions
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
@@ -52,12 +51,16 @@ export class EosTransaction implements Transaction {
 
   private _transactionId: string
 
-  constructor(chainState: EosChainState, options?: EosTxOptions) {
+  constructor(chainState: EosChainState, options?: EosTransactionOptions) {
     this._chainState = chainState
     let { blocksBehind, expireSeconds } = options || {}
     blocksBehind = blocksBehind ?? this._chainState?.chainSettings?.defaultTransactionSettings?.blocksBehind
     expireSeconds = expireSeconds ?? this._chainState?.chainSettings?.defaultTransactionSettings?.expireSeconds
     this._options = { blocksBehind, expireSeconds }
+  }
+
+  public async init(): Promise<void> {
+    return null
   }
 
   // header
@@ -335,7 +338,7 @@ export class EosTransaction implements Transaction {
   }
 
   /** TODO: Implement support for eos multi-sig transactions */
-  public get isMultiSig(): boolean {
+  public get isMultisig(): boolean {
     return false
   }
 
@@ -470,16 +473,12 @@ export class EosTransaction implements Transaction {
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
   public async send(
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EosChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any> {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    this._sendReceipt = this._chainState.sendTransaction(
-      this._raw,
-      this.signatures,
-      waitForConfirm,
-      communicationSettings,
-    )
+    const signedTransaction = { serializedTransaction: this._raw, signatures: this.signatures }
+    this._sendReceipt = this._chainState.sendTransaction(signedTransaction, waitForConfirm, communicationSettings)
     this.setTransactionId(this._sendReceipt)
     return this._sendReceipt
   }
@@ -529,11 +528,11 @@ export class EosTransaction implements Transaction {
     notImplemented()
   }
 
-  public async setDesiredFee(desiredFee: TransactionCost): Promise<any> {
+  public async setDesiredFee(): Promise<any> {
     notSupported('setDesiredFee')
   }
 
-  public async getSuggestedFee(priority: TxExecutionPriority): Promise<any> {
+  public async getSuggestedFee(): Promise<any> {
     notSupported('getSuggestedFee')
   }
 
