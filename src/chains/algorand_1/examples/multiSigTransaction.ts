@@ -6,51 +6,51 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue, AlgorandMultiSigOptions } from '../models'
-import { toAlgorandPrivateKey, determineMultiSigAddress, toAlgorandSignature } from '../helpers'
+import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
+import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
+import { AlgorandMultisigNativeTransactionOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
 
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [{
-  url: 'https://mainnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoTestnetEndpoints = [ {
-  url: 'https://testnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoBetanetEndpoints = [{
-  url: 'https://betanet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-
-export const CreateAccountOptions = {
-  newKeysOptions: {
-    password: '2233',
+const algoMainnetEndpoints = [
+  {
+    url: 'https://mainnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
   },
-}
+]
+const algoTestnetEndpoints = [
+  {
+    url: 'https://testnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoBetanetEndpoints = [
+  {
+    url: 'https://betanet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
 
-export const multiSigOptions: AlgorandMultiSigOptions = {
+const transactionMultisigOptions: AlgorandMultisigNativeTransactionOptions = {
   version: 1,
   threshold: 2,
   addrs: [
-    env.ALGOTESTNET_mulitsig_child_account1,  // 1
-    env.ALGOTESTNET_mulitsig_child_account2,  // 2
-    env.ALGOTESTNET_mulitsig_child_account3,  // 3
+    env.ALGOTESTNET_mulitsig_child_account1,
+    env.ALGOTESTNET_mulitsig_child_account2,
+    env.ALGOTESTNET_mulitsig_child_account3,
   ],
 }
 
-export const CreateMultiSigAccountOptions = {
-  ...CreateAccountOptions,
-  multiSigOptions,
+export const transactionOptions = {
+  multisigOptions: transactionMultisigOptions,
 }
 
 const composeValueTransferParams: ValueTransferParams = {
-  // fromAccountName: ... // from will be calculated from hash of multiSigOptions
+  fromAccountName: toChainEntityName('U7KCCCPAGTHL3IQGEG2SUTIKCZR55RUZZ4H2VCHAWSJ6AYT25KHGDLUD7A'),
   toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
   amount: '1000000',
   symbol: AlgorandUnit.Microalgo,
@@ -65,14 +65,7 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
 
-  /** Create Algorand multisig account */
-  const createMultiSigAccount = algoTest.new.CreateAccount(CreateMultiSigAccountOptions)
-  await createMultiSigAccount.generateKeysIfNeeded()
-  const { accountName: multiSigAccountName } = createMultiSigAccount
-  console.log('mulitsig account: %o', multiSigAccountName)
-
-  const transaction = await algoTest.new.Transaction({ multiSigOptions })
-  composeValueTransferParams.fromAccountName = multiSigAccountName
+  const transaction = await algoTest.new.Transaction(transactionOptions)
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
@@ -83,6 +76,7 @@ async function run() {
   // add signatures seperately
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY)])
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account2_PRIVATE_KEY)])
+  // await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account3_PRIVATE_KEY)])
   // OR add them as a group
   // await transaction.sign([
   //   toAlgorandPrivateKey(env.ALGOTESTNET_mulitsig_child_account1_PRIVATE_KEY),
