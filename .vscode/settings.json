@@ -22,15 +22,23 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "diffEditor.ignoreTrimWhitespace": false,
   "eslint.alwaysShowStatus": true,
+  "eslint.options": {
+    "configFile": ".eslintrc.json",
+    "extensions": [".html", ".js"]
+  },
   "eslint.validate": [
       "javascript",
       "typescript",
   ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
   "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
   },
   "debug.node.autoAttach": "on",
 }
