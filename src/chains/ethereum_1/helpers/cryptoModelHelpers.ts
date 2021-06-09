@@ -1,6 +1,21 @@
-import { isValidPrivate, isValidPublic, isValidAddress, ECDSASignature, BN, bufferToHex } from 'ethereumjs-util'
-import { isString } from 'util'
-import { ensureHexPrefix, isNullOrEmpty, isABuffer, isAString, jsonParseAndRevive } from '../../../helpers'
+import {
+  isValidPrivate,
+  isValidPublic,
+  isValidAddress,
+  ECDSASignature,
+  BN,
+  bufferToHex,
+  privateToAddress,
+} from 'ethereumjs-util'
+import {
+  ensureHexPrefix,
+  isNullOrEmpty,
+  isABuffer,
+  isAString,
+  jsonParseAndRevive,
+  toChainEntityName,
+  toHexStringIfNeeded,
+} from '../../../helpers'
 import {
   EthereumSignature,
   EthereumPublicKey,
@@ -60,7 +75,7 @@ export function isValidEthereumSignature(
   // this is an oversimplified check just to prevent assigning a wrong string
   // signatures are actually verified in transaction object
   if (!value) return false
-  if (isString(value)) {
+  if (typeof value === 'string') {
     signature = jsonParseAndRevive(value)
   } else {
     signature = value
@@ -120,9 +135,10 @@ export function toEthereumSignature(value: string | ECDSASignature): EthereumSig
  *  Returns EthereumAddress with prefix
  */
 export function toEthereumAddress(value: string): EthereumAddress {
+  if (isNullOrEmpty(value)) return null
   const prefixedValue = ensureHexPrefix(value)
   if (isValidEthereumAddress(prefixedValue)) {
-    return prefixedValue
+    return toChainEntityName(prefixedValue)
   }
   throw new Error(`Not a valid ethereum address:${value}.`)
 }
@@ -137,5 +153,10 @@ export function toEthUnit(unit: string): EthUnit {
 
 /** accepts a hexstring or Buffer and returns hexstring (converts buffer to hexstring) */
 export function convertBufferToHexStringIfNeeded(value: string | Buffer) {
-  return isABuffer(value) ? bufferToHex(value as Buffer) : (value as string)
+  return isABuffer(value) ? bufferToHex(value as Buffer) : toHexStringIfNeeded(value)
+}
+
+export function privateKeyToAddress(privateKey: string): EthereumAddress {
+  const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
+  return toEthereumAddress(bufferToHex(privateToAddress(privateKeyBuffer)))
 }
