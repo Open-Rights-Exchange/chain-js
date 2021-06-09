@@ -6,7 +6,7 @@ import secp256k1 from 'secp256k1'
 import { AesCrypto, Asymmetric } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
 import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
-import { toEthBuffer, toEthereumPublicKey, toEthereumSignature } from './helpers'
+import { toEthBuffer, toEthereumAddress, toEthereumPublicKey, toEthereumSignature } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 import { AsymmetricScheme } from '../../crypto/asymmetricModels'
@@ -136,7 +136,7 @@ export function getEthereumPublicKeyFromSignature(
 
 /** Returns public key from ethereum address */
 export function getEthereumAddressFromPublicKey(publicKey: EthereumPublicKey): EthereumAddress {
-  return bufferToHex(publicToAddress(toEthBuffer(publicKey)))
+  return toEthereumAddress(bufferToHex(publicToAddress(toEthBuffer(publicKey))))
 }
 
 /** Adds privateKeyEncrypted if missing by encrypting privateKey (using password) */

@@ -36,6 +36,7 @@ import {
   toEosDate,
   toEosSymbol,
 } from './helpers'
+import { initializePlugin } from '../../helpers'
 import {
   EosActionStruct,
   EosChainSettings,
@@ -47,6 +48,7 @@ import {
   EosSymbol,
 } from './models'
 import { Asymmetric } from '../../crypto'
+import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
 
 /** Provides support for the EOS blockchain
  *  Provides EOS-specific implementations of the Chain interface
@@ -57,6 +59,8 @@ class ChainEosV2 implements Chain {
   private _settings: EosChainSettings
 
   private _chainState: EosChainState
+
+  private _plugins: ChainJsPlugin[]
 
   constructor(endpoints: EosChainEndpoint[], settings?: EosChainSettings) {
     this._endpoints = endpoints
@@ -80,6 +84,14 @@ class ChainEosV2 implements Chain {
   public get chainInfo(): ChainInfo {
     this.assertIsConnected()
     return this._chainState.chainInfo
+  }
+
+  public get endpoints(): EosChainEndpoint[] {
+    return this._endpoints
+  }
+
+  public get plugins(): ChainJsPlugin[] {
+    return this._plugins
   }
 
   /** Returns chain native token symbol and default token contract address */
@@ -151,15 +163,19 @@ class ChainEosV2 implements Chain {
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newCreateAccount(options?: EosCreateAccountOptions): EosCreateAccount {
+  private async newCreateAccount(options?: EosCreateAccountOptions): Promise<EosCreateAccount> {
     this.assertIsConnected()
-    return new EosCreateAccount(this._chainState, options)
+    const createAccount = new EosCreateAccount(this._chainState, options)
+    await createAccount.init()
+    return createAccount
   }
 
   /** Return a ChainTransaction class used to compose and send transactions */
-  private newTransaction(options?: TransactionOptions): EosTransaction {
+  private async newTransaction(options?: TransactionOptions): Promise<EosTransaction> {
     this.assertIsConnected()
-    return new EosTransaction(this._chainState, options)
+    const transaction = new EosTransaction(this._chainState, options)
+    await transaction.init()
+    return transaction
   }
 
   public new = {
@@ -349,6 +365,24 @@ class ChainEosV2 implements Chain {
   public assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
+    }
+  }
+
+  /** Install a plugin to this chain connection */
+  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
+    this.assertValidPlugin(plugin)
+    this._plugins = this._plugins || []
+    const newPlugin = await initializePlugin(this._chainState, plugin, options)
+    this._plugins.push(newPlugin)
+  }
+
+  /** rules to check tha plugin is well-formed and supported */
+  private assertValidPlugin(plugin: any) {
+    // TODO: We might check if type is supported in the future
+    const types = this._plugins.map(plg => plg.type)
+    const includes = types.includes(plugin?.type)
+    if (includes) {
+      throwNewError(`Type ${plugin.type} is already installed!`)
     }
   }
 

@@ -18,7 +18,8 @@
     "baseUrl": "./",
     "paths": {
       "*" : ["src/@customTypes/*"]
-    }
+    },
+    "resolveJsonModule": true
   },
   "exclude": [
     "dist",

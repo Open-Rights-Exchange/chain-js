@@ -1,11 +1,11 @@
 import { erc20Abi } from '../../templates/abis/erc20Abi'
 import { erc721Abi } from '../../templates/abis/erc721Abi'
 import { EthereumTransactionAction } from '../../models'
-import { toEthereumTxData } from '../../helpers'
+import { toEthereumAddress, toEthereumTxData } from '../../helpers'
 
 export const composedERC20ApproveAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -16,8 +16,8 @@ export const composedERC20ApproveAction: EthereumTransactionAction = {
 }
 
 export const composedERC20BurnAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -28,8 +28,8 @@ export const composedERC20BurnAction: EthereumTransactionAction = {
 }
 
 export const composedERC20IssueAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -40,8 +40,8 @@ export const composedERC20IssueAction: EthereumTransactionAction = {
 }
 
 export const composedERC20TransferAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -52,8 +52,8 @@ export const composedERC20TransferAction: EthereumTransactionAction = {
 }
 
 export const composedERC20TransferFromAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -68,8 +68,8 @@ export const composedERC20TransferFromAction: EthereumTransactionAction = {
 }
 
 export const composedERC721ApproveAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -80,8 +80,8 @@ export const composedERC721ApproveAction: EthereumTransactionAction = {
 }
 
 export const composedERC721TransferAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {
@@ -92,8 +92,8 @@ export const composedERC721TransferAction: EthereumTransactionAction = {
 }
 
 export const composedERC721TransferFromAction: EthereumTransactionAction = {
-  to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-  from: '0x0000000000000000000000000000000000000000',
+  to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+  from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
   value: '0x00',
   data: toEthereumTxData('0xcc872b660000000000000000000000000000000000000000000000000000000000000014'),
   contract: {

@@ -68,7 +68,7 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
   /** Compose and send transaction */
-  const transaction = algoTest.new.Transaction()
+  const transaction = await algoTest.new.Transaction()
   // await transaction.setFromRaw(jsonParseAndRevive(rawTransaction))
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]

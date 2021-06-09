@@ -3,18 +3,24 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainInfo, ConfirmType, ChainErrorType, ChainErrorDetailCode } from '../../models'
+import {
+  ChainInfo,
+  ConfirmType,
+  ChainErrorType,
+  ChainErrorDetailCode,
+  ChainSettingsCommunicationSettings,
+} from '../../models'
 import { fetchWrapper, trimTrailingChars, isAString, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
   EosSignature,
   EosEntityName,
   EOSGetTableRowsParams,
   EosChainSettings,
-  EosChainSettingsCommunicationSettings,
   EosTxResult,
   EosChainEndpoint,
   EosSymbol,
 } from './models'
+import { ChainState } from '../../interfaces/chainState'
 import { mapChainError } from './eosErrors'
 import {
   CHAIN_BLOCK_FREQUENCY,
@@ -25,7 +31,7 @@ import {
   DEFAULT_TRANSACTION_EXPIRY_IN_SECONDS,
 } from './eosConstants'
 
-export class EosChainState {
+export class EosChainState implements ChainState {
   private eosChainInfo: RpcInterfaces.GetInfoResult
 
   private _activeEndpoint: EosChainEndpoint
@@ -255,11 +261,11 @@ export class EosChainState {
     }
   }
 
-  /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: any, transactionId: string): boolean => {
+  /** Return a transaction if its included in a block */
+  public findBlockInTransaction = (block: any, transactionId: string): any => {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction?.trx?.id === transactionId)
-    return !!result
+    return result
   }
 
   /** Retrieve the default settings for chain communications */
@@ -273,10 +279,9 @@ export class EosChainState {
 
   /** Broadcast a signed transaction to the chain */
   async sendTransaction(
-    serializedTransaction: any,
-    signatures: EosSignature[],
+    signedTransaction: { signatures: EosSignature[]; serializedTransaction: any },
     waitForConfirm: ConfirmType = ConfirmType.None,
-    communicationSettings?: EosChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<EosTxResult> {
     if (
       waitForConfirm !== ConfirmType.None &&
@@ -286,7 +291,6 @@ export class EosChainState {
       throwNewError('EOS plugin only supports ConfirmType.None, .After001, and .Final')
     }
 
-    const signedTransaction = { signatures, serializedTransaction }
     // payload to return from this function
     const sendResult: Partial<EosTxResult> = {}
 
@@ -330,7 +334,7 @@ export class EosChainState {
     transactionResult: EosTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: EosChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ) {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
@@ -419,7 +423,7 @@ export class EosChainState {
       // if we cant get the transaction, read the next block and check if it has our transaction
       if (!transactionBlockNumber) {
         possibleTransactionBlock = await this.rpc.get_block(blockNumToCheck)
-        if (this.blockHasTransaction(possibleTransactionBlock, transactionId)) {
+        if (this.findBlockInTransaction(possibleTransactionBlock, transactionId)) {
           transactionBlockNumber = possibleTransactionBlock.block_num
         }
       }

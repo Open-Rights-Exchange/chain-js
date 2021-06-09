@@ -3,6 +3,8 @@ import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
 import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
+import { ChainState } from './interfaces/chainState'
+import { ChainJsPlugin } from './interfaces/plugin'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAString(value: any) {
@@ -516,4 +518,19 @@ export function uInt8ArrayToInteger(value: Uint8Array) {
   if (isNullOrEmpty(value)) return undefined
   const { length } = value
   return Buffer.from(value).readUIntBE(0, length)
+}
+
+/** Installs a plugin. If options provided, also runs plugIn.init(options) */
+export async function initializePlugin(
+  chainState: ChainState,
+  plugin: ChainJsPlugin,
+  options?: any,
+): Promise<ChainJsPlugin> {
+  const newPlugin = plugin
+  newPlugin.chainState = chainState
+  // call init if we have options
+  if (!isNullOrEmpty(options)) {
+    plugin.init(options)
+  }
+  return newPlugin
 }

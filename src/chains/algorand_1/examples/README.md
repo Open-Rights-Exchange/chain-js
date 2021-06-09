@@ -10,7 +10,8 @@ Create an .env file in the root of the examples folder. You can copy .example.en
 
 You'll need an API key to talk to the hosted Algorand endpoints - get one from https://developer.purestake.io and put it in the .env file.
 
-To run the example code, you may need to install the npm ts-node package 
+To run the example code, you may need to install the npm ts-node package
+
 ```bash
   npm i -g ts-node typescript
 ```
@@ -18,10 +19,11 @@ To run the example code, you may need to install the npm ts-node package
 ### Running examples
 
 Comment-out parts of the example or modify it as desired and then run the ts file using ts-node
+
 ```bash
    ts-node transfers.ts
 ```
 
 ### Learning from example code
 
-Start by reviewing the transfers example. It demonstrates several patterns for transferring assets and making payments. Review multiSigTransaction examples for how to sign transaction with multiple signatures.
+Start by reviewing the transfers example. It demonstrates several patterns for transferring assets and making payments. Review multisigTransaction examples for how to sign transaction with multiple signatures.

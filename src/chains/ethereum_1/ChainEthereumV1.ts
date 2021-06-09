@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
-// import { ChainState } from './chainState';
+import {
+  ChainActionType,
+  ChainDate,
+  ChainEndpoint,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  CryptoCurve,
+} from '../../models'
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
 import { composeAction } from './ethCompose'
@@ -38,6 +45,11 @@ import {
 } from './helpers'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 import { Asymmetric } from '../../crypto'
+import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
+import { initializePlugin } from '../../helpers'
+import { MultisigPlugin } from '../../interfaces/plugins/multisig'
+
+// TODO: Comsolidate use of Ethereum libraries
 
 /** Provides support for the Ethereum blockchain
  *  Provides Ethereum-specific implementations of the Chain interface
@@ -48,6 +60,8 @@ class ChainEthereumV1 implements Chain {
   private _settings: EthereumChainSettings
 
   private _chainState: EthereumChainState
+
+  private _plugins: any[]
 
   constructor(endpoints: EthereumChainEndpoint[], settings?: EthereumChainSettings) {
     this._endpoints = endpoints
@@ -77,6 +91,14 @@ class ChainEthereumV1 implements Chain {
 
   public get chainInfo(): ChainInfo {
     return this._chainState.chainInfo
+  }
+
+  public get endpoints(): EthereumChainEndpoint[] {
+    return this._endpoints
+  }
+
+  public get plugins(): ChainJsPlugin[] {
+    return this._plugins
   }
 
   public composeAction = async (
@@ -143,14 +165,18 @@ class ChainEthereumV1 implements Chain {
     return account
   }
 
-  private newCreateAccount = (options?: EthereumCreateAccountOptions): any => {
+  private newCreateAccount = async (options?: EthereumCreateAccountOptions<any>): Promise<EthereumCreateAccount> => {
     this.assertIsConnected()
-    return new EthereumCreateAccount(this._chainState, options)
+    const createAccount = new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
+    await createAccount.init()
+    return createAccount
   }
 
-  private newTransaction = (options?: any): EthereumTransaction => {
+  private newTransaction = async (options?: any): Promise<EthereumTransaction> => {
     this.assertIsConnected()
-    return new EthereumTransaction(this._chainState, options)
+    const transaction = new EthereumTransaction(this._chainState, this.multisigPlugin, options)
+    await transaction.init()
+    return transaction
   }
 
   public new = {
@@ -283,6 +309,29 @@ class ChainEthereumV1 implements Chain {
   public assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
       throwNewError('Not connected to chain')
+    }
+  }
+
+  /** Install a plugin to this chain connection */
+  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
+    this.assertValidPlugin(plugin)
+    this._plugins = this._plugins || []
+    const newPlugin = await initializePlugin(this._chainState, plugin, options)
+    this._plugins.push(newPlugin)
+  }
+
+  public get multisigPlugin(): MultisigPlugin {
+    return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
+  }
+
+  // TODO: Move to helpers
+  /** rules to check tha plugin is well-formed and supported */
+  private assertValidPlugin(plugin: any) {
+    // TODO: We might check if type is supported in the future
+    const types = this._plugins?.map(plg => plg.type)
+    const includes = types?.includes(plugin?.type)
+    if (includes) {
+      throwNewError(`Type ${plugin.type} is already installed!`)
     }
   }
 

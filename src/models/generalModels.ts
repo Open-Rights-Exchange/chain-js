@@ -33,6 +33,12 @@ export type ChainEntityName = string & ChainEntityNameBrand
 export type ChainAsset = string & ChainAssetBrand
 /** Token or value symbol */
 export type ChainSymbol = string & ChainSymbolBrand
+/** Parameters related to chain api requests */
+export type ChainSettingsCommunicationSettings = {
+  blocksToCheck: number
+  checkInterval: number
+  getBlockAttempts: number
+}
 
 /** Supported chain types */
 export enum ChainType {
@@ -60,6 +66,9 @@ export type ChainInfo = {
   version: string
   nativeInfo: any
 }
+
+/** Chain-specific options */
+export type ChainSettings = any
 
 /** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */
 export type IndexedObject = { [key: string]: any }

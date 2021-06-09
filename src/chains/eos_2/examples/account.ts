@@ -24,7 +24,7 @@ export const { env } = process
 // Helper functions
 export const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV2).new.Transaction()
+  const transaction = await (chain as ChainEosV2).new.Transaction()
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
@@ -260,7 +260,7 @@ async function run() {
   // console.log('account public keys:', account.publicKeys)
 
   // -----> CreateAccount - createescrow
-  // const createAccount = kylin.new.CreateAccount(createAccountOptions_createescrow)
+  // const createAccount = await kylin.new.CreateAccount(createAccountOptions_createescrow)
   // await createAccount.composeTransaction(EosNewAccountType.CreateEscrow)
   // await prepTransaction(kylin, createAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   // const txResponse = await createAccount.transaction.send(ConfirmType.After001)
@@ -270,7 +270,7 @@ async function run() {
   // console.log('transaction auths: ', createAccount.transaction.requiredAuthorizations)
 
   // -----> CreateAccount - create native kylin account
-  const createAccount = kylin.new.CreateAccount(createAccountOptions_EosNative)
+  const createAccount = await kylin.new.CreateAccount(createAccountOptions_EosNative)
   createAccount.generateKeysIfNeeded()
   if (createAccount.supportsTransactionToCreateAccount) {
     await createAccount.composeTransaction(EosNewAccountType.Native)
@@ -281,7 +281,7 @@ async function run() {
   }
 
   // -----> CreateAccount - create native ore-staging account
-  // const createAccount = oreStaging.new.CreateAccount(createAccountOptions_OreNative)
+  // const createAccount = await oreStaging.new.CreateAccount(createAccountOptions_OreNative)
   // await createAccount.generateKeysIfNeeded()
   // if (createAccount.supportsTransactionToCreateAccount) {
   //   await createAccount.composeTransaction(EosNewAccountType.NativeOre)
@@ -293,7 +293,7 @@ async function run() {
   // console.log('generatedKeys:', createAccount.generatedKeys)
 
   // -----> CreateAccount - create virtual nested account
-  // const createAccount = kylin.new.CreateAccount(createAccountOptions_virtualNested)
+  // const createAccount = await kylin.new.CreateAccount(createAccountOptions_virtualNested)
   // await createAccount.composeTransaction(EosNewAccountType.VirtualNested)
   // await prepTransaction(kylin, createAccount.transaction, env.KYLIN_moonlightore_PRIVATE_KEY)
   // const txResponse = await createAccount.transaction.send()
@@ -318,7 +318,7 @@ async function run() {
   // const account = await kylin.new.Account(createAccountOptions_OreRecycleNative.accountName)
   // console.log('account can be recycled:', account.canBeRecycled)
   // if (account.supportsRecycling && account.canBeRecycled) {
-  //   const recycleAccount = kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
+  //   const recycleAccount = await kylin.new.CreateAccount(createAccountOptions_OreRecycleNative)
   //   await recycleAccount.composeTransaction(EosNewAccountType.Native)
   //   await prepTransaction(kylin, recycleAccount.transaction, env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)
   //   console.log('createAccount response: ', await recycleAccount.transaction.send())

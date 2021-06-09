@@ -5,6 +5,7 @@ import { Account } from './account'
 import { Asymmetric, GenericCrypto } from '../crypto'
 import {
   ChainDate,
+  ChainEndpoint,
   ChainEntityName,
   ChainInfo,
   ChainSymbol,
@@ -29,6 +30,8 @@ export interface Chain {
   chainType: ChainType
   /** Returns chain plug-in name */
   description: string
+  /** Returns chain rpc endpoints */
+  endpoints: ChainEndpoint[]
   /** Returns the native (default) asset symbol for the chain and default token address (if any) */
   nativeToken: { defaultUnit: string; symbol: ChainSymbol; tokenAddress: any }
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
@@ -61,9 +64,9 @@ export interface Chain {
      * Note: Does NOT create a new account - to create an account, use new.CreateAccount */
     Account(accountName?: string): Promise<Account>
     /** Return a new CreateAccount object used to help with creating a new chain account */
-    CreateAccount(options?: any): CreateAccount
+    CreateAccount(options?: any): Promise<CreateAccount>
     /** Return a chain Transaction object used to compose and send transactions */
-    Transaction(options?: TransactionOptions): Transaction
+    Transaction(options?: TransactionOptions): Promise<Transaction>
   }
 
   // Chain Crypto functions
@@ -148,4 +151,7 @@ export interface Chain {
 
   /** Transforms a chain-specfic error type (e.g. RpcError on EOS) to a 'standard' error type (ChainError) that includes additional chain insights */
   mapChainError(error: Error): ChainError
+
+  /** adds a plugin (instantiated seperately) to the chain */
+  installPlugin(plugin: any): Promise<void>
 }

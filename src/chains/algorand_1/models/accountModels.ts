@@ -1,10 +1,12 @@
+// eslint-disable-next-line import/no-cycle
+import { AlgorandMultisigNativeCreateAccountOptions } from '../plugins/multisig/native/models'
 import { AlgorandPublicKey } from './cryptoModels'
-import { AlgorandNewKeysOptions, AlgorandMultiSigOptions } from './generalModels'
+import { AlgorandNewKeysOptions } from './generalModels'
 
 export type AlgorandCreateAccountOptions = {
   publicKey?: AlgorandPublicKey
   newKeysOptions?: AlgorandNewKeysOptions
-  multiSigOptions?: AlgorandMultiSigOptions
+  multisigOptions?: AlgorandMultisigNativeCreateAccountOptions
 }
 
 /** Type of account to create */
