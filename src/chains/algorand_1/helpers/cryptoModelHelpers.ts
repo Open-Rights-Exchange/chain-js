@@ -1,6 +1,7 @@
 import * as base32 from 'hi-base32'
 import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
+import { throwNewError } from '../../../errors'
 import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
 import {
   byteArrayToHexString,
@@ -118,4 +119,13 @@ export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array)
 // convert a native Uint8Array signature to Hexstring
 export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Array {
   return hexStringToByteArray(signature)
+}
+
+/** Throws if signatures isn't properly formatted */
+export function assertValidSignatures(signatures: AlgorandSignature[]) {
+  ;(signatures || []).forEach(sig => {
+    if (!isValidAlgorandSignature(sig)) {
+      throwNewError(`Not a valid signature : ${sig}`, 'signature_invalid')
+    }
+  })
 }
