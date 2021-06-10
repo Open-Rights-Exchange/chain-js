@@ -4,7 +4,7 @@ import { parse, stringify } from 'flatted'
 import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainState } from './interfaces/chainState'
-import { ChainJsPlugin } from './interfaces/plugin'
+import { ChainJsPlugin, ChainJsPluginOptions } from './interfaces/plugin'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAString(value: any) {
@@ -524,7 +524,7 @@ export function uInt8ArrayToInteger(value: Uint8Array) {
 export async function initializePlugin(
   chainState: ChainState,
   plugin: ChainJsPlugin,
-  options?: any,
+  options?: ChainJsPluginOptions,
 ): Promise<ChainJsPlugin> {
   const newPlugin = plugin
   newPlugin.chainState = chainState
@@ -533,4 +533,13 @@ export async function initializePlugin(
     plugin.init(options)
   }
   return newPlugin
+}
+
+/** Throws if a plugin of the same type has already been installed */
+export function assertPluginTypeNotAlreadyInstalled(plugin: ChainJsPlugin, installedPlugins: ChainJsPlugin[]) {
+  const installedTypes = (installedPlugins || []).map(plg => plg.type)
+  const isInstalled = installedTypes.includes(plugin.type)
+  if (isInstalled) {
+    throw new Error(`Plugin of type ${plugin.type} is already installed - only one of each type may be installed.`)
+  }
 }

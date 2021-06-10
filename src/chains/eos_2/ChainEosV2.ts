@@ -36,7 +36,7 @@ import {
   toEosDate,
   toEosSymbol,
 } from './helpers'
-import { initializePlugin } from '../../helpers'
+import { assertPluginTypeNotAlreadyInstalled, initializePlugin } from '../../helpers'
 import {
   EosActionStruct,
   EosChainSettings,
@@ -377,13 +377,9 @@ class ChainEosV2 implements Chain {
   }
 
   /** rules to check tha plugin is well-formed and supported */
-  private assertValidPlugin(plugin: any) {
-    // TODO: We might check if type is supported in the future
-    const types = this._plugins.map(plg => plg.type)
-    const includes = types.includes(plugin?.type)
-    if (includes) {
-      throwNewError(`Type ${plugin.type} is already installed!`)
-    }
+  private assertValidPlugin(plugin: ChainJsPlugin) {
+    // TODO: check if plugin type is supported for this chain
+    assertPluginTypeNotAlreadyInstalled(plugin, this._plugins)
   }
 
   /** Access to underlying eosjs sdk

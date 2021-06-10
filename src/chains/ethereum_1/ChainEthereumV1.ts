@@ -38,7 +38,7 @@ import {
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
-import { initializePlugin } from '../../helpers'
+import { assertPluginTypeNotAlreadyInstalled, initializePlugin } from '../../helpers'
 import { EthereumMultisigPlugin } from './plugins/multisig/ethereumMultisigPlugin'
 
 // TODO: Comsolidate use of Ethereum libraries
@@ -316,15 +316,10 @@ class ChainEthereumV1 implements Chain {
     return this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
   }
 
-  // TODO: Move to helpers
   /** rules to check tha plugin is well-formed and supported */
-  private assertValidPlugin(plugin: any) {
-    // TODO: We might check if type is supported in the future
-    const types = this._plugins?.map(plg => plg.type)
-    const includes = types?.includes(plugin?.type)
-    if (includes) {
-      throwNewError(`Type ${plugin.type} is already installed!`)
-    }
+  private assertValidPlugin(plugin: ChainJsPlugin) {
+    // TODO: check if plugin type is supported for this chain
+    assertPluginTypeNotAlreadyInstalled(plugin, this._plugins)
   }
 
   /** Access to underlying web3 sdk
