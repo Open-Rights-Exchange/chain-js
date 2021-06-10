@@ -3,6 +3,7 @@ import { Transaction } from './transaction'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import { Asymmetric, GenericCrypto } from '../crypto'
+import { ChainJsPlugin, ChainJsPluginOptions } from './plugin'
 import {
   ChainDate,
   ChainEndpoint,
@@ -153,5 +154,5 @@ export interface Chain {
   mapChainError(error: Error): ChainError
 
   /** adds a plugin (instantiated seperately) to the chain */
-  installPlugin(plugin: any): Promise<void>
+  installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions): Promise<void>
 }
