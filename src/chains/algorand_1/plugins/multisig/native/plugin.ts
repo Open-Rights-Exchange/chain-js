@@ -13,7 +13,7 @@ export class NativeMultisigPlugin extends ChainJsPlugin implements MultisigPlugi
   // This plug-in does not require initalization
   protected _isInitialized: boolean = true
 
-  async init(options: any) {
+  async init(options?: any) {
     /** Pass along options so parent class can initialize */
     super.init(options)
   }

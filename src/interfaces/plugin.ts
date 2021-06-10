@@ -27,7 +27,7 @@ export class ChainJsPlugin {
 
   /** Initializes plugin using options
    *  If a plugin doesnt need to be inited, then hardcode protected _isInitialized = true */
-  init(options: ChainJsPluginOptions) {
+  init(options?: ChainJsPluginOptions) {
     this._options = options
     this._isInitialized = true
   } // eslint-disable-line @typescript-eslint/no-unused-vars
