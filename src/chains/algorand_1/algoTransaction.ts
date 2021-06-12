@@ -7,6 +7,7 @@ import { throwNewError } from '../../errors'
 import {
   byteArrayToHexString,
   hexStringToByteArray,
+  isANumber,
   isArrayLengthOne,
   isAUint8Array,
   isNullOrEmpty,
@@ -78,7 +79,7 @@ export class AlgorandTransaction implements Transaction {
   ) {
     this._chainState = chainState
     this.assertValidOptions(options)
-    this._options = options || {}
+    this.applyOptions(options)
     if (!isNullOrEmpty(this.options?.multisigOptions)) {
       this._multisigPlugin = multisigPlugin
     }
@@ -238,7 +239,7 @@ export class AlgorandTransaction implements Transaction {
       this._algoSdkTransaction = null
     } else {
       const chainTxHeaderParams = this._chainState.chainInfo.nativeInfo.transactionHeaderParams
-      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
+      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams, this.options)
       this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk)
     }
   }
@@ -547,6 +548,9 @@ export class AlgorandTransaction implements Transaction {
 
   /** Throws if from is not null or empty algorand argument */
   private assertValidOptions(options: AlgorandTransactionOptions): void {
+    if (options?.expireSeconds && !isANumber(options.expireSeconds)) {
+      throwNewError('Invalid transaction options: ExpireSeconds is not a number')
+    }
     if (options?.multisigOptions && options?.signerPublicKey) {
       throwNewError(
         'Invalid transaction options: Provide multisigOptions OR signerPublicKey - not both. The signerPublicKey is for non-multisig transasctions only',
@@ -564,6 +568,17 @@ export class AlgorandTransaction implements Transaction {
     } else {
       this._rawTransaction = transaction as AlgorandRawTransactionStruct
     }
+  }
+
+  /** apply options and/or use defaults */
+  private applyOptions(options: AlgorandTransactionOptions) {
+    const { multisigOptions, signerPublicKey } = options || {}
+    let { expireSeconds, fee, flatFee } = options || {}
+    const { defaultTransactionSettings } = this._chainState?.chainSettings || {}
+    expireSeconds = expireSeconds ?? defaultTransactionSettings?.expireSeconds
+    fee = fee ?? defaultTransactionSettings?.fee
+    flatFee = flatFee ?? defaultTransactionSettings?.flatFee
+    this._options = { expireSeconds, fee, flatFee, multisigOptions, signerPublicKey }
   }
 
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
