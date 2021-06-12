@@ -12,7 +12,7 @@ import { toAlgorandPrivateKey } from '../helpers'
 import { AlgorandTransaction } from '../algoTransaction'
 import { AlgorandChainState } from '../algoChainState'
 import { ChainAlgorandV1 } from '../ChainAlgorandV1'
-import { jsonParseAndRevive } from '../../../helpers'
+import { jsonParseAndRevive, sleep } from '../../../helpers'
 
 require('dotenv').config()
 
@@ -62,7 +62,8 @@ const rawTransactionType2 = // has serialized UInt8Array
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const chainSettings = { defaultTransactionSettings : { expireSeconds: 100} } // optional setting
+  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints, chainSettings)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
