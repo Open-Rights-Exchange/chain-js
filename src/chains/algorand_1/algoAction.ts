@@ -282,7 +282,7 @@ export class AlgorandActionHelper {
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
     const lastValidBlock = rawAction.firstRound + numberOfBlockValidFor
-    rawAction.lastRound = rawAction.lastRound || lastValidBlock
+    rawAction.lastRound = lastValidBlock // always replace the lastblock with default (or provided options)
     rawAction.fee = rawAction.fee || chainTxParams.minFee
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
   }
