@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { toChainEntityName } from '../../../helpers'
+import { sleep, toChainEntityName } from '../../../helpers'
 import { ChainError, ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint } from '../../../models'
 import { toAlgorandSymbol } from '../helpers'
@@ -29,10 +29,6 @@ const algoBetanetEndpoints = [{
   url: 'https://betanet-algorand.api.purestake.io/ps2',
   options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms || 1000))
-}
 
 async function run() {
   /** Create Algorand chain instance */
