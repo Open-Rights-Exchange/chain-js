@@ -543,3 +543,8 @@ export function assertPluginTypeNotAlreadyInstalled(plugin: ChainJsPlugin, insta
     throw new Error(`Plugin of type ${plugin.type} is already installed - only one of each type may be installed.`)
   }
 }
+
+/** Pause exectuion for nn miliseconds */
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms || 1000))
+}
