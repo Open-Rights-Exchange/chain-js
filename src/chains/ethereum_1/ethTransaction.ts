@@ -224,7 +224,9 @@ export class EthereumTransaction implements Transaction {
     }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
-    // this.updateEthTxFromAction()
+    if (this.isMultisig) {
+      // TODO: this.multisigTransaction.clearRaw()
+    }
   }
 
   /**
