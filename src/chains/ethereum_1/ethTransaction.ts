@@ -348,26 +348,31 @@ export class EthereumTransaction implements Transaction {
 
   /** Get signature attached to transaction - returns null if no signature */
   get signatures(): EthereumSignature[] {
-    const { v, r, s } = this._actionHelper?.raw || {}
-    if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
-      return null // return null instead of empty array
+    let signatures: EthereumSignature[] = []
+    if (this.isMultisig) {
+      signatures = this.multisigTransaction.signatures
+    } else {
+      const { v, r, s } = this._actionHelper?.raw || {}
+      if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
+        return null // return null instead of empty array
+      }
+      const signature = toEthereumSignature({
+        v: bufferToInt(v),
+        r,
+        s,
+      })
+      signatures = [signature]
     }
-    const signature = toEthereumSignature({
-      v: bufferToInt(v),
-      r,
-      s,
-    })
-
-    return [signature]
-  }
-
-  /** Sets the Set of signatures */
-  set signatures(signatures: EthereumSignature[]) {
-    this.addSignatures(signatures)
+    return signatures
   }
 
   /** Add signature to raw transaction - Accepts array with exactly one signature */
-  addSignatures = (signatures: EthereumSignature[]): void => {
+  addSignatures = async (signatures: EthereumSignature[]): Promise<void> => {
+    if (this.isMultisig) {
+      await this.multisigTransaction.addSignatures(signatures)
+      return
+    }
+    // add a regular signature (not multisig)
     if (isNullOrEmpty(signatures) && this.hasRaw) {
       this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignature
     } else if (!isArrayLengthOne(signatures)) {
@@ -389,6 +394,9 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether there is an attached signature */
   get hasAnySignatures(): boolean {
+    if (this.isMultisig) {
+      return !isNullOrEmpty(this.multisigTransaction.signatures)
+    }
     return !isNullOrEmpty(this.signatures)
   }
 
@@ -612,12 +620,12 @@ export class EthereumTransaction implements Transaction {
     return this.ethereumJsTx.hash(false)
   }
 
-  private signAndAddSignatures(privateKey: string) {
+  private async signAndAddSignatures(privateKey: string) {
     const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
     const ethJsTx = this.ethereumJsTx
     ethJsTx.sign(privateKeyBuffer)
     const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignature
-    this.addSignatures([signature])
+    await this.addSignatures([signature])
   }
 
   /** Whether parent transaction has been set yet */
@@ -691,7 +699,7 @@ export class EthereumTransaction implements Transaction {
       }
 
       await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
-      this.signAndAddSignatures(firstPrivateKey)
+      await this.signAndAddSignatures(firstPrivateKey)
     }
   }
   // send
@@ -777,6 +785,14 @@ export class EthereumTransaction implements Transaction {
   /** JSON representation of transaction data */
   public toJson(): any {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
+  }
+
+  /** Ensures that the value comforms to a well-formed signature */
+  public toSignature(value: any): EthereumSignature {
+    if (this.isMultisig) {
+      return this.multisigTransaction.toSignature(value)
+    }
+    return toEthereumSignature(value)
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------
