@@ -1,4 +1,4 @@
-import { PrivateKey } from '../../../models'
+import { PrivateKey, Signature } from '../../../models'
 
 export interface MultisigPluginTransaction {
   init(options: any): Promise<void>
@@ -38,7 +38,7 @@ export interface MultisigPluginTransaction {
   signatures: any[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: any[]): void
+  addSignatures(signature: any[]): Promise<void>
 
   prepareToBeSigned(rawTransaction: any): Promise<void>
 
@@ -46,6 +46,9 @@ export interface MultisigPluginTransaction {
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>
+
+  /** Ensures that the value comforms to a well-formed signature */
+  toSignature(value: string): Signature
 
   validate(): Promise<void>
 }
