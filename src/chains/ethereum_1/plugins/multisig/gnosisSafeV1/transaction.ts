@@ -195,7 +195,6 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
       signResults.push(result)
     })
     await this.addSignatures(signResults)
-    await this.setParentTransactionIfReady()
   }
 
   /** Determine the Nonce to use for the transaction - automatically advances by Gnosis contract if needed */
@@ -245,7 +244,6 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
       }),
     )
     await this.addSignatures(signResults)
-    await this.setParentTransactionIfReady()
   }
 
   /** Generates ethereum chain transaction properties (to, data..) from safeTransaction body */
