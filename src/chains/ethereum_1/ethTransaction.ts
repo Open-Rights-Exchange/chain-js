@@ -319,6 +319,9 @@ export class EthereumTransaction implements Transaction {
     this._actionHelper = new EthereumActionHelper(action, trxOptions)
     this.setRawProperties()
     this._isValidated = false
+    if (this.isMultisig) {
+      this.multisigTransaction.addAction(action)
+    }
   }
 
   // validation
