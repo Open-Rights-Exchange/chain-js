@@ -31,6 +31,12 @@ import { toEthereumAddress } from '../../../helpers'
 export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPluginTransaction {
   private _options: EthereumGnosisMultisigTransactionOptions
 
+  /** mirrors the action from the ethTransction - used to determine if action has changed when setFromRaw */
+  private _action: EthereumTransactionAction
+
+  /** mirrors the action from the ethTransction - used to determine if action has changed when setFromRaw */
+  private _actionUsedForRaw: EthereumTransactionAction
+
   private _chainUrl: string
 
   private _owners: EthereumAddress[]
@@ -220,10 +226,18 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Verify and set multisigAddress, owners and threshold.
    * Set safeTransaction from rawTransaction that has passed from ethTransaction class.
    */
-  public async prepareToBeSigned(transactionAction: EthereumTransactionAction): Promise<void> {
-    // adds transactionOptions into input that is provided from constructor
-    this._rawTransaction = await transactionToSafeTx(transactionAction, this.options)
+  public async prepareToBeSigned(): Promise<void> {
+    // only set raw from if the action has changed since the last prepareToBeSigned
+    if (this._action === this._actionUsedForRaw) return
+    // only update _rawTransaction if we've changed the action since creating it last
+    this._actionUsedForRaw = this._action
+    this._rawTransaction = await transactionToSafeTx(this._action, this.options)
     await this.calculateTransactionHash()
+  }
+
+  /** Save action in this plug-in to reflect the latest action for the ethTransaction */
+  public addAction(action: EthereumTransactionAction): void {
+    this._action = action
   }
 
   public async calculateTransactionHash() {
