@@ -87,6 +87,9 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   /** Ethereum only supports one signature on a transaction so transaction wont ask multisig plugin for signature list - those are data in the contract */
   // signatures: EthereumSignature[]
 
+  /** Save action used for transaction body */
+  addAction(action: EthereumTransactionAction): void
+
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: any[]): Promise<void>
 
