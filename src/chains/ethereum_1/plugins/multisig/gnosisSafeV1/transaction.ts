@@ -191,10 +191,12 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     await this.setParentTransactionIfReady()
   }
 
-  /** Sending a transaction to chain by the owner, which approves a spesific transaction hash.
-   * Then add metadata indicates that approval into signatures array.
+  /** Alternative (optional) way of adding a 'signature' to the Gnosis contract/transaction
+   * May be called for one or more privateKeys and adds signatures to contract on-chain
+   * Add a 'placeholder' signature into signatures array (placeholder is returned from approveSafeTransaction)
+   * The placeholder signature(s) is needed to be sent when executing the gnosis TX on-chain
    */
-  async approveAndAddApprovalSignature(privateKeys: EthereumPrivateKey[]) {
+  public async addApprovalSignatureToGnosisContract(privateKeys: EthereumPrivateKey[]) {
     const signResults: GnosisSafeSignature[] = []
     privateKeys.forEach(async pk => {
       const result = await approveSafeTransaction(pk, this.multisigAddress, this.safeTransaction, this.chainUrl)
