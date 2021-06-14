@@ -60,7 +60,7 @@ export interface Transaction {
    *  since it would invalidate existing signatures. */
   addAction(action: any, asFirstAction?: boolean): void
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: Signature[]): void
+  addSignatures(signature: Signature[]): Promise<void>
   /** Whether there is an attached signature for the publicKey for the authorization (e.g. account/permission)
    *  May need to call chain (async) to fetch publicKey(s) for authorization(s) */
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
@@ -91,6 +91,8 @@ export interface Transaction {
   sign(privateKeys: PrivateKey[]): Promise<void>
   /** JSON representation of transaction data */
   toJson(): ConfirmType.None
+  /** Ensures that the value comforms to a well-formed signature */
+  toSignature(value: string): Signature
   /** Verifies that all accounts and permisison for actions exist on chain.
    *  Throws if any problems */
   validate(): Promise<void>

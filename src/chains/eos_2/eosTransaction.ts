@@ -2,7 +2,7 @@ import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosAccount } from './eosAccount'
 import { EosChainState } from './eosChainState'
 import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
-import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey } from './helpers'
+import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey, toEosSignature } from './helpers'
 import {
   EosAuthorization,
   EosActionStruct,
@@ -12,7 +12,15 @@ import {
   EosPrivateKey,
   EosTransactionOptions,
 } from './models'
-import { isAString, isAnObject, isNullOrEmpty, getUniqueValues, notSupported, notImplemented } from '../../helpers'
+import {
+  asyncForEach,
+  getUniqueValues,
+  isAnObject,
+  isAString,
+  isNullOrEmpty,
+  notImplemented,
+  notSupported,
+} from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
@@ -114,7 +122,7 @@ export class EosTransaction implements Transaction {
 
   /** Parent transaction is what gets sent to chain
    * Note: Eos doesnt use a parent transaction */
-  public getParentTransaction(): Promise<EosTransaction> {
+  public async getParentTransaction(): Promise<Transaction> {
     return notSupported('Eos doesnt use a parent transaction')
   }
 
@@ -258,16 +266,8 @@ export class EosTransaction implements Transaction {
     return [...this._signatures]
   }
 
-  /** Sets the Set of signatures */
-  set signatures(signatures: EosSignature[]) {
-    signatures.forEach(sig => {
-      this.assertValidSignature(sig)
-    })
-    this._signatures = new Set<EosSignature>(signatures)
-  }
-
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signatures: EosSignature[]): void {
+  async addSignatures(signatures: EosSignature[]): Promise<void> {
     if (isNullOrEmpty(signatures)) return
     signatures.forEach(signature => {
       this.assertValidSignature(signature)
@@ -359,7 +359,7 @@ export class EosTransaction implements Transaction {
   }
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
-  public sign(privateKeys: EosPrivateKey[]): Promise<void> {
+  public async sign(privateKeys: EosPrivateKey[]): Promise<void> {
     this.assertIsValidated()
     if (isNullOrEmpty(privateKeys)) return
     privateKeys.forEach(pk => {
@@ -368,9 +368,9 @@ export class EosTransaction implements Transaction {
       }
     })
     // sign the signBuffer using the private key
-    privateKeys.forEach(pk => {
+    await asyncForEach(privateKeys, async pk => {
       const signature = cryptoSign(this._signBuffer, pk)
-      this.addSignatures([signature])
+      await this.addSignatures([signature])
     })
   }
 
@@ -511,6 +511,11 @@ export class EosTransaction implements Transaction {
   /** JSON representation of transaction data */
   public toJson(): any {
     return { ...this._header, actions: this._actions, signatures: this.signatures }
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS signature */
+  public toSignature(value: any) {
+    return toEosSignature(value)
   }
 
   /** Accepts either an object where each value is the uint8 array value

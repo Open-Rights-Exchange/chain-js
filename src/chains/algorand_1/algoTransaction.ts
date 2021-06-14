@@ -44,6 +44,7 @@ import {
   toAlgorandPrivateKey,
   toAddressFromPublicKey,
   assertValidSignatures,
+  toAlgorandSignature,
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
@@ -141,7 +142,7 @@ export class AlgorandTransaction implements Transaction {
 
   /** Parent transaction is what gets sent to chain
    * Note: Algorand doesnt use a parent transaction */
-  public getParentTransaction(): Promise<AlgorandTransaction> {
+  public async getParentTransaction(): Promise<Transaction> {
     return notSupported('Algorand doesnt use a parent transaction')
   }
 
@@ -327,16 +328,10 @@ export class AlgorandTransaction implements Transaction {
     return signature ? [toAlgorandSignatureFromRawSig(signature)] : null
   }
 
-  /** Sets one or more signatures on the transaction
-   * Signatures are hexstring encoded Uint8Array */
-  set signatures(signatures: AlgorandSignature[]) {
-    this.addSignatures(signatures)
-  }
-
   /** Add signatures to raw transaction
    *  Only allows signatures that use the publicKey(s) required for the transaction (from accnt, rekeyed spending key, or mulisig keys)
    *  Signatures are hexstring encoded Uint8Array */
-  addSignatures = (signaturesIn: AlgorandSignature[]): void => {
+  addSignatures = async (signaturesIn: AlgorandSignature[]): Promise<void> => {
     const signatures = signaturesIn || []
     this.assertHasRaw()
     assertValidSignatures(signatures)
@@ -356,7 +351,7 @@ export class AlgorandTransaction implements Transaction {
       }
       this._rawTransaction.sig = Buffer.from(hexStringToByteArray(signature))
     } else {
-      this.multisigTransaction.addSignatures(signatures)
+      await this.multisigTransaction.addSignatures(signatures)
     }
 
     if (errorMsg) {
@@ -612,6 +607,11 @@ export class AlgorandTransaction implements Transaction {
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS signature */
+  public toSignature(value: any) {
+    return toAlgorandSignature(value)
   }
 
   /** Returns transaction fee in units of microalgos (expressed as a string) */

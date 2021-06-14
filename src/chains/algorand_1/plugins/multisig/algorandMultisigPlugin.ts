@@ -69,7 +69,7 @@ export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransac
   getPublicKeysForSignaturesFromRawTx(): AlgorandPublicKey[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: AlgorandSignature[]): void
+  addSignatures(signature: AlgorandSignature[]): Promise<void>
 
   prepareToBeSigned(trxEncodedForChain: AlgorandTxEncodedForChain): Promise<void>
 

@@ -24,6 +24,7 @@ import {
   toAddressFromPublicKey,
   toAlgorandAddressFromPublicKeyByteArray,
   toAlgorandPublicKey,
+  toAlgorandSignature,
   toAlgorandSignatureFromRawSig,
   toPublicKeyFromAddress,
   toRawTransactionFromSignResults,
@@ -178,7 +179,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   /** Add signatures to raw transaction
    *  Only allows signatures that use the publicKey(s) required for the transaction (from accnt, rekeyed spending key, or mulisig keys)
    *  Signatures are hexstring encoded Uint8Array */
-  addSignatures = (signaturesIn: AlgorandSignature[]): void => {
+  addSignatures = async (signaturesIn: AlgorandSignature[]): Promise<void> => {
     const signatures = signaturesIn || []
     this.assertHasRaw()
     assertValidSignatures(signatures)
@@ -270,6 +271,11 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   private setRawTransactionFromSignResults(signResults: AlgorandTxSignResults) {
     const { transaction } = toRawTransactionFromSignResults(signResults)
     this._rawTransaction = transaction as AlgorandRawTransactionMultisigStruct
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS signature */
+  public toSignature(value: any) {
+    return toAlgorandSignature(value)
   }
 
   /** extract 'from' address from various action types and confirm it matches multisig options */
