@@ -269,6 +269,7 @@ export async function approveSafeTransaction(
   const signerSafe = multisigContract.connect(signerWallet)
   await signerSafe.approveHash(typedDataHash)
 
+  // The following is a placeholder 'signature' that can be added to the signatures array - this is sent to the gnosis contract when executing the transaction
   return {
     signer: toEthereumEntityName(signerWallet.address),
     data: `0x000000000000000000000000${signerWallet.address.slice(
