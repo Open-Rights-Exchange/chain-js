@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   EthereumPrivateKey,
   EthereumRawTransactionAction,
+  EthereumSignature,
   EthereumTransactionAction,
 } from '../../../models'
 import {
@@ -38,7 +39,7 @@ import {
   toEthereumAddress,
   toEthBuffer,
 } from '../../../helpers'
-import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
+import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject, tryParseJSON } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 
 // TODO: move to a more generic directory (Consider using EthersJs)
@@ -367,4 +368,34 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
   }
   return { ...detaultOptions, ...multisigOptions }
+}
+
+export function isValidGnosisSignature(value: GnosisSafeSignature | string): value is EthereumSignature {
+  let signature: GnosisSafeSignature
+  // this is an oversimplified check just to prevent assigning a wrong string
+  if (!value) return false
+  if (typeof value === 'string') {
+    signature = tryParseJSON(value) || {}
+  } else {
+    signature = value
+  }
+  const { signer, data } = signature
+  return !!signer && !!data
+}
+
+/** Throws if signatures isn't properly formatted */
+export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
+  if (!isValidGnosisSignature(signature)) {
+    throwNewError(`Not a valid Gnosis signature : ${signature}`, 'signature_invalid')
+  }
+}
+
+/** Accepts GnosisSafeSignature or stringified version of it
+ *  Returns EthereumSignature
+ */
+export function toGnosisSignature(value: string | GnosisSafeSignature) {
+  if (isValidGnosisSignature(value)) {
+    return value as EthereumSignature
+  }
+  throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
