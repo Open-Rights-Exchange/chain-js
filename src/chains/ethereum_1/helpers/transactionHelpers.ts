@@ -40,9 +40,15 @@ export function isNullOrEmptyEthereumValue(obj: any) {
     obj === ZERO_ADDRESS ||
     obj === Buffer.from(ZERO_HEX, 'hex') ||
     obj === 'NaN'
-  )
+  ) {
     return true
-  if (Buffer.isBuffer(obj) && bufferToHex(obj) === EMPTY_HEX) return true
+  }
+
+  try {
+    if (Buffer.isBuffer(obj) && bufferToHex(obj) === EMPTY_HEX) return true
+  } catch (error) {
+    // noting to do
+  }
 
   return false
 }
