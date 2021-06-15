@@ -5,7 +5,6 @@ import {
   EthereumAddress,
   EthereumPrivateKey,
   EthereumRawTransactionAction,
-  EthereumSignature,
   EthereumTransactionAction,
 } from '../../../models'
 import {
@@ -371,7 +370,7 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
   return { ...detaultOptions, ...multisigOptions }
 }
 
-export function isValidGnosisSignature(value: GnosisSafeSignature | string): value is EthereumSignature {
+export function isValidGnosisSignature(value: GnosisSafeSignature | string) {
   let signature: GnosisSafeSignature
   // this is an oversimplified check just to prevent assigning a wrong string
   if (!value) return false
@@ -392,11 +391,12 @@ export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
 }
 
 /** Accepts GnosisSafeSignature or stringified version of it
- *  Returns EthereumSignature
+ *  Returns GnosisSafeSignature
  */
-export function toGnosisSignature(value: string | GnosisSafeSignature) {
-  if (isValidGnosisSignature(value)) {
-    return value as EthereumSignature
+export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSafeSignature {
+  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  if (isValidGnosisSignature(signature)) {
+    return signature
   }
   throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
