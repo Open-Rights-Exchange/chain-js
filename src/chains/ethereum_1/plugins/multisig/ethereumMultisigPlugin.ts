@@ -10,6 +10,7 @@ import { EthereumMultisigRawTransaction } from './gnosisSafeV1/models'
 
 export type EthereumMultisigTransactionOptions = any
 export type EthereumMultisigCreateAccountOptions = any
+export type EthereumMultisigPluginRawTransaction = any
 
 export interface EthereumMultisigPlugin extends MultisigPlugin {
   name: string
@@ -72,9 +73,9 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
    */
   parentRawTransaction: EthereumMultisigRawTransaction
 
-  /** Raw transaction body type is dependent on each plugin
+  /** Raw transaction type is dependent on each plugin
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: any
+  rawTransaction: EthereumMultisigPluginRawTransaction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: EthereumAddress[]
@@ -92,10 +93,13 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   prepareToBeSigned(action: EthereumTransactionAction): Promise<void>
 
-  setFromRaw(rawTransaction: any): Promise<void>
+  setFromRaw(rawTransaction: EthereumMultisigPluginRawTransaction): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>
+
+  /** Ensures that the value comforms to a well-formed signature */
+  toSignature(value: string): EthereumSignature
 
   validate(): Promise<void>
 }
