@@ -70,7 +70,8 @@ export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): v
   return isValidPrivate(toEthBuffer(ensureHexPrefix(value)))
 }
 
-export function isValidEthereumSignature(
+/** whether a value is a valid native Ethereum signature (or a strinigified version of it) */
+export function isValidEthereumSignatureNative(
   value: EthereumSignature | string | ECDSASignature,
 ): value is EthereumSignature {
   let signature: ECDSASignature
@@ -84,6 +85,13 @@ export function isValidEthereumSignature(
   }
   const { v, r, s } = signature
   return isValidSignature(v, r, s)
+}
+
+/** whether a value is a valid native Ethereum signature (or a strinigified version of it) */
+export function isValidEthereumSignature(
+  value: EthereumSignature | string | ECDSASignature,
+): value is EthereumSignature {
+  return isValidEthereumSignatureNative(value)
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
@@ -124,22 +132,21 @@ export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
 }
 
 /** Accepts ECDSASignature object or stringified version of it
- *  Returns EthereumSignature
+ *  Returns EthereumSignatureNative
  */
 export function toEthereumSignatureNative(value: string | ECDSASignature): EthereumSignatureNative {
   const signature = typeof value === 'string' ? tryParseJSON(value) : value
-  if (isValidEthereumSignature(signature)) {
+  if (isValidEthereumSignatureNative(signature)) {
     return signature as EthereumSignatureNative
   }
   throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
 
 /** Accepts any signature object or stringified version of it
- *  Returns EthereumSignature
+ *  Returns EthereumSignature (stringified valid for ETh chain or multisig contract)
  */
 export function toEthereumSignature(value: any): EthereumSignature {
-  if (typeof value === 'string') return value as EthereumSignature
-  return JSON.stringify(value) as EthereumSignature
+  return toEthereumSignatureNative(value)
 }
 
 /** Accepts hex string checks if a valid ethereum address
