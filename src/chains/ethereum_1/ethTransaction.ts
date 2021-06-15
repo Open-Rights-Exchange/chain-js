@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
-import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
+import { bufferToInt, bufferToHex, BN } from 'ethereumjs-util'
+import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
@@ -24,14 +24,7 @@ import {
   EthereumSignatureNative,
 } from './models'
 import { throwNewError } from '../../errors'
-import {
-  ensureHexPrefix,
-  isArrayLengthOne,
-  isNullOrEmpty,
-  nullifyIfEmpty,
-  removeHexPrefix,
-  toHexStringIfNeeded,
-} from '../../helpers'
+import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   convertEthUnit,
@@ -45,13 +38,11 @@ import {
   toEthereumAddress,
   toEthereumPublicKey,
   toEthereumSignatureNative,
-  toEthereumSignature,
   toGweiFromWei,
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
 import { EthereumMultisigPlugin, EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
-import { MultisigPlugin } from '../../interfaces/plugins/multisig'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -792,8 +783,8 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Ensures that the value comforms to a well-formed signature */
-  public toSignature(value: any): EthereumSignature {
-    return toEthereumSignature(value)
+  public toSignature(value: any): EthereumSignatureNative {
+    return toEthereumSignatureNative(value)
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------
