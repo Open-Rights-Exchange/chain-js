@@ -3,7 +3,7 @@
 /* eslint-disable max-len */
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
-import { toEthereumAddress, toEthereumPrivateKey, toEthereumSignature, toEthereumTxData, toEthUnit } from '../helpers'
+import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
@@ -51,7 +51,7 @@ require('dotenv').config()
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
     await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_2_PRIVATE_KEY)])
 
-    console.log('signatures: ', transaction.signatures)
+    await transaction.prepareToBeSigned()
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log(
       'safeTransaction: ',
@@ -70,7 +70,7 @@ require('dotenv').config()
       console.log('Cost', await txToSend.getEstimatedCost())
       console.log('ParentTransaction: ', txToSend.actions[0])
     }
-    console.log('Trx result: ', await txToSend.send())
+    // console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }

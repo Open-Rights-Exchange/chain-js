@@ -33,7 +33,7 @@ describe('Ethereum ParentTransaction Tests', () => {
 
   let transaction: EthereumTransaction
 
-  it('parentRawTransaction should be undefined when there is missingSignatures', async () => {
+  it('sign and get strigified signatures', async () => {
     const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
     await ropsten.installPlugin(gnosisSafePlugin)
 
@@ -48,7 +48,22 @@ describe('Ethereum ParentTransaction Tests', () => {
 
     await transaction.sign([toEthereumPrivateKey(multisigOwnerPrivateKey2)])
 
-    expect(transaction.signatures).toStrictEqual(getSignatures)
-    console.log('rawTransaction: ', transaction.raw)
+    expect(transaction.signatures).toHaveLength(2)
+  })
+
+  it('set signatures', async () => {
+    const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
+    await ropsten.installPlugin(gnosisSafePlugin)
+
+    transaction = await ropsten.new.Transaction(transactionOptions)
+
+    transaction.actions = [sampleAction]
+
+    await transaction.prepareToBeSigned()
+    await transaction.validate()
+
+    await transaction.addSignatures(getSignatures)
+
+    expect(transaction.signatures).toHaveLength(2)
   })
 })
