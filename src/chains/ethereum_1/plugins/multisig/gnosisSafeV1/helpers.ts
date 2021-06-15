@@ -33,7 +33,6 @@ import {
 import {
   isNullOrEmptyEthereumValue,
   generateDataFromContractAction,
-  toEthereumEntityName,
   toEthereumTxData,
   toEthereumAddress,
   toEthBuffer,
@@ -48,6 +47,37 @@ export function getEthersJsonRpcProvider(url: string) {
 // TODO: move to a more generic directory
 export function getEthersWallet(privateKey: string, provider?: ethers.providers.Provider) {
   return new ethers.Wallet(privateKey, provider)
+}
+
+export function isValidGnosisSignature(value: GnosisSafeSignature) {
+  let signature: GnosisSafeSignature
+  // this is an oversimplified check just to prevent assigning a wrong string
+  if (!value) return false
+  if (typeof value === 'string') {
+    signature = tryParseJSON(value) || {}
+  } else {
+    signature = value
+  }
+  const { signer, data } = signature
+  return !!signer && !!data
+}
+
+/** Throws if signatures isn't properly formatted */
+export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
+  if (!isValidGnosisSignature(signature)) {
+    throwNewError(`Not a valid Gnosis signature : ${signature}`, 'signature_invalid')
+  }
+}
+
+/** Accepts GnosisSafeSignature or stringified version of it
+ *  Returns GnosisSafeSignature
+ */
+export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSafeSignature {
+  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  if (isValidGnosisSignature(signature)) {
+    return signature
+  }
+  throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
 
 /** Returns GnosisSafe (for singleton master or proxy) contract instance, that is gonna be used for
@@ -233,10 +263,11 @@ export async function signSafeTransactionHash(
   const signerWallet = getEthersWallet(privateKey)
   const typedDataHash = utils.arrayify(hash)
   const data = (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20')
-  return {
+  const placeholderSig = {
     signer: toEthereumAddress(signerWallet.address),
     data,
   }
+  return toGnosisSignature(JSON.stringify(placeholderSig))
 }
 
 /** Generates GnosisSafe signature object, that is gonne be passed in as serialized for executeTransaction  */
@@ -269,12 +300,13 @@ export async function approveSafeTransaction(
   await signerSafe.approveHash(typedDataHash)
 
   // The following is a placeholder 'signature' that can be added to the signatures array - this is sent to the gnosis contract when executing the transaction
-  return {
-    signer: toEthereumEntityName(signerWallet.address),
+  const placeholderSig = {
+    signer: toEthereumAddress(signerWallet.address),
     data: `0x000000000000000000000000${signerWallet.address.slice(
       2,
     )}000000000000000000000000000000000000000000000000000000000000000001`,
   }
+  return toGnosisSignature(JSON.stringify(placeholderSig))
 }
 
 /** Sorts the signatures in right order and serializes */
@@ -368,35 +400,4 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
   }
   return { ...detaultOptions, ...multisigOptions }
-}
-
-export function isValidGnosisSignature(value: GnosisSafeSignature | string) {
-  let signature: GnosisSafeSignature
-  // this is an oversimplified check just to prevent assigning a wrong string
-  if (!value) return false
-  if (typeof value === 'string') {
-    signature = tryParseJSON(value) || {}
-  } else {
-    signature = value
-  }
-  const { signer, data } = signature
-  return !!signer && !!data
-}
-
-/** Throws if signatures isn't properly formatted */
-export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
-  if (!isValidGnosisSignature(signature)) {
-    throwNewError(`Not a valid Gnosis signature : ${signature}`, 'signature_invalid')
-  }
-}
-
-/** Accepts GnosisSafeSignature or stringified version of it
- *  Returns GnosisSafeSignature
- */
-export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSafeSignature {
-  const signature = typeof value === 'string' ? tryParseJSON(value) : value
-  if (isValidGnosisSignature(signature)) {
-    return signature
-  }
-  throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
 }
