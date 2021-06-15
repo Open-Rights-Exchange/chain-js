@@ -168,6 +168,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   /** Checks if signature addresses match with multisig owners and adds to the signatures array */
   async addSignatures(signatures: GnosisSafeSignature[]) {
+    this.assertHasRaw()
     if (isNullOrEmpty(signatures)) {
       // clear signatures
       this._rawTransaction.signatures = null
@@ -252,6 +253,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   }
 
   public async sign(privateKeys: EthereumPrivateKey[]) {
+    this.assertHasRaw()
     const signResults: GnosisSafeSignature[] = []
     await Promise.all(
       privateKeys.map(async pk => {
@@ -283,5 +285,14 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
       throwNewError('safeTransaction is missing. Call prepareToBeSigned()')
     }
     return null
+  }
+
+  /** Throws if no raw transaction body */
+  private assertHasRaw(): void {
+    if (!this.hasRawTransaction) {
+      throwNewError(
+        'Gnosis Multisig transaction doesnt have a raw transaction. Use setFromRaw() or prepareToBeSigned().',
+      )
+    }
   }
 }
