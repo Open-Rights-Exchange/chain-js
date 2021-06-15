@@ -1,4 +1,4 @@
-import { PrivateKey, Signature } from '../../../models'
+import { PrivateKey } from '../../../models'
 
 export interface MultisigPluginTransaction {
   init(options: any): Promise<void>
@@ -46,9 +46,6 @@ export interface MultisigPluginTransaction {
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>
-
-  /** Ensures that the value comforms to a well-formed signature */
-  toSignature(value: string): Signature
 
   validate(): Promise<void>
 }
