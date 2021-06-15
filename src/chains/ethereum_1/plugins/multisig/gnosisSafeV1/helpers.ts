@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   EthereumPrivateKey,
   EthereumRawTransactionAction,
+  EthereumSignature,
   EthereumTransactionAction,
 } from '../../../models'
 import {
@@ -37,7 +38,13 @@ import {
   toEthereumAddress,
   toEthBuffer,
 } from '../../../helpers'
-import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject, tryParseJSON } from '../../../../../helpers'
+import {
+  isAString,
+  isNullOrEmpty,
+  nullifyIfEmpty,
+  removeEmptyValuesInJsonObject,
+  tryParseJSON,
+} from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 
 // TODO: move to a more generic directory (Consider using EthersJs)
@@ -78,6 +85,17 @@ export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSa
     return signature
   }
   throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
+}
+
+/** stringify a Gnosis sig object */
+export function toStringifiedEthereumSignatureFromGnosisSignature(gnosisSignature: GnosisSafeSignature) {
+  if (isAString(gnosisSignature)) return gnosisSignature as EthereumSignature
+  return JSON.stringify(gnosisSignature) as EthereumSignature
+}
+
+/** stringify an array of Gnosis sig objects */
+export function toStringifiedEthereumSignatureFromGnosisSignatures(gnosisSignatures: GnosisSafeSignature[]) {
+  return (gnosisSignatures || []).map(gs => toStringifiedEthereumSignatureFromGnosisSignature(gs))
 }
 
 /** Returns GnosisSafe (for singleton master or proxy) contract instance, that is gonna be used for
