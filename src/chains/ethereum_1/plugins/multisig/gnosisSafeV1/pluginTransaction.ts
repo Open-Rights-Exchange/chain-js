@@ -190,7 +190,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     const signResults: GnosisSafeSignature[] = []
     privateKeys.forEach(async pk => {
       const result = await approveSafeTransaction(pk, this.multisigAddress, this.safeTransaction, this.chainUrl)
-      signResults.push(toGnosisSignature(result))
+      signResults.push(result)
     })
     await this.addSignatures(toStringifiedEthereumSignatureFromGnosisSignatures(signResults))
   }
@@ -249,7 +249,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     await Promise.all(
       privateKeys.map(async pk => {
         const result = await signSafeTransactionHash(pk, this.transactionHash)
-        signResults.push(toGnosisSignature(result))
+        signResults.push(result)
       }),
     )
     await this.addSignatures(toStringifiedEthereumSignatureFromGnosisSignatures(signResults))
