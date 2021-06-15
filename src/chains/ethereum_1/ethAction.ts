@@ -18,6 +18,7 @@ import {
   toEthBuffer,
   toWeiString,
   toEthereumAddress,
+  toEthereumSignatureNative,
 } from './helpers'
 import {
   EthereumActionContract,
@@ -185,7 +186,7 @@ export class EthereumActionHelper {
   /** set signature */
   set signature(signature: EthereumSignature) {
     const actionInput: EthereumTransactionAction & IndexedObject = this.action
-    const { v, r, s } = signature
+    const { v, r, s } = toEthereumSignatureNative(signature)
     actionInput.v = v
     actionInput.r = r
     actionInput.s = s

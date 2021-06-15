@@ -15,6 +15,7 @@ import {
   jsonParseAndRevive,
   toChainEntityName,
   toHexStringIfNeeded,
+  tryParseJSON,
 } from '../../../helpers'
 import {
   EthereumSignature,
@@ -23,6 +24,7 @@ import {
   EthereumAddress,
   EthereumTxData,
   EthUnit,
+  EthereumSignatureNative,
 } from '../models'
 import { toEthBuffer } from './generalHelpers'
 
@@ -124,11 +126,20 @@ export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
 /** Accepts ECDSASignature object or stringified version of it
  *  Returns EthereumSignature
  */
-export function toEthereumSignature(value: string | ECDSASignature): EthereumSignature {
-  if (isValidEthereumSignature(value)) {
-    return value
+export function toEthereumSignatureNative(value: string | ECDSASignature): EthereumSignatureNative {
+  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  if (isValidEthereumSignature(signature)) {
+    return signature as EthereumSignatureNative
   }
   throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
+}
+
+/** Accepts any signature object or stringified version of it
+ *  Returns EthereumSignature
+ */
+export function toEthereumSignature(value: any): EthereumSignature {
+  if (typeof value === 'string') return value as EthereumSignature
+  return JSON.stringify(value) as EthereumSignature
 }
 
 /** Accepts hex string checks if a valid ethereum address

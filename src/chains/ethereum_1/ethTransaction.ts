@@ -21,7 +21,7 @@ import {
   EthereumTransactionCost,
   EthereumTransactionResources,
   EthUnit,
-  EthereumRawTransactionAction,
+  EthereumSignatureNative,
 } from './models'
 import { throwNewError } from '../../errors'
 import {
@@ -44,6 +44,7 @@ import {
   toEthBuffer,
   toEthereumAddress,
   toEthereumPublicKey,
+  toEthereumSignatureNative,
   toEthereumSignature,
   toGweiFromWei,
   toWeiString,
@@ -321,9 +322,6 @@ export class EthereumTransaction implements Transaction {
     this._actionHelper = new EthereumActionHelper(action, trxOptions)
     this.setRawProperties()
     this._isValidated = false
-    if (this.isMultisig) {
-      this.multisigTransaction.addAction(action)
-    }
   }
 
   // validation
@@ -361,7 +359,7 @@ export class EthereumTransaction implements Transaction {
       if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
         return null // return null instead of empty array
       }
-      const signature = toEthereumSignature({
+      const signature = toEthereumSignatureNative({
         v: bufferToInt(v),
         r,
         s,
@@ -379,14 +377,14 @@ export class EthereumTransaction implements Transaction {
     }
     // add a regular signature (not multisig)
     if (isNullOrEmpty(signatures) && this.hasRaw) {
-      this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignature
+      this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignatureNative
     } else if (!isArrayLengthOne(signatures)) {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     } else {
       this.assertHasRaw()
       const signature = signatures[0]
       this.assertValidSignature(signature)
-      this._actionHelper.signature = signature
+      this._actionHelper.signature = toEthereumSignatureNative(signature)
     }
   }
 
@@ -629,7 +627,7 @@ export class EthereumTransaction implements Transaction {
     const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
     const ethJsTx = this.ethereumJsTx
     ethJsTx.sign(privateKeyBuffer)
-    const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignature
+    const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignatureNative
     await this.addSignatures([signature])
   }
 
@@ -679,6 +677,7 @@ export class EthereumTransaction implements Transaction {
       multisigOptions: null,
     })
     await parentTransaction.setFromRaw(rawParent)
+    await parentTransaction.prepareToBeSigned()
     await parentTransaction.validate()
     return parentTransaction
   }
@@ -794,9 +793,6 @@ export class EthereumTransaction implements Transaction {
 
   /** Ensures that the value comforms to a well-formed signature */
   public toSignature(value: any): EthereumSignature {
-    if (this.isMultisig) {
-      return this.multisigTransaction.toSignature(value)
-    }
     return toEthereumSignature(value)
   }
 

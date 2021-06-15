@@ -5,8 +5,15 @@ import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util
 import secp256k1 from 'secp256k1'
 import { AesCrypto, Asymmetric } from '../../crypto'
 import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
-import { EthereumAddress, EthereumKeyPair, EthereumPrivateKey, EthereumPublicKey, EthereumSignature } from './models'
-import { toEthBuffer, toEthereumAddress, toEthereumPublicKey, toEthereumSignature } from './helpers'
+import {
+  EthereumAddress,
+  EthereumKeyPair,
+  EthereumPrivateKey,
+  EthereumPublicKey,
+  EthereumSignature,
+  EthereumSignatureNative,
+} from './models'
+import { toEthBuffer, toEthereumAddress, toEthereumPublicKey, toEthereumSignatureNative } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
 import { AsymmetricScheme } from '../../crypto/asymmetricModels'
@@ -117,16 +124,16 @@ export async function decryptWithPrivateKeys(
 }
 
 /** Signs data with private key */
-export function sign(data: string | Buffer, privateKey: string): EthereumSignature {
+export function sign(data: string | Buffer, privateKey: string): EthereumSignatureNative {
   // todo: data should be hashed first using ethereum-js-tx Transaction.prototype.hash
   const dataBuffer = toEthBuffer(data)
   const keyBuffer = toBuffer(privateKey, 'hex')
-  return toEthereumSignature(ecsign(dataBuffer, keyBuffer))
+  return toEthereumSignatureNative(ecsign(dataBuffer, keyBuffer))
 }
 
 /** Returns public key from ethereum signature */
 export function getEthereumPublicKeyFromSignature(
-  signature: EthereumSignature,
+  signature: EthereumSignatureNative,
   data: string | Buffer,
   encoding: string,
 ): EthereumPublicKey {

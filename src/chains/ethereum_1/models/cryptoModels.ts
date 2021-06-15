@@ -13,11 +13,11 @@ export type EthereumPrivateKey = string & PrivateKeyBrand
 /** a public key string - formatted correctly for ethereum */
 export type EthereumPublicKey = string & PublicKeyBrand
 
-/** a native Ethereum ECDSA signature structure */
-export type EthereumSignature = ECDSASignature & SignatureBrand
-
 /** a stringified Ethereum signature - may have diff underlying formats (e.g. multisig) */
-export type EthereumSignatureString = string & SignatureBrand
+export type EthereumSignature = string & SignatureBrand
+
+/** a native Ethereum ECDSA signature structure */
+export type EthereumSignatureNative = ECDSASignature & SignatureBrand
 
 /** key pair - in the format returned from algosdk */
 export type EthereumKeyPair = {
