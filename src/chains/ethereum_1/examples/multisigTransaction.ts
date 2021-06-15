@@ -70,7 +70,7 @@ require('dotenv').config()
       console.log('Cost', await txToSend.getEstimatedCost())
       console.log('ParentTransaction: ', txToSend.actions[0])
     }
-    // console.log('Trx result: ', await txToSend.send())
+    console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }
