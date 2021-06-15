@@ -96,6 +96,10 @@ export class EosTransaction implements Transaction {
     return this._raw
   }
 
+  get parentTransaction() {
+    return notSupported('Eos doesnt use a parent transaction')
+  }
+
   /** Whether parent transaction has been set yet */
   public get hasParentTransaction(): boolean {
     return false // Currently always false for Eos (multisig doesnt require it)
@@ -122,7 +126,7 @@ export class EosTransaction implements Transaction {
 
   /** Parent transaction is what gets sent to chain
    * Note: Eos doesnt use a parent transaction */
-  public async generateParentTransaction(): Promise<Transaction> {
+  public async generateParentTransaction(): Promise<void> {
     return notSupported('Eos doesnt use a parent transaction')
   }
 

@@ -61,16 +61,17 @@ require('dotenv').config()
       'parentTransaction: ',
       (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentRawTransaction,
     )
-    // console.log('Transaction: ', transaction.toJson())
-    let txToSend = transaction
+
     if (transaction.requiresParentTransaction) {
-      txToSend = await transaction.generateParentTransaction()
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
-      await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
-      console.log('Cost', await txToSend.getEstimatedCost())
-      console.log('ParentTransaction: ', txToSend.actions[0])
+      await transaction.parentTransaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
+      console.log('Cost', await transaction.parentTransaction.getEstimatedCost())
+      console.log('ParentTransaction: ', transaction.parentTransaction.actions[0])
+      console.log('Trx result: ', await transaction.parentTransaction.send())
+    } else {
+      // this is not gonna be called, since gnosis multisig requires parentTransaction to send
+      console.log('Trx result: ', await transaction.send())
     }
-    console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }
