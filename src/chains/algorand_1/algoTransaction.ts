@@ -142,7 +142,7 @@ export class AlgorandTransaction implements Transaction {
 
   /** Parent transaction is what gets sent to chain
    * Note: Algorand doesnt use a parent transaction */
-  public async getParentTransaction(): Promise<Transaction> {
+  public async generateParentTransaction(): Promise<Transaction> {
     return notSupported('Algorand doesnt use a parent transaction')
   }
 

@@ -7,7 +7,7 @@ import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
-import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
+import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/pluginTransaction'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
@@ -64,7 +64,7 @@ require('dotenv').config()
     // console.log('Transaction: ', transaction.toJson())
     let txToSend = transaction
     if (transaction.requiresParentTransaction) {
-      txToSend = await transaction.getParentTransaction()
+      txToSend = await transaction.generateParentTransaction()
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
       await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
       console.log('Cost', await txToSend.getEstimatedCost())

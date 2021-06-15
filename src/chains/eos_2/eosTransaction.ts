@@ -122,7 +122,7 @@ export class EosTransaction implements Transaction {
 
   /** Parent transaction is what gets sent to chain
    * Note: Eos doesnt use a parent transaction */
-  public async getParentTransaction(): Promise<Transaction> {
+  public async generateParentTransaction(): Promise<Transaction> {
     return notSupported('Eos doesnt use a parent transaction')
   }
 

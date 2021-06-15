@@ -71,7 +71,7 @@ export interface Transaction {
    * Throws if transaction not found on-chain */
   getActualCost(): Promise<string>
   /** Gets Parent transaction for this transaction (if any) */
-  getParentTransaction(): Promise<Transaction>
+  generateParentTransaction(): Promise<Transaction>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.

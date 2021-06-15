@@ -51,7 +51,7 @@ describe('Ethereum ParentTransaction Tests', () => {
     ])
     expect(JSON.stringify(transaction.missingSignatures)).toBe(stringifiedMissingSignatures)
     expect(transaction.multisigTransaction.parentRawTransaction).toBeUndefined()
-    await expect(transaction.getParentTransaction()).rejects.toThrowError(
+    await expect(transaction.generateParentTransaction()).rejects.toThrowError(
       'ParentTransaction is not yet set. It is set by multisigPlugin when enough signatures are attached. Check required signatures using transaction.missingSignatures().',
     )
   })
@@ -62,6 +62,6 @@ describe('Ethereum ParentTransaction Tests', () => {
 
     expect(transaction.multisigTransaction.parentRawTransaction).toBeTruthy()
 
-    await expect(transaction.getParentTransaction()).resolves.toBeInstanceOf(EthereumTransaction)
+    await expect(transaction.generateParentTransaction()).resolves.toBeInstanceOf(EthereumTransaction)
   })
 })
