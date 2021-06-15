@@ -37,12 +37,17 @@ import {
   toEthBuffer,
   toEthereumAddress,
   toEthereumPublicKey,
+  toEthereumSignature,
   toEthereumSignatureNative,
   toGweiFromWei,
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { EthereumMultisigPlugin, EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
+import {
+  EthereumMultisigPlugin,
+  EthereumMultisigPluginRawTransaction,
+  EthereumMultisigPluginTransaction,
+} from './plugins/multisig/ethereumMultisigPlugin'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -240,7 +245,7 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
-  async setFromRaw(raw: EthereumActionHelperInput | any): Promise<void> {
+  async setFromRaw(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
     this.assertIsConnected()
     if (this.isMultisig) {
       await this.multisigTransaction.setFromRaw(raw)
@@ -355,7 +360,7 @@ export class EthereumTransaction implements Transaction {
         r,
         s,
       })
-      signatures = [signature]
+      signatures = [toEthereumSignature(signature)] // cast to stringifed sig
     }
     return signatures
   }
@@ -643,9 +648,9 @@ export class EthereumTransaction implements Transaction {
   /** ParentTransaction is the transaction sent to chain - e.g. sent to multisig contract.
    * Action (e.g transfer token) is embedded as data in parent transaction
    */
-  public async getParentTransaction(): Promise<EthereumTransaction> {
+  public async generateParentTransaction(): Promise<EthereumTransaction> {
     if (!this.requiresParentTransaction) {
-      throwNewError('ParentTransaction is not required')
+      throwNewError('ParentTransaction is not supported')
     }
 
     // Ethereum raw transaction includes both action realted properties (to, value, data)
@@ -783,8 +788,12 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Ensures that the value comforms to a well-formed signature */
-  public toSignature(value: any): EthereumSignatureNative {
-    return toEthereumSignatureNative(value)
+  public toSignature(value: any): EthereumSignature {
+    if (this.isMultisig) {
+      return this.multisigTransaction.toSignature(value)
+    }
+
+    return toEthereumSignature(value) // returns stringified sig
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------
