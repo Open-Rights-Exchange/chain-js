@@ -1,6 +1,7 @@
 import BN from 'bn.js'
 import { ethers } from 'ethers'
 import { EthereumAddress, EthereumRawTransactionAction, EthereumTxData } from '../../../models'
+import { SignatureBrand } from '../../../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumRawTransactionAction
 
@@ -56,10 +57,10 @@ export type GnosisSafeRawTransaction = GnosisSafeTransaction & {
 }
 
 /** Signature object that are gonna be serialized passed for executing sign trx */
-export interface GnosisSafeSignature {
+export type GnosisSafeSignature = {
   signer: EthereumAddress
   data: string
-}
+} & SignatureBrand
 
 export const EIP712_SAFE_TX_TYPE = {
   // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
