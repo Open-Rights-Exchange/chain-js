@@ -143,10 +143,10 @@ export function toEthereumSignatureNative(value: string | ECDSASignature): Ether
 }
 
 /** Accepts any signature object or stringified version of it
- *  Returns EthereumSignature (stringified valid for ETh chain or multisig contract)
+ *  Returns EthereumSignature string (stringified valid for ETh chain or multisig contract)
  */
 export function toEthereumSignature(value: any): EthereumSignature {
-  return toEthereumSignatureNative(value)
+  return JSON.stringify(toEthereumSignatureNative(value)) as EthereumSignature
 }
 
 /** Accepts hex string checks if a valid ethereum address
