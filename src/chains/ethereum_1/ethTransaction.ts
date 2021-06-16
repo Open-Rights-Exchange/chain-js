@@ -198,7 +198,6 @@ export class EthereumTransaction implements Transaction {
    */
   private setRawProperties(): void {
     this.assertIsConnected()
-    this.assertNoSignatures()
     this.assertHasAction()
     this.assertHasFeeSetting()
     if (!this._actionHelper) {
