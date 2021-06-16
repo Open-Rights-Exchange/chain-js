@@ -3,11 +3,11 @@
 /* eslint-disable max-len */
 import { ConfirmType, TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
-import { toEthereumAddress, toEthereumPrivateKey, toEthereumTxData, toEthUnit } from '../helpers'
+import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
-import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/transaction'
+import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/pluginTransaction'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
@@ -51,10 +51,7 @@ require('dotenv').config()
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])
     await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_2_PRIVATE_KEY)])
 
-    console.log(
-      'signatures: ',
-      (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).gnosisSignatures,
-    )
+    await transaction.prepareToBeSigned()
     console.log('missing signatures: ', transaction.missingSignatures)
     console.log(
       'safeTransaction: ',
@@ -64,16 +61,17 @@ require('dotenv').config()
       'parentTransaction: ',
       (transaction.multisigTransaction as GnosisSafeMultisigPluginTransaction).parentRawTransaction,
     )
-    // console.log('Transaction: ', transaction.toJson())
-    let txToSend = transaction
+
     if (transaction.requiresParentTransaction) {
-      txToSend = await transaction.getParentTransaction()
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
-      await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
-      console.log('Cost', await txToSend.getEstimatedCost())
-      console.log('ParentTransaction: ', txToSend.actions[0])
+      await transaction.parentTransaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
+      console.log('Cost', await transaction.parentTransaction.getEstimatedCost())
+      console.log('ParentTransaction: ', transaction.parentTransaction.actions[0])
+      console.log('Trx result: ', await transaction.parentTransaction.send())
+    } else {
+      // this is not gonna be called, since gnosis multisig requires parentTransaction to send
+      console.log('Trx result: ', await transaction.send())
     }
-    console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }

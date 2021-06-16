@@ -5,11 +5,12 @@ import {
   MultisigPlugin,
   MultisigPluginOptions,
 } from '../../../../interfaces/plugins/multisig'
-import { EthereumAddress, EthereumPrivateKey, EthereumTransactionAction } from '../../models'
+import { EthereumAddress, EthereumPrivateKey, EthereumSignature, EthereumTransactionAction } from '../../models'
 import { EthereumMultisigRawTransaction } from './gnosisSafeV1/models'
 
 export type EthereumMultisigTransactionOptions = any
 export type EthereumMultisigCreateAccountOptions = any
+export type EthereumMultisigPluginRawTransaction = any
 
 export interface EthereumMultisigPlugin extends MultisigPlugin {
   name: string
@@ -72,9 +73,9 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
    */
   parentRawTransaction: EthereumMultisigRawTransaction
 
-  /** Raw transaction body type is dependent on each plugin
+  /** Raw transaction type is dependent on each plugin
    *  Note: Set via prepareToBeSigned() or setFromRaw() */
-  rawTransaction: any
+  rawTransaction: EthereumMultisigPluginRawTransaction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
   requiredAuthorizations: EthereumAddress[]
@@ -85,17 +86,20 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   requiresParentTransaction?: boolean
 
   /** Ethereum only supports one signature on a transaction so transaction wont ask multisig plugin for signature list - those are data in the contract */
-  // signatures: EthereumSignature[]
+  signatures: EthereumSignature[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: any[]): void
+  addSignatures(signature: EthereumSignature[]): Promise<void>
 
-  prepareToBeSigned(transactionAction: EthereumTransactionAction): Promise<void>
+  prepareToBeSigned(action: EthereumTransactionAction): Promise<void>
 
-  setFromRaw(rawTransaction: any): Promise<void>
+  setFromRaw(rawTransaction: EthereumMultisigPluginRawTransaction): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>
+
+  /** Ensures that the value comforms to a well-formed signature */
+  toSignature(value: string): EthereumSignature
 
   validate(): Promise<void>
 }

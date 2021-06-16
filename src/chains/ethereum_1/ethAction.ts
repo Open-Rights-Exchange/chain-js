@@ -27,7 +27,7 @@ import {
   EthereumTxData,
   EthereumTransactionAction,
   EthUnit,
-  EthereumSignature,
+  EthereumSignatureNative,
 } from './models'
 import { ZERO_HEX, ZERO_ADDRESS } from './ethConstants'
 import { throwNewError } from '../../errors'
@@ -183,7 +183,7 @@ export class EthereumActionHelper {
   }
 
   /** set signature */
-  set signature(signature: EthereumSignature) {
+  set signature(signature: EthereumSignatureNative) {
     const actionInput: EthereumTransactionAction & IndexedObject = this.action
     const { v, r, s } = signature
     actionInput.v = v

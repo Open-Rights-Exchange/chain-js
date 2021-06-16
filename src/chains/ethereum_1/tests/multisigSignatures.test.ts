@@ -4,6 +4,7 @@ import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { EthereumTransactionOptions } from '../models'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
+import { getSignatures } from './mockups/multisig'
 
 jest.setTimeout(30000)
 
@@ -32,7 +33,7 @@ describe('Ethereum ParentTransaction Tests', () => {
 
   let transaction: EthereumTransaction
 
-  it('parentRawTransaction should be undefined when there is missingSignatures', async () => {
+  it('sign and get strigified signatures', async () => {
     const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
     await ropsten.installPlugin(gnosisSafePlugin)
 
@@ -45,22 +46,24 @@ describe('Ethereum ParentTransaction Tests', () => {
 
     await transaction.sign([toEthereumPrivateKey(multisigOwnerPrivateKey)])
 
-    const stringifiedMissingSignatures = JSON.stringify([
-      '0x1A70f07994876922b07e596d3940f8a81bb093A4',
-      '0x76d1b5dCFE51dbeB3C489977Faf2643272AaD901',
-    ])
-    expect(JSON.stringify(transaction.missingSignatures)).toBe(stringifiedMissingSignatures)
-    expect(transaction.multisigTransaction.parentRawTransaction).toBeUndefined()
-
-    expect(() => {
-      const value = transaction.parentTransaction // must wrap property in func for Jest to catch
-    }).toThrow('ParentTransaction is not yet set')
-  })
-  it('generate and return rawTransaction when no missing signatures', async () => {
     await transaction.sign([toEthereumPrivateKey(multisigOwnerPrivateKey2)])
 
-    expect(transaction.missingSignatures).toBeNull()
-    expect(transaction.multisigTransaction.parentRawTransaction).toBeTruthy()
-    expect(transaction.parentTransaction).toBeInstanceOf(EthereumTransaction)
+    expect(transaction.signatures).toHaveLength(2)
+  })
+
+  it('set signatures', async () => {
+    const ropsten = await connectChain(ropstenEndpoints, ropstenChainOptions)
+    await ropsten.installPlugin(gnosisSafePlugin)
+
+    transaction = await ropsten.new.Transaction(transactionOptions)
+
+    transaction.actions = [sampleAction]
+
+    await transaction.prepareToBeSigned()
+    await transaction.validate()
+
+    await transaction.addSignatures(getSignatures)
+
+    expect(transaction.signatures).toHaveLength(2)
   })
 })

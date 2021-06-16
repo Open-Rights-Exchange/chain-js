@@ -44,6 +44,7 @@ import {
   toAlgorandPrivateKey,
   toAddressFromPublicKey,
   assertValidSignatures,
+  toAlgorandSignature,
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
@@ -96,7 +97,12 @@ export class AlgorandTransaction implements Transaction {
     return !isNullOrEmpty(this.multisigPlugin)
   }
 
-  /** Whether parent transaction has been set yet */
+  /** Returns a parent transaction - not used for Algorand */
+  get parentTransaction() {
+    return notSupported('Algorand doesnt use parent transaction- check requiresParentTransaction() before calling this')
+  }
+
+  /** Whether parent transaction has been set yet - not used for Algorand */
   public get hasParentTransaction(): boolean {
     return false // Currently always false for algorand (multisig doesnt require it)
   }
@@ -134,15 +140,9 @@ export class AlgorandTransaction implements Transaction {
     return this.rawTransaction
   }
 
-  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction */
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction - not used for Algorand */
   public get requiresParentTransaction(): boolean {
     return false // Currently always false for algorand (multisig doesnt require it)
-  }
-
-  /** Parent transaction is what gets sent to chain
-   * Note: Algorand doesnt use a parent transaction */
-  public getParentTransaction(): Promise<AlgorandTransaction> {
-    return notSupported('Algorand doesnt use a parent transaction')
   }
 
   /** Generate the raw transaction body using the actions attached
@@ -327,16 +327,10 @@ export class AlgorandTransaction implements Transaction {
     return signature ? [toAlgorandSignatureFromRawSig(signature)] : null
   }
 
-  /** Sets one or more signatures on the transaction
-   * Signatures are hexstring encoded Uint8Array */
-  set signatures(signatures: AlgorandSignature[]) {
-    this.addSignatures(signatures)
-  }
-
   /** Add signatures to raw transaction
    *  Only allows signatures that use the publicKey(s) required for the transaction (from accnt, rekeyed spending key, or mulisig keys)
    *  Signatures are hexstring encoded Uint8Array */
-  addSignatures = (signaturesIn: AlgorandSignature[]): void => {
+  addSignatures = async (signaturesIn: AlgorandSignature[]): Promise<void> => {
     const signatures = signaturesIn || []
     this.assertHasRaw()
     assertValidSignatures(signatures)
@@ -356,7 +350,7 @@ export class AlgorandTransaction implements Transaction {
       }
       this._rawTransaction.sig = Buffer.from(hexStringToByteArray(signature))
     } else {
-      this.multisigTransaction.addSignatures(signatures)
+      await this.multisigTransaction.addSignatures(signatures)
     }
 
     if (errorMsg) {
@@ -612,6 +606,11 @@ export class AlgorandTransaction implements Transaction {
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
+  }
+
+  /** Ensures that the value comforms to a well-formed EOS signature */
+  public toSignature(value: any) {
+    return toAlgorandSignature(value)
   }
 
   /** Returns transaction fee in units of microalgos (expressed as a string) */

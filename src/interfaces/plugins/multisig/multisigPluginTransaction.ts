@@ -38,7 +38,7 @@ export interface MultisigPluginTransaction {
   signatures: any[]
 
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
-  addSignatures(signature: any[]): void
+  addSignatures(signature: any[]): Promise<void>
 
   prepareToBeSigned(rawTransaction: any): Promise<void>
 

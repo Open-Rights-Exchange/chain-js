@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transaction as EthereumJsTx } from 'ethereumjs-tx'
-import { bufferToInt, privateToAddress, bufferToHex, BN } from 'ethereumjs-util'
-import { EMPTY_HEX, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
+import { bufferToInt, bufferToHex, BN } from 'ethereumjs-util'
+import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
 import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
@@ -21,17 +21,10 @@ import {
   EthereumTransactionCost,
   EthereumTransactionResources,
   EthUnit,
-  EthereumRawTransactionAction,
+  EthereumSignatureNative,
 } from './models'
 import { throwNewError } from '../../errors'
-import {
-  ensureHexPrefix,
-  isArrayLengthOne,
-  isNullOrEmpty,
-  nullifyIfEmpty,
-  removeHexPrefix,
-  toHexStringIfNeeded,
-} from '../../helpers'
+import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
   convertEthUnit,
@@ -45,12 +38,16 @@ import {
   toEthereumAddress,
   toEthereumPublicKey,
   toEthereumSignature,
+  toEthereumSignatureNative,
   toGweiFromWei,
   toWeiString,
 } from './helpers'
 import { EthereumActionHelper } from './ethAction'
-import { EthereumMultisigPlugin, EthereumMultisigPluginTransaction } from './plugins/multisig/ethereumMultisigPlugin'
-import { MultisigPlugin } from '../../interfaces/plugins/multisig'
+import {
+  EthereumMultisigPlugin,
+  EthereumMultisigPluginRawTransaction,
+  EthereumMultisigPluginTransaction,
+} from './plugins/multisig/ethereumMultisigPlugin'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -75,6 +72,8 @@ export class EthereumTransaction implements Transaction {
   private _multisigPlugin: EthereumMultisigPlugin
 
   private _multisigTransaction: EthereumMultisigPluginTransaction
+
+  private _parentTransaction: EthereumTransaction
 
   constructor(
     chainState: EthereumChainState,
@@ -224,7 +223,9 @@ export class EthereumTransaction implements Transaction {
     }
     const trxOptions = this.getOptionsForEthereumJsTx()
     this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
-    // this.updateEthTxFromAction()
+    if (this.isMultisig) {
+      // TODO: this.multisigTransaction.clearRaw()
+    }
   }
 
   /**
@@ -246,10 +247,12 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
-  async setFromRaw(raw: EthereumActionHelperInput | any): Promise<void> {
+  async setFromRaw(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
     this.assertIsConnected()
+    this.assertNoSignatures()
     if (this.isMultisig) {
       await this.multisigTransaction.setFromRaw(raw)
+      await this.updateMultisigParentTransaction()
     }
     if (raw) {
       const trxOptions = this.getOptionsForEthereumJsTx()
@@ -348,35 +351,41 @@ export class EthereumTransaction implements Transaction {
 
   /** Get signature attached to transaction - returns null if no signature */
   get signatures(): EthereumSignature[] {
-    const { v, r, s } = this._actionHelper?.raw || {}
-    if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
-      return null // return null instead of empty array
+    let signatures: EthereumSignature[] = []
+    if (this.isMultisig) {
+      signatures = this.multisigTransaction.signatures
+    } else {
+      const { v, r, s } = this._actionHelper?.raw || {}
+      if (isNullOrEmpty(v) || isNullOrEmpty(r) || isNullOrEmpty(s)) {
+        return null // return null instead of empty array
+      }
+      const signature = toEthereumSignatureNative({
+        v: bufferToInt(v),
+        r,
+        s,
+      })
+      signatures = [toEthereumSignature(signature)] // cast to stringifed sig
     }
-    const signature = toEthereumSignature({
-      v: bufferToInt(v),
-      r,
-      s,
-    })
-
-    return [signature]
-  }
-
-  /** Sets the Set of signatures */
-  set signatures(signatures: EthereumSignature[]) {
-    this.addSignatures(signatures)
+    return signatures
   }
 
   /** Add signature to raw transaction - Accepts array with exactly one signature */
-  addSignatures = (signatures: EthereumSignature[]): void => {
+  addSignatures = async (signatures: EthereumSignature[]): Promise<void> => {
+    if (this.isMultisig) {
+      await this.multisigTransaction.addSignatures(signatures)
+      await this.updateMultisigParentTransaction()
+      return
+    }
+    // add a regular signature (not multisig)
     if (isNullOrEmpty(signatures) && this.hasRaw) {
-      this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignature
+      this._actionHelper.signature = { v: null, r: null, s: null } as EthereumSignatureNative
     } else if (!isArrayLengthOne(signatures)) {
       throwNewError('Ethereum addSignature function only allows signatures array length of 1')
     } else {
       this.assertHasRaw()
       const signature = signatures[0]
       this.assertValidSignature(signature)
-      this._actionHelper.signature = signature
+      this._actionHelper.signature = toEthereumSignatureNative(signature)
     }
   }
 
@@ -389,6 +398,9 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether there is an attached signature */
   get hasAnySignatures(): boolean {
+    if (this.isMultisig) {
+      return !isNullOrEmpty(this.multisigTransaction.signatures)
+    }
     return !isNullOrEmpty(this.signatures)
   }
 
@@ -421,12 +433,12 @@ export class EthereumTransaction implements Transaction {
   /** Whether signature is attached to transaction (and/or whether the signature is correct)
    * If a specific action.from is specifed, ensure that attached signature matches its address/public key */
   public get hasAllRequiredSignatures(): boolean {
+    if (this.isMultisig) {
+      return isNullOrEmpty(this.multisigTransaction.missingSignatures)
+    }
     // if action.from exists, make sure it matches the attached signature
     if (!this.isFromEmptyOrNullAddress()) {
       return isSameEthHexValue(this.signedByAddress, this.action?.from)
-    }
-    if (this.isMultisig) {
-      if (isNullOrEmpty(this.multisigTransaction.missingSignatures)) return true
     }
     // if no specific action.from, just confirm any signature is attached
     return this.hasAnySignatures
@@ -517,6 +529,7 @@ export class EthereumTransaction implements Transaction {
    *  If gasLimitOverride is provided, gasPrice will be calculated and gasLimit will be set to gasLimitOverride
    * */
   public async setDesiredFee(desiredFee: string, options?: EthereumSetDesiredFeeOptions) {
+    this.assertNoSignatures()
     const { gasLimitOverride, gasPriceOverride } = options || {}
     const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
     const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
@@ -612,21 +625,25 @@ export class EthereumTransaction implements Transaction {
     return this.ethereumJsTx.hash(false)
   }
 
-  private signAndAddSignatures(privateKey: string) {
+  private async signAndAddSignatures(privateKey: string) {
     const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
     const ethJsTx = this.ethereumJsTx
     ethJsTx.sign(privateKeyBuffer)
-    const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignature
-    this.addSignatures([signature])
+    const signature = { v: bufferToInt(ethJsTx.v), r: ethJsTx.r, s: ethJsTx.s } as EthereumSignatureNative
+    await this.addSignatures([signature])
+  }
+
+  /** Returns realted parent (to multisig) transaction (if appropriate for this tx)
+   * For a multisig tx, the parent is the tx sent to the mutlsig contract on the chain
+   * Throws if parent is not yet set or isnt required - use requiresParentTransaction() and hasParentTransaction() to check first */
+  public get parentTransaction(): EthereumTransaction {
+    this.assertHasParentTransaction()
+    return this._parentTransaction
   }
 
   /** Whether parent transaction has been set yet */
   public get hasParentTransaction(): boolean {
-    if (this.isMultisig) {
-      return this.multisigTransaction.hasParentTransaction
-    }
-    // Ethereum natively does not use parent transaction
-    return false
+    return !!this._parentTransaction
   }
 
   /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction */
@@ -636,38 +653,6 @@ export class EthereumTransaction implements Transaction {
     }
     // Ethereum natively does not require parent transaction
     return false
-  }
-
-  /** ParentTransaction is the transaction sent to chain - e.g. sent to multisig contract.
-   * Action (e.g transfer token) is embedded as data in parent transaction
-   */
-  public async getParentTransaction(): Promise<EthereumTransaction> {
-    if (!this.requiresParentTransaction) {
-      throwNewError('ParentTransaction is not required')
-    }
-
-    // Ethereum raw transaction includes both action realted properties (to, value, data)
-    //  and option related properties (gasLimit, gasPrice)
-    //  multisig pluging may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
-    //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
-
-    if (isNullOrEmpty(this.multisigTransaction?.parentRawTransaction)) {
-      throwNewError(
-        'ParentTransaction is not yet set. It is set by multisigPlugin when enough signatures are attached. Check required signatures using transaction.missingSignatures().',
-      )
-    }
-    const rawParent = {
-      gasLimit: this._actionHelper?.raw?.gasLimit,
-      gasPrice: this._actionHelper?.raw?.gasPrice,
-      ...this.multisigTransaction?.parentRawTransaction,
-    }
-    const parentTransaction = new EthereumTransaction(this._chainState, null, {
-      ...this._options,
-      multisigOptions: null,
-    })
-    await parentTransaction.setFromRaw(rawParent)
-    await parentTransaction.validate()
-    return parentTransaction
   }
 
   /** Sign the transaction body with private key and add to attached signatures
@@ -684,6 +669,7 @@ export class EthereumTransaction implements Transaction {
     if (this.isMultisig) {
       if (!isNullOrEmpty(this.multisigTransaction?.missingSignatures)) {
         await this.multisigTransaction.sign(privateKeys)
+        await this.updateMultisigParentTransaction()
       }
     } else {
       if (!isArrayLengthOne(privateKeys)) {
@@ -691,7 +677,7 @@ export class EthereumTransaction implements Transaction {
       }
 
       await this.setNonceIfEmpty(privateKeyToAddress(firstPrivateKey))
-      this.signAndAddSignatures(firstPrivateKey)
+      await this.signAndAddSignatures(firstPrivateKey)
     }
   }
   // send
@@ -710,7 +696,51 @@ export class EthereumTransaction implements Transaction {
     return response
   }
 
+  /** Updates the multisig parent transaction for this transaction - if enough signatures are attached
+   * ParentTransaction is the transaction sent to chain - e.g. sent to multisig contract.
+   * Action (e.g transfer token) is embedded as data in parent transaction
+   */
+  async updateMultisigParentTransaction(): Promise<void> {
+    // Ethereum raw transaction includes both action related properties (to, value, data)
+    //  and option related properties (gasLimit, gasPrice)
+    //  multisig plugin may (including default Gnosis) encapsulate multisig transaction into 'data' (contract call)
+    //  so Transaction class needs to fill in the optional fields for the parent transaction using actionHelper
+    // we can only create the parent after enough signatures are present
+    if (!this.hasAllRequiredSignatures && this._parentTransaction) {
+      this._parentTransaction = null // clear _parentTransaction if no longer have enough sigs
+      return
+    }
+    if (!this.hasAllRequiredSignatures) return
+
+    if (isNullOrEmpty(this.multisigTransaction?.parentRawTransaction)) {
+      return
+    }
+    const rawParent = {
+      gasLimit: this._actionHelper?.raw?.gasLimit,
+      gasPrice: this._actionHelper?.raw?.gasPrice,
+      ...this.multisigTransaction?.parentRawTransaction,
+    }
+    this._parentTransaction = new EthereumTransaction(this._chainState, null, {
+      ...this._options,
+      multisigOptions: null,
+    })
+    await this._parentTransaction.setFromRaw(rawParent)
+    await this._parentTransaction.validate()
+  }
+
   // helpers
+
+  /** Throws if parentTransaction isnt supported or missing */
+  assertHasParentTransaction() {
+    if (!this.requiresParentTransaction) {
+      throwNewError('ParentTransaction is not supported')
+    }
+    if (!this.hasParentTransaction) {
+      throwNewError(
+        'ParentTransaction is not yet set. It is set by multisigPlugin when enough signatures are attached. Check required signatures using transaction.missingSignatures().',
+      )
+    }
+  }
 
   /** Throws if not yet connected to chain - via chain.connect() */
   private assertIsConnected(): void {
@@ -777,6 +807,15 @@ export class EthereumTransaction implements Transaction {
   /** JSON representation of transaction data */
   public toJson(): any {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
+  }
+
+  /** Ensures that the value comforms to a well-formed signature */
+  public toSignature(value: any): EthereumSignature {
+    if (this.isMultisig) {
+      return this.multisigTransaction.toSignature(value)
+    }
+
+    return toEthereumSignature(value) // returns stringified sig
   }
 
   // ------------------------ Ethereum Specific functionality -------------------------------

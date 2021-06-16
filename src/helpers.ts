@@ -367,13 +367,13 @@ export function hasHexPrefix(value: any): boolean {
  *  Also converts hex chars to lowercase for consistency
  */
 export function ensureHexPrefix(value: string) {
-  if (!value) return value
+  if (isNullOrEmpty(value)) return value
   return value.startsWith('0x') ? value.toLowerCase() : `${'0x'}${value.toLowerCase()}`
 }
 
 /** Checks that string starts with 0x - removes it if it does */
 export function removeHexPrefix(value: string) {
-  if (!value) return value
+  if (isNullOrEmpty(value)) return value
   return value.startsWith('0x') ? value.slice(2) : value
 }
 
@@ -386,7 +386,7 @@ export function toHexStringIfNeeded(value: any) {
 
 /** Whether array is exactly length of 1 */
 export function isArrayLengthOne(array: any[]) {
-  if (!array) return false
+  if (isNullOrEmpty(array)) return false
   return array.length === 1
 }
 
@@ -547,4 +547,28 @@ export function assertPluginTypeNotAlreadyInstalled(plugin: ChainJsPlugin, insta
 /** Pause exectuion for nn miliseconds */
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms || 1000))
+}
+
+/** Parses a stringified string into a JSON object
+ *  Returns Null if parse fails */
+export function tryParseJSON(value: any) {
+  if (!value || !isAString(value) || value.trim() === '') return null
+  try {
+    const parsed = JSON.parse(value, jsonParseComplexObjectReviver)
+    if (parsed && typeof parsed === 'object') return parsed
+  } catch (error) {
+    // TODO: should log trace this detail: ('error parsing JSON', { jsonString, doubleQuotes, error });
+  }
+  return null
+}
+
+/* Accepts a JSON object or stringified object and returns a JSON object - if parsing fails, returns null */
+export function convertStringifiedOrObjectToObject(value: object | string): object {
+  let returnVal: object
+  if (value && typeof value === 'string') {
+    returnVal = tryParseJSON(value)
+  } else {
+    returnVal = value as object
+  }
+  return returnVal
 }

@@ -5,6 +5,7 @@ import {
   EthereumAddress,
   EthereumPrivateKey,
   EthereumRawTransactionAction,
+  EthereumSignature,
   EthereumTransactionAction,
 } from '../../../models'
 import {
@@ -33,12 +34,17 @@ import {
 import {
   isNullOrEmptyEthereumValue,
   generateDataFromContractAction,
-  toEthereumEntityName,
   toEthereumTxData,
   toEthereumAddress,
   toEthBuffer,
 } from '../../../helpers'
-import { isNullOrEmpty, nullifyIfEmpty, removeEmptyValuesInJsonObject } from '../../../../../helpers'
+import {
+  isAString,
+  isNullOrEmpty,
+  nullifyIfEmpty,
+  removeEmptyValuesInJsonObject,
+  tryParseJSON,
+} from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 
 // TODO: move to a more generic directory (Consider using EthersJs)
@@ -48,6 +54,48 @@ export function getEthersJsonRpcProvider(url: string) {
 // TODO: move to a more generic directory
 export function getEthersWallet(privateKey: string, provider?: ethers.providers.Provider) {
   return new ethers.Wallet(privateKey, provider)
+}
+
+export function isValidGnosisSignature(value: GnosisSafeSignature) {
+  let signature: GnosisSafeSignature
+  // this is an oversimplified check just to prevent assigning a wrong string
+  if (!value) return false
+  if (typeof value === 'string') {
+    signature = tryParseJSON(value) || {}
+  } else {
+    signature = value
+  }
+  const { signer, data } = signature
+  return !!signer && !!data
+}
+
+/** Throws if signatures isn't properly formatted */
+export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
+  if (!isValidGnosisSignature(signature)) {
+    throwNewError(`Not a valid Gnosis signature : ${signature}`, 'signature_invalid')
+  }
+}
+
+/** Accepts GnosisSafeSignature or stringified version of it
+ *  Returns GnosisSafeSignature
+ */
+export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSafeSignature {
+  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  if (isValidGnosisSignature(signature)) {
+    return signature
+  }
+  throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
+}
+
+/** stringify a Gnosis sig object */
+export function toStringifiedEthereumSignatureFromGnosisSignature(gnosisSignature: GnosisSafeSignature) {
+  if (isAString(gnosisSignature)) return gnosisSignature as EthereumSignature
+  return JSON.stringify(gnosisSignature) as EthereumSignature
+}
+
+/** stringify an array of Gnosis sig objects */
+export function toStringifiedEthereumSignatureFromGnosisSignatures(gnosisSignatures: GnosisSafeSignature[]) {
+  return (gnosisSignatures || []).map(gs => toStringifiedEthereumSignatureFromGnosisSignature(gs))
 }
 
 /** Returns GnosisSafe (for singleton master or proxy) contract instance, that is gonna be used for
@@ -233,10 +281,11 @@ export async function signSafeTransactionHash(
   const signerWallet = getEthersWallet(privateKey)
   const typedDataHash = utils.arrayify(hash)
   const data = (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20')
-  return {
+  const placeholderSig = {
     signer: toEthereumAddress(signerWallet.address),
     data,
   }
+  return toGnosisSignature(JSON.stringify(placeholderSig))
 }
 
 /** Generates GnosisSafe signature object, that is gonne be passed in as serialized for executeTransaction  */
@@ -268,12 +317,14 @@ export async function approveSafeTransaction(
   const signerSafe = multisigContract.connect(signerWallet)
   await signerSafe.approveHash(typedDataHash)
 
-  return {
-    signer: toEthereumEntityName(signerWallet.address),
+  // The following is a placeholder 'signature' that can be added to the signatures array - this is sent to the gnosis contract when executing the transaction
+  const placeholderSig = {
+    signer: toEthereumAddress(signerWallet.address),
     data: `0x000000000000000000000000${signerWallet.address.slice(
       2,
     )}000000000000000000000000000000000000000000000000000000000000000001`,
   }
+  return toGnosisSignature(JSON.stringify(placeholderSig))
 }
 
 /** Sorts the signatures in right order and serializes */

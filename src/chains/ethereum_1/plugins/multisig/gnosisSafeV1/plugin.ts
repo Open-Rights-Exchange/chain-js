@@ -1,7 +1,7 @@
 import { EthereumGnosisMultisigCreateAccountOptions, EthereumGnosisMultisigTransactionOptions } from './models'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
-import { GnosisSafeMultisigPluginCreateAccount } from './createAccount'
-import { GnosisSafeMultisigPluginTransaction } from './transaction'
+import { GnosisSafeMultisigPluginCreateAccount } from './pluginCreateAccount'
+import { GnosisSafeMultisigPluginTransaction } from './pluginTransaction'
 import { throwNewError } from '../../../../../errors'
 import { MultisigPlugin } from '../../../../../interfaces/plugins/multisig'
 

@@ -15,6 +15,7 @@ import {
   jsonParseAndRevive,
   toChainEntityName,
   toHexStringIfNeeded,
+  tryParseJSON,
 } from '../../../helpers'
 import {
   EthereumSignature,
@@ -23,6 +24,7 @@ import {
   EthereumAddress,
   EthereumTxData,
   EthUnit,
+  EthereumSignatureNative,
 } from '../models'
 import { toEthBuffer } from './generalHelpers'
 
@@ -68,7 +70,8 @@ export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): v
   return isValidPrivate(toEthBuffer(ensureHexPrefix(value)))
 }
 
-export function isValidEthereumSignature(
+/** whether a value is a valid native Ethereum signature (or a strinigified version of it) */
+export function isValidEthereumSignatureNative(
   value: EthereumSignature | string | ECDSASignature,
 ): value is EthereumSignature {
   let signature: ECDSASignature
@@ -82,6 +85,13 @@ export function isValidEthereumSignature(
   }
   const { v, r, s } = signature
   return isValidSignature(v, r, s)
+}
+
+/** whether a value is a valid native Ethereum signature (or a strinigified version of it) */
+export function isValidEthereumSignature(
+  value: EthereumSignature | string | ECDSASignature,
+): value is EthereumSignature {
+  return isValidEthereumSignatureNative(value)
 }
 
 // For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
@@ -122,13 +132,21 @@ export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
 }
 
 /** Accepts ECDSASignature object or stringified version of it
- *  Returns EthereumSignature
+ *  Returns EthereumSignatureNative
  */
-export function toEthereumSignature(value: string | ECDSASignature): EthereumSignature {
-  if (isValidEthereumSignature(value)) {
-    return value
+export function toEthereumSignatureNative(value: string | ECDSASignature): EthereumSignatureNative {
+  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  if (isValidEthereumSignatureNative(signature)) {
+    return signature as EthereumSignatureNative
   }
   throw new Error(`Not a valid ethereum signature:${JSON.stringify(value)}.`)
+}
+
+/** Accepts any signature object or stringified version of it
+ *  Returns EthereumSignature string (stringified valid for ETh chain or multisig contract)
+ */
+export function toEthereumSignature(value: any): EthereumSignature {
+  return JSON.stringify(toEthereumSignatureNative(value)) as EthereumSignature
 }
 
 /** Accepts hex string checks if a valid ethereum address
