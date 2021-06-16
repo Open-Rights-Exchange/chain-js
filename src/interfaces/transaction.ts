@@ -72,8 +72,6 @@ export interface Transaction {
    * Return format is string of chain's default native currency unit
    * Throws if transaction not found on-chain */
   getActualCost(): Promise<string>
-  /** Gets Parent transaction for this transaction (if any) */
-  generateParentTransaction(): Promise<void>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.
