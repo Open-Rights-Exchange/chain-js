@@ -5,6 +5,9 @@ import { SignatureBrand } from '../../../../../models'
 
 export type EthereumMultisigRawTransaction = EthereumRawTransactionAction
 
+export type EthereumGnosisSignatureData = string
+export type EthereumGnosisTransactionData = string
+
 export type EthereumGnosisMultisigCreateAccountOptions = {
   owners: EthereumAddress[]
   threshold: number
@@ -40,7 +43,7 @@ export type InitializerAction = {
 export type GnosisSafeTransaction = {
   to: string
   value: string | number | BN | ethers.BigNumber
-  data: string
+  data: EthereumGnosisTransactionData
   operation: number
   refundReceiver: string
   safeTxGas: number | string
@@ -53,13 +56,13 @@ export type GnosisSafeTransaction = {
 /** Adds signatures to GnosisSafeTransaction to support setFromRaw() */
 export type GnosisSafeRawTransaction = GnosisSafeTransaction & {
   /** stringified GnosisSafeSignature[] */
-  signatures?: string
+  signatures?: GnosisSafeSignature[]
 }
 
 /** Signature object that are gonna be serialized passed for executing sign trx */
 export type GnosisSafeSignature = {
   signer: EthereumAddress
-  data: string
+  data: EthereumGnosisSignatureData
 } & SignatureBrand
 
 export const EIP712_SAFE_TX_TYPE = {

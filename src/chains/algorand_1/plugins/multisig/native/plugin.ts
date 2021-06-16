@@ -1,8 +1,8 @@
 import { throwNewError } from '../../../../../errors'
 import { AlgorandMultisigNativeCreateAccountOptions, AlgorandMultisigNativeTransactionOptions } from './models'
 import { ChainJsPlugin, PluginType } from '../../../../../interfaces/plugin'
-import { NativeMultisigPluginCreateAccount } from './createAccount'
-import { NativeMultisigPluginTransaction } from './transaction'
+import { NativeMultisigPluginCreateAccount } from './pluginCreateAccount'
+import { NativeMultisigPluginTransaction } from './pluginTransaction'
 import { MultisigPlugin } from '../../../../../interfaces/plugins/multisig'
 
 export class NativeMultisigPlugin extends ChainJsPlugin implements MultisigPlugin {

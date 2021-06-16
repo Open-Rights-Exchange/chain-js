@@ -97,7 +97,12 @@ export class AlgorandTransaction implements Transaction {
     return !isNullOrEmpty(this.multisigPlugin)
   }
 
-  /** Whether parent transaction has been set yet */
+  /** Returns a parent transaction - not used for Algorand */
+  get parentTransaction() {
+    return notSupported('Algorand doesnt use parent transaction- check requiresParentTransaction() before calling this')
+  }
+
+  /** Whether parent transaction has been set yet - not used for Algorand */
   public get hasParentTransaction(): boolean {
     return false // Currently always false for algorand (multisig doesnt require it)
   }
@@ -135,15 +140,9 @@ export class AlgorandTransaction implements Transaction {
     return this.rawTransaction
   }
 
-  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction */
+  /** Wether multisigPlugin requires transaction body to be wrapped in a parent transaction - not used for Algorand */
   public get requiresParentTransaction(): boolean {
     return false // Currently always false for algorand (multisig doesnt require it)
-  }
-
-  /** Parent transaction is what gets sent to chain
-   * Note: Algorand doesnt use a parent transaction */
-  public async getParentTransaction(): Promise<Transaction> {
-    return notSupported('Algorand doesnt use a parent transaction')
   }
 
   /** Generate the raw transaction body using the actions attached
