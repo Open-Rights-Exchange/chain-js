@@ -51,7 +51,10 @@ describe('Ethereum ParentTransaction Tests', () => {
     ])
     expect(JSON.stringify(transaction.missingSignatures)).toBe(stringifiedMissingSignatures)
     expect(transaction.multisigTransaction.parentRawTransaction).toBeUndefined()
-    expect(transaction.parentTransaction).toBeUndefined()
+
+    expect(() => {
+      const value = transaction.parentTransaction // must wrap property in func for Jest to catch
+    }).toThrow('ParentTransaction is not yet set')
   })
   it('generate and return rawTransaction when no missing signatures', async () => {
     await transaction.sign([toEthereumPrivateKey(multisigOwnerPrivateKey2)])
