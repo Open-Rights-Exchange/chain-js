@@ -67,15 +67,19 @@ require('dotenv').config()
     console.log('TransactionB: ', transactionBMultisig.toJson())
     await transactionBMultisig.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     await transactionBMultisig.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_2_PRIVATE_KEY)])
-    let txToSend = transactionBMultisig
+
     if (transactionBMultisig.requiresParentTransaction) {
-      txToSend = await transactionBMultisig.generateParentTransaction()
       // Must sign parent Transaction with any of the multisig account private keys - this signer pays the fees
-      await txToSend.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY)])
-      console.log('Cost', await txToSend.getEstimatedCost())
-      console.log('ParentTransaction: ', txToSend.actions[0])
+      await transactionBMultisig.parentTransaction.sign([
+        toEthereumPrivateKey(process.env.TESTNET_multisigOwner_1_PRIVATE_KEY),
+      ])
+      console.log('Cost', await transactionBMultisig.parentTransaction.getEstimatedCost())
+      console.log('ParentTransaction: ', transactionBMultisig.parentTransaction.actions[0])
+      console.log('Trx result: ', await transactionBMultisig.parentTransaction.send())
+    } else {
+      // this is not gonna be called, since gnosis multisig requires parentTransaction to send
+      console.log('Trx result: ', await transactionBMultisig.send())
     }
-    console.log('Trx result: ', await txToSend.send())
   } catch (error) {
     console.log(error)
   }
