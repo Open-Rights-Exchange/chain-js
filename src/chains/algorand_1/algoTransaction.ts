@@ -23,12 +23,12 @@ import {
   AlgorandRawTransactionStruct,
   AlgorandSignature,
   AlgorandTransactionOptions,
+  AlgorandTransactionResources,
   AlgorandTxAction,
   AlgorandTxActionRaw,
   AlgorandTxActionSdkEncoded,
   AlgorandTxHeaderParams,
   AlgorandTxSignResults,
-  AlgorandTransactionResources,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
@@ -39,16 +39,16 @@ import {
   toRawTransactionFromSignResults,
 } from './helpers'
 import {
+  assertValidSignatures,
+  toAddressFromPublicKey,
+  toAlgorandPrivateKey,
+  toAlgorandSignature,
   toAlgorandSignatureFromRawSig,
   toPublicKeyFromAddress,
-  toAlgorandPrivateKey,
-  toAddressFromPublicKey,
-  assertValidSignatures,
-  toAlgorandSignature,
 } from './helpers/cryptoModelHelpers'
 import { getAlgorandPublicKeyFromPrivateKey, verifySignedWithPublicKey } from './algoCrypto'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
-import { AlgorandMultisigPluginTransaction, AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
+import { AlgorandMultisigPlugin, AlgorandMultisigPluginTransaction } from './plugins/multisig/algorandMultisigPlugin'
 import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
 
 export class AlgorandTransaction implements Transaction {
