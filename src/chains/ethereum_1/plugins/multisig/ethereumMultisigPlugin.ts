@@ -51,7 +51,7 @@ export interface EthereumMultisigPluginCreateAccount extends MultisigPluginCreat
 export interface EthereumMultisigPluginTransaction extends MultisigPluginTransaction {
   init(options: EthereumMultisigTransactionOptions): Promise<void>
 
-  options: EthereumMultisigTransactionOptions // depends on plug-in
+  multisigOptions: EthereumMultisigTransactionOptions // depends on plug-in
 
   owners: EthereumAddress[]
 
