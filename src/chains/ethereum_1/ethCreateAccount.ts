@@ -68,6 +68,7 @@ export class EthereumCreateAccount implements CreateAccount {
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): EthereumAddress {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigCreateAccount.accountName
     }
     return this._accountName
@@ -103,7 +104,11 @@ export class EthereumCreateAccount implements CreateAccount {
   /** ETH does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
-    return this.isMultisig ? this.multisigCreateAccount.requiresTransaction : false
+    if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
+      return this.multisigCreateAccount.requiresTransaction
+    }
+    return false
   }
 
   /** Returns whether the transaction is a multisig transaction */
@@ -112,7 +117,11 @@ export class EthereumCreateAccount implements CreateAccount {
   }
 
   public get requiresTransaction(): boolean {
-    return this.isMultisig ? this.multisigCreateAccount.requiresTransaction : false
+    if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
+      return this.multisigCreateAccount.requiresTransaction
+    }
+    return false
   }
 
   /** If not multisig: ethereum account creation doesn't require any on chain transactions.
@@ -139,6 +148,7 @@ export class EthereumCreateAccount implements CreateAccount {
    */
   async composeTransaction(): Promise<void> {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       const multisigTransactionAction = this.multisigCreateAccount.transactionAction
       const newTransaction = new EthereumTransaction(this._chainState)
       newTransaction.actions = [multisigTransactionAction]
@@ -176,6 +186,7 @@ export class EthereumCreateAccount implements CreateAccount {
    *  autogenerate the public and private key pair and add them to options */
   async generateKeysIfNeeded() {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       await this.multisigCreateAccount.generateKeysIfNeeded()
     } else {
       let publicKey: EthereumPublicKey
@@ -211,5 +222,12 @@ export class EthereumCreateAccount implements CreateAccount {
 
   private assertValidOptionNewKeys() {
     // nothing to check
+  }
+
+  /** If multisig plugin is provided, make sure its initialized */
+  private assertMultisigPlugIsInitialized() {
+    if (!this.multisigPlugin?.isInitialized) {
+      throwNewError('EthereumCreateAccount error - multisig plugin is not initialized')
+    }
   }
 }
