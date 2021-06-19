@@ -64,6 +64,7 @@ export class AlgorandCreateAccount implements CreateAccount {
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigCreateAccount?.accountName
     }
     if (this._publicKey) {
@@ -102,7 +103,11 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Algorand does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
-    return this.isMultisig ? this.multisigCreateAccount?.requiresTransaction : false
+    if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
+      return this.multisigCreateAccount?.requiresTransaction
+    }
+    return false
   }
 
   /** Algorand account creation doesn't require any on chain transactions.
@@ -110,6 +115,7 @@ export class AlgorandCreateAccount implements CreateAccount {
    */
   get transaction(): any {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigCreateAccount?.transactionAction
     }
     throwNewError(
@@ -153,7 +159,6 @@ export class AlgorandCreateAccount implements CreateAccount {
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
    */
   async generateKeysIfNeeded() {
-    this.assertMultisigPlugIsInitialized()
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
@@ -189,9 +194,9 @@ export class AlgorandCreateAccount implements CreateAccount {
     }
   }
 
-  /** Before encrypting keys, check for required options (password and salt) */
+  /** If multisig plugin is provided, make sure its initialized */
   private assertMultisigPlugIsInitialized() {
-    if (!this._multisigPlugin?.isInitialized) {
+    if (!this.multisigPlugin?.isInitialized) {
       throwNewError('AlgorandCreateAccount error - multisig plugin is not initialized')
     }
   }

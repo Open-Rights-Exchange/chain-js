@@ -160,6 +160,7 @@ export class AlgorandTransaction implements Transaction {
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       await this.multisigTransaction.prepareToBeSigned(rawTx)
     } else {
       this._rawTransaction = {
@@ -296,7 +297,10 @@ export class AlgorandTransaction implements Transaction {
   public async validate(): Promise<void> {
     this.assertHasAction()
     this.assertHasRaw()
-    if (this.isMultisig) this.multisigTransaction.validate()
+    if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
+      this.multisigTransaction.validate()
+    }
     this._isValidated = true
   }
 
@@ -321,6 +325,7 @@ export class AlgorandTransaction implements Transaction {
     // retrieve signatures from raw transaction
     const { rawTransaction } = this
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigTransaction.signatures
     }
     const signature = (rawTransaction as AlgorandRawTransactionStruct)?.sig
@@ -339,6 +344,7 @@ export class AlgorandTransaction implements Transaction {
     // NOTE: since we dont have the public key for the incoming signature, we check the signature against each of the public keys used for this transaction
     // When we find a match, we use that publicKey for the new signature structure
     if (!this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       if (isNullOrEmpty(signatures)) this._rawTransaction.sig = null
       // Handle non-multisig transaction
       const signature = signatures[0]
@@ -390,6 +396,7 @@ export class AlgorandTransaction implements Transaction {
   private getPublicKeysForSignaturesFromRawTx(): AlgorandPublicKey[] {
     let publicKeys: AlgorandPublicKey[]
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigTransaction.getPublicKeysForSignaturesFromRawTx()
     }
     if (this._rawTransaction.sig) {
@@ -416,6 +423,7 @@ export class AlgorandTransaction implements Transaction {
     // check if number of signatures present are greater then or equal to multisig threshold
     // If threshold reached, return null for missing signatures
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigTransaction.missingSignatures
     }
     const missingSignatures =
@@ -427,6 +435,7 @@ export class AlgorandTransaction implements Transaction {
   get rawTransaction(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     let rawTransaction
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       rawTransaction = this.multisigTransaction.rawTransaction
     } else {
       rawTransaction = this._rawTransaction
@@ -453,6 +462,7 @@ export class AlgorandTransaction implements Transaction {
   public get requiredAuthorizations(): AlgorandAddress[] {
     this.assertFromIsValidAddress()
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this?.multisigTransaction?.owners || []
     }
     // The signerPublicKey is usually based on the from address (or the spending key for a rekeyed account)
@@ -477,6 +487,7 @@ export class AlgorandTransaction implements Transaction {
   public async sign(privateKeys: AlgorandPrivateKey[]): Promise<void> {
     this.assertIsValidated()
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       await this.multisigTransaction.sign(privateKeys)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
@@ -634,6 +645,13 @@ export class AlgorandTransaction implements Transaction {
       } else {
         throw error
       }
+    }
+  }
+
+  /** If multisig plugin is provided, make sure its initialized */
+  private assertMultisigPlugIsInitialized() {
+    if (!this.multisigPlugin?.isInitialized) {
+      throwNewError('AlgorandTransaction error - multisig plugin is not initialized')
     }
   }
 }
