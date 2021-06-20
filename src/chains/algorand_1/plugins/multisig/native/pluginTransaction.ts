@@ -36,38 +36,38 @@ import { AlgorandMultisigNativeCreateAccountOptions, AlgorandMultisigNativeTrans
 import { determineMultiSigAddress, multisigOptionsFromRawTransactionMultisig } from './helpers'
 
 export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTransaction {
-  private _options: AlgorandMultisigNativeTransactionOptions
+  private _multisigOptions: AlgorandMultisigNativeTransactionOptions
 
   private _multisigAddress: AlgorandAddress
 
   private _rawTransaction: AlgorandRawTransactionMultisigStruct
 
   constructor(options: AlgorandMultisigNativeTransactionOptions) {
-    this._options = options
+    this._multisigOptions = options
   }
 
   async init() {
-    this._multisigAddress = determineMultiSigAddress(this.options)
+    this._multisigAddress = determineMultiSigAddress(this.multisigOptions)
   }
 
   get multisigAddress(): AlgorandAddress {
     return this._multisigAddress
   }
 
-  get options(): AlgorandMultisigNativeTransactionOptions {
-    return this._options
+  get multisigOptions(): AlgorandMultisigNativeTransactionOptions {
+    return this._multisigOptions
   }
 
   get owners(): string[] {
-    return this.options?.addrs
+    return this.multisigOptions?.addrs
   }
 
   get threshold(): number {
-    return this.options?.threshold
+    return this.multisigOptions?.threshold
   }
 
   get version(): number {
-    return this.options?.version
+    return this.multisigOptions?.version
   }
 
   /** Algorand multisig does not use a parent transaction */
@@ -119,7 +119,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
    */
   public async prepareToBeSigned(rawTransaction: AlgorandTxEncodedForChain): Promise<void> {
     let msig
-    if (!isNullOrEmpty(this.options)) {
+    if (!isNullOrEmpty(this.multisigOptions)) {
       msig = {
         v: this.version,
         thr: this.threshold,
@@ -203,7 +203,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
         this._rawTransaction.msig.subsig.find((ss: any) => uint8ArraysAreEqual(ss.pk, newPubKey)).s = newSig
       } else {
         const errorMsg = `The signature: ${sig} isnt valid for this transaction using any of publicKeys specified in multisigOptions: ${JSON.stringify(
-          this.options,
+          this.multisigOptions,
         )}.`
         throwNewError(errorMsg)
       }
@@ -218,7 +218,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
   }
 
   public async setFromRaw(rawTransaction: AlgorandRawTransactionMultisigStruct) {
-    this._options = multisigOptionsFromRawTransactionMultisig(rawTransaction?.msig)
+    this._multisigOptions = multisigOptionsFromRawTransactionMultisig(rawTransaction?.msig)
     this._rawTransaction = rawTransaction
   }
 
@@ -237,6 +237,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
         blob: algosdk.encodeObj(this.rawTransaction),
       })
     }
+
     // add signatures for each private key provided
     privateKeys.forEach(key => {
       const privateKey = hexStringToByteArray(key)
@@ -249,7 +250,7 @@ export class NativeMultisigPluginTransaction implements AlgorandMultisigPluginTr
 
       const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
         this.actionHelper?.actionEncodedForSdk,
-        this.options,
+        this.multisigOptions,
         privateKey,
       )
       signedTransactionResults.push(signResults)

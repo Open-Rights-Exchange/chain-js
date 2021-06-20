@@ -106,7 +106,7 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainAccount class used to perform any function with the chain account */
   private async newCreateAccount(options?: AlgorandCreateAccountOptions): Promise<AlgorandCreateAccount> {
     this.assertIsConnected()
-    const createAccount = new AlgorandCreateAccount(this._chainState, this.multisigPlugin, options)
+    const createAccount = new AlgorandCreateAccount(this._chainState, options, this.multisigPlugin)
     await createAccount.init()
     return createAccount
   }
@@ -114,7 +114,7 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainTransaction class used to compose and send transactions */
   private async newTransaction(options?: AlgorandTransactionOptions): Promise<AlgorandTransaction> {
     this.assertIsConnected()
-    const transaction = new AlgorandTransaction(this._chainState, this.multisigPlugin, options)
+    const transaction = new AlgorandTransaction(this._chainState, options, this.multisigPlugin)
     await transaction.init()
     return transaction
   }

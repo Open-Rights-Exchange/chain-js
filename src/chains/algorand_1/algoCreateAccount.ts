@@ -32,12 +32,14 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _multisigCreateAccount: AlgorandMultisigPluginCreateAccount
 
-  constructor(chainState: AlgorandChainState, multisigPlugin?: MultisigPlugin, options?: AlgorandCreateAccountOptions) {
+  constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions, multisigPlugin?: MultisigPlugin) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
-    if (!isNullOrEmpty(this.options?.multisigOptions)) {
-      this._multisigPlugin = multisigPlugin
+    this._publicKey = options?.publicKey
+    this._multisigPlugin = multisigPlugin
+    if (!isNullOrEmpty(options?.multisigOptions)) {
+      this.assertHasMultisigPlugin()
     }
   }
 
@@ -57,13 +59,14 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   /** Returns whether the transaction is a multisig transaction */
   public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.multisigPlugin)
+    return !isNullOrEmpty(this.options?.multisigOptions)
   }
 
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigCreateAccount?.accountName
     }
     if (this._publicKey) {
@@ -102,7 +105,11 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Algorand does not require the chain to execute a createAccount transaction
    *  to create the account structure on-chain */
   get supportsTransactionToCreateAccount(): boolean {
-    return this.isMultisig ? this.multisigCreateAccount?.requiresTransaction : false
+    if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
+      return this.multisigCreateAccount?.requiresTransaction
+    }
+    return false
   }
 
   /** Algorand account creation doesn't require any on chain transactions.
@@ -110,6 +117,7 @@ export class AlgorandCreateAccount implements CreateAccount {
    */
   get transaction(): any {
     if (this.isMultisig) {
+      this.assertMultisigPlugIsInitialized()
       return this.multisigCreateAccount?.transactionAction
     }
     throwNewError(
@@ -153,7 +161,6 @@ export class AlgorandCreateAccount implements CreateAccount {
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
    */
   async generateKeysIfNeeded() {
-    this.assertMultisigPlugIsInitialized()
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
@@ -189,9 +196,17 @@ export class AlgorandCreateAccount implements CreateAccount {
     }
   }
 
-  /** Before encrypting keys, check for required options (password and salt) */
+  /** If multisig plugin is required, make sure its initialized */
+  private assertHasMultisigPlugin() {
+    if (!this.multisigPlugin) {
+      throwNewError('AlgorandCreateAccount error - multisig plugin is missing (required for multisigOptions)')
+    }
+  }
+
+  /** If multisig plugin is required, make sure its initialized */
   private assertMultisigPlugIsInitialized() {
-    if (!this._multisigPlugin?.isInitialized) {
+    this.assertHasMultisigPlugin()
+    if (!this.multisigPlugin?.isInitialized) {
       throwNewError('AlgorandCreateAccount error - multisig plugin is not initialized')
     }
   }

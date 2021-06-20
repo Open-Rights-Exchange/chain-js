@@ -33,7 +33,7 @@ export interface AlgorandMultisigPluginCreateAccount extends MultisigPluginCreat
 export interface AlgorandMultisigPluginTransaction extends MultisigPluginTransaction {
   init(options: any): Promise<void>
 
-  options: any
+  multisigOptions: any
 
   owners: string[]
 
