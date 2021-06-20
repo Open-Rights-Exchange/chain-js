@@ -33,9 +33,7 @@ import {
   toAlgorandSignature,
 } from './helpers'
 import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
-import { AlgorandMultisigPlugin } from './plugins/multisig/algorandMultisigPlugin'
-import { NativeMultisigPlugin } from './plugins/multisig/native/plugin'
+import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
 
 class ChainAlgorandV1 implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
@@ -106,7 +104,7 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainAccount class used to perform any function with the chain account */
   private async newCreateAccount(options?: AlgorandCreateAccountOptions): Promise<AlgorandCreateAccount> {
     this.assertIsConnected()
-    const createAccount = new AlgorandCreateAccount(this._chainState, options, this.multisigPlugin)
+    const createAccount = new AlgorandCreateAccount(this._chainState, options)
     await createAccount.init()
     return createAccount
   }
@@ -114,7 +112,7 @@ class ChainAlgorandV1 implements Chain {
   /** Return a ChainTransaction class used to compose and send transactions */
   private async newTransaction(options?: AlgorandTransactionOptions): Promise<AlgorandTransaction> {
     this.assertIsConnected()
-    const transaction = new AlgorandTransaction(this._chainState, options, this.multisigPlugin)
+    const transaction = new AlgorandTransaction(this._chainState, options)
     await transaction.init()
     return transaction
   }
@@ -289,11 +287,6 @@ class ChainAlgorandV1 implements Chain {
     this._plugins = this._plugins || []
     const newPlugin = await initializePlugin(this._chainState, plugin, options)
     this._plugins.push(newPlugin)
-  }
-
-  public get multisigPlugin(): AlgorandMultisigPlugin {
-    const multisigPlugin = this._plugins?.find(plugin => plugin?.type === PluginType.MultiSig)
-    return multisigPlugin || new NativeMultisigPlugin()
   }
 
   /** rules to check tha plugin is well-formed and supported */

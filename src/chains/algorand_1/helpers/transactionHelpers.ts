@@ -1,12 +1,20 @@
 import * as algosdk from 'algosdk'
 import { TextEncoder } from 'util'
-import { byteArrayToHexString, isAUint8Array, isHexString } from '../../../helpers'
+import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from '../../../helpers'
 import {
   AlgoClient,
+  AlgorandMultisigAccount,
+  AlgorandMultisigOptions,
   AlgorandRawTransactionMultisigStruct,
   AlgorandRawTransactionStruct,
   AlgorandTxSignResults,
 } from '../models'
+
+/** Calculates the multisig address using the multisig options including version, threshhold and addresses */
+export function determineMultiSigAddress(options: AlgorandMultisigOptions): AlgorandMultisigAccount {
+  if (isNullOrEmpty(options)) return null
+  return algosdk.multisigAddress(options)
+}
 
 /** Decode blob from SDK's sign transaction */
 export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResults) {

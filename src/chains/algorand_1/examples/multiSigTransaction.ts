@@ -6,10 +6,9 @@
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
-import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
+import { AlgorandAddress, AlgorandMultisigOptions, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
-import { AlgorandMultisigNativeTransactionOptions } from '../plugins/multisig/native/models'
 
 require('dotenv').config()
 
@@ -35,7 +34,7 @@ const algoBetanetEndpoints = [
   },
 ]
 
-const transactionMultisigOptions: AlgorandMultisigNativeTransactionOptions = {
+const transactionMultisigOptions: AlgorandMultisigOptions = {
   version: 1,
   threshold: 2,
   addrs: [
