@@ -32,12 +32,14 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   private _multisigCreateAccount: AlgorandMultisigPluginCreateAccount
 
-  constructor(chainState: AlgorandChainState, multisigPlugin?: MultisigPlugin, options?: AlgorandCreateAccountOptions) {
+  constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions, multisigPlugin?: MultisigPlugin) {
     this._chainState = chainState
     this.assertValidOptions(options)
     this._options = options || {}
-    if (!isNullOrEmpty(this.options?.multisigOptions)) {
-      this._multisigPlugin = multisigPlugin
+    this._publicKey = options?.publicKey
+    this._multisigPlugin = multisigPlugin
+    if (!isNullOrEmpty(options?.multisigOptions)) {
+      this.assertHasMultisigPlugin()
     }
   }
 
@@ -57,7 +59,7 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   /** Returns whether the transaction is a multisig transaction */
   public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.multisigPlugin)
+    return !isNullOrEmpty(this.options?.multisigOptions)
   }
 
   /** Account name for the account to be created
@@ -194,8 +196,16 @@ export class AlgorandCreateAccount implements CreateAccount {
     }
   }
 
-  /** If multisig plugin is provided, make sure its initialized */
+  /** If multisig plugin is required, make sure its initialized */
+  private assertHasMultisigPlugin() {
+    if (!this.multisigPlugin) {
+      throwNewError('AlgorandCreateAccount error - multisig plugin is missing (required for multisigOptions)')
+    }
+  }
+
+  /** If multisig plugin is required, make sure its initialized */
   private assertMultisigPlugIsInitialized() {
+    this.assertHasMultisigPlugin()
     if (!this.multisigPlugin?.isInitialized) {
       throwNewError('AlgorandCreateAccount error - multisig plugin is not initialized')
     }
