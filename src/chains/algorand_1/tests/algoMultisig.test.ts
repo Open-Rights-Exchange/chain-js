@@ -2,10 +2,11 @@
 
 import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
 import { ChainFactory, ChainType } from '../../..'
-import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
 import { multisigChainSerialized } from './mockups/multisig'
-import { AlgorandMultiSigOptions } from '../models'
 import { ChainActionType, ValueTransferParams } from '../../../models'
+import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
+import { AlgorandTransaction } from '../algoTransaction'
+import { AlgorandMultisigOptions, AlgorandTransactionOptions } from '../models'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -37,11 +38,11 @@ describe('Test Algorand Multisig Transactions', () => {
   it('setFromRaw() using chain serialized', async () => {
     await algoTest.connect()
     expect(algoTest.isConnected).toBeTruthy()
-
-    const transaction = algoTest.new.Transaction()
+    const transaction = await algoTest.new.Transaction()
     await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
+    expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct1Private)])
     expect(transaction.missingSignatures).toEqual([childAcct2, childAcct3])
     await transaction.sign([toAlgorandPrivateKey(childAcct2Private)])
@@ -56,7 +57,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
-    const multiSigOptions: AlgorandMultiSigOptions = {
+    const transactionMultisigOptions: AlgorandMultisigOptions = {
       version: 1,
       threshold: 3,
       addrs: [
@@ -65,7 +66,12 @@ describe('Test Algorand Multisig Transactions', () => {
         childAcct3, // 3
       ],
     }
-    const transaction = algoTest.new.Transaction({ multiSigOptions })
+
+    const transactionOptions: AlgorandTransactionOptions = {
+      multisigOptions: transactionMultisigOptions,
+    }
+
+    const transaction = (await algoTest.new.Transaction(transactionOptions)) as AlgorandTransaction
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
@@ -87,7 +93,7 @@ describe('Test Algorand Multisig Transactions', () => {
       toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
-    const multiSigOptions: AlgorandMultiSigOptions = {
+    const transactionMultisigOptions: AlgorandMultisigOptions = {
       version: 1,
       threshold: 3,
       addrs: [
@@ -96,8 +102,11 @@ describe('Test Algorand Multisig Transactions', () => {
         childAcct3, // 3
       ],
     }
-    const multisigAddress = determineMultiSigAddress(multiSigOptions)
-    const transaction = algoTest.new.Transaction({ multiSigOptions })
+    const transactionOptions: AlgorandTransactionOptions = {
+      multisigOptions: transactionMultisigOptions,
+    }
+    const multisigAddress = determineMultiSigAddress(transactionMultisigOptions)
+    const transaction = await algoTest.new.Transaction(transactionOptions)
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()

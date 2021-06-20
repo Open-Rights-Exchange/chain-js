@@ -58,6 +58,10 @@ export class EosCreateAccount implements CreateAccount {
     this._options = this.applyDefaultOptions(options)
   }
 
+  public async init(): Promise<void> {
+    return null
+  }
+
   // ---- Interface implementation
 
   /** Account name for the account to be created

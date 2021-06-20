@@ -3,22 +3,17 @@ import { TextEncoder } from 'util'
 import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from '../../../helpers'
 import {
   AlgoClient,
-  AlgorandMultiSigAccount,
-  AlgorandMultiSigOptions,
+  AlgorandMultisigAccount,
+  AlgorandMultisigOptions,
   AlgorandRawTransactionMultisigStruct,
   AlgorandRawTransactionStruct,
   AlgorandTxSignResults,
 } from '../models'
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
-export function determineMultiSigAddress(multiSigOptions: AlgorandMultiSigOptions): AlgorandMultiSigAccount {
-  if (isNullOrEmpty(multiSigOptions)) return null
-  const mSigOptions = {
-    version: multiSigOptions.version,
-    threshold: multiSigOptions.threshold,
-    addrs: multiSigOptions.addrs,
-  }
-  return algosdk.multisigAddress(mSigOptions)
+export function determineMultiSigAddress(options: AlgorandMultisigOptions): AlgorandMultisigAccount {
+  if (isNullOrEmpty(options)) return null
+  return algosdk.multisigAddress(options)
 }
 
 /** Decode blob from SDK's sign transaction */
@@ -33,7 +28,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   }
   if (transaction?.msig) {
     returnTx = transaction as AlgorandRawTransactionMultisigStruct
-  } else {
+  } else if (transaction?.sig) {
     returnTx = transaction as AlgorandRawTransactionStruct
   }
   return { transactionId: txID, transaction: returnTx }

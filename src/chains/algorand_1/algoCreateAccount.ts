@@ -1,19 +1,18 @@
 import { throwNewError } from '../../errors'
 import { CreateAccount } from '../../interfaces'
-import { notSupported } from '../../helpers'
+import { isNullOrEmpty, notSupported } from '../../helpers'
 import {
   AlgorandCreateAccountOptions,
   AlgorandEntityName,
   AlgorandGeneratedKeys,
-  AlgorandMultiSigOptions,
   AlgorandNewAccountType,
   AlgorandPublicKey,
 } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { generateNewAccountKeysAndEncryptPrivateKeys } from './algoCrypto'
 import {
-  isValidAlgorandPublicKey,
   determineMultiSigAddress,
+  isValidAlgorandPublicKey,
   toAddressFromPublicKey,
   toAlgorandEntityName,
 } from './helpers'
@@ -23,8 +22,6 @@ import {
  *  Generates new account keys if not provide */
 export class AlgorandCreateAccount implements CreateAccount {
   private _publicKey: AlgorandPublicKey
-
-  private _multiSigOptions: AlgorandMultiSigOptions
 
   private _chainState: AlgorandChainState
 
@@ -38,9 +35,18 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   constructor(chainState: AlgorandChainState, options?: AlgorandCreateAccountOptions) {
     this._chainState = chainState
-    this._options = options
+    this.assertValidOptions(options)
+    this._options = options || {}
     this._publicKey = options?.publicKey
-    this._multiSigOptions = options?.multiSigOptions || null
+  }
+
+  public async init() {
+    // nothing to do
+  }
+
+  /** Returns whether the transaction is a multisig transaction */
+  public get isMultisig(): boolean {
+    return !isNullOrEmpty(this.options?.multisigOptions)
   }
 
   // ---- Interface implementation
@@ -48,8 +54,8 @@ export class AlgorandCreateAccount implements CreateAccount {
   /** Account name for the account to be created
    *  May be automatically generated (or otherwise changed) by composeTransaction() */
   get accountName(): AlgorandEntityName {
-    if (this._multiSigOptions) {
-      return toAlgorandEntityName(determineMultiSigAddress(this._multiSigOptions))
+    if (this.isMultisig) {
+      return toAlgorandEntityName(determineMultiSigAddress(this.options.multisigOptions))
     }
     if (this._publicKey) {
       return toAlgorandEntityName(toAddressFromPublicKey(this._publicKey))
@@ -81,7 +87,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   }
 
   /** Account creation options */
-  get options() {
+  get options(): AlgorandCreateAccountOptions {
     return this._options
   }
 
@@ -130,17 +136,16 @@ export class AlgorandCreateAccount implements CreateAccount {
     return this.accountName as string
   }
 
-  /** Checks create options - if both publicKey and multiSigOptions are missing,
+  /** Checks create options - if both publicKey and multisigOptions are missing,
    *  autogenerate the public and private key pair and add them to options
    *  Algorand keys are represented as hex strings in chainjs.
    *  These keys are converted to Uint8Array when passed to Algorand sdk and nacl (crypto library for algorand).
    */
   async generateKeysIfNeeded() {
-    this.assertValidOptionPublicKeys()
     this.assertValidOptionNewKeys()
     if (!this._publicKey) {
       // get keys from options or generate
-      if (!this._multiSigOptions) {
+      if (!this.isMultisig) {
         await this.generateAccountKeys()
       }
     }
@@ -155,14 +160,20 @@ export class AlgorandCreateAccount implements CreateAccount {
     this._publicKey = this._generatedKeys?.publicKey // replace working keys with new ones
   }
 
-  private assertValidOptionPublicKeys() {
-    const { publicKey } = this._options
+  /** make sure all options passed-in are valid */
+  private assertValidOptions(options: AlgorandCreateAccountOptions) {
+    const { publicKey } = options
     if (publicKey && !isValidAlgorandPublicKey(publicKey)) {
       throwNewError('Invalid Option - Provided publicKey isnt valid')
     }
   }
 
+  /** Before encrypting keys, check for required options (password and salt) */
   private assertValidOptionNewKeys() {
-    // nothing to check
+    const { newKeysOptions } = this._options || {}
+    const { password, encryptionOptions } = newKeysOptions || {}
+    if (!password || !encryptionOptions) {
+      throwNewError('Invalid Option - Missing password or encryptionOptions to use for generateKeysIfNeeded')
+    }
   }
 }

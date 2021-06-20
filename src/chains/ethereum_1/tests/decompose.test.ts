@@ -1,5 +1,4 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
-import BN from 'bn.js'
 import { decomposeAction } from '../ethDecompose'
 
 import {
@@ -13,12 +12,12 @@ import {
   composedERC721TransferFromAction,
 } from './mockups/composedActions'
 import { EthereumTransactionAction } from '../models'
-import { toEthereumTxData } from '../helpers'
+import { toEthereumAddress, toEthereumTxData } from '../helpers'
 
 describe('Decompose Chain Actions', () => {
   const composedEthTransferAction: EthereumTransactionAction = {
-    to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-    from: '0x0000000000000000000000000000000000000000',
+    to: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+    from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
     value: '10',
     data: toEthereumTxData('0x00'),
   }
@@ -28,8 +27,8 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ValueTransfer',
         args: {
-          toAccountName: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-          fromAccountName: '0x0000000000000000000000000000000000000000',
+          toAccountName: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
+          fromAccountName: toEthereumAddress('0x0000000000000000000000000000000000000000'),
           amount: '10',
           symbol: 'wei',
         },
@@ -45,18 +44,18 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'TokenApprove',
         args: {
-          contractName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          fromAccountName: '0x0000000000000000000000000000000000000000',
-          toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          fromAccountName: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          toAccountName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
         chainActionType: 'ERC20Approve',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          spender: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          spender: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
@@ -71,8 +70,8 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ERC20Burn',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
           value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
@@ -87,8 +86,8 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ERC20Issue',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
           value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
@@ -103,18 +102,18 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'TokenTransfer',
         args: {
-          contractName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          fromAccountName: '0x0000000000000000000000000000000000000000',
-          toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          fromAccountName: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          toAccountName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
         chainActionType: 'ERC20Transfer',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
@@ -129,20 +128,20 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'TokenTransferFrom',
         args: {
-          contractName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          approvedAccountName: '0x0000000000000000000000000000000000000000',
-          fromAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
-          toAccountName: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          approvedAccountName: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          fromAccountName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b80'),
+          toAccountName: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           amount: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
       {
         chainActionType: 'ERC20TransferFrom',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          transferFrom: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
-          to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          transferFrom: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b80'),
+          to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           value: '20000000000000000000', // 20 with 18 decimals of precision
         },
       },
@@ -157,9 +156,9 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ERC721Approve',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           tokenId: 1,
         },
       },
@@ -174,9 +173,9 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ERC721Transfer',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           tokenId: 1,
         },
       },
@@ -191,10 +190,10 @@ describe('Decompose Chain Actions', () => {
       {
         chainActionType: 'ERC721TransferFrom',
         args: {
-          contractAddress: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
-          from: '0x0000000000000000000000000000000000000000',
-          transferFrom: '0x27105356f6c1ede0e92020e6225e46dc1f496b80',
-          to: '0x27105356f6c1ede0e92020e6225e46dc1f496b81',
+          contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
+          from: toEthereumAddress('0x0000000000000000000000000000000000000000'),
+          transferFrom: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b80'),
+          to: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
           tokenId: 1,
         },
       },

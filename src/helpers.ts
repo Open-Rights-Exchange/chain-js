@@ -3,6 +3,8 @@ import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
 import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
+import { ChainState } from './interfaces/chainState'
+import { ChainJsPlugin, ChainJsPluginOptions } from './interfaces/plugin'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
 
 export function isAString(value: any) {
@@ -365,13 +367,13 @@ export function hasHexPrefix(value: any): boolean {
  *  Also converts hex chars to lowercase for consistency
  */
 export function ensureHexPrefix(value: string) {
-  if (!value) return value
+  if (isNullOrEmpty(value)) return value
   return value.startsWith('0x') ? value.toLowerCase() : `${'0x'}${value.toLowerCase()}`
 }
 
 /** Checks that string starts with 0x - removes it if it does */
 export function removeHexPrefix(value: string) {
-  if (!value) return value
+  if (isNullOrEmpty(value)) return value
   return value.startsWith('0x') ? value.slice(2) : value
 }
 
@@ -384,7 +386,7 @@ export function toHexStringIfNeeded(value: any) {
 
 /** Whether array is exactly length of 1 */
 export function isArrayLengthOne(array: any[]) {
-  if (!array) return false
+  if (isNullOrEmpty(array)) return false
   return array.length === 1
 }
 
@@ -516,4 +518,57 @@ export function uInt8ArrayToInteger(value: Uint8Array) {
   if (isNullOrEmpty(value)) return undefined
   const { length } = value
   return Buffer.from(value).readUIntBE(0, length)
+}
+
+/** Installs a plugin. If options provided, also runs plugIn.init(options) */
+export async function initializePlugin(
+  chainState: ChainState,
+  plugin: ChainJsPlugin,
+  options?: ChainJsPluginOptions,
+): Promise<ChainJsPlugin> {
+  const newPlugin = plugin
+  newPlugin.chainState = chainState
+  // call init if we have options
+  if (!isNullOrEmpty(options)) {
+    plugin.init(options)
+  }
+  return newPlugin
+}
+
+/** Throws if a plugin of the same type has already been installed */
+export function assertPluginTypeNotAlreadyInstalled(plugin: ChainJsPlugin, installedPlugins: ChainJsPlugin[]) {
+  const installedTypes = (installedPlugins || []).map(plg => plg.type)
+  const isInstalled = installedTypes.includes(plugin.type)
+  if (isInstalled) {
+    throw new Error(`Plugin of type ${plugin.type} is already installed - only one of each type may be installed.`)
+  }
+}
+
+/** Pause exectuion for nn miliseconds */
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms || 1000))
+}
+
+/** Parses a stringified string into a JSON object
+ *  Returns Null if parse fails */
+export function tryParseJSON(value: any) {
+  if (!value || !isAString(value) || value.trim() === '') return null
+  try {
+    const parsed = JSON.parse(value, jsonParseComplexObjectReviver)
+    if (parsed && typeof parsed === 'object') return parsed
+  } catch (error) {
+    // TODO: should log trace this detail: ('error parsing JSON', { jsonString, doubleQuotes, error });
+  }
+  return null
+}
+
+/* Accepts a JSON object or stringified object and returns a JSON object - if parsing fails, returns null */
+export function convertStringifiedOrObjectToObject(value: object | string): object {
+  let returnVal: object
+  if (value && typeof value === 'string') {
+    returnVal = tryParseJSON(value)
+  } else {
+    returnVal = value as object
+  }
+  return returnVal
 }

@@ -1,5 +1,5 @@
 /** Transaction options used when contructing a trnasaction header */
-export type EosTxOptions = {
+export type EosTransactionOptions = {
   /** Uses the time from the block which is `blocksBehind` behind head block
    *   to calclate the expiratation time (blockBehind_time + expireSeconds) */
   blocksBehind?: number

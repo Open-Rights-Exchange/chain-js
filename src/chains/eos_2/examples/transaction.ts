@@ -18,7 +18,7 @@ require('dotenv').config()
 
 const prepTransactionFromActions = async (chain: Chain, transactionActions: any, key: string) => {
   console.log('actions:', transactionActions)
-  const transaction = (chain as ChainEosV2).new.Transaction()
+  const transaction = await (chain as ChainEosV2).new.Transaction()
   transaction.actions = transactionActions
   await transaction.prepareToBeSigned()
   await transaction.validate()
@@ -67,10 +67,12 @@ const sampleSerializedTransaction2 =
   '{"serializedTransaction":{"0":228,"1":27,"2":67,"3":94,"4":3,"5":53,"6":65,"7":218,"8":162,"9":122,"10":0,"11":0,"12":0,"13":0,"14":2,"15":192,"16":233,"17":69,"18":88,"19":169,"20":108,"21":212,"22":69,"23":0,"24":0,"25":0,"26":0,"27":0,"28":192,"29":166,"30":171,"31":1,"32":192,"33":166,"34":75,"35":83,"36":175,"37":228,"38":212,"39":165,"40":0,"41":0,"42":0,"43":0,"44":168,"45":237,"46":50,"47":50,"48":8,"49":160,"50":248,"51":120,"52":132,"53":13,"54":27,"55":212,"56":165,"57":64,"58":99,"59":84,"60":173,"61":86,"62":67,"63":165,"64":74,"65":0,"66":0,"67":0,"68":0,"69":0,"70":0,"71":128,"72":107,"73":1,"74":160,"75":248,"76":120,"77":132,"78":13,"79":27,"80":212,"81":165,"82":224,"83":98,"84":173,"85":134,"86":74,"87":149,"88":106,"89":53,"90":8,"91":160,"92":248,"93":120,"94":132,"95":13,"96":27,"97":212,"98":165,"99":0},"signatures":["SIG_K1_KaEoCVCqiK8BvicHXvEcKAV83AduPNUWxXTknyUGBAUF18tXG1SPQhCApjxPS7xEtxrAVXFFCa8WRPXn2PZ8beG5j5nHSL"]}'
 
 const sampleActionsDemoApp = JSON.parse(
-  '{"account":"demoapphello","name":"hi","authorization":[{"actor":"ore1qctfkfhw","permission":"appdemoappli"}],"data":{"user":"ore1qctfkfhw"}}',
+  '{ "account": "demoapphello", "name": "hi", "authorization": [ { "actor": "ore1rnjyxvqp", "permission": "app1qyajfzqr" } ], "data": { "user": "ore1rnjyxvqp" } }',
+  // '{"account":"demoapphello","name":"hi","authorization":[{"actor":"ore1qctfkfhw","permission":"appdemoappli"}],"data":{"user":"ore1qctfkfhw"}}',
 )
 const sampleActionFirstAuth = JSON.parse(
-  '{"account":"createbridge","name":"ping","authorization":[{"actor":"proppropprop","permission":"active"}],"data":{"from":"ore1qctfkfhw"}}',
+  '{"account":"createescrow","name":"ping","authorization":[{"actor":"ore1rmpfgqqo","permission":"active"}],"data":{"from":"ore1rmpfgqqo"}}',
+  // '{"account":"createbridge","name":"ping","authorization":[{"actor":"oreidfunding","permission":"active"}],"data":{"from":"oreidfunding"}}',
 )
 const sampleActionData_UpdateAuthSetActiveToUnused = JSON.parse(
   '{"account":"eosio","name":"updateauth","authorization":[{"actor":"ore1qadesjxm","permission":"owner"}],"data":{"account":"ore1qadesjxm","permission":"active","parent":"owner","auth":{"accounts":[],"keys":[{"key":"EOS5vf6mmk2oU6ae1PXTtnZD7ucKasA3rUEzXyi5xR7WkzX8emEma","weight":1}],"threshold":1,"waits":[]}}}',
@@ -101,7 +103,7 @@ async function run() {
   await kylin.connect()
 
   //  ---> set transaction from serialized
-  // const transaction = kylin.new.Transaction({ blocksBehind: 10 })
+  // const transaction = await kylin.new.Transaction({ blocksBehind: 10 })
   // await transaction.setFromRaw(serializedTransaction)
   // await transaction.validate()
   // console.log('missing signatures:', transaction.missingSignatures)
@@ -115,7 +117,7 @@ async function run() {
   // ----<
 
   // ---> set transaction from actions
-  // const transaction = kylin.new.Transaction()
+  // const transaction = await kylin.new.Transaction()
   // transaction.actions = [sampleActionFirstAuth]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()
@@ -126,12 +128,19 @@ async function run() {
   // console.log('send response:', JSON.stringify(txResponse))
 
   // ---> send token
-  const transaction = kylin.new.Transaction()
-  transaction.actions = [await kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
-  // transaction.addAction(sampleActionFirstAuth, true)
+  const transaction = await kylin.new.Transaction()
+  // transaction.actions = [await kylin.composeAction(ChainActionType.TokenTransfer, transferTokenOptions)]
+  transaction.actions = [sampleActionsDemoApp]
+  transaction.addAction(sampleActionFirstAuth, true)
   await transaction.prepareToBeSigned()
   await transaction.validate()
-  await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.EOS_KYLIN_OREIDFUNDING_PRIVATE_KEY)])
+  // await transaction.sign([toEosPrivateKey(env.KYLIN_proppropprop_PRIVATE_KEY)])
+  await transaction.sign([toEosPrivateKey('5KADGFLxMNNB3PGWo6eUCTeSFoJMCBzMoJCxtaWH4oPYcgb2THR')])
+  await transaction.sign([toEosPrivateKey('5JYCyY6girNbvKNxaXJqHuzEZp9kBSK7vfquE17vVqTTjkjrCFT')])
+  console.log(JSON.stringify(transaction.actions))
+  console.log(transaction.raw)
+  console.log(transaction.signatures)
   console.log('missing signatures:', await transaction.missingSignatures)
   const txResponse = await transaction.send(ConfirmType.After001)
   console.log('send response:', JSON.stringify(txResponse))
@@ -139,7 +148,7 @@ async function run() {
   // ----<
 
   // ---> demo transaction
-  // const transaction = kylin.new.Transaction()
+  // const transaction = await kylin.new.Transaction()
   // transaction.actions = [sampleActionsDemoApp]
   // // transaction.addAction(sampleActionFirstAuth, true)
   // await transaction.prepareToBeSigned()

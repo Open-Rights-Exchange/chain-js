@@ -3,6 +3,7 @@ import {
   ChainAssetBrand,
   ChainDateBrand,
   ChainEntityNameBrand,
+  ChainSettingsCommunicationSettings,
   ChainSymbolBrand,
   ModelsCryptoAes,
 } from '../../../models'
@@ -29,7 +30,7 @@ export type EosAuthorization = {
 /** Chain configuation for creating a new connection */
 export type EosChainSettings = {
   createEscrowContract?: string
-  communicationSettings?: EosChainSettingsCommunicationSettings
+  communicationSettings?: ChainSettingsCommunicationSettings
   defaultTransactionSettings?: {
     blocksBehind: number
     expireSeconds: number
@@ -59,12 +60,6 @@ export enum EosChainMonitorType {
   NONE,
   DFUSE,
   DEMUX,
-}
-
-export type EosChainSettingsCommunicationSettings = {
-  blocksToCheck: number
-  checkInterval: number
-  getBlockAttempts: number
 }
 
 export type EosPermissionSimplified = {

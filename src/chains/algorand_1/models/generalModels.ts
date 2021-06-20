@@ -1,4 +1,4 @@
-import { ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
+import { ChainSettingsCommunicationSettings, ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
 import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
@@ -40,23 +40,30 @@ export type AlgorandChainInfo = {
 
 /** Currently nothing is needed in algorand chain settings.
  * Once any such parameter is there, change the type from any to an object containing specific properties */
-export type AlgorandChainSettings = any
-
-export type AlgorandChainSettingsCommunicationSettings = {
-  blocksToCheck: number
-  checkInterval: number
-  getBlockAttempts: number
+export type AlgorandChainSettings = {
+  communicationSettings?: ChainSettingsCommunicationSettings
+  defaultTransactionSettings?: {
+    expireSeconds?: number
+    fee?: AlgorandValue
+    flatFee?: boolean
+  }
 }
 
 /**  Multisig options required to create a multisignature account for Algorand */
-export type AlgorandMultiSigOptions = {
+export type AlgorandMultisigOptions = {
   version: number
   threshold: number
   addrs: AlgorandAddress[]
 }
 
+/** multisig options for creating an account */
+export type AlgorandMultisigCreateAccountOptions = AlgorandMultisigOptions
+
+/** multisig options for signing a transaction */
+export type AlgorandMultisigTransactionOptions = AlgorandMultisigOptions
+
 /**  Algorand multisig account is similar to a native algorand address */
-export type AlgorandMultiSigAccount = AlgorandAddress
+export type AlgorandMultisigAccount = AlgorandAddress
 
 /**  Algorand keys generated for a new account */
 export type AlgorandGeneratedKeys = AlgorandKeyPair

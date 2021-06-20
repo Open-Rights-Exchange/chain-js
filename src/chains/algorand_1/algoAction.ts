@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/indent */
 import * as algosdk from 'algosdk'
-import { Transaction as AlgoTransactionClass } from 'algosdk/src/transaction'
+import { Transaction as AlgoTransactionClass } from 'algosdk'
 import {
   bigIntToUint8Array,
   bufferToString,
@@ -18,6 +19,7 @@ import {
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
+  AlgorandTransactionOptions,
   AlgorandTxAction,
   AlgorandTxActionRaw,
   AlgorandTxActionSdkEncoded,
@@ -30,7 +32,11 @@ import {
   AlgorandRawTransactionStruct,
   AlgorandTxHeaderParams,
 } from './models'
-import { ALGORAND_TRX_COMFIRMATION_ROUNDS, ALGORAND_EMPTY_CONTRACT_NAME } from './algoConstants'
+import {
+  ALGORAND_EMPTY_CONTRACT_NAME,
+  ALGORAND_CHAIN_BLOCK_FREQUENCY,
+  ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS,
+} from './algoConstants'
 import { toAlgorandAddressFromRawStruct, toRawAddressFromAlgoAddr } from './helpers'
 
 /** Helper class to ensure transaction actions properties are set correctly
@@ -52,11 +58,11 @@ export class AlgorandActionHelper {
    *  .raw property returns action which includes Uint8Arrays (used by chain) */
   constructor(
     params:
-    | AlgorandTxAction
-    | AlgorandTxActionRaw
-    | AlgorandTxActionSdkEncoded
-    | AlgorandRawTransactionStruct
-    | AlgorandRawTransactionMultisigStruct,
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     this.validateAndApplyParams(params)
   }
@@ -64,11 +70,11 @@ export class AlgorandActionHelper {
   /** applies rules for input params, converts to raw values if needed */
   private validateAndApplyParams(
     actionParam:
-    | AlgorandTxAction
-    | AlgorandTxActionRaw
-    | AlgorandTxActionSdkEncoded
-    | AlgorandRawTransactionStruct
-    | AlgorandRawTransactionMultisigStruct,
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct,
   ) {
     if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
@@ -194,7 +200,10 @@ export class AlgorandActionHelper {
   /** Convert raw, compressed format to our decompressed raw format */
   private actionRawCompressedToRaw(action: any) {
     const compressedTxn = action?.txn
-    return AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
+    const rawTrx = AlgoTransactionClass.from_obj_for_encoding(compressedTxn)
+    // CompressedTrx.fee is always flatFee but from_obj_for_encoding only converts fields.
+    rawTrx.flatFee = true
+    return rawTrx
   }
 
   /** Always returns 'none' for Algorand chain */
@@ -260,12 +269,20 @@ export class AlgorandActionHelper {
 
   /** Adds the latest transaction header fields (firstRound, etc.) from chain
    *  Applies any that are not already provided in the action */
-  applyCurrentTxHeaderParamsWhereNeeded(chainTxParams: AlgorandChainTransactionParamsStruct) {
+  applyCurrentTxHeaderParamsWhereNeeded(
+    chainTxParams: AlgorandChainTransactionParamsStruct,
+    transactionOptions?: AlgorandTransactionOptions,
+  ) {
     const rawAction = this.raw
+    // calculate last block
+    const numberOfBlockValidFor = transactionOptions?.expireSeconds
+      ? Math.floor(transactionOptions?.expireSeconds / ALGORAND_CHAIN_BLOCK_FREQUENCY)
+      : ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
-    rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_TRX_COMFIRMATION_ROUNDS
+    const lastValidBlock = rawAction.firstRound + numberOfBlockValidFor
+    rawAction.lastRound = lastValidBlock // always replace the lastblock with default (or provided options)
     rawAction.fee = rawAction.fee || chainTxParams.minFee
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
   }

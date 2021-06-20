@@ -1,6 +1,13 @@
 import algosdk from 'algosdk'
 import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ChainInfo, ConfirmType } from '../../models'
+import { ChainState } from '../../interfaces/chainState'
+import {
+  ChainErrorDetailCode,
+  ChainErrorType,
+  ChainInfo,
+  ChainSettingsCommunicationSettings,
+  ConfirmType,
+} from '../../models'
 import {
   AlgorandAddress,
   AlgoClient,
@@ -9,7 +16,6 @@ import {
   AlgorandChainEndpoint,
   AlgorandChainInfo,
   AlgorandChainSettings,
-  AlgorandChainSettingsCommunicationSettings,
   AlgorandChainTransactionParamsStruct,
   AlgorandSymbol,
   AlgorandTxChainResponse,
@@ -28,7 +34,7 @@ import {
 import { toAlgo } from './helpers'
 import { mapChainError } from './algoErrors'
 
-export class AlgorandChainState {
+export class AlgorandChainState implements ChainState {
   private _activeEndpoint: AlgorandChainEndpoint
 
   private _chainInfo: AlgorandChainInfo
@@ -147,6 +153,16 @@ export class AlgorandChainState {
     return block
   }
 
+  /** Fetches data from a contract table */
+  fetchContractData(): Promise<any> {
+    throw new Error('Not Implemented')
+  }
+
+  /** Fetches data from a contract table */
+  fetchContractTable(): Promise<any> {
+    throw new Error('Not Implemented')
+  }
+
   /** Get the balance for an account from the chain
    *  If symbol = 'algo', returns Algo balance (in units of Algo)
    *  Else returns the asset balance of the account for the provided symbol (asset symbol),  if the symbol is valid
@@ -226,7 +242,7 @@ export class AlgorandChainState {
     signedTransaction: string,
     waitForConfirm: ConfirmType = ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    communicationSettings?: AlgorandChainSettingsCommunicationSettings,
+    communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
     if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
       throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
@@ -263,7 +279,7 @@ export class AlgorandChainState {
     transactionResult: AlgorandTxResult,
     waitForConfirm: ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: AlgorandChainSettingsCommunicationSettings,
+    communicationSettings: ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
@@ -340,7 +356,7 @@ export class AlgorandChainState {
         possibleTransactionBlock = await this.getBlock(blockNumToCheck)
       }
 
-      transactionResponse = this.blockHasTransaction(possibleTransactionBlock, transactionId)
+      transactionResponse = this.findBlockInTransaction(possibleTransactionBlock, transactionId)
       if (!isNullOrEmpty(transactionResponse)) {
         transactionBlockNumber = possibleTransactionBlock.round
       }
@@ -443,8 +459,8 @@ export class AlgorandChainState {
     }
   }
 
-  /** Check if a block includes a transaction */
-  public blockHasTransaction = (block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse => {
+  /** Return a transaction if its included in a block */
+  public findBlockInTransaction(block: Partial<AlgorandBlock>, transactionId: string): AlgorandTxChainResponse {
     const { transactions } = block
     const result = transactions?.find((transaction: any) => transaction?.id === transactionId)
     return result

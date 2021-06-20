@@ -6,7 +6,7 @@ import {
 } from '../../../models'
 import { erc20Abi } from '../../abis/erc20Abi'
 import { getArrayIndexOrNull, toTokenValueString } from '../../../../../helpers'
-import { matchKnownAbiTypes, isNullOrEmptyEthereumValue } from '../../../helpers'
+import { matchKnownAbiTypes, isNullOrEmptyEthereumValue, toEthereumAddress } from '../../../helpers'
 
 export interface Erc20TransferParams {
   contractAddress: EthereumAddress
@@ -38,7 +38,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
     const returnData: Erc20TransferParams = {
       contractAddress: to,
       from,
-      to: getArrayIndexOrNull(contract?.parameters, 0) as string,
+      to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       value: getArrayIndexOrNull(contract?.parameters, 1) as string,
     }
     const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
