@@ -56,8 +56,14 @@ export type AlgorandMultisigOptions = {
   addrs: AlgorandAddress[]
 }
 
+/** multisig options for creating an account */
+export type AlgorandMultisigCreateAccountOptions = AlgorandMultisigOptions
+
+/** multisig options for signing a transaction */
+export type AlgorandMultisigTransactionOptions = AlgorandMultisigOptions
+
 /**  Algorand multisig account is similar to a native algorand address */
-export type AlgorandMultiSigAccount = AlgorandAddress
+export type AlgorandMultisigAccount = AlgorandAddress
 
 /**  Algorand keys generated for a new account */
 export type AlgorandGeneratedKeys = AlgorandKeyPair

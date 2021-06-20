@@ -1,7 +1,6 @@
-import { AlgorandValue } from './generalModels'
+import { AlgorandMultisigOptions, AlgorandValue } from './generalModels'
 import { AlgorandAddress, AlgorandPublicKey } from './cryptoModels'
 import { AlgorandTxActionStruct } from './algoStructures'
-import { AlgorandMultisigNativeTransactionOptions } from '../plugins/multisig/native/models'
 
 /**
  * Chain response type after a transaction is confirmed on the chain
@@ -61,7 +60,7 @@ export type AlgorandTransactionOptions = {
   expireSeconds?: number
   fee?: AlgorandValue
   flatFee?: boolean
-  multisigOptions?: AlgorandMultisigNativeTransactionOptions // only support on multisig plugin type for Algorand (native)
+  multisigOptions?: AlgorandMultisigOptions
   /** (optional) The publicKey used to sign the transaction - if an account has been rekeyed, use the signing key here
    * if not provided, defaults to 'from' address's publicKey */
   signerPublicKey?: AlgorandPublicKey
