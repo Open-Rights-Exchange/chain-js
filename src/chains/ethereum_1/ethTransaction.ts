@@ -48,6 +48,7 @@ import {
   EthereumMultisigPluginRawTransaction,
   EthereumMultisigPluginTransaction,
 } from './plugins/multisig/ethereumMultisigPlugin'
+import { mapChainError } from './ethErrors'
 
 export class EthereumTransaction implements Transaction {
   private _actionHelper: EthereumActionHelper
@@ -528,13 +529,18 @@ export class EthereumTransaction implements Transaction {
 
   /** Get the suggested Eth fee (in Ether) for this transaction */
   public async getSuggestedFee(priority: TxExecutionPriority = TxExecutionPriority.Average): Promise<string> {
-    this.assertHasAction()
-    const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
-    let gasPriceinWeiBN = new BN(gasPriceString)
-    const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
-    gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
-    const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
-    return convertEthUnit(totalFee.toString(10), EthUnit.Wei, EthUnit.Ether)
+    try {
+      this.assertHasAction()
+      const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
+      let gasPriceinWeiBN = new BN(gasPriceString)
+      const multiplier: number = TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+      gasPriceinWeiBN = gasPriceinWeiBN.muln(multiplier)
+      const totalFee = gasPriceinWeiBN.mul(new BN(await this.getEstimatedGas(), 10))
+      return convertEthUnit(totalFee.toString(10), EthUnit.Wei, EthUnit.Ether)
+    } catch (error) {
+      const chainError = mapChainError(error)
+      throw chainError
+    }
   }
 
   /** get the desired fee (in Ether) to spend on sending the transaction */
@@ -546,24 +552,29 @@ export class EthereumTransaction implements Transaction {
    *  If gasLimitOverride is provided, gasPrice will be calculated and gasLimit will be set to gasLimitOverride
    * */
   public async setDesiredFee(desiredFee: string, options?: EthereumSetDesiredFeeOptions) {
-    this.assertNoSignatures()
-    const { gasLimitOverride, gasPriceOverride } = options || {}
-    const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
-    const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
-    const desiredFeeBn = new BN(desiredFeeWei, 10)
-    const gasPriceBn = desiredFeeBn.div(gasRequired)
-    this._desiredFee = desiredFeeWei
-    let gasPriceString = gasPriceBn.toString(10).slice(0, -9)
-    const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
-    let gasLimitString = Math.round(gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
-    if (gasLimitOverride) {
-      gasLimitString = gasLimitOverride
+    try {
+      this.assertNoSignatures()
+      const { gasLimitOverride, gasPriceOverride } = options || {}
+      const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
+      const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
+      const desiredFeeBn = new BN(desiredFeeWei, 10)
+      const gasPriceBn = desiredFeeBn.div(gasRequired)
+      this._desiredFee = desiredFeeWei
+      let gasPriceString = gasPriceBn.toString(10).slice(0, -9)
+      const gasRequiredInt = parseInt(gasRequired.toString(10), 10)
+      let gasLimitString = Math.round(gasRequiredInt * (1 + this.maxFeeIncreasePercentage / 100)).toString()
+      if (gasLimitOverride) {
+        gasLimitString = gasLimitOverride
+      }
+      if (gasPriceOverride) {
+        gasPriceString = gasPriceOverride
+      }
+      this._actionHelper.gasPrice = gasPriceString
+      this._actionHelper.gasLimit = gasLimitString
+    } catch (error) {
+      const chainError = mapChainError(error)
+      throw chainError
     }
-    if (gasPriceOverride) {
-      gasPriceString = gasPriceOverride
-    }
-    this._actionHelper.gasPrice = gasPriceString
-    this._actionHelper.gasLimit = gasLimitString
   }
 
   /** Hash of transaction - signature must be present to determine transactionId */
