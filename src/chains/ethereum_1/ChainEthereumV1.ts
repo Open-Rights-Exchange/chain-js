@@ -159,14 +159,14 @@ class ChainEthereumV1 implements Chain {
 
   private newCreateAccount = async (options?: EthereumCreateAccountOptions<any>): Promise<EthereumCreateAccount> => {
     this.assertIsConnected()
-    const createAccount = new EthereumCreateAccount(this._chainState, this.multisigPlugin, options)
+    const createAccount = new EthereumCreateAccount(this._chainState, options, this.multisigPlugin)
     await createAccount.init()
     return createAccount
   }
 
   private newTransaction = async (options?: any): Promise<EthereumTransaction> => {
     this.assertIsConnected()
-    const transaction = new EthereumTransaction(this._chainState, this.multisigPlugin, options)
+    const transaction = new EthereumTransaction(this._chainState, options, this.multisigPlugin)
     await transaction.init()
     return transaction
   }
