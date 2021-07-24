@@ -295,7 +295,7 @@ export class EosChainState implements ChainState {
     const sendResult: Partial<EosTxResult> = {}
 
     // get the head block just before sending the transaction
-    const currentHeadBlock = await this.getChainInfo()
+    const currentHeadBlock = (await this.getChainInfo())?.head_block_num
     try {
       sendResult.chainResponse = await this.rpc.push_transaction(signedTransaction)
       sendResult.transactionId = sendResult.chainResponse?.transaction_id
@@ -307,7 +307,7 @@ export class EosChainState implements ChainState {
     if (waitForConfirm !== ConfirmType.None) {
       // starting block number should be the block number in the transaction receipt
       // ...if it doesnt have one (which can happen), get the latest head block from the chain via get info
-      let startFromBlockNumber = sendResult?.chainResponse?.processed?.block_num
+      let startFromBlockNumber: number = sendResult?.chainResponse?.processed?.block_num
       if (!startFromBlockNumber) {
         startFromBlockNumber = currentHeadBlock
       }
