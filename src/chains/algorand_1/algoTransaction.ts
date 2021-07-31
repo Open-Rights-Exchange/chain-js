@@ -13,7 +13,6 @@ import {
   isAString,
   isAUint8Array,
   isNullOrEmpty,
-  notImplemented,
   notSupported,
   uint8ArraysAreEqual,
 } from '../../helpers'
@@ -523,12 +522,9 @@ export class AlgorandTransaction implements Transaction {
     return this.signerPublicKey ? [toAddressFromPublicKey(this.signerPublicKey)] : []
   }
 
-  public get hashToSign(): string {
-    return notImplemented()
-  }
-
   public get signBuffer(): Buffer {
-    return notImplemented()
+    // uses Algo SDK Transaction object
+    return this._algoSdkTransaction?.bytesToSign()
   }
 
   /** Algorand provides the functionality to sign a transaction using multi-signature account */
@@ -674,7 +670,7 @@ export class AlgorandTransaction implements Transaction {
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
   private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
     if (!this.rawTransaction) return false
-    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
+    const transactionBytesToSign = this.signBuffer // uses Algo SDK Transaction object
     return verifySignatureForDataAndPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
 

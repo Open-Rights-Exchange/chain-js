@@ -50,10 +50,6 @@ export interface Transaction {
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
   signBuffer: any
-  /** Hexadecimal string format of the signBuffer.
-   * Can be something different than serializedTransaction depending on the plugin
-   */
-  hashToSign: string
   /** Does the chain support fees for transactions */
   supportsFee: boolean
   /** Whether the chain supports signing a transactions using a multi-signature account */

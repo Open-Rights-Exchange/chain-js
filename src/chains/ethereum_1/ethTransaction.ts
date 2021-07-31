@@ -646,16 +646,11 @@ export class EthereumTransaction implements Transaction {
     return this.senderAddress
   }
 
-  /** set transaction hash to sign */
+  /** Buffer encoding of transaction data/hash to sign */
   public get signBuffer(): Buffer {
     this.assertIsValidated()
-    this.assertHasSignature()
+    if (this.isMultisig) return this.multisigTransaction.signBuffer
     return this.ethereumJsTx.hash(false)
-  }
-
-  public get hashToSign(): string {
-    if (this.isMultisig) return this.multisigTransaction.hashToSign
-    return bufferToHex(this.signBuffer)
   }
 
   private async signAndAddSignatures(privateKey: string) {

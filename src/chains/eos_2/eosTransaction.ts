@@ -1,4 +1,3 @@
-import { bufferToHex } from 'ethereumjs-util'
 import { EosAccount } from './eosAccount'
 import { EosChainState } from './eosChainState'
 import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
@@ -343,10 +342,6 @@ export class EosTransaction implements Transaction {
       publicKey = await this.getPublicKeyForAuthorization(account, permission)
     }
     return this.hasSignatureForPublicKey(publicKey)
-  }
-
-  public get hashToSign(): string {
-    return bufferToHex(this.signBuffer)
   }
 
   /** The transaction data needed to create a transaction signature.

@@ -105,9 +105,9 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     return this._threshold
   }
 
-  /** Calculated transactionHash from safeTransaction */
-  get transactionHash(): string {
-    return this._transactionHash
+  /** buffer encoding of transaction hash to be signed */
+  public get signBuffer(): Buffer {
+    return Buffer.from(this._transactionHash, 'hex')
   }
 
   get chainUrl(): string {
@@ -215,7 +215,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     return includes
   }
 
-  public async calculateTransactionHash() {
+  public async setTransactionHash() {
     this._transactionHash = await getSafeTransactionHash(this.multisigAddress, this.safeTransaction, this.chainUrl)
   }
 
@@ -237,12 +237,8 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     }
 
     this.assertSignatureOwnerValidAndUnique(this.gnosisSignatures)
-    await this.calculateTransactionHash()
+    await this.setTransactionHash()
     await this.setParentTransactionIfReady()
-  }
-
-  public get hashToSign(): string {
-    return this.transactionHash
   }
 
   public async sign(privateKeys: EthereumPrivateKey[]) {
@@ -250,7 +246,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     const signResults: GnosisSafeSignature[] = []
     await Promise.all(
       privateKeys.map(async pk => {
-        const result = await signSafeTransactionHash(pk, this.transactionHash)
+        const result = await signSafeTransactionHash(pk, this._transactionHash)
         signResults.push(result)
       }),
     )
