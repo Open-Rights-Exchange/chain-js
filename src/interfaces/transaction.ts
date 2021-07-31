@@ -20,7 +20,7 @@ export interface Transaction {
   /** Transction options set in constructor */
   options: TransactionOptions
   /** Raw transaction body
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
+   *  Note: Set via prepareToBeSigned() or setTransaction() */
   raw: any
   /** Whether there is an attached signature for every authorization (e.g. account/permission) in all actions */
   hasAllRequiredSignatures: boolean
@@ -81,9 +81,9 @@ export interface Transaction {
   resourcesRequired(): Promise<TransactionResources>
   /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) */
   setDesiredFee(desiredFee: TransactionCost, options?: any): Promise<void>
-  /** Set the body of the transaction using raw (hex) transaction data
+  /** Set the body of the transaction using actions or raw transaction data
    *  This is one of the ways to set the actions for the transaction */
-  setFromRaw(raw: any): Promise<void>
+  setTransaction(transaction: any): Promise<void>
   /** Broadcast a signed transaction to the chain
    *  waitForConfirm specifies whether to wait for a transaction to appear in a block (or irreversable block) before returning */
   send(waitForConfirm?: ConfirmType, communicationSettings?: any): Promise<TransactionResult>
