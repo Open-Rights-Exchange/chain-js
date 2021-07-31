@@ -104,7 +104,7 @@ async function run() {
 
   //  ---> set transaction from serialized
   // const transaction = await kylin.new.Transaction({ blocksBehind: 10 })
-  // await transaction.setFromRaw(serializedTransaction)
+  // await transaction.setTransaction(serializedTransaction)
   // await transaction.validate()
   // console.log('missing signatures:', transaction.missingSignatures)
   // transaction.signatures = signatures

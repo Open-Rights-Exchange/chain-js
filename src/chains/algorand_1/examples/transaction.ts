@@ -62,7 +62,7 @@ const rawTransactionType2 = // has serialized UInt8Array
 
 async function run() {
   /** Create Algorand chain instance */
-  const chainSettings = { defaultTransactionSettings : { expireSeconds: 100} } // optional setting
+  const chainSettings = { defaultTransactionSettings: { expireSeconds: 100 } } // optional setting
   const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints, chainSettings)
   await algoTest.connect()
   if (algoTest.isConnected) {
@@ -70,7 +70,7 @@ async function run() {
   }
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
-  // await transaction.setFromRaw(jsonParseAndRevive(rawTransaction))
+  // await transaction.setTransaction(jsonParseAndRevive(rawTransaction))
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
