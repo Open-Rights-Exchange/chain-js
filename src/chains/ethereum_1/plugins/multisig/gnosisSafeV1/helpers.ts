@@ -16,6 +16,7 @@ import {
   EthereumMultisigRawTransaction,
   GnosisSafeSignature,
   GnosisSafeTransaction,
+  GnosisSafeRawTransaction,
 } from './models'
 import { EMPTY_DATA, SENTINEL_ADDRESS } from '../../../ethConstants'
 import {
@@ -418,4 +419,20 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
   }
   return { ...detaultOptions, ...multisigOptions }
+}
+
+export function containsSafeSpesificField(value: any): value is GnosisSafeRawTransaction {
+  const { operation, refundReceiver, safeTxGas, baseGas, gasToken, signatures } =
+    (value as GnosisSafeRawTransaction) || {}
+  if (
+    operation !== undefined ||
+    refundReceiver !== undefined ||
+    safeTxGas !== undefined ||
+    baseGas !== undefined ||
+    gasToken !== undefined ||
+    signatures !== undefined
+  ) {
+    return true
+  }
+  return false
 }
