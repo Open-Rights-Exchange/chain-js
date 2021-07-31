@@ -18,18 +18,24 @@ require('dotenv').config()
 const { env } = process
 
 const algoApiKey = env.AGLORAND_API_KEY || 'missing api key'
-const algoMainnetEndpoints = [{
-  url: 'https://mainnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoTestnetEndpoints = [ {
-  url: 'https://testnet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
-const algoBetanetEndpoints = [{
-  url: 'https://betanet-algorand.api.purestake.io/ps2',
-  options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
-}]
+const algoMainnetEndpoints = [
+  {
+    url: 'https://mainnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://mainnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoTestnetEndpoints = [
+  {
+    url: 'https://testnet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://testnet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
+const algoBetanetEndpoints = [
+  {
+    url: 'https://betanet-algorand.api.purestake.io/ps2',
+    options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
+  },
+]
 
 // Standard chainJS action types
 const composeValueTransferParams: Partial<ValueTransferParams> = {
@@ -67,17 +73,116 @@ const composeAlgoPaymentParams: Partial<AlgorandActionPaymentParams> = {
 
 // raw transaction ('blob' returned from the Algo SDK transaction sign function)
 const payRawTransaction: any = {
-  txn:{
+  txn: {
     amt: 7,
     fee: 70224000,
     fv: 8431331,
     lv: 8432331,
-    note: [173,116,114,97,110,115,102,101,114,32,109,101,109,111],
-    snd: [168,101,164,68,116,110,137,242,164,216,34,161,122,2,23,221,236,191,81,161,78,114,147,135,226,72,217,99,209,87,1,164],
+    note: [173, 116, 114, 97, 110, 115, 102, 101, 114, 32, 109, 101, 109, 111],
+    snd: [
+      168,
+      101,
+      164,
+      68,
+      116,
+      110,
+      137,
+      242,
+      164,
+      216,
+      34,
+      161,
+      122,
+      2,
+      23,
+      221,
+      236,
+      191,
+      81,
+      161,
+      78,
+      114,
+      147,
+      135,
+      226,
+      72,
+      217,
+      99,
+      209,
+      87,
+      1,
+      164,
+    ],
     type: 'pay',
     gen: 'testnet-v1.0',
-    gh: [72,99,181,24,164,179,200,78,200,16,242,45,79,16,129,203,15,113,240,89,167,172,32,222,198,47,127,112,229,9,58,34],
-    rcv: [153,124,244,219,245,145,20,62,130,248,101,46,94,224,204,120,233,96,166,17,57,248,252,37,18,43,238,6,35,95,121,176],
+    gh: [
+      72,
+      99,
+      181,
+      24,
+      164,
+      179,
+      200,
+      78,
+      200,
+      16,
+      242,
+      45,
+      79,
+      16,
+      129,
+      203,
+      15,
+      113,
+      240,
+      89,
+      167,
+      172,
+      32,
+      222,
+      198,
+      47,
+      127,
+      112,
+      229,
+      9,
+      58,
+      34,
+    ],
+    rcv: [
+      153,
+      124,
+      244,
+      219,
+      245,
+      145,
+      20,
+      62,
+      130,
+      248,
+      101,
+      46,
+      94,
+      224,
+      204,
+      120,
+      233,
+      96,
+      166,
+      17,
+      57,
+      248,
+      252,
+      37,
+      18,
+      43,
+      238,
+      6,
+      35,
+      95,
+      121,
+      176,
+    ],
   },
 }
 
@@ -93,11 +198,7 @@ const payTxWithHeaders = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   to: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   amount: 1,
-  note: [
-    174,  83,  97, 109, 112,
-    108, 101,  32, 112,  97,
-    121, 109, 101, 110, 116,
-  ],
+  note: [174, 83, 97, 109, 112, 108, 101, 32, 112, 97, 121, 109, 101, 110, 116],
   type: 'pay',
   genesisID: 'testnet-v1.0',
   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
@@ -106,7 +207,6 @@ const payTxWithHeaders = {
   fee: 0,
   flatFee: true,
 }
-
 
 async function run() {
   /** Create Algorand chain instance */
@@ -129,7 +229,7 @@ async function run() {
   transaction.actions = [action]
 
   // // Alternatively, set action using raw transaction
-  // await transaction.setFromRaw(payRawTransaction)
+  // await transaction.setTransaction(payRawTransaction)
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed action: ', decomposed)
   await transaction.prepareToBeSigned()

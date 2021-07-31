@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
@@ -19,7 +20,6 @@ import {
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
-  AlgorandChainTransactionParamsStruct,
   AlgorandMultisigOptions,
   AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
@@ -35,7 +35,6 @@ import {
   AlgorandTxSignResults,
   AlgorandTransactionResources,
   AlgorandMultiSignatureMsigStruct,
-  AlgorandAddressStruct,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
@@ -49,7 +48,6 @@ import {
   toAlgorandAddressFromPublicKeyByteArray,
   toAlgorandAddressFromRawStruct,
   toAlgorandPublicKey,
-  toRawAddressBufferFromAlgorandAddress,
   toRawTransactionFromSignResults,
 } from './helpers'
 import {
@@ -90,7 +88,6 @@ export class AlgorandTransaction implements Transaction {
     this._chainState = chainState
     this.assertValidOptions(options)
     this.applyOptions(options)
-    this._options = options || {}
   }
 
   public async init() {
@@ -126,7 +123,7 @@ export class AlgorandTransaction implements Transaction {
   get raw(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setTransaction(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     return this.rawTransaction
@@ -148,8 +145,6 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     this.assertHasAction()
-    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
-      ?.nativeInfo?.transactionHeaderParams
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
@@ -179,34 +174,6 @@ export class AlgorandTransaction implements Transaction {
     if (this.options.signerPublicKey) {
       this._rawTransaction.sgnr = this.options.signerPublicKey
     }
-  }
-
-  /** Set the transaction by using the blob from the results of an Algo SDK sign function
-   *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
-   *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
-   */
-  async setFromRaw(
-    rawTransaction: AlgorandRawTransactionMultisigStruct | AlgorandRawTransactionStruct | Uint8Array,
-  ): Promise<void> {
-    this.assertIsConnected()
-    this.assertNoSignatures()
-    let decodedBlob
-    // if transaction isnt already encoded, encode it
-    if (isAUint8Array(rawTransaction)) {
-      decodedBlob = algosdk.decodeObj(rawTransaction)
-    } else {
-      decodedBlob = rawTransaction
-    }
-
-    if (!decodedBlob?.txn) {
-      throwNewError('Cant decode blob into transaction - expected a property .txn')
-    }
-    this.assertMultisigFromMatchesOptions(decodedBlob)
-    // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
-    this.actions = [decodedBlob]
-    this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
-    this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the data from action
-    this._isValidated = false
   }
 
   /** actionHelper provides different formats of action - Use only to READ data */
@@ -271,6 +238,7 @@ export class AlgorandTransaction implements Transaction {
       throwNewError('Algorand transaction.actions only accepts an array of exactly 1 action')
     }
     const action = actions[0]
+    this.assertMultisigFromMatchesOptions(action)
     this._actionHelper = new AlgorandActionHelper(action)
     this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
@@ -290,6 +258,28 @@ export class AlgorandTransaction implements Transaction {
       )
     }
     this.actions = [action]
+  }
+
+  /** Set the transaction by using the blob from the results of an Algo SDK sign function
+   *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
+   *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
+   */
+  async setTransaction(
+    transaction:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct
+      | Uint8Array,
+  ): Promise<void> {
+    this.assertIsConnected()
+    // if transaction isnt already encoded, encode it
+    const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
+    if (decodedTransaction?.txn) {
+      this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
+    }
+    this.actions = [decodedTransaction]
   }
 
   // validation
@@ -652,7 +642,7 @@ export class AlgorandTransaction implements Transaction {
   /** Throws if no raw transaction body */
   private assertHasRaw(): void {
     if (!this.hasRaw) {
-      throwNewError('Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
+      throwNewError('Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or use setTransaction().')
     }
   }
 
