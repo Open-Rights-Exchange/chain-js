@@ -100,28 +100,6 @@ export type EosActionAuthorizationStruct = {
   permission: EosEntityName
 }
 
-/** EOS Raw Data Structure for contract action - i.e. including name, authorizations, and serialized representation */
-export type EosActionStruct = {
-  account: EosEntityName
-  name: string
-  authorization: EosActionAuthorizationStruct[]
-  data?: any
-  hex_data?: string
-}
-
-/** EOS Raw Data Structure for chain transaction - i.e. including header, actions, and keys */
-export interface EosTransactionStruct {
-  expiration: string
-  ref_block_num: number // int32
-  ref_block_prefix: number // int32
-  max_net_usage_words: number | string // a whole number - int32 or string
-  max_cpu_usage_ms: number | string // a whole number - int32 or string
-  delay_sec: number // int32
-  context_free_actions: EosActionStruct[]
-  actions: EosActionStruct[]
-  available_keys: EosPublicKey[]
-}
-
 export type EosDecomposeReturn = {
   chainActionType: ChainActionType | EosChainActionType
   args: any
