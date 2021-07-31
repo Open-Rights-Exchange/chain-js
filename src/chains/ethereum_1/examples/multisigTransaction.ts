@@ -46,6 +46,7 @@ require('dotenv').config()
 
     console.log('owners: ', transaction.multisigTransaction.owners)
     console.log('threshold: ', transaction.multisigTransaction.threshold)
+    console.log('hashToSign: ', transaction.hashToSign)
 
     await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])

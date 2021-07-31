@@ -653,6 +653,11 @@ export class EthereumTransaction implements Transaction {
     return this.ethereumJsTx.hash(false)
   }
 
+  public get hashToSign(): string {
+    if (this.isMultisig) return this.multisigTransaction.hashToSign
+    return bufferToHex(this.signBuffer)
+  }
+
   private async signAndAddSignatures(privateKey: string) {
     const privateKeyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
     const ethJsTx = this.ethereumJsTx

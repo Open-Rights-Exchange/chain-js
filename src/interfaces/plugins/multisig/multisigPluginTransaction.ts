@@ -37,6 +37,11 @@ export interface MultisigPluginTransaction {
   /** Signatures attached to transaction */
   signatures: any[]
 
+  /** Hexadecimal string format of the signBuffer.
+   * Can be something different than serializedTransaction depending on the plugin
+   */
+  hashToSign: string
+
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: any[]): Promise<void>
 

@@ -523,6 +523,10 @@ export class AlgorandTransaction implements Transaction {
     return this.signerPublicKey ? [toAddressFromPublicKey(this.signerPublicKey)] : []
   }
 
+  public get hashToSign(): string {
+    return notImplemented()
+  }
+
   public get signBuffer(): Buffer {
     return notImplemented()
   }

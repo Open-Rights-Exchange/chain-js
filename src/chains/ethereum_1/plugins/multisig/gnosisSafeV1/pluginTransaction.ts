@@ -241,6 +241,10 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     await this.setParentTransactionIfReady()
   }
 
+  public get hashToSign(): string {
+    return this.transactionHash
+  }
+
   public async sign(privateKeys: EthereumPrivateKey[]) {
     this.assertHasRaw()
     const signResults: GnosisSafeSignature[] = []

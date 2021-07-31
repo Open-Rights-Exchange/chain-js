@@ -65,7 +65,7 @@ export class EthereumActionHelper {
 
   private _chainOptions: ActionChainOptions
 
-  /** Creates a new Action from 'human-readable' transfer or contact info
+  /** Creates a new Action from 'human-readable' transfer or contract info
    *  OR from 'raw' data property
    *  Allows access to human-readable properties (method, parameters) or raw data (hex) */
   constructor(actionInput: EthereumActionHelperInput, chainOptions: ActionChainOptions) {
