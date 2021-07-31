@@ -91,9 +91,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: EthereumSignature[]): Promise<void>
 
-  prepareToBeSigned(action: EthereumTransactionAction): Promise<void>
-
-  setFromRaw(rawTransaction: EthereumMultisigPluginRawTransaction): Promise<void>
+  setTransaction(transaction: EthereumTransactionAction | EthereumMultisigPluginRawTransaction): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>

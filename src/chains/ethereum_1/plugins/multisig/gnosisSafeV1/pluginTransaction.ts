@@ -5,6 +5,7 @@ import { EthereumMultisigPluginTransaction } from '../ethereumMultisigPlugin'
 import {
   approveSafeTransaction,
   assertValidGnosisSignature,
+  containsSafeSpesificField,
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
   getSafeExecuteRawTransaction,
@@ -214,19 +215,6 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     return includes
   }
 
-  /** Verify and set multisigAddress, owners and threshold.
-   * Set safeTransaction from rawTransaction that has passed from ethTransaction class.
-   */
-  public async prepareToBeSigned(action: EthereumTransactionAction): Promise<void> {
-    const rawTransaction = await transactionToSafeTx(action, this.multisigOptions)
-    // if new rawTransaction is exactly same with previos rawTransaction except signatures, don't purge previous rawTransaction
-    if (JSON.stringify(this.safeTransaction) === JSON.stringify(rawTransaction)) {
-      return
-    }
-    this._rawGnosisTransaction = rawTransaction
-    await this.calculateTransactionHash()
-  }
-
   public async calculateTransactionHash() {
     this._transactionHash = await getSafeTransactionHash(this.multisigAddress, this.safeTransaction, this.chainUrl)
   }
@@ -236,8 +224,18 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
     return toGnosisSignature(value)
   }
 
-  public async setFromRaw(rawTransaction: GnosisSafeRawTransaction) {
-    this._rawGnosisTransaction = rawTransaction
+  /** Verify and set multisigAddress, owners and threshold.
+   * Set safeTransaction from GnosisSafeRawTransaction or EthereumTransactionAction that has passed from ethTransaction class.
+   */
+  public async setTransaction(transaction: EthereumTransactionAction | GnosisSafeRawTransaction) {
+    this._rawGnosisTransaction = containsSafeSpesificField(transaction)
+      ? (transaction as GnosisSafeRawTransaction)
+      : await transactionToSafeTx(transaction, this.multisigOptions)
+
+    if (JSON.stringify(this.safeTransaction) === JSON.stringify(transaction)) {
+      return
+    }
+
     this.assertSignatureOwnerValidAndUnique(this.gnosisSignatures)
     await this.calculateTransactionHash()
     await this.setParentTransactionIfReady()
