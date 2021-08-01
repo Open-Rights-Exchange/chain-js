@@ -1,15 +1,8 @@
+import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize'
 import { EosAccount } from './eosAccount'
 import { EosChainState } from './eosChainState'
 import { getPublicKeyFromSignature, sign as cryptoSign } from './eosCrypto'
-import {
-  isValidEosSignature,
-  isValidEosPrivateKey,
-  toEosPublicKey,
-  toEosSignature,
-  ensureSerializedIsRaw,
-  isEosActionStructArray,
-  isSerializedEosTransaction,
-} from './helpers'
+import { isValidEosSignature, isValidEosPrivateKey, toEosPublicKey, toEosSignature } from './helpers'
 import {
   EosAuthorization,
   EosActionStruct,
@@ -21,7 +14,15 @@ import {
   EosRawTransaction,
   EosSerializedTransaction,
 } from './models'
-import { asyncForEach, getUniqueValues, isNullOrEmpty, notImplemented, notSupported } from '../../helpers'
+import {
+  asyncForEach,
+  getUniqueValues,
+  isAnObject,
+  isAString,
+  isNullOrEmpty,
+  notImplemented,
+  notSupported,
+} from '../../helpers'
 import { throwAndLogError, throwNewError } from '../../errors'
 import { ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
 import { Transaction } from '../../interfaces'
@@ -41,6 +42,8 @@ export class EosTransaction implements Transaction {
 
   private _chainState: EosChainState
 
+  private _header: any
+
   private _options: EosTransactionOptions
 
   private _signatures: Set<EosSignature> // A set keeps only unique values
@@ -49,6 +52,8 @@ export class EosTransaction implements Transaction {
   private _raw: EosRawTransaction
 
   private _sendReceipt: any
+
+  private _signBuffer: Buffer
 
   private _requiredAuthorizations: EosAuthorization[]
 
@@ -72,13 +77,10 @@ export class EosTransaction implements Transaction {
 
   /** The header that is included when the transaction is sent to the chain
    *  It is part of the transaction body (in the signBuffer) which is signed
-   *  The header changes every time raw changes.
+   *  The header changes every time prepareToBeSigned() is called since it includes latest block time, etc.
    */
   get header() {
-    // deserializeTransaction does not call the chain - just deserializes transation header and action names (not action data)
-    const deRawified = this._chainState.api.deserializeTransaction(this.raw)
-    delete deRawified.actions // remove parially deRawified actions
-    return deRawified
+    return this._header
   }
 
   /** The options provided when the transaction class was created */
@@ -90,7 +92,7 @@ export class EosTransaction implements Transaction {
   get raw() {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setTransaction(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     return this._raw
@@ -125,6 +127,95 @@ export class EosTransaction implements Transaction {
     return false
   }
 
+  /** Generate the raw transaction body using the actions attached
+   *  Also adds a header to the transaction that is included when transaction is signed
+   */
+  public async prepareToBeSigned(): Promise<void> {
+    this.assertIsConnected()
+    // if prepared (raw) transaction already exists, then dont do it again
+    if (this._raw) {
+      return
+    }
+    this.assertNoSignatures()
+    if (!this._actions) {
+      throwNewError('Transaction serialization failure. Transaction has no actions.')
+    }
+    const { blocksBehind, expireSeconds } = this._options
+    const transactOptions = { broadcast: false, sign: false, blocksBehind, expireSeconds }
+    const { serializedTransaction: rawTransaction } = await this._chainState.api.transact(
+      { actions: this._actions },
+      transactOptions,
+    )
+    this._raw = this.rawToUint8Array(rawTransaction)
+    this.setHeaderFromRaw(rawTransaction)
+    this.setSignBuffer()
+    // TODO: consider how to setTransactionId()
+  }
+
+  /** Extract header from raw transaction body (eosjs refers to raw as serialized) */
+  private setHeaderFromRaw(rawTransaction: Uint8Array): void {
+    // deserializeTransaction does not call the chain - just deserializes transation header and action names (not action data)
+    const deRawified = this._chainState.api.deserializeTransaction(rawTransaction)
+    delete deRawified.actions // remove parially deRawified actions
+    this._header = deRawified
+  }
+
+  /** Accepts either a raw transaction or an array of actions
+   */
+  public async setTransaction(transaction: EosActionStruct[] | EosSerializedTransaction) {
+    this.assertNoSignatures()
+    if (this.isEosActionStructArray(transaction)) {
+      this.actions = transaction as EosActionStruct[]
+      return
+    }
+    // if not actions array, assume value is a raw transaction
+    try {
+      await this.setFromRaw(transaction as EosSerializedTransaction)
+    } catch (error) {
+      throwNewError(
+        `Failed trying to set transaction. Value must be either: array of actions OR serialized transaction object. Error: ${error.message}`,
+      )
+    }
+  }
+
+  /** Set the body of the transaction using Hex raw transaction data
+   *  This is one of the ways to set the actions for the transaction
+   *  Sets transaction data from raw transaction - supports both raw/serialized formats (JSON bytes array and hex)
+   *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
+  async setFromRaw(raw: EosSerializedTransaction): Promise<void> {
+    this.assertIsConnected()
+    this.assertNoSignatures()
+    if (raw) {
+      // if raw is passed-in as a JSON array of bytes, convert it to Uint8Array
+      const useRaw = this.rawToUint8Array(raw)
+      const { actions: txActions, deRawifiedTransaction: txHeader } = await this.deRawifyWithActions(useRaw)
+      this._header = txHeader
+      this._actions = txActions
+      this._raw = useRaw
+      this._isValidated = false
+      this.setSignBuffer()
+    }
+  }
+
+  /** Creates a sign buffer using raw transaction body */
+  private setSignBuffer() {
+    this.assertIsConnected()
+    this._signBuffer = Buffer.concat([
+      Buffer.from(this._chainState?.chainId, 'hex'),
+      Buffer.from(this._raw),
+      Buffer.from(new Uint8Array(32)),
+    ])
+  }
+
+  /** Deserializes the transaction header and actions - fetches from the chain to deserialize action data */
+  private async deRawifyWithActions(rawTransaction: Uint8Array | string): Promise<any> {
+    this.assertIsConnected()
+    const { actions, ...deRawifiedTransaction } = await this._chainState.api.deserializeTransactionWithActions(
+      rawTransaction,
+    )
+    return { actions, deRawifiedTransaction }
+  }
+
   // actions
 
   /** The contract actions executed by the transaction */
@@ -135,11 +226,10 @@ export class EosTransaction implements Transaction {
   /** Sets the Array of actions */
   public set actions(actions: EosActionStruct[]) {
     this.assertNoSignatures()
-    if (isNullOrEmpty(actions) || !Array.isArray(actions)) {
+    if (!this.isEosActionStructArray(actions)) {
       throwNewError('actions must be an array and have at least one value')
     }
     this._actions = actions
-    this._raw = null
     this._isValidated = false
   }
 
@@ -150,84 +240,21 @@ export class EosTransaction implements Transaction {
     if (!action) {
       throwNewError('Action parameter is missing')
     }
-    let newActions = (this.actions as EosActionStruct[]) ?? []
+    let newActions = this._actions ?? []
     if (asFirstAction) {
-      newActions = [action, ...newActions]
+      newActions = [action, ...(this._actions || [])]
     } else {
       newActions.push(action)
     }
-    this.actions = newActions
+    this._actions = newActions
     this._isValidated = false
   }
 
-  /** Accepts all valid transaction input formats, and sets other formats automatically
-   */
-  public async setTransaction(transaction: EosActionStruct[] | EosSerializedTransaction) {
-    this.assertNoSignatures()
-    this._raw = null
-    if (isSerializedEosTransaction(transaction)) {
-      await this.setFromRaw(transaction)
-      return
-    }
-    if (isEosActionStructArray(transaction)) {
-      this._actions = transaction as EosActionStruct[]
-      await this.serializeActions()
-      return
-    }
-    throwNewError('Invalid setActions input. Needs to be a valid EosActionStruct[] OR EosSerializedTransaction')
-  }
-
-  /** Deserialize and set human-readable transaction action and header properties
-   */
-  private async setActionsFromRaw(): Promise<any> {
-    if (isNullOrEmpty(this.actions)) return
-    this.assertIsConnected()
-    const { actions } = await this._chainState.api.deserializeTransactionWithActions(this.raw)
-    this._actions = actions
-  }
-
-  /** If there is no raw property set
-   * Serialize transaction and set raw property
-   */
-  private async serializeActions() {
-    if (this.raw) return
-    const { blocksBehind, expireSeconds } = this.options
-    const transactOptions = { broadcast: false, sign: false, blocksBehind, expireSeconds }
-    const { serializedTransaction } = await this._chainState.api.transact({ actions: this.actions }, transactOptions)
-    this._raw = ensureSerializedIsRaw(serializedTransaction)
-  }
-
-  /** Set the body of the transaction using Hex raw transaction data
-   *  This is one of the ways to set the actions for the transaction
-   *  Sets transaction data from raw transaction - supports both raw/serialized formats (JSON bytes array and hex)
-   *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
-  private async setFromRaw(raw: any): Promise<void> {
-    this.assertIsConnected()
-    this.assertNoSignatures()
-    if (raw) {
-      this._raw = ensureSerializedIsRaw(raw)
-      this._actions = null
-      await this.setActionsFromRaw()
-      this._isValidated = false
-    }
-  }
-
-  /** Generate the raw transaction body using the actions attached
-   *  Also adds a header to the transaction that is included when transaction is signed
-   */
-  public async prepareToBeSigned(): Promise<void> {
-    this.assertIsConnected()
-    // if prepared (raw) transaction already exists, then dont do it again. Only set headers to be able to get it as a property if needed
-    if (this.raw) {
-      await this.setActionsFromRaw()
-      return
-    }
-    this.assertNoSignatures()
-    if (!this.actions) {
-      throwNewError('Transaction serialization failure. Transaction has no actions.')
-    }
-    await this.serializeActions()
-    // TODO: consider how to setTransactionId()
+  /** Wether a value is a well-formed array of tx actions */
+  isEosActionStructArray(value: any) {
+    if (isNullOrEmpty(value) || !Array.isArray(value)) return false
+    if (!(value[0] as EosActionStruct)?.account) return false
+    return true
   }
 
   // validation
@@ -237,7 +264,7 @@ export class EosTransaction implements Transaction {
   public async validate(): Promise<void> {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction validation failure. Missing raw transaction. Use setTransaction() or if setting actions, call transaction.prepareToBeSigned().',
+        'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
       )
     }
     // this will throw an error if an account in transaction body doesn't exist on chain
@@ -328,7 +355,7 @@ export class EosTransaction implements Transaction {
   public hasSignatureForPublicKey(publicKey: EosPublicKey): boolean {
     const sigsToLoop = this.signatures || []
     return sigsToLoop.some(signature => {
-      const pk = getPublicKeyFromSignature(signature, this.signBuffer)
+      const pk = getPublicKeyFromSignature(signature, this._signBuffer)
       return pk === publicKey
     })
   }
@@ -349,11 +376,7 @@ export class EosTransaction implements Transaction {
   public get signBuffer(): Buffer {
     this.assertIsValidated()
     this.assertHasAllRequiredSignature()
-    return Buffer.concat([
-      Buffer.from(this._chainState?.chainId, 'hex'),
-      Buffer.from(this.raw),
-      Buffer.from(new Uint8Array(32)),
-    ])
+    return this._signBuffer
   }
 
   /** TODO: Implement support for eos multi-sig transactions */
@@ -372,7 +395,7 @@ export class EosTransaction implements Transaction {
     })
     // sign the signBuffer using the private key
     await asyncForEach(privateKeys, async pk => {
-      const signature = cryptoSign(this.signBuffer, pk)
+      const signature = cryptoSign(this._signBuffer, pk)
       await this.addSignatures([signature])
     })
   }
@@ -513,12 +536,32 @@ export class EosTransaction implements Transaction {
 
   /** JSON representation of transaction data */
   public toJson(): any {
-    return { ...this.header, actions: this._actions, signatures: this.signatures }
+    return { ...this._header, actions: this._actions, signatures: this.signatures }
   }
 
   /** Ensures that the value comforms to a well-formed EOS signature */
   public toSignature(value: any) {
     return toEosSignature(value)
+  }
+
+  /** Accepts either an object where each value is the uint8 array value
+   *     ex: {'0': 24, ... '3': 93 } => [24,241,213,93]
+   *  OR a packed transaction as a string of hex bytes
+   * */
+  private rawToUint8Array = (rawTransaction: any): Uint8Array => {
+    // if the trasaction data is a JSON array of bytes, convert to Uint8Array
+    if (isAnObject(rawTransaction)) {
+      const trxLength = Object.keys(rawTransaction).length
+      let buf = new Uint8Array(trxLength)
+      buf = Object.values(rawTransaction) as any // should be a Uint8Array in this value
+      return buf
+    }
+    // if transaction is a packed transaction (string of bytes), convert it into an Uint8Array of bytes
+    if (rawTransaction && isAString(rawTransaction)) {
+      const deRawifiedTransaction = hexToUint8Array(rawTransaction)
+      return deRawifiedTransaction
+    }
+    throw Error('Missing or malformed rawTransaction (rawToUint8Array)')
   }
 
   // Fees
