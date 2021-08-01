@@ -47,7 +47,7 @@ export const prepTransaction = async (chain: Chain, transaction: any, key: strin
 // Reusable Settings
 export const kylinEndpoints = [
   {
-    url: 'https:api-kylin.eosasia.one:443',
+    url: 'https:kylin.eosn.io:443',
   },
   {
     url: 'https:api-kylin.eoslaomao.com:443',
