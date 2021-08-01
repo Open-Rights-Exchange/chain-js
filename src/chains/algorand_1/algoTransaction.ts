@@ -273,11 +273,12 @@ export class AlgorandTransaction implements Transaction {
       | Uint8Array,
   ): Promise<void> {
     this.assertIsConnected()
-    // if transaction isnt already encoded, encode it
     const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
+    // if we have a txn property, then we have a 'raw' tx value, so set raw props
     if (decodedTransaction?.txn) {
       this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
     }
+    // actions setter can handle any flavor of transaction
     this.actions = [decodedTransaction]
   }
 
@@ -643,7 +644,9 @@ export class AlgorandTransaction implements Transaction {
   /** Throws if no raw transaction body */
   private assertHasRaw(): void {
     if (!this.hasRaw) {
-      throwNewError('Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or use setTransaction().')
+      throwNewError(
+        'Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or set a complete transaction using setTransaction().',
+      )
     }
   }
 
