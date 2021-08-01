@@ -224,12 +224,8 @@ class ChainEosV2 implements Chain {
   /** Returns a public key given a signature and the original data was signed */
 
   /** Returns a public key given a signature and the original data was signed */
-  public getPublicKeyFromSignature = (
-    signature: string | Buffer,
-    data: string | Buffer,
-    encoding: string,
-  ): PublicKey => {
-    return eoscrypto.getPublicKeyFromSignature(signature, data, encoding) as PublicKey
+  public getPublicKeyFromSignature = (signature: string | Buffer, data: string | Buffer): PublicKey => {
+    return eoscrypto.getPublicKeyFromSignature(signature, data) as PublicKey
   }
 
   /** Generates and returns a new public/private key pair */
@@ -263,16 +259,22 @@ class ChainEosV2 implements Chain {
   /** Ensures that the value comforms to a well-formed EOS public Key */
   isValidEosPublicKey = isValidEosPublicKey
 
-  /** Generate a signature given some data and a private key */
-  sign = eoscrypto.sign
-
   /** Generates new owner and active key pairs (public and private)
    *  Encrypts private keys with provided password and optional params
    *  Returns: { publicKeys:{owner, active}, privateKeys:{owner, active}, privateKeysEncrypted:{owner, active} } */
   generateNewAccountKeysWithEncryptedPrivateKeys = eoscrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
+  /** Generate a signature given some data and a private key */
+  sign = eoscrypto.sign
+
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
+
+  /** Signs data as a message using private key (Eos does not append additional fields for a message) */
+  signMessage = eoscrypto.signMessage
+
+  /** Verify that a 'personal message' was signed using the given key (Eos does not append additional fields for a message) */
+  verifySignedMessage = eoscrypto.verifySignedMessage
 
   // --------- Chain helper functions
 
