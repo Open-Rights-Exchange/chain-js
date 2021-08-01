@@ -143,7 +143,6 @@ export function sign(data: string | Buffer, privateKey: string): EthereumSignatu
 export function getEthereumPublicKeyFromSignature(
   signature: EthereumSignatureNative,
   data: string | Buffer,
-  encoding: string,
 ): EthereumPublicKey {
   const { v, r, s } = signature
   const dataHash = keccak(convertUtf8OrHexStringToBuffer(data))
@@ -202,7 +201,7 @@ export function verifySignedWithPublicKey(
   publicKey: EthereumPublicKey,
   signature: EthereumSignature,
 ): boolean {
-  const signedWithPubKey = getEthereumPublicKeyFromSignature(toEthereumSignatureNative(signature), data, null)
+  const signedWithPubKey = getEthereumPublicKeyFromSignature(toEthereumSignatureNative(signature), data)
   return ensureHexPrefixForPublicKey(signedWithPubKey) === ensureHexPrefixForPublicKey(publicKey)
 }
 
@@ -216,15 +215,15 @@ export function prepareMessageToSign(data: string | Buffer): string {
   return bufferToHexString(Buffer.concat([prefix, body]))
 }
 
-/** Signs data with as a message (appending additional requried data) using private key */
+/** Signs data as a message using private key (first prefixing additional message string) */
 export function signMessage(data: string | Buffer, privateKey: string): EthereumSignatureNative {
   const dataString = this.prepareMessageToSign(data)
   return this.sign(dataString, privateKey)
 }
 
 /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
- * A message differs than verifySignedWithPublicKey() because it might have a standard prefix appended (defined by the chain)
- * - this allows a wallet to sign an arbitrary string without risking signing an unintended transaction */
+ * A message differs than verifySignedWithPublicKey() because it might additional strings appended (Eth best-practices has a prefixed message)
+ * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
 export function verifySignedMessage(
   data: string | Buffer,
   publicKey: EthereumPublicKey,
