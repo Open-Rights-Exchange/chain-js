@@ -258,3 +258,7 @@ export function signMessage(data: string, privateKey: EosPrivateKey | string): E
 export function verifySignedMessage(data: string, publicKey: EosPublicKey, signature: EosSignature): boolean {
   return this.verifySignedWithPublicKey(data, publicKey, signature)
 }
+
+export function getPublicKeyFromPrivateKey(privateKey: EosPrivateKey) {
+  return eosEcc.privateToPublic(privateKey)
+}
