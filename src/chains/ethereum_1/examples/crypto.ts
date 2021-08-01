@@ -70,7 +70,7 @@ async function run() {
   console.log('decrypted asymmetric text 3:', decrypted3)
 
   // sign a message (akak string) and verify signature
-  const message = 'Hello from ore-id-docs string'
+  const message = 'Hello from chainjs'
   const stringSignature = signMessage(message, privateKey1)
   console.log('signature is verified: ', verifySignedMessage(message, publicKey1, stringSignature))
 }
