@@ -73,6 +73,7 @@ async function run() {
   // await transaction.setTransaction(jsonParseAndRevive(rawTransaction))
   const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
+  // transaction.setTransaction(action)
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
