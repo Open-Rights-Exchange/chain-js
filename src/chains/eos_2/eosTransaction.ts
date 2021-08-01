@@ -92,7 +92,7 @@ export class EosTransaction implements Transaction {
   get raw() {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setTransaction(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     return this._raw
@@ -182,7 +182,7 @@ export class EosTransaction implements Transaction {
    *  This is one of the ways to set the actions for the transaction
    *  Sets transaction data from raw transaction - supports both raw/serialized formats (JSON bytes array and hex)
    *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
-  async setFromRaw(raw: EosSerializedTransaction): Promise<void> {
+  private async setFromRaw(raw: EosSerializedTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
@@ -264,7 +264,7 @@ export class EosTransaction implements Transaction {
   public async validate(): Promise<void> {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
+        'Transaction validation failure. Missing raw transaction. Use Transaction() or if setting actions, call transaction.prepareToBeSigned().',
       )
     }
     // this will throw an error if an account in transaction body doesn't exist on chain
