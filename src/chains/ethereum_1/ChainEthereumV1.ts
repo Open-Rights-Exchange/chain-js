@@ -244,6 +244,14 @@ class ChainEthereumV1 implements Chain {
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
 
+  /** Signs data as a message using private key (first appending additional required data if any) */
+  signMessage = ethcrypto.signMessage
+
+  /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
+   * A message differs than verifySignedWithPublicKey() because it might additional strings appended (as required by chain best-practices)
+   * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
+  verifySignedMessage = ethcrypto.verifySignedMessage
+
   // Chain Helper Functions
 
   // --------- Chain helper functions
