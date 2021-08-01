@@ -175,6 +175,34 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
+  /** Set the transaction by using any one of many valid formats
+   * Valid formats for transaction param include:
+   *  JSON with verbose key names and string values (or values encoded by AlgoSDK)
+   *  the blob from the results of an Algo SDK sign function
+   *  Supports either encoded as Uint8Array or JSON object of raw transaction
+   *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
+   */
+  async setTransaction(
+    transaction:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct
+      | Uint8Array,
+  ): Promise<void> {
+    this.assertIsConnected()
+    this.assertNoSignatures()
+    const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
+    // if we have a txn property, then we have a 'raw' tx value, so set raw props
+    if (decodedTransaction?.txn) {
+      this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
+    }
+    // actions setter can handle any flavor of transaction
+    this.actions = [decodedTransaction]
+    this._isValidated = false
+  }
+
   /** actionHelper provides different formats of action - Use only to READ data */
   get actionHelper() {
     return this._actionHelper
@@ -257,29 +285,6 @@ export class AlgorandTransaction implements Transaction {
       )
     }
     this.actions = [action]
-  }
-
-  /** Set the transaction by using the blob from the results of an Algo SDK sign function
-   *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
-   *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
-   */
-  async setTransaction(
-    transaction:
-      | AlgorandTxAction
-      | AlgorandTxActionRaw
-      | AlgorandTxActionSdkEncoded
-      | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct
-      | Uint8Array,
-  ): Promise<void> {
-    this.assertIsConnected()
-    const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
-    // if we have a txn property, then we have a 'raw' tx value, so set raw props
-    if (decodedTransaction?.txn) {
-      this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
-    }
-    // actions setter can handle any flavor of transaction
-    this.actions = [decodedTransaction]
   }
 
   // validation
