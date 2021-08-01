@@ -30,6 +30,7 @@ import {
   convertEthUnit,
   isNullOrEmptyEthereumValue,
   isSameEthHexValue,
+  isSameEthPublicKey,
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
@@ -438,7 +439,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey = (publicKey: EthereumPublicKey): boolean => {
-    return isSameEthHexValue(this.signedByPublicKey, publicKey)
+    return isSameEthPublicKey(this.signedByPublicKey, publicKey)
   }
 
   /** Whether there is an attached signature for the publicKey of the address */
