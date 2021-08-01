@@ -5,7 +5,7 @@ import { EthereumMultisigPluginTransaction } from '../ethereumMultisigPlugin'
 import {
   approveSafeTransaction,
   assertValidGnosisSignature,
-  containsSafeSpesificField,
+  containsSafeSpecificField,
   getEthersJsonRpcProvider,
   getGnosisSafeContract,
   getSafeExecuteRawTransaction,
@@ -228,7 +228,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
    * Set safeTransaction from GnosisSafeRawTransaction or EthereumTransactionAction that has passed from ethTransaction class.
    */
   public async setTransaction(transaction: EthereumTransactionAction | GnosisSafeRawTransaction) {
-    this._rawGnosisTransaction = containsSafeSpesificField(transaction)
+    this._rawGnosisTransaction = containsSafeSpecificField(transaction)
       ? (transaction as GnosisSafeRawTransaction)
       : await transactionToSafeTx(transaction, this.multisigOptions)
 

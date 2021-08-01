@@ -430,7 +430,9 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
   return { ...detaultOptions, ...multisigOptions }
 }
 
-export function containsSafeSpesificField(value: any): value is GnosisSafeRawTransaction {
+export function containsSafeSpecificField(
+  value: EthereumTransactionAction | GnosisSafeRawTransaction,
+): value is GnosisSafeRawTransaction {
   const { operation, refundReceiver, safeTxGas, baseGas, gasToken, signatures } =
     (value as GnosisSafeRawTransaction) || {}
   if (
