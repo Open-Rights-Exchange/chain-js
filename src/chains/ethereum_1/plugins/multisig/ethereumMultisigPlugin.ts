@@ -74,7 +74,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   parentRawTransaction: EthereumMultisigRawTransaction
 
   /** Raw transaction type is dependent on each plugin
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
+   *  Note: Set via prepareToBeSigned() or setTransaction() */
   rawTransaction: EthereumMultisigPluginRawTransaction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
