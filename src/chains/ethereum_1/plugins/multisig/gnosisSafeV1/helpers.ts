@@ -16,6 +16,7 @@ import {
   EthereumMultisigRawTransaction,
   GnosisSafeSignature,
   GnosisSafeTransaction,
+  GnosisSafeRawTransaction,
 } from './models'
 import { EMPTY_DATA, SENTINEL_ADDRESS } from '../../../ethConstants'
 import {
@@ -76,11 +77,20 @@ export function assertValidGnosisSignature(signature: GnosisSafeSignature) {
   }
 }
 
+/** Convert certain bytes of signature data for Gnosis
+ * This helper function can be used multiple times to ensure the signature is in right format
+ */
+export function signedMessageHashToGnosisSignatureData(signatureHash: string) {
+  return signatureHash.replace(/1b$/, '1f').replace(/1c$/, '20')
+}
+
 /** Accepts GnosisSafeSignature or stringified version of it
  *  Returns GnosisSafeSignature
  */
 export function toGnosisSignature(value: string | GnosisSafeSignature): GnosisSafeSignature {
-  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  const signature = (typeof value === 'string' ? tryParseJSON(value) : value) as GnosisSafeSignature
+  signature.data = signedMessageHashToGnosisSignatureData(signature.data)
+
   if (isValidGnosisSignature(signature)) {
     return signature
   }
@@ -280,7 +290,7 @@ export async function signSafeTransactionHash(
 ): Promise<GnosisSafeSignature> {
   const signerWallet = getEthersWallet(privateKey)
   const typedDataHash = utils.arrayify(hash)
-  const data = (await signerWallet.signMessage(typedDataHash)).replace(/1b$/, '1f').replace(/1c$/, '20')
+  const data = signedMessageHashToGnosisSignatureData(await signerWallet.signMessage(typedDataHash))
   const placeholderSig = {
     signer: toEthereumAddress(signerWallet.address),
     data,
@@ -418,4 +428,22 @@ export function applyDefaultAndSetCreateOptions(multisigOptions: EthereumGnosisM
     fallbackHandler: DEFAULT_FALLBACK_HANDLER_ADDRESS,
   }
   return { ...detaultOptions, ...multisigOptions }
+}
+
+export function containsSafeSpecificField(
+  value: EthereumTransactionAction | GnosisSafeRawTransaction,
+): value is GnosisSafeRawTransaction {
+  const { operation, refundReceiver, safeTxGas, baseGas, gasToken, signatures } =
+    (value as GnosisSafeRawTransaction) || {}
+  if (
+    operation !== undefined ||
+    refundReceiver !== undefined ||
+    safeTxGas !== undefined ||
+    baseGas !== undefined ||
+    gasToken !== undefined ||
+    signatures !== undefined
+  ) {
+    return true
+  }
+  return false
 }

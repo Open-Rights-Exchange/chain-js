@@ -1,17 +1,20 @@
 import {
+  BN,
+  bufferToHex,
+  ECDSASignature,
+  fromRpcSig,
   isValidPrivate,
   isValidPublic,
   isValidAddress,
-  ECDSASignature,
-  BN,
-  bufferToHex,
   privateToAddress,
 } from 'ethereumjs-util'
 import {
   ensureHexPrefix,
+  ensureHexPrefixForPublicKey,
   isNullOrEmpty,
   isABuffer,
   isAString,
+  isHexString,
   jsonParseAndRevive,
   toChainEntityName,
   toHexStringIfNeeded,
@@ -62,7 +65,7 @@ export function isValidEthereumTxData(value: string | Buffer | EthereumTxData): 
 
 export function isValidEthereumPublicKey(value: string | EthereumPublicKey): value is EthereumPublicKey {
   if (!value) return false
-  return isValidPublic(toEthBuffer(ensureHexPrefix(value)))
+  return isValidPublic(toEthBuffer(ensureHexPrefixForPublicKey(value)))
 }
 
 export function isValidEthereumPrivateKey(value: EthereumPrivateKey | string): value is EthereumPrivateKey {
@@ -131,11 +134,16 @@ export function toEthereumPrivateKey(value: string): EthereumPrivateKey {
   throw new Error(`Not a valid ethereum private key:${value}.`)
 }
 
-/** Accepts ECDSASignature object or stringified version of it
+/** Accepts ECDSASignature object or stringified version of it, or hexstring of signature (as returned from eth_sign)
  *  Returns EthereumSignatureNative
  */
 export function toEthereumSignatureNative(value: string | ECDSASignature): EthereumSignatureNative {
-  const signature = typeof value === 'string' ? tryParseJSON(value) : value
+  let signature: ECDSASignature
+  if (isHexString(value)) {
+    signature = fromRpcSig(value as string)
+  } else {
+    signature = typeof value === 'string' ? tryParseJSON(value) : value
+  }
   if (isValidEthereumSignatureNative(signature)) {
     return signature as EthereumSignatureNative
   }

@@ -8,6 +8,7 @@ import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/n
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/pluginTransaction'
+import { bufferToHexString } from '../../../helpers'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
@@ -46,6 +47,7 @@ require('dotenv').config()
 
     console.log('owners: ', transaction.multisigTransaction.owners)
     console.log('threshold: ', transaction.multisigTransaction.threshold)
+    console.log('hash to sign: ', bufferToHexString(transaction.signBuffer))
 
     await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])

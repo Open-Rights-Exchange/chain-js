@@ -30,6 +30,7 @@ import {
   convertEthUnit,
   isNullOrEmptyEthereumValue,
   isSameEthHexValue,
+  isSameEthPublicKey,
   isValidEthereumAddress,
   isValidEthereumSignature,
   nullifyIfEmptyEthereumValue,
@@ -83,7 +84,7 @@ export class EthereumTransaction implements Transaction {
   ) {
     this._chainState = chainState
     this.applyOptions(options, multisigPlugin)
-    // Note: In order to use setFromRaw for multisig, we would need to install multisigPlugin (even if we dont pass in options.multisigOptions)
+    // Note: In order to use setTransaction for multisig, we would need to install multisigPlugin (even if we dont pass in options.multisigOptions)
     this._multisigPlugin = multisigPlugin
     if (!isNullOrEmpty(options?.multisigOptions)) {
       this.assertHasMultisigPlugin()
@@ -184,7 +185,7 @@ export class EthereumTransaction implements Transaction {
     return this._actionHelper?.raw
   }
 
-  /** Whether the raw transaction body has been set (via setting action or setFromRaw()) */
+  /** Whether the raw transaction body has been set (via setting action or setTransaction()) */
   get hasRaw(): boolean {
     return !!this.raw
   }
@@ -198,92 +199,6 @@ export class EthereumTransaction implements Transaction {
   /** Ethereum doesn't have any native multi-sig functionality */
   get supportsMultisigTransaction(): boolean {
     return true
-  }
-
-  /**
-   *  Updates 'raw' transaction properties using the actions attached
-   *  Creates and sets private _ethereumJsTx (web3 EthereumJsTx object)
-   *  Also adds header values (nonce, gasPrice, gasLimit) if not already set in action
-   */
-  private setRawProperties(): void {
-    this.assertIsConnected()
-    this.assertHasAction()
-    this.assertHasFeeSetting()
-    if (!this._actionHelper) {
-      throwNewError('Failed to set raw transaction properties. Transaction has no actions.')
-    }
-    const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce: nonceOptions } = this._options || {}
-    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, nonce: nonceAction } = this._actionHelper.action
-
-    // Convert gas price returned from getGasPrice to Gwei
-    const gasPrice =
-      nullifyIfEmpty(gasPriceAction) ||
-      nullifyIfEmpty(gasPriceOptions) ||
-      Math.round(toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))).toString() // round up to nearest integer in GWEI
-    const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
-    const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
-    // update action helper with updated nonce and gas values
-    const trxBody: EthereumActionHelperInput = {
-      ...this._actionHelper.action,
-      nonce,
-      gasPrice,
-      gasLimit,
-      contract: this._actionHelper.contract,
-    }
-    const trxOptions = this.getOptionsForEthereumJsTx()
-    this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
-    if (this.isMultisig) {
-      this.assertMultisigPluginIsInitialized()
-      // TODO: this.multisigTransaction.clearRaw()
-    }
-  }
-
-  /**
-   *  Updates nonce and gas fees (if necessary) - these values must be present
-   */
-  public async prepareToBeSigned(): Promise<void> {
-    this.assertIsConnected()
-    this.assertHasAction()
-    // set gasLimit if not already set, set it using the execution Priority specified for this transaction
-    if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
-      const gasFee = await this.getSuggestedFee(this._executionPriority)
-      await this.setDesiredFee(gasFee)
-    }
-    if (this.isMultisig) {
-      this.assertMultisigPluginIsInitialized()
-      await this.multisigTransaction.prepareToBeSigned(this._actionHelper.action)
-    } else {
-      await this.setNonceIfEmpty(this.senderAddress)
-    }
-  }
-
-  /** Set the body of the transaction using Hex raw transaction data */
-  async setFromRaw(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
-    this.assertIsConnected()
-    this.assertNoSignatures()
-    if (this.isMultisig) {
-      this.assertMultisigPluginIsInitialized()
-      await this.multisigTransaction.setFromRaw(raw)
-      await this.updateMultisigParentTransaction()
-    }
-    if (raw) {
-      const trxOptions = this.getOptionsForEthereumJsTx()
-      this._actionHelper = new EthereumActionHelper(raw, trxOptions)
-      this.setRawProperties()
-      this._isValidated = false
-    }
-  }
-
-  /** calculates a unique nonce value for the tx (if not already set) by using the chain transaction count for a given address */
-  async setNonceIfEmpty(fromAddress: EthereumAddress | EthereumAddressBuffer) {
-    if (isNullOrEmpty(fromAddress)) return
-    this.assertHasRaw()
-    const address = toEthereumAddress(convertBufferToHexStringIfNeeded(fromAddress))
-
-    if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
-      const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)
-      this._actionHelper.nonce = txCount.toString()
-    }
   }
 
   /** Ethereum transaction action (transfer & contract functions)
@@ -336,13 +251,99 @@ export class EthereumTransaction implements Transaction {
     this._isValidated = false
   }
 
+  /**
+   *  Updates 'raw' transaction properties using the actions attached
+   *  Creates and sets private _ethereumJsTx (web3 EthereumJsTx object)
+   *  Also adds header values (nonce, gasPrice, gasLimit) if not already set in action
+   */
+  private setRawProperties(): void {
+    this.assertIsConnected()
+    this.assertHasAction()
+    this.assertHasFeeSetting()
+    if (!this._actionHelper) {
+      throwNewError('Failed to set raw transaction properties. Transaction has no actions.')
+    }
+    const { gasLimit: gasLimitOptions, gasPrice: gasPriceOptions, nonce: nonceOptions } = this._options || {}
+    const { gasPrice: gasPriceAction, gasLimit: gasLimitAction, nonce: nonceAction } = this._actionHelper.action
+
+    // Convert gas price returned from getGasPrice to Gwei
+    const gasPrice =
+      nullifyIfEmpty(gasPriceAction) ||
+      nullifyIfEmpty(gasPriceOptions) ||
+      Math.round(toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))).toString() // round up to nearest integer in GWEI
+    const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
+    const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
+    // update action helper with updated nonce and gas values
+    const trxBody: EthereumActionHelperInput = {
+      ...this._actionHelper.action,
+      nonce,
+      gasPrice,
+      gasLimit,
+      contract: this._actionHelper.contract,
+    }
+    const trxOptions = this.getOptionsForEthereumJsTx()
+    this._actionHelper = new EthereumActionHelper(trxBody, trxOptions)
+    if (this.isMultisig) {
+      this.assertMultisigPluginIsInitialized()
+      // TODO: this.multisigTransaction.clearRaw()
+    }
+  }
+
+  /** Set the body of the transaction using Hex raw transaction data */
+  async setTransaction(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
+    this.assertIsConnected()
+    this.assertNoSignatures()
+    if (this.isMultisig) {
+      this.assertMultisigPluginIsInitialized()
+      await this.multisigTransaction.setTransaction(raw)
+      await this.updateMultisigParentTransaction()
+    }
+    if (raw) {
+      const trxOptions = this.getOptionsForEthereumJsTx()
+      this._actionHelper = new EthereumActionHelper(raw, trxOptions)
+      this.setRawProperties()
+      this._isValidated = false
+    }
+  }
+
+  /**
+   *  Updates nonce and gas fees (if necessary) - these values must be present
+   */
+  public async prepareToBeSigned(): Promise<void> {
+    this.assertIsConnected()
+    this.assertHasAction()
+    // set gasLimit if not already set, set it using the execution Priority specified for this transaction
+    if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
+      const gasFee = await this.getSuggestedFee(this._executionPriority)
+      await this.setDesiredFee(gasFee)
+    }
+    if (this.isMultisig) {
+      this.assertMultisigPluginIsInitialized()
+      await this.multisigTransaction.setTransaction(this._actionHelper.action)
+    } else {
+      await this.setNonceIfEmpty(this.senderAddress)
+    }
+  }
+
+  /** calculates a unique nonce value for the tx (if not already set) by using the chain transaction count for a given address */
+  async setNonceIfEmpty(fromAddress: EthereumAddress | EthereumAddressBuffer) {
+    if (isNullOrEmpty(fromAddress)) return
+    this.assertHasRaw()
+    const address = toEthereumAddress(convertBufferToHexStringIfNeeded(fromAddress))
+
+    if (isNullOrEmptyEthereumValue(this.raw?.nonce)) {
+      const txCount = await this._chainState.getTransactionCount(address, EthereumBlockType.Pending)
+      this._actionHelper.nonce = txCount.toString()
+    }
+  }
+
   // validation
 
   /** Verifies that raw trx exists, sets nonce (using sender's address) if not already set
    *  Throws if any problems */
   public async validate(): Promise<void> {
     if (!this.hasRaw) {
-      throwNewError('Transaction validation failure. Transaction has no action. Set action or use setFromRaw().')
+      throwNewError('Transaction validation failure. Transaction has no action. Set action or use setTransaction().')
     }
     if (this.isMultisig) {
       this.assertMultisigPluginIsInitialized()
@@ -438,7 +439,7 @@ export class EthereumTransaction implements Transaction {
 
   /** Whether there is an attached signature for the provided publicKey */
   public hasSignatureForPublicKey = (publicKey: EthereumPublicKey): boolean => {
-    return isSameEthHexValue(this.signedByPublicKey, publicKey)
+    return isSameEthPublicKey(this.signedByPublicKey, publicKey)
   }
 
   /** Whether there is an attached signature for the publicKey of the address */
@@ -646,10 +647,10 @@ export class EthereumTransaction implements Transaction {
     return this.senderAddress
   }
 
-  /** set transaction hash to sign */
+  /** Buffer encoding of transaction data/hash to sign */
   public get signBuffer(): Buffer {
     this.assertIsValidated()
-    this.assertHasSignature()
+    if (this.isMultisig) return this.multisigTransaction.signBuffer
     return this.ethereumJsTx.hash(false)
   }
 
@@ -755,7 +756,7 @@ export class EthereumTransaction implements Transaction {
       multisigOptions: null,
     }
     this._parentTransaction = new EthereumTransaction(this._chainState, txOptions, null)
-    await this._parentTransaction.setFromRaw(rawParent)
+    await this._parentTransaction.setTransaction(rawParent)
     await this._parentTransaction.validate()
   }
 
@@ -807,14 +808,14 @@ export class EthereumTransaction implements Transaction {
   /** Throws if an action isn't attached to this transaction */
   private assertHasAction() {
     if (isNullOrEmpty(this._actionHelper)) {
-      throwNewError('Transaction has no action. You can set the action using transaction.actions or setFromRaw().')
+      throwNewError('Transaction has no action. You can set the action using transaction.actions or setTransaction().')
     }
   }
 
   /** Throws if no raw transaction body */
   private assertHasRaw(): void {
     if (!this.hasRaw) {
-      throwNewError('Transaction doesnt have a transaction body. Set action or use setFromRaw().')
+      throwNewError('Transaction doesnt have a transaction body. Set action or use setTransaction().')
     }
   }
 

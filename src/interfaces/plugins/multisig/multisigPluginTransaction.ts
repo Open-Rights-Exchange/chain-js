@@ -37,12 +37,13 @@ export interface MultisigPluginTransaction {
   /** Signatures attached to transaction */
   signatures: any[]
 
+  /** Buffer encoding of transaction data/hash to be signed */
+  signBuffer: Buffer
+
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: any[]): Promise<void>
 
-  prepareToBeSigned(rawTransaction: any): Promise<void>
-
-  setFromRaw(rawTransaction: any): Promise<void>
+  setTransaction(transaction: any): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: PrivateKey[]): Promise<void>

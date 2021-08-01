@@ -39,7 +39,7 @@ describe('Test Algorand Multisig Transactions', () => {
     await algoTest.connect()
     expect(algoTest.isConnected).toBeTruthy()
     const transaction = await algoTest.new.Transaction()
-    await transaction.setFromRaw(jsonParseAndRevive(multisigChainSerialized))
+    await transaction.setTransaction(jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
     expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
@@ -108,9 +108,10 @@ describe('Test Algorand Multisig Transactions', () => {
     const multisigAddress = determineMultiSigAddress(transactionMultisigOptions)
     const transaction = await algoTest.new.Transaction(transactionOptions)
     const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
-    transaction.actions = [action]
-    await transaction.prepareToBeSigned()
-    await expect(transaction.validate()).rejects.toThrow(
+
+    expect(() => {
+      transaction.actions = [action]
+    }).toThrow(
       `From address (or txn.snd) must be the multisig address (hash of multisig options). Got: ${valueTransferParams.fromAccountName}. Expected: ${multisigAddress}`,
     )
   })

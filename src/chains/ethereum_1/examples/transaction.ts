@@ -59,9 +59,9 @@ const { env } = process
       },
     }
 
-    // EthereumRawTransaction type input for setFromRaw()
+    // EthereumRawTransaction type input for setTransaction()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
-    const sampleSetFromRawTrx = {
+    const sampleSetTransactionTrx = {
       to: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
       value: '0x01',
       data: '0x00',
@@ -180,9 +180,9 @@ const { env } = process
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
-    // // ---> Sign and send ethereum transfer with setFromRaw()
+    // // ---> Sign and send ethereum transfer with setTransaction()
     // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
-    // await transaction.setFromRaw(sampleSetFromRawTrx)
+    // await transaction.setTransaction(sampleSetTransactionTrx)
     // await transaction.prepareToBeSigned()
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
     // console.log('decomposd action:', decomposed)

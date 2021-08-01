@@ -189,3 +189,13 @@ export function verifySignedWithPublicKey(
     hexStringToByteArray(signature),
   )
 }
+
+/** Signs data as a message using private key (Algorand does not append additional fields for a message) */
+export function signMessage(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
+  return sign(data, privateKey)
+}
+
+/** Verify that a 'personal message' was signed using the given key (Algorand does not append additional fields for a message) */
+export function verifySignedMessage(data: string, publicKey: AlgorandPublicKey, signature: AlgorandSignature): boolean {
+  return this.verifySignedWithPublicKey(data, publicKey, signature)
+}

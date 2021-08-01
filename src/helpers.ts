@@ -371,6 +371,13 @@ export function ensureHexPrefix(value: string) {
   return value.startsWith('0x') ? value.toLowerCase() : `${'0x'}${value.toLowerCase()}`
 }
 
+/** makes sure that the public key has a 0x prefix - but drops '04' at front of public key if exists */
+export function ensureHexPrefixForPublicKey(value: string) {
+  if (isNullOrEmpty(value) || !isAString(value)) return value
+  const pubString = value.replace('0x04', '0x').toLowerCase()
+  return pubString.startsWith('0x') ? pubString : `${'0x'}${pubString}`
+}
+
 /** Checks that string starts with 0x - removes it if it does */
 export function removeHexPrefix(value: string) {
   if (isNullOrEmpty(value)) return value
@@ -382,6 +389,21 @@ export function removeHexPrefix(value: string) {
 export function toHexStringIfNeeded(value: any) {
   if (!isAString(value) || value.startsWith('0x')) return value
   return decimalToHexString(value)
+}
+
+/** Accepts string or Buffer
+ *  If string - converts (Utf8 OR Hex string) into Buffer
+ *  If buffer - just returns it */
+export function convertUtf8OrHexStringToBuffer(data: string | Buffer) {
+  if (Buffer.isBuffer(data)) return data
+  let dataBytes: Uint8Array
+  // convert string into UInt8Array
+  if (isHexString(data)) {
+    dataBytes = new Uint8Array(Buffer.from(data, 'hex')) // convert hex string (e.g. 'A0D045') to UInt8Array - '0x' prefix is optional
+  } else {
+    dataBytes = new Uint8Array(Buffer.from(data, 'utf8')) // from 'any UTF8 string' to Uint8Array
+  }
+  return Buffer.from(dataBytes)
 }
 
 /** Whether array is exactly length of 1 */
