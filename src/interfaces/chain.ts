@@ -115,7 +115,7 @@ export interface Chain {
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
-  getPublicKeyFromSignature(signature: Signature, data: string | Buffer, encoding: string): PublicKey
+  getPublicKeyFromSignature(signature: Signature, data: string | Buffer): PublicKey
   /** Verifies that the value is a valid, stringified JSON encryption result */
   isAsymEncryptedDataString(value: string): boolean
   /** Generate a signature given some data and a private key */
@@ -125,9 +125,14 @@ export interface Chain {
   /** Verifies that the value is a valid public key for the chain */
   isValidPublicKey(value: string | Buffer): boolean
   /** Generate a signature given some data and a private key */
-  sign(data: string | Buffer, privateKey: PrivateKey, encoding: string): any
+  sign(data: string | Buffer, privateKey: PrivateKey): any
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
+  /** Signs data as a message using private key (first appending additional required data if any) */
+  signMessage(data: string | Buffer, privateKey: PrivateKey): any
+  /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
+   * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
+  verifySignedMessage(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
 
   // Chain Helper functions
 
