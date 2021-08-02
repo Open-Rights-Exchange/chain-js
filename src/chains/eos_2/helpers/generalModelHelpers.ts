@@ -10,12 +10,12 @@ export function isValidEosDate(str: string): str is EosDate {
   return str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}\d+$/i) !== null
 }
 
-// A string representation of an EOSIO symbol, composed of a float with a precision of 3-4
+// A string representation of an EOSIO symbol, composed of a float with a precision between 0-16
 // ... and a symbol composed of capital letters between 1-7 letters separated by a space
 // example '1.0000 ABC'
 export function isValidEosAsset(str: EosAsset | string): str is EosAsset {
   if (isNullOrEmpty(str)) return false
-  return str.match(/^\d{1,}\.?\d{0,4} [A-Z]{1,7}$/) !== null
+  return str.match(/^\d{1,}\.?\d{0,16} [A-Z]{1,7}$/) !== null
 }
 
 /** Expects a string composed of up to 7 upper-case letters */
