@@ -217,8 +217,8 @@ export function prepareMessageToSign(data: string | Buffer): string {
 
 /** Signs data as a message using private key (first prefixing additional message string) */
 export function signMessage(data: string | Buffer, privateKey: string): EthereumSignatureNative {
-  const dataString = this.prepareMessageToSign(data)
-  return this.sign(dataString, privateKey)
+  const dataString = prepareMessageToSign(data)
+  return sign(dataString, privateKey)
 }
 
 /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
@@ -229,6 +229,6 @@ export function verifySignedMessage(
   publicKey: EthereumPublicKey,
   signature: EthereumSignature,
 ): boolean {
-  const completeMessage = this.prepareMessageToSign(data)
+  const completeMessage = prepareMessageToSign(data)
   return verifySignedWithPublicKey(completeMessage, publicKey, signature)
 }
