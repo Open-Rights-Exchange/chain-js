@@ -1,4 +1,4 @@
-import { getUniqueValues, isNullOrEmpty } from '../../../../../helpers'
+import { getUniqueValues, isNullOrEmpty, toBuffer } from '../../../../../helpers'
 import { throwNewError } from '../../../../../errors'
 import { EthereumAddress, EthereumPrivateKey, EthereumSignature, EthereumTransactionAction } from '../../../models'
 import { EthereumMultisigPluginTransaction } from '../ethereumMultisigPlugin'
@@ -107,7 +107,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
 
   /** buffer encoding of transaction hash to be signed */
   public get signBuffer(): Buffer {
-    return Buffer.from(this._transactionHash, 'hex')
+    return toBuffer(this._transactionHash, 'hex')
   }
 
   get chainUrl(): string {
@@ -228,13 +228,13 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
    * Set safeTransaction from GnosisSafeRawTransaction or EthereumTransactionAction that has passed from ethTransaction class.
    */
   public async setTransaction(transaction: EthereumTransactionAction | GnosisSafeRawTransaction) {
-    this._rawGnosisTransaction = containsSafeSpecificField(transaction)
+    const inputTransaction = containsSafeSpecificField(transaction)
       ? (transaction as GnosisSafeRawTransaction)
       : await transactionToSafeTx(transaction, this.multisigOptions)
-
-    if (JSON.stringify(this.safeTransaction) === JSON.stringify(transaction)) {
+    if (JSON.stringify(this.safeTransaction) === JSON.stringify(inputTransaction)) {
       return
     }
+    this._rawGnosisTransaction = inputTransaction
 
     this.assertSignatureOwnerValidAndUnique(this.gnosisSignatures)
     await this.setTransactionHash()

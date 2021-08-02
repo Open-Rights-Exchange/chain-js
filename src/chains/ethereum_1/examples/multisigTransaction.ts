@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { ConfirmType, TxExecutionPriority } from '../../../models'
+import { TxExecutionPriority } from '../../../models'
 import { EthereumTransactionOptions } from '../models'
 import { toEthereumAddress, toEthereumPrivateKey } from '../helpers'
 import { connectChain, ropstenChainOptions, ropstenEndpoints } from './helpers/networks'
 import { GnosisSafeMultisigPlugin } from '../plugins/multisig/gnosisSafeV1/plugin'
 import { EthereumGnosisMultisigTransactionOptions } from '../plugins/multisig/gnosisSafeV1/models'
 import { GnosisSafeMultisigPluginTransaction } from '../plugins/multisig/gnosisSafeV1/pluginTransaction'
-import { bufferToHexString } from '../../../helpers'
+import { bufferToPrefixedHexString } from '../../../helpers'
 
 require('dotenv').config()
 // eslint-disable-next-line import/newline-after-import
@@ -47,7 +47,7 @@ require('dotenv').config()
 
     console.log('owners: ', transaction.multisigTransaction.owners)
     console.log('threshold: ', transaction.multisigTransaction.threshold)
-    console.log('hash to sign: ', bufferToHexString(transaction.signBuffer))
+    console.log('hash to sign: ', bufferToPrefixedHexString(transaction.signBuffer))
 
     await transaction.sign([toEthereumPrivateKey(process.env.TESTNET_multisigOwner_3_PRIVATE_KEY)])
     // await transaction.sign([toEthereumPrivateKey(process.env.GOERLI_multisigOwner_1_PRIVATE_KEY)])

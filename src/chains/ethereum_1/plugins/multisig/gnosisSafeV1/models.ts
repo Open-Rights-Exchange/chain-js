@@ -55,7 +55,6 @@ export type GnosisSafeTransaction = {
 
 /** Adds signatures to GnosisSafeTransaction to support setFromRaw() */
 export type GnosisSafeRawTransaction = GnosisSafeTransaction & {
-  /** stringified GnosisSafeSignature[] */
   signatures?: GnosisSafeSignature[]
 }
 

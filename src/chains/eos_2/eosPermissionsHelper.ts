@@ -66,6 +66,7 @@ export class PermissionsHelper {
     authAccount: EosEntityName,
     authPermission: EosEntityName,
     permissionsToAdd: Partial<EosPermissionSimplified>[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     appendKeyToExistingPermission: boolean = false,
   ): Promise<EosActionStruct[]> {
     if (isNullOrEmpty(permissionsToAdd)) return null
