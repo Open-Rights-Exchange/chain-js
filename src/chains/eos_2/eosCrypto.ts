@@ -256,7 +256,7 @@ export function signMessage(data: string, privateKey: EosPrivateKey | string): E
 
 /** Verify that a 'personal message' was signed using the given key (Eos does not append additional fields for a message) */
 export function verifySignedMessage(data: string, publicKey: EosPublicKey, signature: EosSignature): boolean {
-  return this.verifySignedWithPublicKey(data, publicKey, signature)
+  return verifySignedWithPublicKey(data, publicKey, signature)
 }
 
 export function getPublicKeyFromPrivateKey(privateKey: EosPrivateKey) {
