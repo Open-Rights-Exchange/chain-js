@@ -122,7 +122,7 @@ export class AlgorandChainState implements ChainState {
         firstRound: chainTxParams?.firstRound,
         lastRound: chainTxParams?.lastRound,
         consensusVersion: chainTxParams?.consensusVersion,
-        minFee: 0,
+        minFee: chainTxParams?.minFee || 1000, // NOTE: as of Aug 2021, minFee is missing from algoClient.getTransactionParams() response - but it should be there
         suggestedFee: chainTxParams?.fee, // suggested fee (in microAlgos)
       }
       // get a few things from status endpoint
@@ -493,8 +493,14 @@ export class AlgorandChainState implements ChainState {
     return transaction
   }
 
+  /** Gets the minimum fee (microalgo) used by any transaction
+   * Fee per byte call fall to 0, but the minimum fee is required */
+  public get minimumFeePerTx(): number {
+    return this._chainInfo?.nativeInfo?.transactionHeaderParams?.minFee
+  }
+
   /** Gets recommented fee (microalgo) per byte according to network's transaction load */
-  public async getSuggestedFeePerByte(): Promise<number> {
+  public get suggestedFeePerByte(): number {
     return this._chainInfo?.nativeInfo?.transactionHeaderParams?.suggestedFee
   }
 
