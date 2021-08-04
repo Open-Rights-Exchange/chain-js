@@ -60,7 +60,7 @@ import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
-import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
+import { MINIMUM_TRANSACTION_FEE_FALLBACK, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -770,7 +770,7 @@ export class AlgorandTransaction implements Transaction {
       const { bytes } = await this.resourcesRequired()
       const { suggestedFeePerByte } = this._chainState
       let microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
-      if (microalgos === 0) microalgos = this._chainState.minimumFeePerTx
+      if (microalgos === 0) microalgos = this._chainState.minimumFeePerTx || MINIMUM_TRANSACTION_FEE_FALLBACK
       return microToAlgoString(microalgos)
     } catch (error) {
       const chainError = mapChainError(error)

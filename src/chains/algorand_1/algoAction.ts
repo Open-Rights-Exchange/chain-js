@@ -36,6 +36,7 @@ import {
   ALGORAND_EMPTY_CONTRACT_NAME,
   ALGORAND_CHAIN_BLOCK_FREQUENCY,
   ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS,
+  MINIMUM_TRANSACTION_FEE_FALLBACK,
 } from './algoConstants'
 import { toAlgorandAddressFromRawStruct, toRawAddressFromAlgoAddr } from './helpers'
 
@@ -283,7 +284,7 @@ export class AlgorandActionHelper {
     rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
     const lastValidBlock = rawAction.firstRound + numberOfBlockValidFor
     rawAction.lastRound = lastValidBlock // always replace the lastblock with default (or provided options)
-    rawAction.fee = rawAction.fee || chainTxParams.minFee
+    rawAction.fee = rawAction.fee || chainTxParams.minFee || MINIMUM_TRANSACTION_FEE_FALLBACK
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
   }
 
