@@ -753,6 +753,7 @@ export class AlgorandTransaction implements Transaction {
    *  desiredFee units is in algos (expressed as a string)
    */
   public async setDesiredFee(desiredFee: string) {
+    this.assertHasAction()
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
@@ -767,8 +768,9 @@ export class AlgorandTransaction implements Transaction {
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
     try {
       const { bytes } = await this.resourcesRequired()
-      const suggestedFeePerByte = await this._chainState.getSuggestedFeePerByte()
-      const microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+      const { suggestedFeePerByte } = this._chainState
+      let microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+      if (microalgos === 0) microalgos = this._chainState.minimumFeePerTx
       return microToAlgoString(microalgos)
     } catch (error) {
       const chainError = mapChainError(error)
