@@ -555,6 +555,7 @@ export class EthereumTransaction implements Transaction {
   public async setDesiredFee(desiredFee: string, options?: EthereumSetDesiredFeeOptions) {
     try {
       this.assertNoSignatures()
+      this.assertHasAction()
       const { gasLimitOverride, gasPriceOverride } = options || {}
       const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
       const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
