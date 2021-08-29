@@ -11,6 +11,8 @@ import {
   EosSignature,
   EosPrivateKey,
   EosTransactionOptions,
+  EosRawTransaction,
+  EosSerializedTransaction,
 } from './models'
 import {
   asyncForEach,
@@ -47,7 +49,7 @@ export class EosTransaction implements Transaction {
   private _signatures: Set<EosSignature> // A set keeps only unique values
 
   /** Transaction prepared for signing (raw transaction) */
-  private _raw: Uint8Array
+  private _raw: EosRawTransaction
 
   private _sendReceipt: any
 
@@ -90,7 +92,7 @@ export class EosTransaction implements Transaction {
   get raw() {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setTransaction(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     return this._raw
@@ -158,11 +160,29 @@ export class EosTransaction implements Transaction {
     this._header = deRawified
   }
 
+  /** Accepts either a raw transaction or an array of actions
+   */
+  public async setTransaction(transaction: EosActionStruct[] | EosSerializedTransaction) {
+    this.assertNoSignatures()
+    if (this.isEosActionStructArray(transaction)) {
+      this.actions = transaction as EosActionStruct[]
+      return
+    }
+    // if not actions array, assume value is a raw transaction
+    try {
+      await this.setFromRaw(transaction as EosSerializedTransaction)
+    } catch (error) {
+      throwNewError(
+        `Failed trying to set transaction. Value must be either: array of actions OR serialized transaction object. Error: ${error.message}`,
+      )
+    }
+  }
+
   /** Set the body of the transaction using Hex raw transaction data
    *  This is one of the ways to set the actions for the transaction
    *  Sets transaction data from raw transaction - supports both raw/serialized formats (JSON bytes array and hex)
    *  This is an ASYNC call since it fetches (cached) action contract schema from chain in order to deserialize action data */
-  async setFromRaw(raw: any): Promise<void> {
+  private async setFromRaw(raw: EosSerializedTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (raw) {
@@ -206,7 +226,7 @@ export class EosTransaction implements Transaction {
   /** Sets the Array of actions */
   public set actions(actions: EosActionStruct[]) {
     this.assertNoSignatures()
-    if (isNullOrEmpty(actions) || !Array.isArray(actions)) {
+    if (!this.isEosActionStructArray(actions)) {
       throwNewError('actions must be an array and have at least one value')
     }
     this._actions = actions
@@ -230,6 +250,13 @@ export class EosTransaction implements Transaction {
     this._isValidated = false
   }
 
+  /** Wether a value is a well-formed array of tx actions */
+  isEosActionStructArray(value: any) {
+    if (isNullOrEmpty(value) || !Array.isArray(value)) return false
+    if (!(value[0] as EosActionStruct)?.account) return false
+    return true
+  }
+
   // validation
 
   /** Verifies that all accounts and permisison for actions exist on chain.
@@ -237,7 +264,7 @@ export class EosTransaction implements Transaction {
   public async validate(): Promise<void> {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction validation failure. Missing raw transaction. Use setFromRaw() or if setting actions, call transaction.prepareToBeSigned().',
+        'Transaction validation failure. Missing raw transaction. Use Transaction() or if setting actions, call transaction.prepareToBeSigned().',
       )
     }
     // this will throw an error if an account in transaction body doesn't exist on chain

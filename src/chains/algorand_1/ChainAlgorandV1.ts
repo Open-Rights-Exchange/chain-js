@@ -189,16 +189,22 @@ class ChainAlgorandV1 implements Chain {
     return !!isValidAlgorandPublicKey(value)
   }
 
-  /** Generate a signature given some data and a private key */
-  sign = algoCrypto.sign
-
   /** Generates new key pairs (public and private)
    *  Encrypts private key with provided password
    *  Returns: { privateKey, publicKey, encryptedPrivateKey } */
   generateNewAccountKeysWithEncryptedPrivateKeys = algoCrypto.generateNewAccountKeysAndEncryptPrivateKeys
 
+  /** Generate a signature given some data and a private key */
+  sign = algoCrypto.sign
+
   /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
   verifySignedWithPublicKey = algoCrypto.verifySignedWithPublicKey
+
+  /** Signs data as a message using private key (Algorand does not append additional fields for a message) */
+  signMessage = algoCrypto.signMessage
+
+  /** Verify that a 'personal message' was signed using the given key (Algorand does not append additional fields for a message) */
+  verifySignedMessage = algoCrypto.verifySignedMessage
 
   // --------- Chain helper functions
 

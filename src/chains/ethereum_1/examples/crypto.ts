@@ -7,8 +7,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'
-import { toEthereumPrivateKey, toEthereumPublicKey } from '../helpers'
-import { uncompressPublicKey } from '../ethCrypto'
+import { toEthereumPrivateKey, toEthereumPublicKey, toEthereumSignatureNative } from '../helpers'
+import { uncompressPublicKey, prepareMessageToSign, verifySignedMessage, signMessage, getEthereumPublicKeyFromSignature} from '../ethCrypto'
 import { EthereumChainEndpoint } from '../models'
 
 require('dotenv').config()
@@ -68,6 +68,11 @@ async function run() {
   console.log('encrypted text 3:', encrypted3)
   const decrypted3 = await ropsten.decryptWithPrivateKeys(encrypted3, [privateKey1, privateKey2, privateKey3], {s1:'abc'})
   console.log('decrypted asymmetric text 3:', decrypted3)
+
+  // sign a message (akak string) and verify signature
+  const message = 'Hello from chainjs'
+  const stringSignature = signMessage(message, privateKey1)
+  console.log('signature is verified: ', verifySignedMessage(message, publicKey1, stringSignature))
 }
 
 ;(async () => {

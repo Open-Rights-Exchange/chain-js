@@ -1,10 +1,18 @@
 /* eslint-disable new-cap */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Wallet from 'ethereumjs-wallet'
-import { bufferToHex, ecsign, ecrecover, publicToAddress } from 'ethereumjs-util'
+import { bufferToHex, ecsign, ecrecover, publicToAddress, keccak } from 'ethereumjs-util'
 import secp256k1 from 'secp256k1'
 import { AesCrypto, Asymmetric } from '../../crypto'
-import { toBuffer, notImplemented, removeHexPrefix, byteArrayToHexString, hexStringToByteArray } from '../../helpers'
+import {
+  bufferToHexString,
+  byteArrayToHexString,
+  convertUtf8OrHexStringToBuffer,
+  ensureHexPrefix,
+  ensureHexPrefixForPublicKey,
+  hexStringToByteArray,
+  removeHexPrefix,
+} from '../../helpers'
 import {
   EthereumAddress,
   EthereumKeyPair,
@@ -125,20 +133,20 @@ export async function decryptWithPrivateKeys(
 
 /** Signs data with private key */
 export function sign(data: string | Buffer, privateKey: string): EthereumSignatureNative {
-  // todo: data should be hashed first using ethereum-js-tx Transaction.prototype.hash
-  const dataBuffer = toEthBuffer(data)
-  const keyBuffer = toBuffer(privateKey, 'hex')
-  return toEthereumSignatureNative(ecsign(dataBuffer, keyBuffer))
+  const dataBuffer = convertUtf8OrHexStringToBuffer(data)
+  const keyBuffer = toEthBuffer(ensureHexPrefix(privateKey))
+  const dataHash = keccak(dataBuffer)
+  return toEthereumSignatureNative(ecsign(dataHash, keyBuffer))
 }
 
 /** Returns public key from ethereum signature */
 export function getEthereumPublicKeyFromSignature(
   signature: EthereumSignatureNative,
   data: string | Buffer,
-  encoding: string,
 ): EthereumPublicKey {
   const { v, r, s } = signature
-  return toEthereumPublicKey(ecrecover(toEthBuffer(data), v, r, s).toString())
+  const dataHash = keccak(convertUtf8OrHexStringToBuffer(data))
+  return toEthereumPublicKey(bufferToHexString(ecrecover(toEthBuffer(dataHash), v, r, s)))
 }
 
 /** Returns public key from ethereum address */
@@ -187,13 +195,40 @@ export async function generateNewAccountKeysAndEncryptPrivateKeys(
   return encryptedKeys
 }
 
-// TODO: implement using web3 method?
 /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
 export function verifySignedWithPublicKey(
   data: string | Buffer,
   publicKey: EthereumPublicKey,
   signature: EthereumSignature,
 ): boolean {
-  notImplemented()
-  return null
+  const signedWithPubKey = getEthereumPublicKeyFromSignature(toEthereumSignatureNative(signature), data)
+  return ensureHexPrefixForPublicKey(signedWithPubKey) === ensureHexPrefixForPublicKey(publicKey)
+}
+
+/** Prepares a message body (e.g. a message/string to be signed) with the appropriate chain specific prefix or suffix
+ * For Eth, prepends the standard message prefix ('Ethereum Signed Message:') to the beginning of data
+ * Returns a HexString of the complete message (including the additions)
+ * Adding data to the message allows a wallet to sign an arbitrary string without risking signing an actual transaction */
+export function prepareMessageToSign(data: string | Buffer): string {
+  const body = convertUtf8OrHexStringToBuffer(data)
+  const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${body.length.toString()}`, 'utf-8')
+  return bufferToHexString(Buffer.concat([prefix, body]))
+}
+
+/** Signs data as a message using private key (first prefixing additional message string) */
+export function signMessage(data: string | Buffer, privateKey: string): EthereumSignatureNative {
+  const dataString = prepareMessageToSign(data)
+  return sign(dataString, privateKey)
+}
+
+/** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
+ * A message differs than verifySignedWithPublicKey() because it might additional strings appended (Eth best-practices has a prefixed message)
+ * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
+export function verifySignedMessage(
+  data: string | Buffer,
+  publicKey: EthereumPublicKey,
+  signature: EthereumSignature,
+): boolean {
+  const completeMessage = prepareMessageToSign(data)
+  return verifySignedWithPublicKey(completeMessage, publicKey, signature)
 }

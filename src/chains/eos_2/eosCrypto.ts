@@ -5,7 +5,7 @@ import { AesCrypto, Asymmetric } from '../../crypto'
 import { TRANSACTION_ENCODING } from './eosConstants'
 import { EosAccountKeys, EosSignature, EosPublicKey, EosPrivateKey, EosKeyPair } from './models'
 import { Signature } from '../../models'
-import { removeEmptyValuesInJsonObject } from '../../helpers'
+import { isHexString, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
@@ -114,11 +114,8 @@ export async function decryptWithPrivateKeys(
 }
 
 /** Signs data with private key */
-export function sign(
-  data: string | Buffer,
-  privateKey: EosPrivateKey | string,
-  encoding: string = TRANSACTION_ENCODING,
-): EosSignature {
+export function sign(data: string | Buffer, privateKey: EosPrivateKey | string): EosSignature {
+  const encoding = isHexString(data) ? 'hex' : 'utf8'
   return eosEcc.sign(data, privateKey, encoding)
 }
 
@@ -144,7 +141,8 @@ export function verifySignedWithPublicKey(
   publicKey: EosPublicKey,
   signature: EosSignature,
 ): boolean {
-  return eosEcc.verify(signature, data, publicKey)
+  const encoding = isHexString(data) ? 'hex' : 'utf8'
+  return eosEcc.verify(signature, data, publicKey, encoding)
 }
 
 /** Adds privateKeyEncrypted (owner and/or active) if missing by encrypting privateKey (using password) */
@@ -249,4 +247,18 @@ export function eosPrivateKeyToEccPrivateKey(eosPrivateKey: EosPrivateKey) {
     .slice(0, 33) // trim first byte (x80 prefix) and last 4 bytes (checksum)
     .toString('hex')
   return eosPrivHexRaw
+}
+
+/** Signs data as a message using private key (Eos does not append additional fields for a message) */
+export function signMessage(data: string, privateKey: EosPrivateKey | string): EosSignature {
+  return sign(data, privateKey)
+}
+
+/** Verify that a 'personal message' was signed using the given key (Eos does not append additional fields for a message) */
+export function verifySignedMessage(data: string, publicKey: EosPublicKey, signature: EosSignature): boolean {
+  return verifySignedWithPublicKey(data, publicKey, signature)
+}
+
+export function getPublicKeyFromPrivateKey(privateKey: EosPrivateKey) {
+  return eosEcc.privateToPublic(privateKey)
 }

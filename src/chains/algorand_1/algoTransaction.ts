@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
@@ -12,14 +13,12 @@ import {
   isAString,
   isAUint8Array,
   isNullOrEmpty,
-  notImplemented,
   notSupported,
   uint8ArraysAreEqual,
 } from '../../helpers'
 import { AlgorandChainState } from './algoChainState'
 import {
   AlgorandAddress,
-  AlgorandChainTransactionParamsStruct,
   AlgorandMultisigOptions,
   AlgorandMultiSignatureStruct,
   AlgorandPrivateKey,
@@ -35,7 +34,6 @@ import {
   AlgorandTxSignResults,
   AlgorandTransactionResources,
   AlgorandMultiSignatureMsigStruct,
-  AlgorandAddressStruct,
 } from './models'
 import { AlgorandActionHelper } from './algoAction'
 import {
@@ -49,7 +47,6 @@ import {
   toAlgorandAddressFromPublicKeyByteArray,
   toAlgorandAddressFromRawStruct,
   toAlgorandPublicKey,
-  toRawAddressBufferFromAlgorandAddress,
   toRawTransactionFromSignResults,
 } from './helpers'
 import {
@@ -63,7 +60,7 @@ import {
   getAlgorandPublicKeyFromPrivateKey,
   verifySignedWithPublicKey as verifySignatureForDataAndPublicKey,
 } from './algoCrypto'
-import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
+import { MINIMUM_TRANSACTION_FEE_FALLBACK, TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './algoConstants'
 
 export class AlgorandTransaction implements Transaction {
   private _actionHelper: AlgorandActionHelper
@@ -90,7 +87,6 @@ export class AlgorandTransaction implements Transaction {
     this._chainState = chainState
     this.assertValidOptions(options)
     this.applyOptions(options)
-    this._options = options || {}
   }
 
   public async init() {
@@ -126,7 +122,7 @@ export class AlgorandTransaction implements Transaction {
   get raw(): AlgorandRawTransactionStruct | AlgorandRawTransactionMultisigStruct {
     if (!this.hasRaw) {
       throwNewError(
-        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setFromRaw(). Use transaction.hasRaw to check before using transaction.raw',
+        'Transaction has not been prepared to be signed yet. Call prepareToBeSigned() or use setTransaction(). Use transaction.hasRaw to check before using transaction.raw',
       )
     }
     return this.rawTransaction
@@ -148,8 +144,6 @@ export class AlgorandTransaction implements Transaction {
     this.assertIsConnected()
     this.assertNoSignatures()
     this.assertHasAction()
-    const chainTxHeaderParams: AlgorandChainTransactionParamsStruct = (await this._chainState.getChainInfo())
-      ?.nativeInfo?.transactionHeaderParams
     this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the latest
     // get a chain-ready minified transaction - uses Algo SDK Transaction class
     const rawTx = this._algoSdkTransaction?.get_obj_for_encoding()
@@ -181,31 +175,31 @@ export class AlgorandTransaction implements Transaction {
     }
   }
 
-  /** Set the transaction by using the blob from the results of an Algo SDK sign function
-   *  rawTransaction is either encoded as Uint8Array or JSON object of raw transaction
+  /** Set the transaction by using any one of many valid formats
+   * Valid formats for transaction param include:
+   *  JSON with verbose key names and string values (or values encoded by AlgoSDK)
+   *  the blob from the results of an Algo SDK sign function
+   *  Supports either encoded as Uint8Array or JSON object of raw transaction
    *  Example format: { txn: {}, sig: {}, sngr: {}, msig: {} }
    */
-  async setFromRaw(
-    rawTransaction: AlgorandRawTransactionMultisigStruct | AlgorandRawTransactionStruct | Uint8Array,
+  async setTransaction(
+    transaction:
+      | AlgorandTxAction
+      | AlgorandTxActionRaw
+      | AlgorandTxActionSdkEncoded
+      | AlgorandRawTransactionStruct
+      | AlgorandRawTransactionMultisigStruct
+      | Uint8Array,
   ): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    let decodedBlob
-    // if transaction isnt already encoded, encode it
-    if (isAUint8Array(rawTransaction)) {
-      decodedBlob = algosdk.decodeObj(rawTransaction)
-    } else {
-      decodedBlob = rawTransaction
+    const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
+    // if we have a txn property, then we have a 'raw' tx value, so set raw props
+    if (decodedTransaction?.txn) {
+      this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
     }
-
-    if (!decodedBlob?.txn) {
-      throwNewError('Cant decode blob into transaction - expected a property .txn')
-    }
-    this.assertMultisigFromMatchesOptions(decodedBlob)
-    // uses ActionHelper to convert packed transaction blob into AlgorandTxActionSdkEncoded (for Algo SDK)
-    this.actions = [decodedBlob]
-    this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedBlob) })
-    this.setAlgoSdkTransactionFromAction() // update _algoSdkTransaction with the data from action
+    // actions setter can handle any flavor of transaction
+    this.actions = [decodedTransaction]
     this._isValidated = false
   }
 
@@ -271,6 +265,7 @@ export class AlgorandTransaction implements Transaction {
       throwNewError('Algorand transaction.actions only accepts an array of exactly 1 action')
     }
     const action = actions[0]
+    this.assertMultisigFromMatchesOptions(action)
     this._actionHelper = new AlgorandActionHelper(action)
     this.setAlgoSdkTransactionFromAction()
     this._isValidated = false
@@ -534,7 +529,9 @@ export class AlgorandTransaction implements Transaction {
   }
 
   public get signBuffer(): Buffer {
-    return notImplemented()
+    this.assertIsValidated()
+    // uses Algo SDK Transaction object
+    return this._algoSdkTransaction?.bytesToSign()
   }
 
   /** Algorand provides the functionality to sign a transaction using multi-signature account */
@@ -652,7 +649,9 @@ export class AlgorandTransaction implements Transaction {
   /** Throws if no raw transaction body */
   private assertHasRaw(): void {
     if (!this.hasRaw) {
-      throwNewError('Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or use setFromRaw().')
+      throwNewError(
+        'Transaction doesnt have a raw transaction body. Call prepareToBeSigned() or set a complete transaction using setTransaction().',
+      )
     }
   }
 
@@ -680,7 +679,7 @@ export class AlgorandTransaction implements Transaction {
   /** Whether the transaction signature is valid for this transaction body and publicKey provided */
   private isValidTxSignatureForPublicKey(signature: AlgorandSignature, publicKey: AlgorandPublicKey): boolean {
     if (!this.rawTransaction) return false
-    const transactionBytesToSign = this._algoSdkTransaction?.bytesToSign() // using Algo SDK Transaction object
+    const transactionBytesToSign = this.signBuffer // uses Algo SDK Transaction object
     return verifySignatureForDataAndPublicKey(byteArrayToHexString(transactionBytesToSign), publicKey, signature)
   }
 
@@ -754,6 +753,7 @@ export class AlgorandTransaction implements Transaction {
    *  desiredFee units is in algos (expressed as a string)
    */
   public async setDesiredFee(desiredFee: string) {
+    this.assertHasAction()
     const fee = algoToMicro(desiredFee)
     const trx: AlgorandTxAction = { ...this._actionHelper.action, fee, flatFee: true }
     this.actions = [trx]
@@ -768,8 +768,9 @@ export class AlgorandTransaction implements Transaction {
   public async getSuggestedFee(priority: TxExecutionPriority): Promise<string> {
     try {
       const { bytes } = await this.resourcesRequired()
-      const suggestedFeePerByte = await this._chainState.getSuggestedFeePerByte()
-      const microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+      const { suggestedFeePerByte } = this._chainState
+      let microalgos = bytes * suggestedFeePerByte * TRANSACTION_FEE_PRIORITY_MULTIPLIERS[priority]
+      if (microalgos === 0) microalgos = this._chainState.minimumFeePerTx || MINIMUM_TRANSACTION_FEE_FALLBACK
       return microToAlgoString(microalgos)
     } catch (error) {
       const chainError = mapChainError(error)

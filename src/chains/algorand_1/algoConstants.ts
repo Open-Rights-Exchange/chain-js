@@ -28,8 +28,8 @@ export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 export const NATIVE_CHAIN_TOKEN_ADDRESS: any = null
 /** The symbol for the native token/currency on the chain */
 export const NATIVE_CHAIN_TOKEN_SYMBOL = 'algo'
-
-export const MINIMUM_TRANSACTION_FEE = '1000'
+/** If the chain doesnt report a minimum fee, set min fee for a TX to this */
+export const MINIMUM_TRANSACTION_FEE_FALLBACK = 1000
 
 /** Slow -> minimum transaction fee - we pass in 0 for the fixedFee then it will use the minimum fee
  *  Average ->  suggested fee per byte from chainState

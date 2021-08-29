@@ -57,7 +57,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
 
   threshold: number
 
-  transactionHash: string
+  signBuffer: Buffer
 
   /** Whether parent transaction has been set yet */
   hasParentTransaction: boolean
@@ -74,7 +74,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   parentRawTransaction: EthereumMultisigRawTransaction
 
   /** Raw transaction type is dependent on each plugin
-   *  Note: Set via prepareToBeSigned() or setFromRaw() */
+   *  Note: Set via prepareToBeSigned() or setTransaction() */
   rawTransaction: EthereumMultisigPluginRawTransaction
 
   /** An array of the unique set of authorizations needed for all actions in transaction */
@@ -91,9 +91,7 @@ export interface EthereumMultisigPluginTransaction extends MultisigPluginTransac
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: EthereumSignature[]): Promise<void>
 
-  prepareToBeSigned(action: EthereumTransactionAction): Promise<void>
-
-  setFromRaw(rawTransaction: EthereumMultisigPluginRawTransaction): Promise<void>
+  setTransaction(transaction: EthereumTransactionAction | EthereumMultisigPluginRawTransaction): Promise<void>
 
   /** Sign the transaction body with private key(s) and add to attached signatures */
   sign(privateKeys: EthereumPrivateKey[]): Promise<void>
