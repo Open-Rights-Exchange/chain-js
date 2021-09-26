@@ -47,7 +47,7 @@ export class AlgorandChainState implements ChainState {
 
   private _algoClient: AlgoClient
 
-  private _algoClientIndexer: AlgoClient
+  private _algoClientIndexer: AlgoClientIndexer
 
   constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -100,8 +100,8 @@ export class AlgorandChainState implements ChainState {
           ...token,
           ...ALGORAND_POST_CONTENT_TYPE,
         }
-        this._algoClient = new algosdk.Algodv2(token, url, port)
-        this._algoClientIndexer = new algosdk.Indexer(postToken, indexerUrl, port)
+        this._algoClient = new algosdk.Algodv2(token, url.toString(), port)
+        this._algoClientIndexer = new algosdk.Indexer(postToken, indexerUrl.toString(), port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -121,8 +121,7 @@ export class AlgorandChainState implements ChainState {
         genesisID: chainTxParams?.genesisID,
         firstRound: chainTxParams?.firstRound,
         lastRound: chainTxParams?.lastRound,
-        consensusVersion: chainTxParams?.consensusVersion,
-        minFee: chainTxParams?.minFee, // NOTE: as of Aug 2021, minFee is missing from algoClient.getTransactionParams() response - we would expect it to be there
+        minFee: null, // chainTxParams?.minFee, // NOTE: as of Aug 2021, minFee is missing from algoClient.getTransactionParams() response - we would expect it to be there
         suggestedFee: chainTxParams?.fee, // suggested fee (in microAlgos)
       }
       // get a few things from status endpoint
@@ -486,7 +485,7 @@ export class AlgorandChainState implements ChainState {
   public async getTransactionById(id: string): Promise<any> {
     let transaction
     try {
-      transaction = this.algoClient.transactionById(id)
+      transaction = this.algoClientIndexer.lookupTransactionByID(id)
     } catch (error) {
       return null
     }
