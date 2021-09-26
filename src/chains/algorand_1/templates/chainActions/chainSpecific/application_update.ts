@@ -7,7 +7,6 @@ import {
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
   AlgorandTxActionRaw,
-  AlgorandOnApplicationComplete,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
@@ -55,7 +54,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   // Cant identify using only type (more than one action uses Application type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.Application &&
-    actionParams?.appOnComplete === AlgorandOnApplicationComplete.Update &&
+    actionParams?.appOnComplete === algosdk.OnApplicationComplete.UpdateApplicationOC &&
     !(actionParams?.appIndex === 0 || !actionParams?.appIndex)
   ) {
     const returnData = {
