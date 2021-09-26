@@ -1,4 +1,5 @@
 /* eslint-disable quotes */
+/* eslint-disable no-console */
 import { deriveKey, decryptWithKey, decryptWithPassword, encryptWithPassword } from '../aesCrypto'
 import { AesEncryptionOptions } from '../aesCryptoModels'
 import { timed } from './utils'

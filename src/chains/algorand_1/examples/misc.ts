@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { sleep, toChainEntityName } from '../../../helpers'
@@ -66,7 +66,7 @@ async function run() {
   // map chain error
   try {
     const { algoClient, algoClientIndexer } = algoTest as ChainAlgorandV1
-    const { timestamp } = await algoClientIndexer.lookupBlock(99999999999)
+    const { timestamp } = algoClientIndexer.lookupBlock(99999999999) as any
   } catch (error) {
     const chainError = mapChainError(error)
     console.log('Chain Error Type:', chainError.errorType)

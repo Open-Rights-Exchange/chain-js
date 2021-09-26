@@ -205,7 +205,7 @@ export class GnosisSafeMultisigPluginTransaction implements EthereumMultisigPlug
   /** Whether there is an attached signature for the provided address */
   public hasSignatureForAddress(address: EthereumAddress): boolean {
     let includes = false
-    this.gnosisSignatures?.map(signature => {
+    this.gnosisSignatures?.forEach(signature => {
       // Ensure check is case insensitive
       if (toEthereumAddress(signature.signer).toLowerCase() === toEthereumAddress(address).toLowerCase()) {
         includes = true

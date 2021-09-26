@@ -39,7 +39,7 @@ describe('Ethereum Action Tests', () => {
 
     expect(ethAction.hasData).toEqual(true)
   })
-  it('creates eth transfer action object with only to & value ', async () => {
+  it('creates eth transfer action object with only to & value', async () => {
     const ethAction = new EthereumActionHelper({ to, value }, chainOptions)
 
     expect(ethAction.hasData).toEqual(false)
