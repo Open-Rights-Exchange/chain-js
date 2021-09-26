@@ -44,7 +44,7 @@ export class AlgorandAccount implements Account {
   load = async (address?: AlgorandAddress): Promise<void> => {
     this.assertValidAlgorandAddress(address)
     try {
-      this._account = this._chainState.algoClient.accountInformation(address) as any
+      this._account = (await this._chainState.algoClient.accountInformation(address)) as any
     } catch (error) {
       // ALGO TODO: map chain error
       throw new Error()
@@ -56,7 +56,7 @@ export class AlgorandAccount implements Account {
     this.assertValidAlgorandPublickey(publicKey)
     this._publicKey = publicKey
     const address = toAddressFromPublicKey(publicKey)
-    this._account = this._chainState.algoClient.accountInformation(address) as any
+    this._account = (await this._chainState.algoClient.accountInformation(address)) as any
   }
 
   /** An algorand account is registered/active on the chain if the account has a minimum balance of  100,000 microalgos */
