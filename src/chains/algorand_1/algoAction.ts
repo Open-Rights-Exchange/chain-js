@@ -63,7 +63,8 @@ export class AlgorandActionHelper {
       | AlgorandTxActionRaw
       | AlgorandTxActionSdkEncoded
       | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+      | AlgorandRawTransactionMultisigStruct
+      | algosdk.Transaction,
   ) {
     this.validateAndApplyParams(params)
   }
@@ -75,7 +76,8 @@ export class AlgorandActionHelper {
       | AlgorandTxActionRaw
       | AlgorandTxActionSdkEncoded
       | AlgorandRawTransactionStruct
-      | AlgorandRawTransactionMultisigStruct,
+      | AlgorandRawTransactionMultisigStruct
+      | algosdk.Transaction,
   ) {
     if (isNullOrEmpty(actionParam)) {
       throwNewError('Missing action')
@@ -132,8 +134,8 @@ export class AlgorandActionHelper {
       // raw appArgs is an array of UInt8Array - since we cant know what type to decode it to, we convert each to a hexstring - with '0x' prefix for clarity
       appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.decodeRawAppArgsToReadable(this.raw.appArgs) : undefined,
       group: this.raw.group ? bufferToString(this.raw.group) : undefined,
-      lease: !isNullOrEmpty(this.raw.lease) ? algosdk.decodeObj(this.raw.lease) : undefined,
-      note: !isNullOrEmpty(this.raw.note) ? algosdk.decodeObj(this.raw.note) : undefined,
+      lease: !isNullOrEmpty(this.raw.lease) ? (algosdk.decodeObj(this.raw.lease) as any) : undefined,
+      note: !isNullOrEmpty(this.raw.note) ? (algosdk.decodeObj(this.raw.note) as any) : undefined,
       selectionKey: this.raw.selectionKey ? bufferToString(this.raw.selectionKey) : undefined,
       tag: this.raw.tag ? bufferToString(this.raw.tag) : undefined,
       voteKey: this.raw.voteKey ? bufferToString(this.raw.voteKey) : undefined,
