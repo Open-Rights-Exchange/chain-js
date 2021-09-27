@@ -11,9 +11,12 @@ export type AlgorandProducerParticipationStruct = {
 
 /** Algorand assets held by an Algorand account */
 export type AlgorandAssetStruct = {
-  creator?: string
   amount: number
-  frozen: boolean
+  'asset-id': number
+  creator?: string
+  deleted?: boolean
+  'is-frozen': boolean
+  'opted-in-at-round': number
 }
 
 /** Algorand asset information stored on the chain */
@@ -36,14 +39,20 @@ export type AlgorandAssetParamsStruct = {
 export type AlgorandAccountStruct = {
   address: AlgorandAddress
   amount?: number
-  Amountwithoutpendingrewards?: number
-  assets?: Map<string, AlgorandAssetStruct>
-  participation?: AlgorandProducerParticipationStruct
-  pendingrewards?: number
+  'amount-without-pending-rewards'?: number
+  'apps-local-state'?: any // Todo: Type this
+  'apps-total-schema'?: any // Todo: Type this
+  assets?: AlgorandAssetStruct[]
+  'created-apps'?: any // Todo: Type this
+  'created-assets'?: any // Todo: Type this
+  'created-at-round'?: number
+  deleted?: boolean
+  'pending-rewards'?: number
+  'reward-base'?: number
   rewards?: number
   round?: number
+  'sig-type'?: string
   status?: string
-  thisassettotal?: Map<string, AlgorandAssetParamsStruct>
 }
 
 /** Latest chain state - from calling {chain}/transactions/params - useful for adding 'header' fields to a transaction */
