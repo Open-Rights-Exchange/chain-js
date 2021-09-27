@@ -2,9 +2,21 @@ import Web3 from 'web3'
 import BN from 'bn.js'
 import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
-import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
-import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
+import { BlockTransactionString, Transaction, TransactionReceipt } from 'web3-eth'
+import {
+  ChainError,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
+  throwAndLogError,
+  throwNewError,
+} from '../../errors'
+import {
+  ChainErrorDetailCode,
+  ChainErrorType,
+  ChainSettingsCommunicationSettings,
+  ConfirmType,
+  TransactionStatus,
+} from '../../models'
 import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, objectHasProperty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import { ChainState } from '../../interfaces/chainState'
@@ -27,6 +39,7 @@ import {
   DEFAULT_GET_BLOCK_ATTEMPTS,
   NATIVE_CHAIN_TOKEN_SYMBOL,
 } from './ethConstants'
+import { assertIsValidTransactionId } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -290,7 +303,7 @@ export class EthereumChainState implements ChainState {
     if (isNullOrEmpty(result)) {
       return null
     }
-    return this.getTransactionById(result)
+    return this.getExecutedTransactionById(result)
   }
 
   /** Submits the transaction to the chain and waits only until it gets a transaction hash
@@ -523,8 +536,21 @@ export class EthereumChainState implements ChainState {
     }
   }
 
-  public async getTransactionById(id: string): Promise<TransactionReceipt> {
+  /** Gets transaction receipt for an executed transaction (by transaction hash) */
+  async getExecutedTransactionById(id: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(id)
+  }
+
+  /** Gets an executed or pending transaction (by transaction hash)
+   * Throws if transaction is not on chain */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: Transaction }> {
+    assertIsValidTransactionId(transactionId)
+    const transaction = await this.web3.eth.getTransaction(transactionId)
+    if (!transaction) throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found')
+    const status = transaction.blockNumber ? TransactionStatus.Executed : TransactionStatus.Pending
+    return { status, transaction }
   }
 
   /** Return instance of Web3js API */
