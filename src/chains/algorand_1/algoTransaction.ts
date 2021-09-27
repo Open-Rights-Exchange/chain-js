@@ -781,16 +781,7 @@ export class AlgorandTransaction implements Transaction {
   /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string)
    * Throws if transaction not found on-chain */
   public async getActualCost(): Promise<string> {
-    try {
-      const trx = await this._chainState.getTransactionById(this.transactionId)
-      return trx ? microToAlgoString(trx?.fee) : null
-    } catch (error) {
-      const chainError = mapChainError(error)
-      if (chainError?.errorType === ChainErrorType.TxNotFoundOnChain) {
-        throw new Error('Cant retrieve actual cost - Transaction not found on chain')
-      } else {
-        throw error
-      }
-    }
+    const trx = await this._chainState.getTransactionById(this.transactionId)
+    return trx ? microToAlgoString(trx?.fee) : null
   }
 }
