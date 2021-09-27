@@ -1,5 +1,5 @@
 import { assertPluginTypeNotAlreadyInstalled, initializePlugin, notImplemented } from '../../helpers'
-import { ChainType, ChainActionType, ChainEntityName, CryptoCurve } from '../../models'
+import { ChainType, ChainActionType, ChainEntityName, CryptoCurve, TransactionStatus } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
 import {
@@ -126,6 +126,15 @@ class ChainAlgorandV1 implements Chain {
     CreateAccount: this.newCreateAccount.bind(this),
     /** Return a chain Transaction object used to compose and send transactions */
     Transaction: this.newTransaction.bind(this),
+  }
+
+  // --------- Transaction functions */
+  /** Gets an executed or pending transaction (by transaction hash)
+   * A transaction that has enough fees will appear on the chain and quickly be confirmed
+   * Until the transaction is processed by the chain, this function will throw a TxNotFoundOnChain chain error
+   */
+  public async fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }> {
+    return this._chainState.fetchTransaction(transactionId)
   }
 
   // --------- Chain crytography functions */

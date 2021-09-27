@@ -1,5 +1,11 @@
 import algosdk from 'algosdk'
-import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
+import {
+  ChainError,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
+  throwAndLogError,
+  throwNewError,
+} from '../../errors'
 import { ChainState } from '../../interfaces/chainState'
 import {
   ChainErrorDetailCode,
@@ -7,6 +13,7 @@ import {
   ChainInfo,
   ChainSettingsCommunicationSettings,
   ConfirmType,
+  TransactionStatus,
 } from '../../models'
 import {
   AlgorandAddress,
@@ -480,16 +487,35 @@ export class AlgorandChainState implements ChainState {
   }
 
   /** Searched transaction on chain by id
-   * Returns null if transaction does not exsits (this includes invalid id)
+   * Throws if transaction does not exsits (this includes invalid id)
    */
   public async getTransactionById(id: string): Promise<any> {
     let transaction
     try {
-      transaction = this.algoClientIndexer.lookupTransactionByID(id)
+      transaction = await this.algoClientIndexer.lookupTransactionByID(id).do()
     } catch (error) {
-      return null
+      throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found', null, error)
     }
     return transaction
+  }
+
+  /** Gets an executed or pending transaction (by transaction hash)
+   * A transction that has enough fees will appear on the chain and quickly be confirmed
+   * Until the transaction is processed by the chain, this function will throw a TxNotFoundOnChain chain error
+   */
+  public async fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }> {
+    const transactionResponse = await this.getTransactionById(transactionId)
+    // TODO: Type the transaction response - which wraps this unfinished type: AlgorandTxFromChain
+    const { 'confirmed-round': confirmedRound, 'last-valid': lastValid } = transactionResponse.transaction
+    const { 'current-round': currentRound } = transactionResponse
+    let status: TransactionStatus
+    if (confirmedRound) {
+      status = TransactionStatus.Executed
+    } else {
+      const isExpired = currentRound > lastValid
+      status = isExpired ? TransactionStatus.Dead : TransactionStatus.Pending
+    }
+    return { status, transaction: transactionResponse.transaction }
   }
 
   /** Gets the minimum fee (microalgo) used by any transaction
