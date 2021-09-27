@@ -16,7 +16,6 @@ import {
 import { Account } from '../../interfaces'
 import { throwNewError } from '../../errors'
 import { mapChainError } from './eosErrors'
-import { isNullOrEmpty } from '../../helpers'
 import { toEosEntityName } from './helpers'
 import { PermissionsHelper } from './eosPermissionsHelper'
 import { ChainErrorType } from '../../models'

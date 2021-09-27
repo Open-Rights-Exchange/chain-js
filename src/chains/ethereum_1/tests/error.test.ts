@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
 // Web3 cannot be used to mock fetch response
 // TODO: refactor fect mock to not use eosjs module

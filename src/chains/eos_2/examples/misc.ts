@@ -2,7 +2,7 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable import/order */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { Chain, ChainFactory, ChainType } from '../../../index'

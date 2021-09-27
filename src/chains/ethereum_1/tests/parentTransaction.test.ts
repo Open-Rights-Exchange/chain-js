@@ -53,6 +53,7 @@ describe('Ethereum ParentTransaction Tests', () => {
     expect(transaction.multisigTransaction.parentRawTransaction).toBeUndefined()
 
     expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const value = transaction.parentTransaction // must wrap property in func for Jest to catch
     }).toThrow('ParentTransaction is not yet set')
   })

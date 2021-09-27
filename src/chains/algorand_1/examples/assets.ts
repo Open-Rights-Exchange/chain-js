@@ -1,12 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
 import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, TokenTransferParams } from '../../../models'
+import { ChainActionType, ChainEndpoint, TokenTransferParams, TxExecutionPriority } from '../../../models'
 import {
   AlgorandActionAssetConfigParams,
   AlgorandChainActionType,
@@ -151,6 +150,8 @@ async function run() {
   // const action = testAppOptIn
 
   transaction.actions = [action]
+  // const suggestedFee = await transaction.getSuggestedFee(TxExecutionPriority.Average)
+  // await transaction.setDesiredFee(suggestedFee)
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
