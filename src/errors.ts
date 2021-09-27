@@ -14,7 +14,7 @@ export class ChainError extends Error {
   /** original error from which this ChainError was composed */
   public originalError: Error
 
-  constructor(errorType: ChainErrorType, message: string, json: any, originalError: Error) {
+  constructor(errorType: ChainErrorType, message: string, json?: any, originalError?: Error) {
     super(message)
     this.json = json
     this.originalError = originalError
