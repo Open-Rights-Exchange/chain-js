@@ -130,7 +130,7 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
   assetUnitName?: string
   assetName?: string
   assetURL?: string
-  assetMetadataHash?: string
+  assetMetadataHash?: string | Uint8Array
   freezeAccount?: AlgorandAddress
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddress
@@ -155,3 +155,7 @@ type AlgorandTxActionSharedFields = AlgorandTxHeaderParams & {
 export type AlgorandTransactionResources = {
   bytes: number
 }
+
+// TODO: implement mapper to map this class to one of our Transaction types - this type is a class and has methods, etc.
+/** algoSdk.transaction object */
+export type AlgorandTransactionBuilder = any
