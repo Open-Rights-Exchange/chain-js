@@ -17,6 +17,7 @@ import {
   PublicKey,
   Signature,
   TransactionOptions,
+  TransactionStatus,
 } from '../models'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
@@ -69,6 +70,9 @@ export interface Chain {
     /** Return a chain Transaction object used to compose and send transactions */
     Transaction(options?: TransactionOptions): Promise<Transaction>
   }
+
+  // Transaction functions
+  fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }>
 
   // Chain Crypto functions
   /** Primary cryptography curve used by this chain */
