@@ -737,7 +737,9 @@ export class AlgorandTransaction implements Transaction {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
   }
 
-  // Fees
+  public get supportsCancel() {
+    return false
+  }
 
   public get supportsFee() {
     return true

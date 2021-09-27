@@ -489,7 +489,10 @@ export class EthereumTransaction implements Transaction {
     return missingSignatures
   }
 
-  // Fees
+  /** A transction in the pending pool can be cancelled */
+  public get supportsCancel() {
+    return true
+  }
 
   /** Ethereum has a fee for transactions */
   public get supportsFee(): boolean {

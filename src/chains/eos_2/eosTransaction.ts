@@ -564,7 +564,9 @@ export class EosTransaction implements Transaction {
     throw Error('Missing or malformed rawTransaction (rawToUint8Array)')
   }
 
-  // Fees
+  public get supportsCancel() {
+    return false
+  }
 
   public get supportsFee() {
     return false
