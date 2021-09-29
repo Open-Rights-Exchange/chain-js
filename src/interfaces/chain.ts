@@ -130,13 +130,15 @@ export interface Chain {
   isValidPublicKey(value: string | Buffer): boolean
   /** Generate a signature given some data and a private key */
   sign(data: string | Buffer, privateKey: PrivateKey): any
-  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
   /** Signs data as a message using private key (first appending additional required data if any) */
   signMessage(data: string | Buffer, privateKey: PrivateKey): any
+  /** Whether chain supports ability to get a publicKey from a signature */
+  supportsGetPublicKeyFromSignature: boolean
   /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
    * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
   verifySignedMessage(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+  verifySignedWithPublicKey(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
 
   // Chain Helper functions
 
