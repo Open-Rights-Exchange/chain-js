@@ -12,6 +12,7 @@ export const DefaultChainErrorRegExs: { [key: string]: string } = {
   BlockDoesNotExist: '(does not exist|header for hash not found|neither block nor hash specified)',
   DataReadFailedKeyDoesNotExist: 'not found',
   TxExceededResources: '(insufficient funds|insufficient balance)', // insufficient funds for gas * price + value
+  TxNotFoundOnChain: 'Transaction Not Found',
   // catch-all errors for a category
   MiscTransactionError:
     '(gas limit|nonce too high|nonce too low|already known|invalid sender|transaction underpriced|gas too low|negative value|oversized data|txdata|for signer|execution timeout)',

@@ -10,6 +10,7 @@ import {
   PublicKey,
   Signature,
   TransactionOptions,
+  TransactionStatus,
 } from '../../models'
 import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS } from './eosConstants'
 import { Chain } from '../../interfaces'
@@ -46,6 +47,7 @@ import {
   EosDecomposeReturn,
   EosChainEndpoint,
   EosSymbol,
+  EosTransactionHistory,
 } from './models'
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
@@ -187,6 +189,14 @@ class ChainEosV2 implements Chain {
     CreateAccount: this.newCreateAccount.bind(this),
     /** Return a chain Transaction object used to compose and send transactions */
     Transaction: this.newTransaction.bind(this),
+  }
+
+  // --------- Transaction functions */
+  /** Return an exectued or pending transaction and status */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: EosTransactionHistory }> {
+    return this._chainState.fetchTransaction(transactionId)
   }
 
   // --------- Chain crytography functions */

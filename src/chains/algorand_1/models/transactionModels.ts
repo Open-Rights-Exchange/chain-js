@@ -159,3 +159,39 @@ export type AlgorandTransactionResources = {
 // TODO: implement mapper to map this class to one of our Transaction types - this type is a class and has methods, etc.
 /** algoSdk.transaction object */
 export type AlgorandTransactionBuilder = any
+
+// TODO: Finish this type - it is partially complete - The TransactionResponse type (which inclides this txn) is here: https://github.com/algorand/indexer/blob/e90c76581e1c36e0ed544b564591668e0f0342a7/api/indexer.oas2.json#L2355
+/** Algorand Tx Fields for a transction that has retrieved from the chain
+ *  Includes optional fields related to actual cost, final block, etc.
+ */
+export type AlgorandTxFromChain = AlgorandTxHeaderParams & {
+  closeRewards: number
+  closingAmount: number
+  confirmedRound: number // if confirmed
+  fee: number
+  firstValid?: number
+  genesisID: string
+  genesisHash: string
+  group?: string
+  id: string // Transaction ID
+  intraRoundOffset?: number
+  lastValid?: number
+  paymentTransaction?: {
+    amount: number
+    closeAmount: number
+    receiver: AlgorandAddress
+  }
+  receiverRewards: number
+  roundTime: number // uint64
+  sender: AlgorandAddress
+  senderRewards: number
+  // signature: {
+  //   logicsig: {
+  //     args: [],
+  //     logic: "BC"
+  //   },
+  //   multisig: ,
+  //   sig: ,
+  // }
+  txType: string
+}

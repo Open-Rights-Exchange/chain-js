@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Transaction } from 'web3-eth'
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
+import {
+  ChainActionType,
+  ChainDate,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  CryptoCurve,
+  TransactionStatus,
+} from '../../models'
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
 import { composeAction } from './ethCompose'
@@ -175,6 +184,17 @@ class ChainEthereumV1 implements Chain {
     Account: this.newAccount,
     CreateAccount: this.newCreateAccount,
     Transaction: this.newTransaction,
+  }
+
+  // --------- Transaction functions */
+  /** Gets an executed or pending transaction and its status
+   * A transaction that has been added to the transction pool but not yet exectured will have a status of Pending
+   * Until the transaction is added to the TX pool, this function will throw a TxNotFoundOnChain chain error
+   */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: Transaction }> {
+    return this._chainState.fetchTransaction(transactionId)
   }
 
   // --------- Chain crytography functions */

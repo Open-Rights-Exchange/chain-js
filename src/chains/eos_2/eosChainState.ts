@@ -2,13 +2,20 @@ import { Api, JsonRpc, RpcInterfaces } from 'eosjs'
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig' // development only
 import nodeFetch, { Headers as NodeFetchHeaders } from 'node-fetch' // node only; not needed in browsers
 import { TextEncoder, TextDecoder } from 'util' // for node only; native TextEncoder/Decoder
-import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
+import {
+  ChainError,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
+  throwAndLogError,
+  throwNewError,
+} from '../../errors'
 import {
   ChainInfo,
   ConfirmType,
   ChainErrorType,
   ChainErrorDetailCode,
   ChainSettingsCommunicationSettings,
+  TransactionStatus,
 } from '../../models'
 import { fetchWrapper, trimTrailingChars, isAString, isNullOrEmpty, arrayToObject } from '../../helpers'
 import {
@@ -19,6 +26,8 @@ import {
   EosTxResult,
   EosChainEndpoint,
   EosSymbol,
+  EosTransactionHistory,
+  EosTransactionHistoryStatus,
 } from './models'
 import { ChainState } from '../../interfaces/chainState'
 import { mapChainError } from './eosErrors'
@@ -526,6 +535,30 @@ export class EosChainState implements ChainState {
       default:
         return false
     }
+  }
+
+  /** Return transaction from chain by TxId
+   * IMPORTANT: This requires that the chain endpoint is running the depricated history plugin - likley to fail */
+  async getTransactionHistoryById(id: string, blockHint: number): Promise<EosTransactionHistory> {
+    const transaction = await this.eosjs.jsonRpc.history_get_transaction(id, blockHint)
+    return transaction
+  }
+
+  /** Gets an executed or pending transaction (by transaction hash) */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: EosTransactionHistory }> {
+    const txHistory = await this.getTransactionHistoryById(transactionId, null)
+    if (!txHistory) throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found')
+    let status: TransactionStatus
+    if (txHistory.receipt.status === EosTransactionHistoryStatus.Executed) {
+      status = TransactionStatus.Executed
+    } else if (txHistory.receipt.status === EosTransactionHistoryStatus.Delayed) {
+      status = TransactionStatus.Pending
+    } else {
+      status = TransactionStatus.Dead
+    }
+    return { status, transaction: txHistory }
   }
 
   /** Access to underlying eosjs sdk

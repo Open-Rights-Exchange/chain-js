@@ -4,7 +4,7 @@ import { bufferToInt, bufferToHex, BN } from 'ethereumjs-util'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -23,7 +23,7 @@ import {
   EthUnit,
   EthereumSignatureNative,
 } from './models'
-import { throwNewError } from '../../errors'
+import { ChainError, throwNewError } from '../../errors'
 import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
@@ -489,7 +489,10 @@ export class EthereumTransaction implements Transaction {
     return missingSignatures
   }
 
-  // Fees
+  /** A transction in the pending pool can be cancelled */
+  public get supportsCancel() {
+    return true
+  }
 
   /** Ethereum has a fee for transactions */
   public get supportsFee(): boolean {
@@ -593,11 +596,15 @@ export class EthereumTransaction implements Transaction {
     if (!isNullOrEmptyEthereumValue(this._actualCost)) {
       return this._actualCost
     }
-    const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
-    if (!transaction?.gasUsed) {
-      throw new Error('Cant retrieve actual cost - Transaction not found on chain')
+    const transaction = await this._chainState.getExecutedTransactionById(this.transactionId)
+    if (!transaction) {
+      throw new ChainError(
+        ChainErrorType.TxNotFoundOnChain,
+        'Cant retrieve actual cost - Transaction not found on chain',
+      )
     }
-    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
+
+    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed || 0).toString(10)
     return convertEthUnit(this._actualCost, EthUnit.Wei, EthUnit.Ether)
   }
 

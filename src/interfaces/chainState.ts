@@ -6,6 +6,7 @@ import {
   ChainSettingsCommunicationSettings,
   ChainSymbol,
   ConfirmType,
+  TransactionStatus,
 } from '../models'
 
 /** The ChainState interface declares the operations that all concrete chainState classes must implement */
@@ -77,4 +78,6 @@ export interface ChainState {
     waitForConfirm: ConfirmType,
     communicationSettings?: ChainSettingsCommunicationSettings,
   ): Promise<any>
+
+  fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }>
 }

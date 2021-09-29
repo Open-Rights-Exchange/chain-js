@@ -17,6 +17,7 @@ export enum ChainErrorType {
   TokenBalanceTooLow = 'TokenBalanceTooLow',
   TxConfirmFailure = 'TxConfirmFailure',
   TxExceededResources = 'TxExceededResources',
+  TxFeeTooLow = 'TxFeeTooLow',
   TxNotFoundOnChain = 'TxNotFoundOnChain',
   MiscChainError = 'MiscChainError',
   MiscBlockValidationError = 'MiscBlockValidationError',

@@ -35,3 +35,10 @@ export enum ConfirmType {
   /** After final block */
   Final = 999999,
 }
+
+/** Transaction fee priority */
+export enum TransactionStatus {
+  Executed = 'executed',
+  Dead = 'dead',
+  Pending = 'pending',
+}
