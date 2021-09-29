@@ -277,14 +277,17 @@ class ChainEosV2 implements Chain {
   /** Generate a signature given some data and a private key */
   sign = eoscrypto.sign
 
-  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
-
   /** Signs data as a message using private key (Eos does not append additional fields for a message) */
   signMessage = eoscrypto.signMessage
 
+  /** Whether chain supports ability to get a publicKey from a signature */
+  supportsGetPublicKeyFromSignature = true
+
   /** Verify that a 'personal message' was signed using the given key (Eos does not append additional fields for a message) */
   verifySignedMessage = eoscrypto.verifySignedMessage
+
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+  verifySignedWithPublicKey = eoscrypto.verifySignedWithPublicKey
 
   // --------- Chain helper functions
 

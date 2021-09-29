@@ -1,4 +1,4 @@
-import { assertPluginTypeNotAlreadyInstalled, initializePlugin, notImplemented } from '../../helpers'
+import { assertPluginTypeNotAlreadyInstalled, initializePlugin, notImplemented, notSupported } from '../../helpers'
 import { ChainType, ChainActionType, ChainEntityName, CryptoCurve, TransactionStatus } from '../../models'
 import { throwNewError } from '../../errors'
 import { Chain } from '../../interfaces'
@@ -173,7 +173,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
-    notImplemented()
+    notSupported('public key cannot be determined from a signature for Algorand chain (ED25519 curve)')
   }
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
@@ -206,14 +206,17 @@ class ChainAlgorandV1 implements Chain {
   /** Generate a signature given some data and a private key */
   sign = algoCrypto.sign
 
-  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey = algoCrypto.verifySignedWithPublicKey
-
   /** Signs data as a message using private key (Algorand does not append additional fields for a message) */
   signMessage = algoCrypto.signMessage
 
+  /** Whether chain supports ability to get a publicKey from a signature */
+  supportsGetPublicKeyFromSignature = false
+
   /** Verify that a 'personal message' was signed using the given key (Algorand does not append additional fields for a message) */
   verifySignedMessage = algoCrypto.verifySignedMessage
+
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+  verifySignedWithPublicKey = algoCrypto.verifySignedWithPublicKey
 
   // --------- Chain helper functions
 
