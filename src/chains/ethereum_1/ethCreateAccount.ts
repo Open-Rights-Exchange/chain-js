@@ -11,6 +11,7 @@ import {
   EthereumGeneratedKeys,
   EthereumNewAccountType,
   EthereumPublicKey,
+  EthereumTransactionOptions,
 } from './models'
 import { EthereumMultisigPluginCreateAccount } from './plugins/multisig/ethereumMultisigPlugin'
 import { EthereumTransaction } from './ethTransaction'
@@ -147,11 +148,15 @@ export class EthereumCreateAccount implements CreateAccount {
    * Ethereum may only require a create account transaction to be sent
    * If creating multisig account
    */
-  async composeTransaction(): Promise<void> {
+  async composeTransaction(
+    /** Account Type is not required for Ethereum */
+    _accountType?: EthereumNewAccountType, // we don't need a value here - we inlcude _accountType here to implement the interface
+    transactionOptions?: EthereumTransactionOptions<any>,
+  ): Promise<void> {
     if (this.isMultisig) {
       this.assertMultisigPluginIsInitialized()
       const multisigTransactionAction = this.multisigCreateAccount.transactionAction
-      const newTransaction = new EthereumTransaction(this._chainState)
+      const newTransaction = new EthereumTransaction(this._chainState, transactionOptions)
       newTransaction.actions = [multisigTransactionAction]
       await newTransaction.prepareToBeSigned()
       await newTransaction.validate()

@@ -40,7 +40,7 @@ Chains plug-ins included: **Algorand**, **EOS**, **Ethereum (V1)** - more coming
   // get an account creator class
   const accntCreator = await eosChain.new.CreateAccount()
   // generate the transaction to create an on-chain account
-  await accntCreator.composeTransaction(AccountType.Native, accountOptions)
+  await accntCreator.composeTransaction(AccountType.Native)
   // sign and send the transaction to the chain
   await accntCreator.transaction.sign([{myPrivateKeys}])
   accntCreator.transaction.send()
