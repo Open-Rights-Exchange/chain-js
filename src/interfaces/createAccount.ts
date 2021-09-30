@@ -1,5 +1,5 @@
 import { Transaction } from './transaction'
-import { NewAccountType, CreateAccountOptions, ChainEntityName } from '../models'
+import { NewAccountType, CreateAccountOptions, ChainEntityName, TransactionOptions } from '../models'
 
 /**
  * The CreateAccount interface declares the operations that all concrete (chain)CreateAccount classes must implement
@@ -24,7 +24,7 @@ export interface CreateAccount {
    *  This should be signed and sent to the chain to create the account */
   transaction: Transaction
   /** Compose a transaction to send to the chain to create a new account */
-  composeTransaction(accountType: NewAccountType | any): Promise<void>
+  composeTransaction(accountType: NewAccountType | any, transactionOptions?: TransactionOptions): Promise<void>
   /** Determine if desired account name is usable for a new account.
    *  Generates a new account name if one isnt provided.
    *  If account is unused (active key = unusedAccountPublicKey) then returns canRecycle = true */
