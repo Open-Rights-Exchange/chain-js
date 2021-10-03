@@ -529,7 +529,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   public get signBuffer(): Buffer {
-    this.assertIsValidated()
+    // this.assertIsValidated()
     // uses Algo SDK Transaction object
     return this._algoSdkTransaction?.bytesToSign()
   }
