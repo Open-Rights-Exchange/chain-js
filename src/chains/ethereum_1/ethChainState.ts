@@ -39,7 +39,7 @@ import {
   DEFAULT_GET_BLOCK_ATTEMPTS,
   NATIVE_CHAIN_TOKEN_SYMBOL,
 } from './ethConstants'
-import { assertIsValidTransactionId } from './helpers'
+import { assertIsValidTransactionId, toGweiFromWei } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -190,6 +190,11 @@ export class EthereumChainState implements ChainState {
       const chainError = mapChainError(error, ChainFunctionCategory.ChainState)
       throw chainError
     }
+  }
+
+  /** return (string) of the last retrieved gas price - rounded up to GWEI */
+  public get currentGasPriceInGwei(): string {
+    return Math.round(toGweiFromWei(new BN(this.chainInfo.nativeInfo.currentGasPrice))).toString()
   }
 
   /** Confirm that we've connected to the chain - throw if not */

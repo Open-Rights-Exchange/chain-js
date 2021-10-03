@@ -268,9 +268,7 @@ export class EthereumTransaction implements Transaction {
 
     // Convert gas price returned from getGasPrice to Gwei
     const gasPrice =
-      nullifyIfEmpty(gasPriceAction) ||
-      nullifyIfEmpty(gasPriceOptions) ||
-      Math.round(toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))).toString() // round up to nearest integer in GWEI
+      nullifyIfEmpty(gasPriceAction) || nullifyIfEmpty(gasPriceOptions) || this._chainState.currentGasPriceInGwei
     const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
     const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
     // update action helper with updated nonce and gas values
