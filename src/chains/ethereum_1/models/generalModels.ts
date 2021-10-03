@@ -76,9 +76,9 @@ export type EthereumChainEndpoint = {
 }
 
 export type EthereumChainSettingsCommunicationSettings = {
-  blocksToCheck: number
-  checkInterval: number
-  getBlockAttempts: number
+  blocksToCheck?: number
+  checkInterval?: number
+  getBlockAttempts?: number
 }
 
 export type EthereumBlockNumber = string | number | BN | BigNumber | EthereumBlockType
