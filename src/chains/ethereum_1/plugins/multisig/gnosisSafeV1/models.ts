@@ -21,12 +21,17 @@ export type EthereumGnosisMultisigCreateAccountOptions = {
 export type EthereumGnosisMultisigTransactionOptions = {
   multisigAddress: EthereumAddress
   operation?: number
-  refundReceiver?: EthereumAddress
-  safeTxGas?: number | string
-  baseGas?: number | string
-  gasPrice?: number | string
-  gasToken?: EthereumAddress
   nonce?: number
+  /** specifies a (non-eth) custom token used to pay gas */
+  gasToken?: EthereumAddress
+  /** Only used if gasToken is set */
+  refundReceiver?: EthereumAddress
+  /** Only used if gasToken is set */
+  safeTxGas?: number | string
+  /** Only used if gasToken is set */
+  baseGas?: number | string
+  /** Only used if gasToken is set */
+  gasPrice?: number | string
 }
 
 /** Ethereum action will be called automatically as proxy multisig contract is created
