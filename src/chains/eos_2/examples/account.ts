@@ -147,7 +147,7 @@ export const createAccountOptions_EosNative = {
     salt: env.EOS_KYLIN_PK_SALT_V0, // kylin
   },
   publicKeys: {
-    owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
+    // owner: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
     // active: 'EOS5TjGeH12cqxKrXExiQohiVZo8utowncv7Qg4FbFUhbwVNgUbKs',
   },
   resourcesOptions: {

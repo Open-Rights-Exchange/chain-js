@@ -50,8 +50,7 @@ async function run() {
     'fc774182bd250473e856cdb993f8f8390c7a5584c30efeffa75e956d37bb13f3a9742a7b9ac9e23d14753a7fbe754e8e5096257892d2327c1e32979b92ae1cb6',
   )
 
-  const message1 =
-    'example private key-7dd9c3224748f35f32a0a405a858bcc4608483c2759a796611f77420bbdeaa07b03509d6006fc6536353f30bc60a89ef7f15fc0275908019697098f1172b04f0'
+  const message1 = `example payload to encrypt ${new Date().getTime()}`
 
   const encryptedBlob1 = await algoTest.encryptWithPublicKey(message1, publicKey1)
   console.log('encryptedBlob1:', encryptedBlob1)

@@ -40,7 +40,8 @@ require('dotenv').config()
 
     const transaction = await ropsten.new.Transaction(transactionOptions)
 
-    transaction.actions = [sampleAction]
+    await transaction.setTransaction(sampleAction)
+    // transaction.actions = [sampleAction]
 
     await transaction.prepareToBeSigned()
     await transaction.validate()
