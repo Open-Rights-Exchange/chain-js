@@ -100,7 +100,7 @@ const { env } = process
       value: '20',
     }
 
-    const composeERC721TransferFromParams: Erc721TransferFromParams = {
+    const composeERC721SafeTransferFromParams: Erc721TransferFromParams = {
       contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
       transferFrom: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
       to: toEthereumAddress('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
@@ -144,6 +144,24 @@ const { env } = process
     //   'token value converted back using precision:',
     //   fromTokenValueString(decomposed[0]?.args?.amount, 10, composeTokenTransferParams?.precision),
     // )
+    // await transaction.prepareToBeSigned()
+    // await transaction.validate()
+    // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
+    // console.log('missing signatures: ', transaction.missingSignatures)
+    // console.log('send response:', JSON.stringify(await transaction.send()))
+
+    // ---> Sign and send erc721 transfer Transaction
+    // const transaction = await ropsten.new.Transaction(ropstenChainOptions)
+    // const action = await ropsten.composeAction(
+    //   EthereumChainActionType.ERC721SafeTransferFrom,
+    //   composeERC721SafeTransferFromParams,
+    // )
+    // transaction.actions = [action]
+    // // extract out the transaction object sent to the eth chain
+    // const { contract, ...actionSentToEthChain } = transaction.actions[0]
+    // console.log('actionSentToEthChain:', actionSentToEthChain)
+    // const fee = await transaction.getSuggestedFee(TxExecutionPriority.Fast)
+    // await transaction.setDesiredFee(fee)
     // await transaction.prepareToBeSigned()
     // await transaction.validate()
     // await transaction.sign([toEthereumPrivateKey(env.ROPSTEN_erc20acc_PRIVATE_KEY)])
