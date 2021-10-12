@@ -23,6 +23,12 @@ export const ropstenEndpoints: EthereumChainEndpoint[] = [
     url: 'https://ropsten.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
   },
 ]
+// main net
+export const mainnetEndpoints: EthereumChainEndpoint[] = [
+  {
+    url: 'https://mainnet.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
+  },
+]
 export const ropstenChainOptions: EthereumChainSettings = {
   chainForkType: {
     chainName: 'ropsten',
