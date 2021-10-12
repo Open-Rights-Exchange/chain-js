@@ -288,17 +288,17 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
-  async setTransaction(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
+  async setTransaction(transaction: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (this.isMultisig) {
       this.assertMultisigPluginIsInitialized()
-      await this.multisigTransaction.setTransaction(raw)
+      await this.multisigTransaction.setTransaction(transaction)
       await this.updateMultisigParentTransaction()
     }
-    if (raw) {
+    if (transaction) {
       const trxOptions = this.getOptionsForEthereumJsTx()
-      this._actionHelper = new EthereumActionHelper(raw, trxOptions)
+      this._actionHelper = new EthereumActionHelper(transaction, trxOptions)
       this.setRawProperties()
       this._isValidated = false
     }
@@ -567,6 +567,7 @@ export class EthereumTransaction implements Transaction {
     try {
       this.assertNoSignatures()
       this.assertHasAction()
+      // TODO: Consider whether this should set the fees using the gasPriceOverride, gasLimitOverride if they exist
       // clear fees by passing in null
       if (!desiredFee) {
         this._desiredFee = null
