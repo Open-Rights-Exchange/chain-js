@@ -237,7 +237,7 @@ export class AlgorandTransaction implements Transaction {
       this._algoSdkTransaction = null
     } else {
       const chainTxHeaderParams = this._chainState.chainInfo.nativeInfo.transactionHeaderParams
-      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
+      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams, this.options)
       this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk as any)
     }
   }
