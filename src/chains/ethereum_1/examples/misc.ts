@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
@@ -9,6 +9,7 @@ import { ChainEndpoint } from '../../../models/generalModels'
 import { toEthereumPrivateKey, toEthereumPublicKey, toEthereumSymbol } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import { ropstenEndpoints } from './helpers/networks'
+import { ChainError } from '../../../errors'
 
 require('dotenv').config()
 
@@ -59,7 +60,12 @@ export const { env } = process
         '0x9699f68bebf4b360d9a529523d7d6d23b6f52d44',
       ),
     )
+
+    const txResponse = await ropsten.fetchTransaction('0xd44ae935d82cda6aeffb5c7d85aaf64e5b3e57e5149068b7ae5ec4080032e112')
+    console.log('txResponse for txId:', txResponse)
+
   } catch (error) {
-    console.log(error)
+    const chainError = (error as ChainError)
+    console.log(`Chain Error Type: ${chainError.errorType} error:`, error)
   }
 })()

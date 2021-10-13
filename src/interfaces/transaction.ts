@@ -50,7 +50,9 @@ export interface Transaction {
   /** The transaction data needed to create a transaction signature.
    *  It should be signed with a private key. */
   signBuffer: any
-  /** Does the chain support fees for transactions */
+  /** Whether the chain allow a pending transaction to be cancelled */
+  supportsCancel: boolean
+  /** Whether the chain uses fees for transactions */
   supportsFee: boolean
   /** Whether the chain supports signing a transactions using a multi-signature account */
   supportsMultisigTransaction: boolean

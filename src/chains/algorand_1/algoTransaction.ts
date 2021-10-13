@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as algosdk from 'algosdk'
-import { Transaction as AlgoTransactionClass } from 'algosdk'
+import { Transaction as AlgoTransactionClass, TransactionLike } from 'algosdk'
 import { Transaction } from '../../interfaces'
 import { ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import { mapChainError } from './algoErrors'
@@ -193,7 +193,7 @@ export class AlgorandTransaction implements Transaction {
   ): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
-    const decodedTransaction = isAUint8Array(transaction) ? algosdk.decodeObj(transaction) : transaction
+    const decodedTransaction = isAUint8Array(transaction) ? (algosdk.decodeObj(transaction as any) as any) : transaction
     // if we have a txn property, then we have a 'raw' tx value, so set raw props
     if (decodedTransaction?.txn) {
       this.setRawTransactionFromSignResults({ txID: null, blob: algosdk.encodeObj(decodedTransaction) })
@@ -237,8 +237,8 @@ export class AlgorandTransaction implements Transaction {
       this._algoSdkTransaction = null
     } else {
       const chainTxHeaderParams = this._chainState.chainInfo.nativeInfo.transactionHeaderParams
-      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams)
-      this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk)
+      this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams, this.options)
+      this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk as any)
     }
   }
 
@@ -529,7 +529,7 @@ export class AlgorandTransaction implements Transaction {
   }
 
   public get signBuffer(): Buffer {
-    this.assertIsValidated()
+    // this.assertIsValidated()
     // uses Algo SDK Transaction object
     return this._algoSdkTransaction?.bytesToSign()
   }
@@ -552,7 +552,7 @@ export class AlgorandTransaction implements Transaction {
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
       const signResults: AlgorandTxSignResults = algosdk.signTransaction(
-        this._actionHelper.actionEncodedForSdk,
+        this._actionHelper.actionEncodedForSdk as TransactionLike,
         privateKey,
       )
       this.setRawTransactionFromSignResults(signResults)
@@ -586,7 +586,7 @@ export class AlgorandTransaction implements Transaction {
         )
       }
       const signResults: AlgorandTxSignResults = algosdk.signMultisigTransaction(
-        action,
+        action as TransactionLike,
         this.multiSigOptions,
         privateKey,
       )
@@ -737,7 +737,9 @@ export class AlgorandTransaction implements Transaction {
     return { header: this.header, actions: this.actions, raw: this.raw, signatures: this.signatures }
   }
 
-  // Fees
+  public get supportsCancel() {
+    return false
+  }
 
   public get supportsFee() {
     return true
@@ -781,16 +783,7 @@ export class AlgorandTransaction implements Transaction {
   /** Returns the actual cost of executing the transaction in units of Algos (expressed as a string)
    * Throws if transaction not found on-chain */
   public async getActualCost(): Promise<string> {
-    try {
-      const trx = await this._chainState.getTransactionById(this.transactionId)
-      return trx ? microToAlgoString(trx?.fee) : null
-    } catch (error) {
-      const chainError = mapChainError(error)
-      if (chainError?.errorType === ChainErrorType.TxNotFoundOnChain) {
-        throw new Error('Cant retrieve actual cost - Transaction not found on chain')
-      } else {
-        throw error
-      }
-    }
+    const trx = await this._chainState.getTransactionById(this.transactionId)
+    return trx ? microToAlgoString(trx?.fee) : null
   }
 }

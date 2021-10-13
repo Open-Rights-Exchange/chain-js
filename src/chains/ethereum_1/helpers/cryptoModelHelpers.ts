@@ -19,6 +19,7 @@ import {
   toChainEntityName,
   toHexStringIfNeeded,
   tryParseJSON,
+  hasHexPrefix,
 } from '../../../helpers'
 import {
   EthereumSignature,
@@ -97,11 +98,25 @@ export function isValidEthereumSignature(
   return isValidEthereumSignatureNative(value)
 }
 
-// For a given private key, pr, the Ethereum address A(pr) (a 160-bit value) is defined as the right most 160-bits of the Keccak hash of the corresponding ECDSA public key.
+/** whether value is an Ethereum address */
 export function isValidEthereumAddress(value: string | Buffer | EthereumAddress): boolean {
   if (!value) return false
   if (typeof value === 'string') return isValidAddress(value)
   return true
+}
+
+/** whether value is an Ethereum TxId (Hash) */
+export function isValidEthereumTxId(value: string | Buffer | EthereumAddress): boolean {
+  if (!value || !hasHexPrefix(value)) return false
+  const buffer = toEthBuffer(value)
+  return buffer.length === 32
+}
+
+/** throws error if value is not a valid transactionId */
+export function assertIsValidTransactionId(value: any) {
+  if (!isValidEthereumTxId(value)) {
+    throw new Error(`Not valid ethereum transactionId:${value && JSON.stringify(value)}.`)
+  }
 }
 
 /** Accepts hex string checks if a valid ethereum data hex

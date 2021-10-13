@@ -4,7 +4,7 @@ import { bufferToInt, bufferToHex, BN } from 'ethereumjs-util'
 import { TRANSACTION_FEE_PRIORITY_MULTIPLIERS } from './ethConstants'
 import { EthereumChainState } from './ethChainState'
 import { Transaction } from '../../interfaces'
-import { ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
+import { ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType, TxExecutionPriority } from '../../models'
 import {
   EthereumPrivateKey,
   EthereumRawTransaction,
@@ -23,7 +23,7 @@ import {
   EthUnit,
   EthereumSignatureNative,
 } from './models'
-import { throwNewError } from '../../errors'
+import { ChainError, throwNewError } from '../../errors'
 import { ensureHexPrefix, isArrayLengthOne, isNullOrEmpty, nullifyIfEmpty } from '../../helpers'
 import {
   convertBufferToHexStringIfNeeded,
@@ -268,9 +268,7 @@ export class EthereumTransaction implements Transaction {
 
     // Convert gas price returned from getGasPrice to Gwei
     const gasPrice =
-      nullifyIfEmpty(gasPriceAction) ||
-      nullifyIfEmpty(gasPriceOptions) ||
-      Math.round(toGweiFromWei(new BN(this._chainState.chainInfo.nativeInfo.currentGasPrice))).toString() // round up to nearest integer in GWEI
+      nullifyIfEmpty(gasPriceAction) || nullifyIfEmpty(gasPriceOptions) || this._chainState.currentGasPriceInGwei
     const gasLimit = nullifyIfEmpty(gasLimitAction) || nullifyIfEmpty(gasLimitOptions)
     const nonce = nullifyIfEmpty(nonceAction) || nullifyIfEmpty(nonceOptions)
     // update action helper with updated nonce and gas values
@@ -290,17 +288,17 @@ export class EthereumTransaction implements Transaction {
   }
 
   /** Set the body of the transaction using Hex raw transaction data */
-  async setTransaction(raw: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
+  async setTransaction(transaction: EthereumActionHelperInput | EthereumMultisigPluginRawTransaction): Promise<void> {
     this.assertIsConnected()
     this.assertNoSignatures()
     if (this.isMultisig) {
       this.assertMultisigPluginIsInitialized()
-      await this.multisigTransaction.setTransaction(raw)
+      await this.multisigTransaction.setTransaction(transaction)
       await this.updateMultisigParentTransaction()
     }
-    if (raw) {
+    if (transaction) {
       const trxOptions = this.getOptionsForEthereumJsTx()
-      this._actionHelper = new EthereumActionHelper(raw, trxOptions)
+      this._actionHelper = new EthereumActionHelper(transaction, trxOptions)
       this.setRawProperties()
       this._isValidated = false
     }
@@ -312,10 +310,14 @@ export class EthereumTransaction implements Transaction {
   public async prepareToBeSigned(): Promise<void> {
     this.assertIsConnected()
     this.assertHasAction()
-    // set gasLimit if not already set, set it using the execution Priority specified for this transaction
-    if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
-      const gasFee = await this.getSuggestedFee(this._executionPriority)
-      await this.setDesiredFee(gasFee)
+
+    if (!this.requiresParentTransaction) {
+      // set gasLimit if not already set, set it using the execution Priority specified for this transaction
+      // NOTE: we don't set fees here if we'll have a parent trnsaction. That will happen when the parent tx is set
+      if (isNullOrEmptyEthereumValue(this._actionHelper.action.gasLimit)) {
+        const gasFee = await this.getSuggestedFee(this._executionPriority)
+        await this.setDesiredFee(gasFee)
+      }
     }
     if (this.isMultisig) {
       this.assertMultisigPluginIsInitialized()
@@ -350,10 +352,13 @@ export class EthereumTransaction implements Transaction {
       this.multisigTransaction.validate()
     } else {
       const { gasPrice, gasLimit } = this.ethereumJsTx
-      if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
-        throwNewError(
-          'Transaction validation failure. Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
-        )
+      // if we have a parent Tx, it should have fees set, not this 'child' tx
+      if (!this.requiresParentTransaction) {
+        if (isNullOrEmptyEthereumValue(gasPrice) || isNullOrEmptyEthereumValue(gasLimit)) {
+          throwNewError(
+            'Transaction validation failure. Missing gasPrice or gasLimit. Call prepareToBeSigned() to auto-set.',
+          )
+        }
       }
     }
     // make sure the from address is a valid Eth address
@@ -489,7 +494,10 @@ export class EthereumTransaction implements Transaction {
     return missingSignatures
   }
 
-  // Fees
+  /** A transction in the pending pool can be cancelled */
+  public get supportsCancel() {
+    return true
+  }
 
   /** Ethereum has a fee for transactions */
   public get supportsFee(): boolean {
@@ -531,6 +539,8 @@ export class EthereumTransaction implements Transaction {
   /** Get the suggested Eth fee (in Ether) for this transaction */
   public async getSuggestedFee(priority: TxExecutionPriority = TxExecutionPriority.Average): Promise<string> {
     try {
+      // fees for 'child' transaction are always null (if we set here, this value will be used instead of re-caclulating for parent)
+      if (this.requiresParentTransaction) return null
       this.assertHasAction()
       const gasPriceString = await this._chainState.getCurrentGasPriceFromChain()
       let gasPriceinWeiBN = new BN(gasPriceString)
@@ -546,6 +556,7 @@ export class EthereumTransaction implements Transaction {
 
   /** get the desired fee (in Ether) to spend on sending the transaction */
   public async getDesiredFee(): Promise<string> {
+    if (!this._desiredFee) return null
     return convertEthUnit(this._desiredFee, EthUnit.Wei, EthUnit.Ether)
   }
 
@@ -556,6 +567,14 @@ export class EthereumTransaction implements Transaction {
     try {
       this.assertNoSignatures()
       this.assertHasAction()
+      // TODO: Consider whether this should set the fees using the gasPriceOverride, gasLimitOverride if they exist
+      // clear fees by passing in null
+      if (!desiredFee) {
+        this._desiredFee = null
+        this._actionHelper.gasPrice = null
+        this._actionHelper.gasLimit = null
+        return
+      }
       const { gasLimitOverride, gasPriceOverride } = options || {}
       const desiredFeeWei = toWeiString(desiredFee, EthUnit.Ether)
       const gasRequired = new BN((await this.resourcesRequired())?.gas, 10)
@@ -593,11 +612,15 @@ export class EthereumTransaction implements Transaction {
     if (!isNullOrEmptyEthereumValue(this._actualCost)) {
       return this._actualCost
     }
-    const transaction = await this._chainState.web3.eth.getTransactionReceipt(this.transactionId)
-    if (!transaction?.gasUsed) {
-      throw new Error('Cant retrieve actual cost - Transaction not found on chain')
+    const transaction = await this._chainState.getExecutedTransactionById(this.transactionId)
+    if (!transaction) {
+      throw new ChainError(
+        ChainErrorType.TxNotFoundOnChain,
+        'Cant retrieve actual cost - Transaction not found on chain',
+      )
     }
-    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed).toString(10)
+
+    this._actualCost = (parseInt(this.action.gasPrice, 16) * transaction?.gasUsed || 0).toString(10)
     return convertEthUnit(this._actualCost, EthUnit.Wei, EthUnit.Ether)
   }
 
@@ -758,6 +781,7 @@ export class EthereumTransaction implements Transaction {
     }
     this._parentTransaction = new EthereumTransaction(this._chainState, txOptions, null)
     await this._parentTransaction.setTransaction(rawParent)
+    await this._parentTransaction.prepareToBeSigned()
     await this._parentTransaction.validate()
   }
 

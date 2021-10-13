@@ -11,9 +11,12 @@ export type AlgorandProducerParticipationStruct = {
 
 /** Algorand assets held by an Algorand account */
 export type AlgorandAssetStruct = {
-  creator?: string
   amount: number
-  frozen: boolean
+  'asset-id': number
+  creator?: string
+  deleted?: boolean
+  'is-frozen': boolean
+  'opted-in-at-round': number
 }
 
 /** Algorand asset information stored on the chain */
@@ -36,14 +39,20 @@ export type AlgorandAssetParamsStruct = {
 export type AlgorandAccountStruct = {
   address: AlgorandAddress
   amount?: number
-  Amountwithoutpendingrewards?: number
-  assets?: Map<string, AlgorandAssetStruct>
-  participation?: AlgorandProducerParticipationStruct
-  pendingrewards?: number
+  'amount-without-pending-rewards'?: number
+  'apps-local-state'?: any // Todo: Type this
+  'apps-total-schema'?: any // Todo: Type this
+  assets?: AlgorandAssetStruct[]
+  'created-apps'?: any // Todo: Type this
+  'created-assets'?: any // Todo: Type this
+  'created-at-round'?: number
+  deleted?: boolean
+  'pending-rewards'?: number
+  'reward-base'?: number
   rewards?: number
   round?: number
+  'sig-type'?: string
   status?: string
-  thisassettotal?: Map<string, AlgorandAssetParamsStruct>
 }
 
 /** Latest chain state - from calling {chain}/transactions/params - useful for adding 'header' fields to a transaction */
@@ -52,14 +61,13 @@ export type AlgorandChainTransactionParamsStruct = {
   genesisID: string
   firstRound: number
   lastRound: number
-  consensusVersion: number
   minFee: number
   suggestedFee: number
 }
 
 /** Account object generated - in the format returned from algosdk */
 export type AlgorandGeneratedAccountStruct = {
-  addr: Uint8Array
+  addr: string
   sk: Uint8Array
 }
 
@@ -71,32 +79,6 @@ export enum AlgorandTransactionTypeCode {
   AssetTransfer = 'axfer',
   KeyRegistration = 'keyreg',
   Payment = 'pay',
-}
-
-/*
- * Enums for application transactions on-transaction-complete behavior
- */
-export enum AlgorandOnApplicationComplete {
-  // NoOpOC indicates that an application transaction will simply call its
-  // ApprovalProgram
-  NoOp = 0,
-  // OptInOC indicates that an application transaction will allocate some
-  // LocalState for the application in the sender's account
-  OptIn = 1,
-  // CloseOutOC indicates that an application transaction will deallocate
-  // some LocalState for the application from the user's account
-  CloseOut = 2,
-  // ClearStateOC is similar to CloseOutOC, but may never fail. This
-  // allows users to reclaim their minimum balance from an application
-  // they no longer wish to opt in to.
-  Clear = 3,
-  // UpdateApplicationOC indicates that an application transaction will
-  // update the ApprovalProgram and ClearStateProgram for the application
-  Update = 4,
-  // DeleteApplicationOC indicates that an application transaction will
-  // delete the AppParams for the application from the creator's balance
-  // record
-  Delete = 5,
 }
 
 export type AlgorandAddressStruct = {
@@ -130,7 +112,7 @@ export type AlgorandTxActionStruct = {
   assetUnitName?: string
   assetName?: string
   assetURL?: string
-  assetMetadataHash?: string
+  assetMetadataHash?: string | Uint8Array
   freezeAccount?: AlgorandAddressStruct
   freezeState?: boolean
   assetRevocationTarget?: AlgorandAddressStruct
@@ -155,6 +137,8 @@ export type AlgorandTxActionStruct = {
   lastRound?: number
   fee?: number
   flatFee?: boolean // flatfee is not included in the actual transaction data sent to chain - its only a hint to the algoSdk.transaction object
+  nonParticipation?: boolean
+  extraPages?: number
 }
 
 /** Algorand transaction encoded and 'minified' ready to send to chain */
@@ -213,6 +197,8 @@ export type AlgorandTxEncodedForChain = {
   fadd?: Buffer // Buffer.from(freezeAccount.publicKey)
   afrz?: boolean // freezeState
   reKeyTo?: Buffer // Buffer.from(reKeyTo.publicKey)
+  apep?: number // appIndex,
+  // todo: is a field for nonParticipation missing here?
 }
 
 /** a signature object for multisig transaction */

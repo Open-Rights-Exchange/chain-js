@@ -1,9 +1,10 @@
+import { Algodv2, Indexer } from 'algosdk'
 import { ChainSettingsCommunicationSettings, ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
 import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
-export type AlgoClient = any
-export type AlgoClientIndexer = any
+export type AlgoClient = Algodv2
+export type AlgoClientIndexer = Indexer
 
 /** Chain urls and related details used to connect to chain */
 export type AlgorandChainEndpoint = {

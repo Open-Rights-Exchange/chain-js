@@ -30,6 +30,7 @@ export type EosActionStruct = {
   hex_data?: string
 }
 
+// TODO: Check is this type correct. Appears to be missing: transaction_extensions, signatures and includes incorrect: available_keys?
 /** EOS Raw Data Structure for chain transaction - i.e. including header, actions, and keys */
 export interface EosTransactionStruct {
   expiration: string
@@ -41,6 +42,26 @@ export interface EosTransactionStruct {
   context_free_actions: EosActionStruct[]
   actions: EosActionStruct[]
   available_keys: EosPublicKey[]
+}
+
+/** EOS chain transaction history */
+export interface EosTransactionHistory {
+  receipt: {
+    status: EosTransactionHistoryStatus
+    cpu_usage_us: number | string
+    net_usage_words: number | string
+    trx: [any] // TODO: type this
+  }
+  trx: EosTransactionStruct
+}
+
+/** Transction Status on-chain */
+export enum EosTransactionHistoryStatus {
+  Executed = 'executed', // succeed, no error handler executed
+  SoftFail = 'soft_fail', // objectively failed (not executed), error handler executed
+  HardFail = 'hard_fail', // objectively failed and error handler objectively failed thus no state change
+  Delayed = 'delayed', // transaction delayed/deferred/scheduled for future execution
+  Expired = 'expired', // transaction expired and storage space refuned to user
 }
 
 export type EosSerializedTransaction = EosRawTransaction | string

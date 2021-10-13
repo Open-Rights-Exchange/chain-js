@@ -35,9 +35,9 @@ export type ChainAsset = string & ChainAssetBrand
 export type ChainSymbol = string & ChainSymbolBrand
 /** Parameters related to chain api requests */
 export type ChainSettingsCommunicationSettings = {
-  blocksToCheck: number
-  checkInterval: number
-  getBlockAttempts: number
+  blocksToCheck?: number
+  checkInterval?: number
+  getBlockAttempts?: number
 }
 
 /** Supported chain types */

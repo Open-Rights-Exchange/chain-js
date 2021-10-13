@@ -1,10 +1,22 @@
+import { Contract, ethers, BigNumber } from 'ethers'
 import Web3 from 'web3'
 import BN from 'bn.js'
-import { Contract } from 'web3-eth-contract'
 import { HttpProviderOptions } from 'web3-core-helpers'
-import { BlockTransactionString, TransactionReceipt } from 'web3-eth'
-import { rejectAwaitTransaction, resolveAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
-import { ChainErrorDetailCode, ChainErrorType, ChainSettingsCommunicationSettings, ConfirmType } from '../../models'
+import { BlockTransactionString, Transaction, TransactionReceipt } from 'web3-eth'
+import {
+  ChainError,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
+  throwAndLogError,
+  throwNewError,
+} from '../../errors'
+import {
+  ChainErrorDetailCode,
+  ChainErrorType,
+  ChainSettingsCommunicationSettings,
+  ConfirmType,
+  TransactionStatus,
+} from '../../models'
 import { bigNumberToString, ensureHexPrefix, isNullOrEmpty, objectHasProperty, trimTrailingChars } from '../../helpers'
 import { mapChainError } from './ethErrors'
 import { ChainState } from '../../interfaces/chainState'
@@ -27,6 +39,7 @@ import {
   DEFAULT_GET_BLOCK_ATTEMPTS,
   NATIVE_CHAIN_TOKEN_SYMBOL,
 } from './ethConstants'
+import { assertIsValidTransactionId, toGweiFromWei } from './helpers'
 
 //   blockIncludesTransaction() {}; // hasTransaction
 //   getContractTableRows() {}; // getAllTableRows
@@ -100,6 +113,10 @@ export class EthereumChainState implements ChainState {
     } catch (error) {
       throwAndLogError('Problem connecting to chain', 'chainConnectFailed', error)
     }
+  }
+
+  public get ethersJsonRpcProvider() {
+    return new ethers.providers.JsonRpcProvider(this._activeEndpoint)
   }
 
   /** Map endpoint options to web3 HttpProviderOptions type */
@@ -179,6 +196,11 @@ export class EthereumChainState implements ChainState {
     }
   }
 
+  /** return (string) of the last retrieved gas price - rounded up to GWEI */
+  public get currentGasPriceInGwei(): string {
+    return Math.round(toGweiFromWei(new BN(this.chainInfo.nativeInfo.currentGasPrice))).toString()
+  }
+
   /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
     if (!this._isConnected) {
@@ -225,7 +247,8 @@ export class EthereumChainState implements ChainState {
     }
     // Get balance for ERC20 token
     const abi = erc20Abi
-    const erc20Contract = new this.web3.eth.Contract(abi, tokenAddress.toString())
+    const erc20Contract = new Contract(tokenAddress.toString(), abi, this.ethersJsonRpcProvider)
+
     if (isNullOrEmpty(erc20Contract)) {
       throw Error(`Cannot find ERC20 token contract at tokenAddress: ${tokenAddress}`)
     }
@@ -256,12 +279,10 @@ export class EthereumChainState implements ChainState {
     account: EthereumAddress,
   ): Promise<{ balance: string; tokenName?: string; tokenSymbol?: string }> {
     let balanceString = '0.0000'
-    const balance: BN = this.isMethodCallable(contract, 'balanceOf')
-      ? await contract?.methods?.balanceOf(account)?.call()
-      : null
-    const decimals = this.isMethodCallable(contract, 'decimals') ? await contract?.methods?.decimals()?.call() : null
-    const tokenName = this.isMethodCallable(contract, 'name') ? await contract?.methods?.name()?.call() : null
-    const tokenSymbol = this.isMethodCallable(contract, 'symbol') ? await contract?.methods?.symbol()?.call() : null
+    const balance: BigNumber = this.isMethodCallable(contract, 'balanceOf') ? await contract?.balanceOf(account) : null
+    const decimals = this.isMethodCallable(contract, 'decimals') ? await contract?.decimals() : null
+    const tokenName = this.isMethodCallable(contract, 'name') ? await contract?.name() : null
+    const tokenSymbol = this.isMethodCallable(contract, 'symbol') ? await contract?.symbol() : null
 
     if (balance && decimals) {
       balanceString = bigNumberToString(balance, decimals)
@@ -273,8 +294,7 @@ export class EthereumChainState implements ChainState {
 
   /** Whether a callable method exists on an ethereum contract */
   public isMethodCallable(contract: Contract, methodName: string): boolean {
-    const methods = contract?.methods
-    if (objectHasProperty(methods, methodName) && objectHasProperty(methods[methodName], 'call')) {
+    if (objectHasProperty(contract, methodName)) {
       return true
     }
     return false
@@ -290,7 +310,7 @@ export class EthereumChainState implements ChainState {
     if (isNullOrEmpty(result)) {
       return null
     }
-    return this.getTransactionById(result)
+    return this.getExecutedTransactionById(result)
   }
 
   /** Submits the transaction to the chain and waits only until it gets a transaction hash
@@ -523,8 +543,21 @@ export class EthereumChainState implements ChainState {
     }
   }
 
-  public async getTransactionById(id: string): Promise<TransactionReceipt> {
+  /** Gets transaction receipt for an executed transaction (by transaction hash) */
+  async getExecutedTransactionById(id: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(id)
+  }
+
+  /** Gets an executed or pending transaction (by transaction hash)
+   * Throws if transaction is not on chain */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: Transaction }> {
+    assertIsValidTransactionId(transactionId)
+    const transaction = await this.web3.eth.getTransaction(transactionId)
+    if (!transaction) throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found')
+    const status = transaction.blockNumber ? TransactionStatus.Executed : TransactionStatus.Pending
+    return { status, transaction }
   }
 
   /** Return instance of Web3js API */

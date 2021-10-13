@@ -13,6 +13,7 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "dist",
+    "skipLibCheck": true,
     "sourceMap": true,
     "target": "es5",
     "baseUrl": "./",
@@ -25,8 +26,8 @@
     "dist",
     "node_modules",
     "./src/**/?(*.)test.ts",
-    "./src/tests/*.*",
-    "./src/crypto/tests/*.*",
+    // "./src/tests/*.*",
+    // "./src/crypto/tests/*.*",
   ],
   "include": [
     "./src/**/*.js",

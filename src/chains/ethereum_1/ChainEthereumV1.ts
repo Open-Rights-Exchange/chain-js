@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Transaction } from 'web3-eth'
 import { Chain } from '../../interfaces'
-import { ChainActionType, ChainDate, ChainEntityName, ChainInfo, ChainType, CryptoCurve } from '../../models'
+import {
+  ChainActionType,
+  ChainDate,
+  ChainEntityName,
+  ChainInfo,
+  ChainType,
+  CryptoCurve,
+  TransactionStatus,
+} from '../../models'
 import { ChainError, throwNewError } from '../../errors'
 import * as ethcrypto from './ethCrypto'
 import { composeAction } from './ethCompose'
@@ -177,6 +186,17 @@ class ChainEthereumV1 implements Chain {
     Transaction: this.newTransaction,
   }
 
+  // --------- Transaction functions */
+  /** Gets an executed or pending transaction and its status
+   * A transaction that has been added to the transction pool but not yet exectured will have a status of Pending
+   * Until the transaction is added to the TX pool, this function will throw a TxNotFoundOnChain chain error
+   */
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: TransactionStatus; transaction: Transaction }> {
+    return this._chainState.fetchTransaction(transactionId)
+  }
+
   // --------- Chain crytography functions */
   /** Primary cryptography curve used by this chain */
   cryptoCurve: CryptoCurve.Secp256k1
@@ -241,16 +261,19 @@ class ChainEthereumV1 implements Chain {
   /** Generate a signature given some data and a private key */
   sign = ethcrypto.sign
 
-  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
-  verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
-
   /** Signs data as a message using private key (first appending additional required data if any) */
   signMessage = ethcrypto.signMessage
+
+  /** Whether chain supports ability to get a publicKey from a signature */
+  supportsGetPublicKeyFromSignature = true
 
   /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
    * A message differs than verifySignedWithPublicKey() because it might additional strings appended (as required by chain best-practices)
    * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
   verifySignedMessage = ethcrypto.verifySignedMessage
+
+  /** Verify that the signed data was signed using the given key (signed with the private key for the provided public key) */
+  verifySignedWithPublicKey = ethcrypto.verifySignedWithPublicKey
 
   // Chain Helper Functions
 

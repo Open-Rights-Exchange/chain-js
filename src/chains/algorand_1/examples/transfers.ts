@@ -1,14 +1,14 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
 import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainEndpoint, ChainActionType, TokenTransferParams, ValueTransferParams } from '../../../models'
-import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams } from '../models'
+import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams, AlgorandTransactionOptions } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { toChainEntityName } from '../../../helpers'
 import { AlgorandActionHelper } from '../algoAction'
@@ -117,8 +117,12 @@ async function run() {
     console.log('Connected to %o', algoTest.chainId)
   }
 
+  const options: AlgorandTransactionOptions = { 
+    expireSeconds: 3600, // tx only valid for the next hour
+  }
+
   /** Compose and send transaction */
-  const transaction = await algoTest.new.Transaction()
+  const transaction = await algoTest.new.Transaction(options)
 
   // Compose an action from basic parameters using composeAction function
   const action = await algoTest.composeAction(AlgorandChainActionType.Payment, composeAlgoPaymentParams)
@@ -127,7 +131,7 @@ async function run() {
   // const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
   // OR, set an action using params directly - values depend on the SDK requirements
   // const action = payTxWithHeaders
-  transaction.actions = [action]
+  transaction.setTransaction(action)
 
   // // Alternatively, set action using raw transaction
   // await transaction.setTransaction(payRawTransaction)

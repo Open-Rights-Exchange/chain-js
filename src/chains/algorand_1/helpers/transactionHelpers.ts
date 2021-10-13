@@ -22,7 +22,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   let transaction
   const { txID, blob } = signResult
   if (isAUint8Array(blob)) {
-    transaction = algosdk.decodeObj(blob)
+    transaction = algosdk.decodeObj(blob) as any
   } else {
     transaction = blob
   }

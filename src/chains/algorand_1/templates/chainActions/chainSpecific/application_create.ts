@@ -7,7 +7,6 @@ import {
   AlgorandTransactionTypeCode,
   AlgorandTxAction,
   AlgorandTxActionRaw,
-  AlgorandOnApplicationComplete,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
@@ -34,7 +33,7 @@ export const composeAction = async (args: AlgorandActionAppCreate, suggestedPara
   const composedAction = algosdk.makeApplicationCreateTxn(
     from,
     suggestedParams,
-    AlgorandOnApplicationComplete.NoOp,
+    algosdk.OnApplicationComplete.NoOpOC,
     appApprovalProgram,
     appClearProgram,
     appLocalInts,

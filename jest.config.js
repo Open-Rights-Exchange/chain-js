@@ -1,8 +1,5 @@
 module.exports = {
   automock: false,
-  // collectCoverageFrom: [
-  //   'src/**/*.{js,jsx,ts}'
-  // ],
   roots: [
     '<rootDir>/src/chains/eos_2/tests',
     '<rootDir>/src/tests',
@@ -11,11 +8,11 @@ module.exports = {
     '<rootDir>/src/chains/algorand_1/tests',
   ],
   setupFiles: ['<rootDir>/src/tests/setupJest.js'],
-  testMatch: ['<rootDir>/src/**/?(*.)(spec|test).(js|jsx|ts|tsx)'],
+  testMatch: ['<rootDir>/src/**/?(*.)(spec|test).(js|ts|tsx)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'json', 'node'],
   globals: {
     'ts-jest': {
       diagnostics: {

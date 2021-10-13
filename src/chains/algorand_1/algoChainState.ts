@@ -1,5 +1,11 @@
 import algosdk from 'algosdk'
-import { resolveAwaitTransaction, rejectAwaitTransaction, throwNewError, throwAndLogError } from '../../errors'
+import {
+  ChainError,
+  rejectAwaitTransaction,
+  resolveAwaitTransaction,
+  throwAndLogError,
+  throwNewError,
+} from '../../errors'
 import { ChainState } from '../../interfaces/chainState'
 import {
   ChainErrorDetailCode,
@@ -7,6 +13,7 @@ import {
   ChainInfo,
   ChainSettingsCommunicationSettings,
   ConfirmType,
+  TransactionStatus,
 } from '../../models'
 import {
   AlgorandAddress,
@@ -47,7 +54,7 @@ export class AlgorandChainState implements ChainState {
 
   private _algoClient: AlgoClient
 
-  private _algoClientIndexer: AlgoClient
+  private _algoClientIndexer: AlgoClientIndexer
 
   constructor(endpoints: AlgorandChainEndpoint[], settings?: AlgorandChainSettings) {
     this._endpoints = endpoints
@@ -100,8 +107,8 @@ export class AlgorandChainState implements ChainState {
           ...token,
           ...ALGORAND_POST_CONTENT_TYPE,
         }
-        this._algoClient = new algosdk.Algodv2(token, url, port)
-        this._algoClientIndexer = new algosdk.Indexer(postToken, indexerUrl, port)
+        this._algoClient = new algosdk.Algodv2(token, url.toString(), port)
+        this._algoClientIndexer = new algosdk.Indexer(postToken, indexerUrl.toString(), port)
       }
       await this.getChainInfo()
       this._isConnected = true
@@ -121,8 +128,7 @@ export class AlgorandChainState implements ChainState {
         genesisID: chainTxParams?.genesisID,
         firstRound: chainTxParams?.firstRound,
         lastRound: chainTxParams?.lastRound,
-        consensusVersion: chainTxParams?.consensusVersion,
-        minFee: chainTxParams?.minFee, // NOTE: as of Aug 2021, minFee is missing from algoClient.getTransactionParams() response - we would expect it to be there
+        minFee: null, // chainTxParams?.minFee, // NOTE: as of Aug 2021, minFee is missing from algoClient.getTransactionParams() response - we would expect it to be there
         suggestedFee: chainTxParams?.fee, // suggested fee (in microAlgos)
       }
       // get a few things from status endpoint
@@ -481,16 +487,35 @@ export class AlgorandChainState implements ChainState {
   }
 
   /** Searched transaction on chain by id
-   * Returns null if transaction does not exsits (this includes invalid id)
+   * Throws if transaction does not exsits (this includes invalid id)
    */
   public async getTransactionById(id: string): Promise<any> {
     let transaction
     try {
-      transaction = this.algoClient.transactionById(id)
+      transaction = await this.algoClientIndexer.lookupTransactionByID(id).do()
     } catch (error) {
-      return null
+      throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found', null, error)
     }
     return transaction
+  }
+
+  /** Gets an executed or pending transaction (by transaction hash)
+   * A transction that has enough fees will appear on the chain and quickly be confirmed
+   * Until the transaction is processed by the chain, this function will throw a TxNotFoundOnChain chain error
+   */
+  public async fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }> {
+    const transactionResponse = await this.getTransactionById(transactionId)
+    // TODO: Type the transaction response - which wraps this unfinished type: AlgorandTxFromChain
+    const { 'confirmed-round': confirmedRound, 'last-valid': lastValid } = transactionResponse.transaction
+    const { 'current-round': currentRound } = transactionResponse
+    let status: TransactionStatus
+    if (confirmedRound) {
+      status = TransactionStatus.Executed
+    } else {
+      const isExpired = currentRound > lastValid
+      status = isExpired ? TransactionStatus.Dead : TransactionStatus.Pending
+    }
+    return { status, transaction: transactionResponse.transaction }
   }
 
   /** Gets the minimum fee (microalgo) used by any transaction

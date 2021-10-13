@@ -1,4 +1,5 @@
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'ethers'
+import BigNumberJs from 'bignumber.js'
 import BN from 'bn.js'
 import { parse, stringify } from 'flatted'
 import { sha256 } from 'js-sha256'
@@ -457,7 +458,7 @@ export function toTokenValueString(value: string, base: number = 10, precision: 
   }
 
   // Using BigNumber library here because it supports decmials
-  const bigNumber = new BigNumber(value, base)
+  const bigNumber = new BigNumberJs(value, base)
   const result = bigNumber.shiftedBy(usePrecision)
   return result.toFixed() // no exponential notation
 }
@@ -483,8 +484,8 @@ export function isABN(value: any) {
 
 /** convert a balance and decimals into a long value string
  *  e.g. BN('200333300000000000000'), precision=18 -> '200.333' */
-export function bigNumberToString(value: BN, precision: number): string {
-  const bigValue = new BN(value)
+export function bigNumberToString(value: BN | BigNumber, precision: number): string {
+  const bigValue = new BN(value.toString())
   const precisionBN = new BN(precision)
   const divisor = new BN(10).pow(precisionBN)
   return `${bigValue.div(divisor)}.${bigValue.mod(divisor)}`
@@ -503,7 +504,7 @@ export function toBigIntegerString(value: string | number | BN, base: number = 1
     useValue = value as string
   }
   // Using BigNumber library here because it supports decmials
-  const result = new BigNumber(useValue, base)
+  const result = new BigNumberJs(useValue, base)
   return result.toFixed() // no exponential notation
 }
 

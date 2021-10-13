@@ -1,16 +1,14 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { sleep, toChainEntityName } from '../../../helpers'
 import { ChainError, ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint } from '../../../models'
 import { toAlgorandSymbol } from '../helpers'
 import { decryptWithPassword, encryptWithPassword } from '../algoCrypto'
 import { ChainAlgorandV1 } from '../ChainAlgorandV1'
-import { mapChainError } from '../algoErrors'
 
 require('dotenv').config()
 
@@ -55,7 +53,7 @@ async function run() {
     ),
   )
 
-  /** Encrypt and decrypt value using algo crypto function */
+  // /** Encrypt and decrypt value using algo crypto function */
   // encryption options can use N:{65536, 131072, 262144, 524288, 1048576}
   const encrypted = encryptWithPassword('somevalue', 'mypassword', { salt: 'mysalt' })
   console.log('encrypted:', encrypted)
@@ -65,12 +63,14 @@ async function run() {
 
   // map chain error
   try {
+    await sleep(1000) // dont hit chain api again too fast
+    const txResponse = await algoTest.fetchTransaction('IELHXMRB5ZMWZGMRP6PEU2KQQGTRP5AIXBUAYCDWYF7GGC4QWGOQ')
+    console.log('txResponse for txId:', txResponse)
     const { algoClient, algoClientIndexer } = algoTest as ChainAlgorandV1
-    const { timestamp } = await algoClientIndexer.lookupBlock(99999999999)
+    // const blockInfo = await algoClientIndexer.lookupBlock(99999999999).do() as any
   } catch (error) {
-    const chainError = mapChainError(error)
-    console.log('Chain Error Type:', chainError.errorType)
-
+    const chainError = (error as ChainError)
+    console.log(`Chain Error Type: ${chainError.errorType} error:`, error)
   }
 }
 

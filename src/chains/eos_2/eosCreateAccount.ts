@@ -8,6 +8,7 @@ import {
   EosNewAccountType,
   EosPublicKeys,
   EosChainActionType,
+  EosTransactionOptions,
 } from './models/index'
 import { EosAccount } from './eosAccount'
 import { throwNewError } from '../../errors'
@@ -113,7 +114,7 @@ export class EosCreateAccount implements CreateAccount {
   }
 
   /** Compose a transaction to send to the chain to create a new account */
-  async composeTransaction(accountType: EosNewAccountType): Promise<void> {
+  async composeTransaction(accountType: EosNewAccountType, transactionOptions?: EosTransactionOptions): Promise<void> {
     this._accountType = accountType
     const {
       accountName,
@@ -215,7 +216,7 @@ export class EosCreateAccount implements CreateAccount {
     }
 
     // Create a transaction object to execute the updates
-    const newTransaction = new EosTransaction(this._chainState)
+    const newTransaction = new EosTransaction(this._chainState, transactionOptions)
     // newTransaction.actions = [createAccountAction, updatePermissionsActions, linkPermissionsActions]
     let newActions: EosActionStruct[] = []
     if (!isNullOrEmpty(createAccountActions)) newActions = [...newActions, ...createAccountActions]
