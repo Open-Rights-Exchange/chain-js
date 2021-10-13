@@ -20,7 +20,7 @@ export const DEFAULT_CHECK_INTERVAL = 500
 /** minimum milliseconds between requests - prevents getting blacklisted by pinging API too quickly between calls */
 export const MINIMUM_CHECK_INTERVAL = 500
 /** time in seconds between blocks */
-export const ALGORAND_CHAIN_BLOCK_FREQUENCY = 2
+export const ALGORAND_CHAIN_BLOCK_FREQUENCY = 4.39
 /** number of times to attempt to read a chain endpoint before failing the read */
 export const DEFAULT_GET_BLOCK_ATTEMPTS = 10
 
