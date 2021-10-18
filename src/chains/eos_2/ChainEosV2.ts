@@ -12,7 +12,7 @@ import {
   TransactionOptions,
   TransactionStatus,
 } from '../../models'
-import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS } from './eosConstants'
+import { NATIVE_CHAIN_TOKEN_ADDRESS, NATIVE_CHAIN_TOKEN_PRECISION, NATIVE_CHAIN_TOKEN_SYMBOL } from './eosConstants'
 import { Chain } from '../../interfaces'
 import { ChainError, throwNewError } from '../../errors'
 import * as eoscrypto from './eosCrypto'
@@ -97,11 +97,12 @@ class ChainEosV2 implements Chain {
   }
 
   /** Returns chain native token symbol and default token contract address */
-  public get nativeToken(): { defaultUnit: string; symbol: EosSymbol; tokenAddress: EosEntityName } {
+  public get nativeToken(): { defaultUnit: string; symbol: EosSymbol; tokenAddress: EosEntityName; precision: number } {
     return {
       defaultUnit: NATIVE_CHAIN_TOKEN_SYMBOL, // EOS doesnt use a seperate unit for the token - just returning the EOS symbol
       symbol: toEosSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
       tokenAddress: toEosEntityName(NATIVE_CHAIN_TOKEN_ADDRESS),
+      precision: NATIVE_CHAIN_TOKEN_PRECISION,
     }
   }
 
