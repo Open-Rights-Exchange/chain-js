@@ -8,6 +8,7 @@ export enum EthereumChainActionType {
   ERC677TransferAndCall = 'ERC677TransferAndCall',
   ERC721Approve = 'ERC721Approve',
   ERC721Transfer = 'ERC721Transfer',
+  ERC721SafeTransferFrom = 'ERC721SafeTransferFrom',
   ERC721TransferFrom = 'ERC721TransferFrom',
   ERC1155Approve = 'ERC1155Approve',
   ERC1155Transfer = 'ERC1155Transfer',

@@ -15,7 +15,7 @@ export interface Erc1155TransferParams {
   to: EthereumAddress
   tokenId: number
   quantity: number
-  data: string
+  data: number
 }
 
 export const composeAction = ({ contractAddress, from, to, tokenId, quantity, data }: Erc1155TransferParams) => {
@@ -39,6 +39,8 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       from,
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       tokenId: getArrayIndexOrNull(contract?.parameters, 1) as number,
+      quantity: getArrayIndexOrNull(contract?.parameters, 2) as number,
+      data: getArrayIndexOrNull(contract?.parameters, 3) as number,
     }
     const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
     return {

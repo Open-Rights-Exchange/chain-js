@@ -45,10 +45,10 @@ const { env } = process
     // EthereumRawTransaction type input for setTransaction()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
     const composeERC721TransferFromParams: Erc721TransferFromParams = {
-      contractAddress: toEthereumAddress('0xe07c99e940fa19280368e80a612eedbb0665b68c'), // ERC721 Smart Contract Adddress
-      transferFrom: toEthereumAddress('0xb0a807F5DF3448206217858f32bb201F068c7e1a'), // ORE Vault Multi Sig Account
+      contractAddress: toEthereumAddress('0xE07C99e940FA19280368E80A612EEDBB0665B68C'), // ERC721 Smart Contract Adddress
+      transferFrom: toEthereumAddress('0x0F10910FA0b92a58Fcc1a5df478424D20661aDE7'), // ORE Vault Multi Sig Account
       to: toEthereumAddress('0x7eFef68B9BD9342AEC2b21681426aF541343a4dD'), // Testing MetaMask Account
-      tokenId: 4,
+      tokenId: 20,
     }
 
     const defaultEthTxOptions: EthereumTransactionOptions<null> = {
