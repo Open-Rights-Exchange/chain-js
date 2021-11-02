@@ -37,7 +37,7 @@ export type AlgorandKeyRegistrationParams = {
 }
 
 /** Make a transaction that will create an application */
-export type AlgorandActionAppCreate = {
+export type AlgorandActionAppCreateParams = {
   from: AlgorandAddress // Algorand address of sender
   appApprovalProgram: string // the compiled TEAL that approves a transaction
   appClearProgram: string // the compiled TEAL that runs when clearing state
@@ -55,7 +55,7 @@ export type AlgorandActionAppCreate = {
 }
 
 /** For an Action for several Application type transactions */
-export type AlgorandActionAppMultiPurpose = {
+export type AlgorandActionAppMultiPurposeParams = {
   from: AlgorandAddress // Algorand address of sender
   appIndex: number // the ID of the app to use
   appArgs?: (string | number | Uint8Array)[] // optional - Array of Uint8Array, any additional arguments to the application
@@ -68,7 +68,7 @@ export type AlgorandActionAppMultiPurpose = {
 }
 
 /** For an action that changes an application's approval and clear programs */
-export type AlgorandActionAppUpdate = {
+export type AlgorandActionAppUpdateParams = {
   from: AlgorandAddress // Algorand address of sender
   appIndex?: number // the ID of the app to be updated
   appApprovalProgram?: string // the compiled TEAL that approves a transaction
