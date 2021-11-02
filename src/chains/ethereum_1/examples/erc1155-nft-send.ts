@@ -13,7 +13,7 @@ import {
   EthereumChainActionType,
   EthereumChainEndpoint,
 } from '../models'
-import { Erc1155TransferFromParams } from '../templates/chainActions/chainSpecific/erc1155_transferFrom'
+import { Erc1155SafeTransferFromParams } from '../templates/chainActions/chainSpecific/erc1155_safeTransferFrom'
 
 require('dotenv').config()
 
@@ -44,7 +44,7 @@ const { env } = process
 
     // EthereumRawTransaction type input for setTransaction()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
-    const composeErc1155TransferFromParams: Erc1155TransferFromParams = {
+    const composeErc1155TransferFromParams: Erc1155SafeTransferFromParams = {
       contractAddress: toEthereumAddress('0xE5CAd93B68440F7983668F9348B774cbfb722440'), // ERC1155 Smart Contract Adddress
       transferFrom: toEthereumAddress('0xb0a807F5DF3448206217858f32bb201F068c7e1a'), // ORE Vault Multi Sig Account
       to: toEthereumAddress('0x7eFef68B9BD9342AEC2b21681426aF541343a4dD'), // Testing MetaMask Account
@@ -64,7 +64,7 @@ const { env } = process
     // ---> Sign and send erc1155 transfer Transaction
     const transaction = await rinkeby.new.Transaction(rinkebyChainOptions)
     const action = await rinkeby.composeAction(
-      EthereumChainActionType.ERC1155TransferFrom,
+      EthereumChainActionType.ERC1155SafeTransferFrom,
       composeErc1155TransferFromParams,
     )
     // console.log(JSON.stringify(action))

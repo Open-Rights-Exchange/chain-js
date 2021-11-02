@@ -9,7 +9,7 @@ import { erc1155Abi } from '../../abis/erc1155Abi'
 import { toEthereumAddress, isNullOrEmptyEthereumValue } from '../../../helpers'
 import { getArrayIndexOrNull } from '../../../../../helpers'
 
-export interface Erc1155TransferFromParams {
+export interface Erc1155SafeTransferFromParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   transferFrom: EthereumAddress
@@ -19,7 +19,15 @@ export interface Erc1155TransferFromParams {
   data: number
 }
 
-export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId, quantity, data }: Erc1155TransferFromParams) => {
+export const composeAction = ({
+  contractAddress,
+  from,
+  transferFrom,
+  to,
+  tokenId,
+  quantity,
+  data,
+}: Erc1155SafeTransferFromParams) => {
   const contract = {
     abi: erc1155Abi,
     parameters: [transferFrom, to, tokenId, quantity, data],
@@ -35,7 +43,7 @@ export const composeAction = ({ contractAddress, from, transferFrom, to, tokenId
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.abi === erc1155Abi && contract?.method === 'safeTransferFrom') {
-    const returnData: Erc1155TransferFromParams = {
+    const returnData: Erc1155SafeTransferFromParams = {
       contractAddress: to,
       from,
       transferFrom: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
@@ -46,7 +54,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
     }
     const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
     return {
-      chainActionType: EthereumChainActionType.ERC1155TransferFrom,
+      chainActionType: EthereumChainActionType.ERC1155SafeTransferFrom,
       args: returnData,
       partial,
     }

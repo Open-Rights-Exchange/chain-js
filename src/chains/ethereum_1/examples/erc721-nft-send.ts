@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, ChainType } from '../../../index'
@@ -13,7 +12,7 @@ import {
   EthereumChainActionType,
   EthereumChainEndpoint,
 } from '../models'
-import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecific/erc721_transferFrom'
+import { Erc721SafeTransferFromParams } from '../templates/chainActions/chainSpecific/erc721_safeTransferFrom'
 
 require('dotenv').config()
 
@@ -44,7 +43,7 @@ const { env } = process
 
     // EthereumRawTransaction type input for setTransaction()
     // Defaults all optional properties, so you can set from raw just with to & value OR data
-    const composeERC721TransferFromParams: Erc721TransferFromParams = {
+    const composeERC721SafeTransferFromParams: Erc721SafeTransferFromParams = {
       contractAddress: toEthereumAddress('0xE07C99e940FA19280368E80A612EEDBB0665B68C'), // ERC721 Smart Contract Adddress
       transferFrom: toEthereumAddress('0x0F10910FA0b92a58Fcc1a5df478424D20661aDE7'), // ORE Vault Multi Sig Account
       to: toEthereumAddress('0x7eFef68B9BD9342AEC2b21681426aF541343a4dD'), // Testing MetaMask Account
@@ -62,8 +61,8 @@ const { env } = process
     // ---> Sign and send erc721 transfer Transaction
     const transaction = await rinkeby.new.Transaction(rinkebyChainOptions)
     const action = await rinkeby.composeAction(
-      EthereumChainActionType.ERC721TransferFrom,
-      composeERC721TransferFromParams,
+      EthereumChainActionType.ERC721SafeTransferFrom,
+      composeERC721SafeTransferFromParams,
     )
     // console.log(JSON.stringify(action))
     transaction.actions = [action]

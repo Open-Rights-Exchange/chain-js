@@ -17,6 +17,9 @@ import { decomposeAction as ERC721ApproveTemplate } from './templates/chainActio
 import { decomposeAction as ERC721TransferTemplate } from './templates/chainActions/chainSpecific/erc721_transfer'
 import { decomposeAction as ERC721TransferFromTemplate } from './templates/chainActions/chainSpecific/erc721_transferFrom'
 import { decomposeAction as ERC721SafeTransferFromTemplate } from './templates/chainActions/chainSpecific/erc721_safeTransferFrom'
+import { decomposeAction as ERC1155ApproveTemplate } from './templates/chainActions/chainSpecific/erc1155_approve'
+import { decomposeAction as ERC1155TransferTemplate } from './templates/chainActions/chainSpecific/erc1155_transfer'
+import { decomposeAction as ERC1155SafeTransferFromTemplate } from './templates/chainActions/chainSpecific/erc1155_safeTransferFrom'
 import { EthereumTransactionAction, EthereumDecomposeReturn } from './models'
 import { isNullOrEmpty } from '../../helpers'
 
@@ -38,6 +41,9 @@ const DecomposeAction: { [key: string]: (args: any) => any } = {
   ERC721Transfer: ERC721TransferTemplate,
   ERC721TransferFrom: ERC721TransferFromTemplate,
   ERC721SafeTransferFrom: ERC721SafeTransferFromTemplate,
+  ERC1155pprove: ERC1155ApproveTemplate,
+  ERC1155Transfer: ERC1155TransferTemplate,
+  ERC1155SafeTransferFrom: ERC1155SafeTransferFromTemplate,
 }
 
 /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */

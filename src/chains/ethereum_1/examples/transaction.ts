@@ -28,7 +28,7 @@ import {
 } from '../models'
 import { Erc20TransferParams } from '../templates/chainActions/chainSpecific/erc20_transfer'
 import { Erc20IssueParams } from '../templates/chainActions/chainSpecific/erc20_issue'
-import { Erc721TransferFromParams } from '../templates/chainActions/chainSpecific/erc721_transferFrom'
+import { Erc721SafeTransferFromParams } from '../templates/chainActions/chainSpecific/erc721_safeTransferFrom'
 import { EthTransferParams } from '../templates/chainActions/chainSpecific/eth_transfer'
 import { EthereumTransaction } from '../ethTransaction'
 
@@ -100,7 +100,7 @@ const { env } = process
       value: '20',
     }
 
-    const composeERC721SafeTransferFromParams: Erc721TransferFromParams = {
+    const composeERC721SafeTransferFromParams: Erc721SafeTransferFromParams = {
       contractAddress: toEthereumAddress('0x27105356f6c1ede0e92020e6225e46dc1f496b81'),
       transferFrom: toEthereumAddress('0x27105356F6C1ede0e92020e6225E46DC1F496b81'),
       to: toEthereumAddress('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
@@ -210,10 +210,10 @@ const { env } = process
     // console.log('missing signatures: ', transaction.missingSignatures)
     // console.log('send response:', JSON.stringify(await transaction.send()))
 
-    // ---> Compose & Decompose erc721 transferFrom Transaction
+    // ---> Compose & Decompose erc721 safeTransferFrom Transaction
     // const transaction = await ropsten.new.Transaction(defaultEthTxOptions)
     // transaction.actions = [
-    //   await ropsten.composeAction(EthereumChainActionType.ERC721TransferFrom, composeERC721TransferFromParams),
+    //   await ropsten.composeAction(EthereumChainActionType.ERC721SafeTransferFrom, composeERC721SafeTransferFromParams),
     // ]
     // console.log(transaction.actions[0])
     // const decomposed = await ropsten.decomposeAction(transaction.actions[0])
