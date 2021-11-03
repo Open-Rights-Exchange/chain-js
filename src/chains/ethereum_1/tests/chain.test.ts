@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
 import { toChainEntityName } from '../../../helpers'
 import { ChainType } from '../../..'

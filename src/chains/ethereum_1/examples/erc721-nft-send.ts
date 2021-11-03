@@ -69,8 +69,8 @@ const { env } = process
     const { contract, ...actionSentToEthChain } = transaction.actions[0]
     // extract out the transaction object sent to the eth chain
     console.log('actionSentToEthChain:', actionSentToEthChain)
-    // const decomposed = await rinkeby.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
+    const decomposed = await rinkeby.decomposeAction(transaction.actions[0])
+    console.log(decomposed)
   } catch (error) {
     console.log(error)
   }

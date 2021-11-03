@@ -81,17 +81,14 @@ const { env } = process
 
     // ---> Sign and send erc20 transfer Transaction
     const transaction = await rinkeby.new.Transaction(rinkebyChainOptions)
-    const action = await rinkeby.composeAction(
-      EthereumChainActionType.ERC20Transfer,
-      composeERC20TransferParams,
-    )
+    const action = await rinkeby.composeAction(EthereumChainActionType.ERC20Transfer, composeERC20TransferParams)
     // console.log(JSON.stringify(action))
     transaction.actions = [action]
     const { contract, ...actionSentToEthChain } = transaction.actions[0]
     // extract out the transaction object sent to the eth chain
     console.log('actionSentToEthChain:', actionSentToEthChain)
-    // const decomposed = await rinkeby.decomposeAction(transaction.actions[0])
-    // console.log(decomposed)
+    const decomposed = await rinkeby.decomposeAction(transaction.actions[0])
+    console.log(decomposed)
   } catch (error) {
     console.log(error)
   }

@@ -40,7 +40,7 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       tokenId: getArrayIndexOrNull(contract?.parameters, 1) as number,
       quantity: getArrayIndexOrNull(contract?.parameters, 2) as number,
-      data: getArrayIndexOrNull(contract?.parameters, 3) as string
+      data: getArrayIndexOrNull(contract?.parameters, 3) as string,
     }
     const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
     return {
