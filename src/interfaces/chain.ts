@@ -35,7 +35,7 @@ export interface Chain {
   /** Returns chain rpc endpoints */
   endpoints: ChainEndpoint[]
   /** Returns the native (default) asset symbol for the chain and default token address (if any) */
-  nativeToken: { defaultUnit: string; symbol: ChainSymbol; tokenAddress: any }
+  nativeToken: { defaultUnit: string; symbol: ChainSymbol; tokenAddress: any; precision: number }
   /** Connect to chain endpoint to verify that it is operational and to get latest block info */
   connect(): Promise<void>
   /** Compose an object for a chain contract action */

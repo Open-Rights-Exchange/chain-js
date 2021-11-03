@@ -14,6 +14,7 @@ import * as ModelsEthereum from './chains/ethereum_1/models/indexToExport'
 import * as HelpersAlgorand from './chains/algorand_1/helpers'
 import * as HelpersEos from './chains/eos_2/helpers'
 import * as HelpersEthereum from './chains/ethereum_1/helpers'
+import * as Helpers from './helpers'
 
 const { ChainType } = Models
 
@@ -30,6 +31,7 @@ export {
   AlgorandV1,
   EosV2,
   EthereumV1,
+  Helpers,
   HelpersAlgorand,
   HelpersEos,
   HelpersEthereum,

@@ -44,7 +44,12 @@ import {
   toEthereumSignature,
   toEthereumSymbol,
 } from './helpers'
-import { NATIVE_CHAIN_TOKEN_SYMBOL, NATIVE_CHAIN_TOKEN_ADDRESS, DEFAULT_ETH_UNIT } from './ethConstants'
+import {
+  DEFAULT_ETH_UNIT,
+  NATIVE_CHAIN_TOKEN_ADDRESS,
+  NATIVE_CHAIN_TOKEN_PRECISION,
+  NATIVE_CHAIN_TOKEN_SYMBOL,
+} from './ethConstants'
 import { Asymmetric } from '../../crypto'
 import { ChainJsPlugin, ChainJsPluginOptions, PluginType } from '../../interfaces/plugin'
 import { assertPluginTypeNotAlreadyInstalled, initializePlugin } from '../../helpers'
@@ -119,11 +124,17 @@ class ChainEthereumV1 implements Chain {
   }
 
   /** Returns chain native token symbol and default token contract address */
-  public get nativeToken(): { defaultUnit: EthUnit; symbol: EthereumSymbol; tokenAddress: EthereumAddress } {
+  public get nativeToken(): {
+    defaultUnit: EthUnit
+    symbol: EthereumSymbol
+    tokenAddress: EthereumAddress
+    precision: number
+  } {
     return {
       defaultUnit: DEFAULT_ETH_UNIT,
       symbol: toEthereumSymbol(NATIVE_CHAIN_TOKEN_SYMBOL),
       tokenAddress: NATIVE_CHAIN_TOKEN_ADDRESS,
+      precision: NATIVE_CHAIN_TOKEN_PRECISION,
     }
   }
 
