@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
-  AlgorandActionAppCreate,
+  AlgorandActionAppCreateParams,
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
   AlgorandSuggestedParams,
@@ -12,7 +12,7 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
-export const composeAction = async (args: AlgorandActionAppCreate, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (args: AlgorandActionAppCreateParams, suggestedParams: AlgorandSuggestedParams) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const {
     from,
