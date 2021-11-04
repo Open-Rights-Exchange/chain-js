@@ -471,8 +471,9 @@ export class EosChainState implements ChainState {
       rejectAwaitTransaction(
         reject,
         ChainErrorDetailCode.ConfirmTransactionTimeout,
-        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${
+          (checkInterval / 1000) * blocksToCheck
+        } seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
         null,
       )
       return
@@ -527,8 +528,9 @@ export class EosChainState implements ChainState {
         blocksTillIrreversible = transactionBlockNumber - lastIrreversibleBlockNum
         if (blocksTillIrreversible > blocksToCheck) {
           throw new Error(
-            `Process will 'time-out' before reaching final confirmation. It would take ${blocksTillIrreversible} blocks to get to the lastIrreversibleBlock (taking ${blocksTillIrreversible *
-              CHAIN_BLOCK_FREQUENCY} seconds) but blocksToCheck setting is only ${blocksToCheck}. To use ConfirmType.Final (which is not recommended), increase communicationsSettings.blocksToCheck to be at least ${blocksTillIrreversible}`,
+            `Process will 'time-out' before reaching final confirmation. It would take ${blocksTillIrreversible} blocks to get to the lastIrreversibleBlock (taking ${
+              blocksTillIrreversible * CHAIN_BLOCK_FREQUENCY
+            } seconds) but blocksToCheck setting is only ${blocksToCheck}. To use ConfirmType.Final (which is not recommended), increase communicationsSettings.blocksToCheck to be at least ${blocksTillIrreversible}`,
           )
         }
         return transactionBlockNumber <= lastIrreversibleBlockNum

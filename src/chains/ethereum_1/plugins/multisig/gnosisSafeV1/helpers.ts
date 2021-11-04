@@ -144,9 +144,8 @@ export async function getCreateProxyInitializerData(
   const { gnosisSafeMaster, fallbackHandler, initializerAction, threshold, owners } = multisigOptions
   const ethersProvier = getEthersJsonRpcProvider(chainUrl)
   const gnosisSafeMasterContract = getGnosisSafeContract(ethersProvier, gnosisSafeMaster)
-  const { initializerTo, initializerData, paymentToken, paymentAmount, paymentReceiver } = setupInitilaizerAction(
-    initializerAction,
-  )
+  const { initializerTo, initializerData, paymentToken, paymentAmount, paymentReceiver } =
+    setupInitilaizerAction(initializerAction)
   const sortedAddrs = sortHexStrings(owners)
   const { data } = await gnosisSafeMasterContract.populateTransaction.setup(
     sortedAddrs,
@@ -237,8 +236,15 @@ export async function transactionToSafeTx(
   transactionOptions: EthereumGnosisMultisigTransactionOptions,
 ): Promise<GnosisSafeTransaction> {
   const { to, value, data, contract } = transactionAction
-  const { operation, refundReceiver, safeTxGas, baseGas, gasPrice: safeGasPice, gasToken, nonce } =
-    transactionOptions || {}
+  const {
+    operation,
+    refundReceiver,
+    safeTxGas,
+    baseGas,
+    gasPrice: safeGasPice,
+    gasToken,
+    nonce,
+  } = transactionOptions || {}
 
   let safeTxData
   if (isNullOrEmptyEthereumValue(data) && !isNullOrEmpty(contract)) {

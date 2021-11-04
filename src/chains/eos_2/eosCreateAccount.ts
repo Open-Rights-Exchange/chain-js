@@ -116,14 +116,8 @@ export class EosCreateAccount implements CreateAccount {
   /** Compose a transaction to send to the chain to create a new account */
   async composeTransaction(accountType: EosNewAccountType, transactionOptions?: EosTransactionOptions): Promise<void> {
     this._accountType = accountType
-    const {
-      accountName,
-      creatorAccountName,
-      creatorPermission,
-      oreOptions,
-      createEscrowOptions,
-      resourcesOptions,
-    } = this._options
+    const { accountName, creatorAccountName, creatorPermission, oreOptions, createEscrowOptions, resourcesOptions } =
+      this._options
     const { tier, referralAccountName } = oreOptions || {}
     const { contractName, appName } = createEscrowOptions || {}
     const { ramBytes, stakeNetQuantity, stakeCpuQuantity, transfer } = resourcesOptions || {}
@@ -133,9 +127,11 @@ export class EosCreateAccount implements CreateAccount {
 
     // determine account name - generate account name if once wasn't provided
     const permissionHelper = new PermissionsHelper(this._chainState)
-    const { alreadyExists, newAccountName, canRecycle: recycleAccount } = await this.determineNewAccountName(
-      accountName,
-    )
+    const {
+      alreadyExists,
+      newAccountName,
+      canRecycle: recycleAccount,
+    } = await this.determineNewAccountName(accountName)
 
     if (alreadyExists) throwNewError(`Account name ${accountName} already in use`)
 
