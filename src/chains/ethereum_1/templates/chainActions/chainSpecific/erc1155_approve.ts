@@ -4,6 +4,7 @@ import {
   EthereumTransactionAction,
   EthereumDecomposeReturn,
   EthereumChainActionType,
+  EthereumMultiValue,
 } from '../../../models'
 import { erc1155Abi } from '../../abis/erc1155Abi'
 import { toEthereumAddress, isNullOrEmptyEthereumValue } from '../../../helpers'
@@ -15,7 +16,7 @@ export interface Erc1155ApproveParams {
   to: EthereumAddress
   tokenId: number
   quantity: number
-  data: string
+  data: EthereumMultiValue[]
 }
 
 export const composeAction = ({ contractAddress, from, to, tokenId, quantity, data }: Erc1155ApproveParams) => {
@@ -40,11 +41,11 @@ export const decomposeAction = (action: EthereumTransactionAction): EthereumDeco
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
       tokenId: getArrayIndexOrNull(contract?.parameters, 1) as number,
       quantity: getArrayIndexOrNull(contract?.parameters, 2) as number,
-      data: getArrayIndexOrNull(contract?.parameters, 3) as string,
+      data: getArrayIndexOrNull(contract?.parameters, 3) as EthereumMultiValue[],
     }
     const partial = !returnData?.from || isNullOrEmptyEthereumValue(to)
     return {
-      chainActionType: EthereumChainActionType.ERC721Approve,
+      chainActionType: EthereumChainActionType.ERC1155Approve,
       args: returnData,
       partial,
     }
