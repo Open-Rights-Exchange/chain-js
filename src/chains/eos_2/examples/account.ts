@@ -100,7 +100,7 @@ export const createAccountOptions_OreNative = {
   creatorAccountName: toEosEntityName('app.oreid'),
   creatorPermission: toEosEntityName('active'),
   publicKeys: {
-    owner: 'EOS7rNR9AhgcqkmMAoUSHrjTXgxM4PnpGYDXhS3B4UW3jjZgBATXL',
+    // owner: 'EOS7rNR9AhgcqkmMAoUSHrjTXgxM4PnpGYDXhS3B4UW3jjZgBATXL',
   },
   newKeysOptions: {
     password: '2233',

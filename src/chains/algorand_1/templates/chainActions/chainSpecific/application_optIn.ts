@@ -17,17 +17,8 @@ export const composeAction = async (
   suggestedParams: AlgorandSuggestedParams,
 ) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const {
-    from,
-    appIndex,
-    appArgs,
-    appAccounts,
-    appForeignApps,
-    appForeignAssets,
-    note,
-    lease,
-    reKeyTo,
-  } = argsEncodedForSdk
+  const { from, appIndex, appArgs, appAccounts, appForeignApps, appForeignAssets, note, lease, reKeyTo } =
+    argsEncodedForSdk
   const composedAction = algosdk.makeApplicationOptInTxn(
     from,
     suggestedParams,
