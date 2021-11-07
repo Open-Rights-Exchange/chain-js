@@ -281,19 +281,22 @@ export class AlgorandActionHelper {
     rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
     rawAction.fee = rawAction.fee || chainTxParams.minFee || MINIMUM_TRANSACTION_FEE_FALLBACK
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
-    // if expireSeconds options is provided, override firstRound and lastRound
-    if ((transactionOptions?.expireSeconds || 0) > 0) {
-      // adjust last block to be expireSeconds from now - first block will be ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS before the last block (e.g. 1000)
-      rawAction.lastRound =
-        chainTxParams.firstRound + Math.floor(transactionOptions?.expireSeconds / ALGORAND_CHAIN_BLOCK_FREQUENCY)
-      // we'll set first round 1000 before the last round - unless the current round is higher, in which case, use the current round
-      rawAction.firstRound = Math.max(
-        chainTxParams.firstRound,
-        rawAction.lastRound - ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS,
-      )
-    } else {
-      rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
-      rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS // always replace the lastblock with default (or provided options)
+    // if firstRound and/or lastRound are missing, set them
+    if (!rawAction?.firstRound && !rawAction?.lastRound) {
+      // if expireSeconds options is provided, override firstRound and lastRound
+      if ((transactionOptions?.expireSeconds || 0) > 0) {
+        // adjust last block to be expireSeconds from now - first block will be ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS before the last block (e.g. 1000)
+        rawAction.lastRound =
+          chainTxParams.firstRound + Math.floor(transactionOptions?.expireSeconds / ALGORAND_CHAIN_BLOCK_FREQUENCY)
+        // we'll set first round 1000 before the last round - unless the current round is higher, in which case, use the current round
+        rawAction.firstRound = Math.max(
+          chainTxParams.firstRound,
+          rawAction.lastRound - ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS,
+        )
+      } else {
+        rawAction.firstRound = rawAction.firstRound || chainTxParams.firstRound
+        rawAction.lastRound = rawAction.lastRound || rawAction.firstRound + ALGORAND_DEFAULT_TRANSACTION_VALID_BLOCKS // always replace the lastblock with default (or provided options)
+      }
     }
   }
 
