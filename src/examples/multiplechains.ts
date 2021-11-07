@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import { ChainFactory, Chain } from '../index'
-import { ChainActionType, ChainEndpoint, ConfirmType, ChainEntityNameBrand, ChainType } from '../models'
+import { ChainActionType, ChainEndpoint, ConfirmType, ChainType, TxExecutionPriority } from '../models'
 import { EthereumChainForkType } from '../chains/ethereum_1/models'
 
 require('dotenv').config()
@@ -92,8 +92,11 @@ async function sendCurrency(chain: Chain, options: any) {
   ]
   await sendCurrencyTx.prepareToBeSigned()
   await sendCurrencyTx.validate()
+  const fees = sendCurrencyTx.getSuggestedFee(TxExecutionPriority.Fast)
+  sendCurrencyTx.setDesiredFee(fees)
   await sendCurrencyTx.sign([options.privateKey])
   const response = await sendCurrencyTx.send(ConfirmType.None)
+  const actualFees = sendCurrencyTx.getActualCost()
   return response
 }
 

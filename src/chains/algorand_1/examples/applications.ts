@@ -9,9 +9,9 @@ import * as algosdk from 'algosdk'
 import { ChainFactory, ChainType } from '../../../index'
 import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
 import {
-  AlgorandActionAppCreate,
-  AlgorandActionAppMultiPurpose,
-  AlgorandActionAppUpdate,
+  AlgorandActionAppCreateParams,
+  AlgorandActionAppMultiPurposeParams,
+  AlgorandActionAppUpdateParams,
   AlgorandChainActionType,
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
@@ -37,7 +37,7 @@ const algoBetanetEndpoints = [{
   options: { indexerUrl: 'https://betanet-algorand.api.purestake.io/idx2', headers: [{ 'x-api-key': algoApiKey }] },
 }]
 
-const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
+const composeAppCreateParams: Partial<AlgorandActionAppCreateParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appLocalInts: 0,
   appLocalByteSlices: 0,
@@ -45,29 +45,29 @@ const composeAppCreateParams: Partial<AlgorandActionAppCreate> = {
   appGlobalByteSlices: 0,
   // appApprovalProgram & appClearProgram will be added in run()
 }
-const composeAppUpdateParams: Partial<AlgorandActionAppMultiPurpose> = {
+const composeAppUpdateParams: Partial<AlgorandActionAppMultiPurposeParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex: 13379916,
   // appApprovalProgram & appClearProgram will be added in run()
 }
-const composeAppOptInParams: AlgorandActionAppMultiPurpose = {
+const composeAppOptInParams: AlgorandActionAppMultiPurposeParams = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   note: 'test optIn',
   appIndex: 13379916,
 }
-const composeAppNoOpParams: Partial<AlgorandActionAppMultiPurpose> = {
+const composeAppNoOpParams: Partial<AlgorandActionAppMultiPurposeParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex: 13379916,
 }
-const composeAppCloseOutParams: Partial<AlgorandActionAppMultiPurpose> = {
+const composeAppCloseOutParams: Partial<AlgorandActionAppMultiPurposeParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex: 13379916,
 }
-const composeAppClearParams: Partial<AlgorandActionAppMultiPurpose> = {
+const composeAppClearParams: Partial<AlgorandActionAppMultiPurposeParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex: 13379916,
 }
-const composeAppDeleteParams: Partial<AlgorandActionAppMultiPurpose> = {
+const composeAppDeleteParams: Partial<AlgorandActionAppMultiPurposeParams> = {
   from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
   appIndex: 13379919,
 }

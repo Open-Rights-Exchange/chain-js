@@ -1,29 +1,5 @@
-import { AlgorandAddress } from './cryptoModels'
-import { ChainActionType } from '../../../models'
-
-/** ChainJS action type names */
-export enum AlgorandChainActionType {
-  AppClear = 'AppClear', // clear
-  AppCloseOut = 'AppCloseOut', // closeout
-  AppCreate = 'AppCreate', // create
-  AppDelete = 'AppDelete', // delete
-  AppNoOp = 'AppNoOp', // call
-  AppOptIn = 'AppOptIn', // optIn
-  AppUpdate = 'AppUpdate', // update
-  AssetCreate = 'AssetCreate',
-  AssetConfig = 'AssetConfig',
-  AssetDestroy = 'AssetDestroy',
-  AssetFreeze = 'AssetFreeze',
-  AssetTransfer = 'AssetTransfer',
-  KeyRegistration = 'KeyRegistration',
-  Payment = 'Payment',
-}
-
-export type AlgorandDecomposeReturn = {
-  chainActionType: ChainActionType | AlgorandChainActionType
-  args: any
-  partial?: boolean
-}
+// no specific model types to export
+import { AlgorandAddress } from '../models/cryptoModels'
 
 export type AlgorandKeyRegistrationParams = {
   from: AlgorandAddress // Algorand address of sender

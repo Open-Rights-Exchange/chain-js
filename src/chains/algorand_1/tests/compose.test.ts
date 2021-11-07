@@ -2,34 +2,34 @@
 import { composeAction } from '../algoCompose'
 // import { ChainActionType } from '../../../models'
 import {
-  composedAppCreate,
-  composedAppUpdate,
-  composedAssetCreate,
-  composedAppCloseOut,
-  composedAppOptIn,
-  composedAppNoOp,
   composedAppClear,
+  composedAppCloseOut,
+  composedAppCreate,
   composedAppDelete,
+  composedAppNoOp,
+  composedAppOptIn,
+  composedAppUpdate,
   composedAssetConfig,
+  composedAssetCreate,
+  composedAssetDestroy,
   composedAssetFreeze,
   composedAssetTransfer,
-  composedAssetDestroy,
   composedKeyRegistration,
   composedPayment,
 } from './mockups/composedActions'
 import { sourceApproval, sourceClear } from './mockups/sourceCode'
 import {
-  AlgorandChainActionType,
-  AlgorandActionAssetCreateParams,
+  AlgorandActionAppCreateParams,
+  AlgorandActionAppMultiPurposeParams,
+  AlgorandActionAppUpdateParams,
   AlgorandActionAssetConfigParams,
+  AlgorandActionAssetCreateParams,
+  AlgorandActionAssetDestroyParams,
   AlgorandActionAssetFreezeParams,
   AlgorandActionAssetTransferParams,
-  AlgorandActionAssetDestroyParams,
-  AlgorandKeyRegistrationParams,
   AlgorandActionPaymentParams,
-  AlgorandActionAppCreate,
-  AlgorandActionAppMultiPurpose,
-  AlgorandActionAppUpdate,
+  AlgorandChainActionType,
+  AlgorandKeyRegistrationParams,
 } from '../models'
 import { getChainState } from './mockups/chainState'
 
@@ -177,7 +177,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app create action object', async () => {
-    const args: Partial<AlgorandActionAppCreate> = {
+    const args: Partial<AlgorandActionAppCreateParams> = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       appLocalInts: 0,
       appLocalByteSlices: 0,
@@ -197,7 +197,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app update action object', async () => {
-    const args: Partial<AlgorandActionAppUpdate> = {
+    const args: Partial<AlgorandActionAppUpdateParams> = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       appIndex: 13379916,
       appApprovalProgram: sourceApproval,
@@ -214,7 +214,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app optIn action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test optIn',
       appIndex: 13379916,
@@ -230,7 +230,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app close out action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test close out',
       appIndex: 13379916,
@@ -246,7 +246,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app noOp base64 & UintArray appArgs action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test noOp',
       appIndex: 13379916,
@@ -263,7 +263,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app noOp hex appArgs action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test noOp',
       appIndex: 13379916,
@@ -279,7 +279,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app noOp readable appArgs action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test noOp',
       appIndex: 13379916,
@@ -295,7 +295,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app clear action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test clear',
       appIndex: 13379916,
@@ -311,7 +311,7 @@ describe('Compose Algorand Chain Actions', () => {
   })
 
   it('creates app delete action object', async () => {
-    const args: AlgorandActionAppMultiPurpose = {
+    const args: AlgorandActionAppMultiPurposeParams = {
       from: 'VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ',
       note: 'test clear',
       appIndex: 13379916,

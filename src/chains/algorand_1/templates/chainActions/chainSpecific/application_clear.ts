@@ -1,6 +1,6 @@
 import * as algosdk from 'algosdk'
 import {
-  AlgorandActionAppMultiPurpose,
+  AlgorandActionAppMultiPurposeParams,
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
   AlgorandSuggestedParams,
@@ -12,19 +12,13 @@ import { AlgorandActionHelper } from '../../../algoAction'
 import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that clears a user's state in an application */
-export const composeAction = async (args: AlgorandActionAppMultiPurpose, suggestedParams: AlgorandSuggestedParams) => {
+export const composeAction = async (
+  args: AlgorandActionAppMultiPurposeParams,
+  suggestedParams: AlgorandSuggestedParams,
+) => {
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
-  const {
-    from,
-    appIndex,
-    appArgs,
-    appAccounts,
-    appForeignApps,
-    appForeignAssets,
-    note,
-    lease,
-    reKeyTo,
-  } = argsEncodedForSdk
+  const { from, appIndex, appArgs, appAccounts, appForeignApps, appForeignAssets, note, lease, reKeyTo } =
+    argsEncodedForSdk
   const composedAction = algosdk.makeApplicationClearStateTxn(
     from,
     suggestedParams,

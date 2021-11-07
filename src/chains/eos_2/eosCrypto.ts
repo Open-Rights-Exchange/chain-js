@@ -59,11 +59,7 @@ export async function encryptWithPublicKey(
     curveType: Asymmetric.EciesCurveType.Secp256k1,
     scheme: AsymmetricScheme.EOS_ASYMMETRIC_SCHEME_NAME,
   }
-  const publicKeyUncompressed = eosEcc
-    .PublicKey(publicKey)
-    .toUncompressed()
-    .toBuffer()
-    .toString('hex')
+  const publicKeyUncompressed = eosEcc.PublicKey(publicKey).toUncompressed().toBuffer().toString('hex')
   const response = Asymmetric.encryptWithPublicKey(publicKeyUncompressed, unencrypted, useOptions)
   return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
 }
@@ -77,10 +73,7 @@ export async function decryptWithPrivateKey(
   options?: Asymmetric.EciesOptions,
 ): Promise<string> {
   const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Secp256k1 }
-  const privateKeyHex = eosEcc
-    .PrivateKey(privateKey)
-    .toBuffer()
-    .toString('hex')
+  const privateKeyHex = eosEcc.PrivateKey(privateKey).toBuffer().toString('hex')
   const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.AsymmetricEncryptedData
   return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyHex, useOptions)
 }

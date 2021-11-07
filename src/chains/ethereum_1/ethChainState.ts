@@ -495,8 +495,9 @@ export class EthereumChainState implements ChainState {
       rejectAwaitTransaction(
         reject,
         ChainErrorDetailCode.ConfirmTransactionTimeout,
-        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${(checkInterval / 1000) *
-          blocksToCheck} seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
+        `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${
+          (checkInterval / 1000) * blocksToCheck
+        } seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
         null,
       )
       return

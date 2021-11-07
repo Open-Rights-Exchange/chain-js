@@ -23,3 +23,6 @@ export const NATIVE_CHAIN_TOKEN_SYMBOL = 'EOS'
 
 /** The chain address of the native (default) token contract (if any) */
 export const NATIVE_CHAIN_TOKEN_ADDRESS = 'eosio.token'
+
+/** The number of decimal places for the EOS token  */
+export const NATIVE_CHAIN_TOKEN_PRECISION = 4

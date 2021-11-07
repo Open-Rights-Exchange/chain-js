@@ -9,7 +9,7 @@ import { erc20Abi } from '../../abis/erc20Abi'
 import { toEthereumAddress, isNullOrEmptyEthereumValue } from '../../../helpers'
 import { getArrayIndexOrNull, toTokenValueString } from '../../../../../helpers'
 
-export interface Erc20TransferAndCallParams {
+export interface Erc677TransferAndCallParams {
   contractAddress: EthereumAddress
   from?: EthereumAddress
   precision?: number
@@ -18,7 +18,7 @@ export interface Erc20TransferAndCallParams {
   data: EthereumMultiValue[]
 }
 
-export const composeAction = ({ contractAddress, from, precision, to, value, data }: Erc20TransferAndCallParams) => {
+export const composeAction = ({ contractAddress, from, precision, to, value, data }: Erc677TransferAndCallParams) => {
   const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
@@ -35,7 +35,7 @@ export const composeAction = ({ contractAddress, from, precision, to, value, dat
 export const decomposeAction = (action: EthereumTransactionAction): EthereumDecomposeReturn => {
   const { to, from, contract } = action
   if (contract?.method === 'transferAndCall') {
-    const returnData: Erc20TransferAndCallParams = {
+    const returnData: Erc677TransferAndCallParams = {
       contractAddress: to,
       from,
       to: toEthereumAddress(getArrayIndexOrNull(contract?.parameters, 0) as string),
