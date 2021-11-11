@@ -16,7 +16,7 @@ export interface Erc1155SafeTransferFromParams {
   to: EthereumAddress
   tokenId: number
   quantity: number
-  data: number
+  data?: number
 }
 
 export const composeAction = ({
@@ -30,7 +30,7 @@ export const composeAction = ({
 }: Erc1155SafeTransferFromParams) => {
   const contract = {
     abi: erc1155Abi,
-    parameters: [transferFrom, to, tokenId, quantity, data],
+    parameters: [transferFrom, to, tokenId, quantity, data || 0],
     method: 'safeTransferFrom',
   }
   return {

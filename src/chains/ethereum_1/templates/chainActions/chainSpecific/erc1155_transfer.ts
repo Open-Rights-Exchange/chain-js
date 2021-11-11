@@ -16,13 +16,13 @@ export interface Erc1155TransferParams {
   to: EthereumAddress
   tokenId: number
   quantity: number
-  data: EthereumMultiValue[]
+  data?: EthereumMultiValue[]
 }
 
 export const composeAction = ({ contractAddress, from, to, tokenId, quantity, data }: Erc1155TransferParams) => {
   const contract = {
     abi: erc1155Abi,
-    parameters: [to, tokenId, quantity, data],
+    parameters: [to, tokenId, quantity, data || 0],
     method: 'transfer',
   }
   return {
