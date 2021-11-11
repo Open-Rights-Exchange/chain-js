@@ -18,9 +18,9 @@
     "target": "es5",
     "baseUrl": "./",
     "paths": {
-      "*" : ["src/@customTypes/*"]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "composite": true
   },
   "exclude": [
     "dist",
