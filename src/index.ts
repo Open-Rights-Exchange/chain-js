@@ -1,4 +1,4 @@
-import { ChainFactory } from './chainFactory'
+import { ChainFactory, PluginChainFactory } from './chainFactory'
 import { ChainError, throwNewError } from './errors'
 import { Account, Chain, CreateAccount, Transaction, ChainJsPlugin, ChainJsPluginOptions } from './interfaces'
 import * as AlgorandV1 from './chains/algorand_1'
@@ -44,5 +44,12 @@ export {
   Errors, //Note that individual errors are also returned. These need to be removed byt will break existing code 
   CryptoHelpers,
   CryptoAsymmetricModels,
-  CryptoAsymmetricHelpers
+  CryptoAsymmetricHelpers,
+  PluginChainFactory
 }
+
+// Note the code using chain specific helpers will also break. 
+// So if external code is importing somethin like 
+// import { HelpersEos } from '@open-rights-exchange/chainjs'
+// That will now need to be imported from the EOS plugin 
+// Unless we leave the code in chain-js main
