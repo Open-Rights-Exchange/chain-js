@@ -10,15 +10,11 @@ import { throwNewError } from './errors'
 export class ChainFactory{
   //plugins: {new(): Chain;}[], 
   public create = (chainType: ChainType, endpoints: ChainEndpoint[], settings?: any): Chain => {
-    /*
-    var chain : Chain = null;
-    plugins.forEach(plugin => {
-      console.log(Object.values(plugin)); 
-    });
-    */
+
     switch (chainType) {
       case ChainType.EosV2:
         //return new ChainEosV2(endpoints, settings)
+        throwNewError(`Chain type ${chainType} must be used via plugin`)
       case ChainType.EthereumV1:
         return new ChainEthereumV1(endpoints, settings)
       case ChainType.AlgorandV1:
