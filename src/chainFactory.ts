@@ -1,5 +1,5 @@
 //import { ChainEosV2 } from './chains/eos_2/ChainEosV2'
-import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
+//import { ChainEthereumV1 } from './chains/ethereum_1/ChainEthereumV1'
 import { ChainAlgorandV1 } from './chains/algorand_1/ChainAlgorandV1'
 import { Chain } from './interfaces'
 import { ChainType, ChainEndpoint } from './models'
@@ -16,7 +16,8 @@ export class ChainFactory{
         //return new ChainEosV2(endpoints, settings)
         throwNewError(`Chain type ${chainType} must be used via plugin`)
       case ChainType.EthereumV1:
-        return new ChainEthereumV1(endpoints, settings)
+        //return new ChainEthereumV1(endpoints, settings)
+        throwNewError(`Chain type ${chainType} must be used via plugin`)
       case ChainType.AlgorandV1:
         return new ChainAlgorandV1(endpoints, settings)
       default:
