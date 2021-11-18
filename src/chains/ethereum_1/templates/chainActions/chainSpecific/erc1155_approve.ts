@@ -16,13 +16,13 @@ export interface Erc1155ApproveParams {
   to: EthereumAddress
   tokenId: number
   quantity: number
-  data: EthereumMultiValue[]
+  data?: EthereumMultiValue[]
 }
 
 export const composeAction = ({ contractAddress, from, to, tokenId, quantity, data }: Erc1155ApproveParams) => {
   const contract = {
     abi: erc1155Abi,
-    parameters: [to, tokenId, quantity, data],
+    parameters: [to, tokenId, quantity, data || 0],
     method: 'approve',
   }
   return {

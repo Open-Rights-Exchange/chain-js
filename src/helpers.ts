@@ -106,6 +106,7 @@ export function jsonParseAndRevive(value: any) {
 }
 
 export function getArrayIndexOrNull(array: any[] = [], index: number) {
+  if (!array) return null
   if (array.length > index && !isNullOrEmpty(array[index])) {
     return array[index]
   }

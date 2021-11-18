@@ -15,14 +15,14 @@ export interface Erc677TransferAndCallParams {
   precision?: number
   to: EthereumAddress
   value: string
-  data: EthereumMultiValue[]
+  data?: EthereumMultiValue[]
 }
 
 export const composeAction = ({ contractAddress, from, precision, to, value, data }: Erc677TransferAndCallParams) => {
   const valueString = toTokenValueString(value, 10, precision)
   const contract = {
     abi: erc20Abi,
-    parameters: [to, valueString, data],
+    parameters: [to, valueString, data || 0],
     method: 'transferAndCall',
   }
   return {

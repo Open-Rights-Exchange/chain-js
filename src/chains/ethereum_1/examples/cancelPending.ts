@@ -20,6 +20,12 @@ const ropstenEndpoints: EthereumChainEndpoint[] = [
   },
 ]
 
+const mainnetEndpoints: EthereumChainEndpoint[] = [
+  {
+    url: 'https://mainnet.infura.io/v3/fc379c787fde4363b91a61a345e3620a',
+  },
+]
+
 function range(start: number, step: number) {
   return Array.apply(0, Array(step)).map((element: number, index: number) => index + start)
 }
@@ -35,9 +41,21 @@ const ropstenChainOptions: EthereumChainSettings = {
   },
 }
 
+const mainChainOptions: EthereumChainSettings = {
+  chainForkType: {
+    chainName: 'mainnet',
+    hardFork: 'istanbul',
+  },
+  defaultTransactionSettings: {
+    maxFeeIncreasePercentage: 20,
+    executionPriority: TxExecutionPriority.Fast,
+  },
+}
+
 // address (and matching private key) to cancel all pending transactions for - replace with your address
 const accountToCancelFor = env.ROPSTEN_erc20acc
 const privateKeyForCancelAccount = env.ROPSTEN_erc20acc_PRIVATE_KEY as any
+
 ;(async () => {
   try {
     const ethChain = new ChainFactory().create(
