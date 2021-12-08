@@ -146,10 +146,10 @@ export type AlgorandTxEncodedForChain = {
   rcv?: Buffer // Buffer.from(to.publicKey)
   name?: string
   tag?: Buffer // Buffer.from(...)
-  amt?: number // integer
+  amt?: number | bigint // integer
   note?: Buffer // Buffer.from(note)
   snd?: Buffer // Buffer.from(from.publicKey)
-  type?: AlgorandTransactionTypeCode // type
+  type?: AlgorandTransactionTypeCode | string // type
   fv?: number // firstRound
   lv?: number // lastRound
   fee?: number // fee
@@ -164,7 +164,7 @@ export type AlgorandTxEncodedForChain = {
   votekd?: number // voteKeyDilution
   caid?: number // assetIndex
   apar?: {
-    t?: number // assetTotal
+    t?: number | bigint // assetTotal
     df?: boolean // assetDefaultFrozen
     dc?: number // assetDecimals
     m?: Buffer // Buffer.from(assetManager.publicKey)
@@ -174,7 +174,7 @@ export type AlgorandTxEncodedForChain = {
     an?: string // assetName
     un?: string // assetUnitName
     au?: string // assetURL
-    am?: string // Buffer.from(assetMetadataHash)
+    am?: Buffer // Buffer.from(assetMetadataHash)
   }
   apid?: number // appIndex,
   apan?: number // appOnComplete
