@@ -263,7 +263,7 @@ export class AlgorandActionHelper {
     if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
-    params.group = toBufferIfNeededFromAny(group)
+    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBufferIfNeededFromAny(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
     if (!isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey)) params.selectionKey = toBuffer(selectionKey)
