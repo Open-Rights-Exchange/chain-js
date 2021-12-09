@@ -17,6 +17,7 @@ import {
   jsonParseAndRevive,
   removeHexPrefix,
   toBuffer,
+  toBufferIfNeededFromAny,
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
@@ -262,15 +263,7 @@ export class AlgorandActionHelper {
     if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
-    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) {
-      if (isHexString(group)) {
-        params.group = toBuffer(group, 'hex')
-      } else if (isBase64Encoded(group)) {
-        params.group = toBuffer(group, 'base64')
-      } else {
-        params.group = toBuffer(group)
-      }
-    }
+    params.group = toBufferIfNeededFromAny(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
     if (!isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey)) params.selectionKey = toBuffer(selectionKey)
