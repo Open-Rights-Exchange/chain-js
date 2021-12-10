@@ -243,6 +243,7 @@ export class AlgorandTransaction implements Transaction {
       const chainTxHeaderParams = this._chainState.chainInfo.nativeInfo.transactionHeaderParams
       this._actionHelper.applyCurrentTxHeaderParamsWhereNeeded(chainTxHeaderParams, this.options)
       this._algoSdkTransaction = new AlgoTransactionClass(this._actionHelper.actionEncodedForSdk as any)
+      // Algosdk's Transaction Class doesnt allow instantiating group id from constructor thus we explicitly set it unlike other params.
       this._algoSdkTransaction.group = this._actionHelper.actionEncodedForSdk.group
     }
   }
