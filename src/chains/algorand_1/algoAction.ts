@@ -10,7 +10,6 @@ import {
   isANumber,
   isAString,
   isAUint8Array,
-  isBase64Encoded,
   isBase64EncodedAndNotUtf,
   isHexString,
   isNullOrEmpty,
