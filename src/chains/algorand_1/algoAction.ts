@@ -10,12 +10,14 @@ import {
   isANumber,
   isAString,
   isAUint8Array,
+  isBase64Encoded,
   isBase64EncodedAndNotUtf,
   isHexString,
   isNullOrEmpty,
   jsonParseAndRevive,
   removeHexPrefix,
   toBuffer,
+  toBufferIfNeededFromAny,
 } from '../../helpers'
 import { throwNewError } from '../../errors'
 import {
@@ -133,7 +135,7 @@ export class AlgorandActionHelper {
         : undefined,
       // raw appArgs is an array of UInt8Array - since we cant know what type to decode it to, we convert each to a hexstring - with '0x' prefix for clarity
       appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.decodeRawAppArgsToReadable(this.raw.appArgs) : undefined,
-      group: this.raw.group ? bufferToString(this.raw.group) : undefined,
+      group: this.raw.group ? bufferToString(this.raw.group, 'base64') : undefined,
       lease: !isNullOrEmpty(this.raw.lease) ? (algosdk.decodeObj(this.raw.lease) as any) : undefined,
       note: !isNullOrEmpty(this.raw.note) ? (algosdk.decodeObj(this.raw.note) as any) : undefined,
       selectionKey: this.raw.selectionKey ? bufferToString(this.raw.selectionKey) : undefined,
@@ -261,7 +263,7 @@ export class AlgorandActionHelper {
     if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
       params.appClearProgram = hexStringToByteArray(appClearProgram)
     }
-    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBuffer(group)
+    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBufferIfNeededFromAny(group)
     if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
     if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
     if (!isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey)) params.selectionKey = toBuffer(selectionKey)
