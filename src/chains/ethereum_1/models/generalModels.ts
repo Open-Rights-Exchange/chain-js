@@ -129,3 +129,6 @@ export enum EthUnit {
   Gether = 'gether', // 1,000,000,000 Eth
   Thether = 'tether', // 1,000,000,000,000 Eth
 }
+
+/** a map between alternate formats of a unit string and supported unit string */
+export const AlternateUnitMap = [{ from: 'eth', to: 'ether' }]
