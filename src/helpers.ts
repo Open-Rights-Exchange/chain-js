@@ -431,6 +431,21 @@ export function nullifyIfEmpty(value: any) {
   return value
 }
 
+/** convert to Buffer if needed from hex, base64, or other encoded value */
+export function toBufferIfNeededFromAny(value: any) {
+  if (!value) return value
+  if (Buffer.isBuffer(value)) return value
+  let buffer: Buffer
+  if (isHexString(value)) {
+    buffer = toBuffer(value, 'hex')
+  } else if (isBase64Encoded(value)) {
+    buffer = toBuffer(value, 'base64')
+  } else {
+    buffer = toBuffer(value)
+  }
+  return buffer
+}
+
 /** Attempts to infer the precision of a token (eg ERC20) by counting digits after the decimal places in a number value string
  *  e.g. '0.120' = 3  - If no decimal places in the string, then returns default precision for token i.e. 0
  */
