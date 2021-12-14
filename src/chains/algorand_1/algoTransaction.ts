@@ -561,10 +561,7 @@ export class AlgorandTransaction implements Transaction {
       this.signMultiSigTransaction(privateKeys)
     } else {
       const privateKey = hexStringToByteArray(privateKeys[0])
-      const signResults: AlgorandTxSignResults = algosdk.signTransaction(
-        this._actionHelper.actionEncodedForSdk as TransactionLike,
-        privateKey,
-      )
+      const signResults: AlgorandTxSignResults = algosdk.signTransaction(this._algoSdkTransaction, privateKey)
       this.setRawTransactionFromSignResults(signResults)
       // the signer is the publicKey associated with the privateKey
       this._signedByPublicKey = getAlgorandPublicKeyFromPrivateKey(
