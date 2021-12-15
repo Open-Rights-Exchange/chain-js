@@ -106,6 +106,7 @@ export function jsonParseAndRevive(value: any) {
 }
 
 export function getArrayIndexOrNull(array: any[] = [], index: number) {
+  if (!array) return null
   if (array.length > index && !isNullOrEmpty(array[index])) {
     return array[index]
   }
@@ -428,6 +429,21 @@ export function objectHasProperty(obj: object, propertyName: string) {
 export function nullifyIfEmpty(value: any) {
   if (isNullOrEmpty(value)) return null
   return value
+}
+
+/** convert to Buffer if needed from hex, base64, or other encoded value */
+export function toBufferIfNeededFromAny(value: any) {
+  if (!value) return value
+  if (Buffer.isBuffer(value)) return value
+  let buffer: Buffer
+  if (isHexString(value)) {
+    buffer = toBuffer(value, 'hex')
+  } else if (isBase64Encoded(value)) {
+    buffer = toBuffer(value, 'base64')
+  } else {
+    buffer = toBuffer(value)
+  }
+  return buffer
 }
 
 /** Attempts to infer the precision of a token (eg ERC20) by counting digits after the decimal places in a number value string
