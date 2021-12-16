@@ -1,6 +1,7 @@
 import * as algosdk from 'algosdk'
 import { TextEncoder } from 'util'
-import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from '../../../helpers'
+// import { byteArrayToHexString, isAUint8Array, isHexString, isNullOrEmpty } from '../../../helpers'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgoClient,
   AlgorandMultisigAccount,
@@ -12,7 +13,7 @@ import {
 
 /** Calculates the multisig address using the multisig options including version, threshhold and addresses */
 export function determineMultiSigAddress(options: AlgorandMultisigOptions): AlgorandMultisigAccount {
-  if (isNullOrEmpty(options)) return null
+  if (Helpers.isNullOrEmpty(options)) return null
   return algosdk.multisigAddress(options)
 }
 
@@ -21,7 +22,7 @@ export function toRawTransactionFromSignResults(signResult: AlgorandTxSignResult
   let returnTx
   let transaction
   const { txID, blob } = signResult
-  if (isAUint8Array(blob)) {
+  if (Helpers.isAUint8Array(blob)) {
     transaction = algosdk.decodeObj(blob) as any
   } else {
     transaction = blob
@@ -60,10 +61,10 @@ export async function compileIfSourceCodeIfNeeded(
   algoClient: AlgoClient,
 ): Promise<string> {
   if (!program) return undefined
-  if (isHexString(program)) {
+  if (Helpers.isHexString(program)) {
     return program as string
   }
   // compile the uncompiled program (into a hex string)
   const byteCode = await compileFromSourceCode(program as string, algoClient)
-  return byteArrayToHexString(byteCode)
+  return Helpers.byteArrayToHexString(byteCode)
 }

@@ -1,6 +1,7 @@
-import { throwNewError } from '../../errors'
-import { CreateAccount } from '../../interfaces'
-import { isNullOrEmpty, notSupported } from '../../helpers'
+// import { throwNewError } from '../../errors'
+// import { CreateAccount } from '../../interfaces'
+// import { isNullOrEmpty, notSupported } from '../../helpers'
+import { Helpers, Errors, Interfaces } from '@open-rights-exchange/chainjs'
 import {
   AlgorandCreateAccountOptions,
   AlgorandEntityName,
@@ -20,7 +21,7 @@ import {
 /** Helper class to compose a transction for creating a new chain account
  *  Handles native accounts
  *  Generates new account keys if not provide */
-export class AlgorandCreateAccount implements CreateAccount {
+export class AlgorandCreateAccount implements Interfaces.CreateAccount {
   private _publicKey: AlgorandPublicKey
 
   private _chainState: AlgorandChainState
@@ -46,7 +47,7 @@ export class AlgorandCreateAccount implements CreateAccount {
 
   /** Returns whether the transaction is a multisig transaction */
   public get isMultisig(): boolean {
-    return !isNullOrEmpty(this.options?.multisigOptions)
+    return !Helpers.isNullOrEmpty(this.options?.multisigOptions)
   }
 
   // ---- Interface implementation
@@ -101,7 +102,7 @@ export class AlgorandCreateAccount implements CreateAccount {
    * Hence there is no transaction object attached to AlgorandCreateAccount class
    */
   get transaction(): any {
-    throwNewError(
+    Errors.throwNewError(
       'Algorand account creation does not require any on chain transactions. You should always first check the supportsTransactionToCreateAccount property - if false, transaction is not supported/required for this chain type',
     )
     return null
@@ -111,7 +112,7 @@ export class AlgorandCreateAccount implements CreateAccount {
    * Algorand does not require a create account transaction to be sent to the chain
    */
   async composeTransaction(): Promise<void> {
-    notSupported('CreateAccount.composeTransaction')
+    Helpers.notSupported('CreateAccount.composeTransaction')
   }
 
   // TODO: Support recycling & alreadyExists
@@ -119,7 +120,11 @@ export class AlgorandCreateAccount implements CreateAccount {
    * Recycling is not supported for now. Will be supported in the future.
    */
   async determineNewAccountName(accountName: AlgorandEntityName): Promise<any> {
-    return { alreadyExists: false, newAccountName: accountName, canRecycle: false }
+    return {
+      alreadyExists: false,
+      newAccountName: accountName,
+      canRecycle: false,
+    }
   }
 
   /** Returns the Algorand Address as AlgorandEntityName for the public key provided in options -
@@ -164,7 +169,7 @@ export class AlgorandCreateAccount implements CreateAccount {
   private assertValidOptions(options: AlgorandCreateAccountOptions) {
     const { publicKey } = options
     if (publicKey && !isValidAlgorandPublicKey(publicKey)) {
-      throwNewError('Invalid Option - Provided publicKey isnt valid')
+      Errors.throwNewError('Invalid Option - Provided publicKey isnt valid')
     }
   }
 
@@ -173,7 +178,7 @@ export class AlgorandCreateAccount implements CreateAccount {
     const { newKeysOptions } = this._options || {}
     const { password, encryptionOptions } = newKeysOptions || {}
     if (!password || !encryptionOptions) {
-      throwNewError('Invalid Option - Missing password or encryptionOptions to use for generateKeysIfNeeded')
+      Errors.throwNewError('Invalid Option - Missing password or encryptionOptions to use for generateKeysIfNeeded')
     }
   }
 }

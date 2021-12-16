@@ -1,13 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { notImplemented } from '../../helpers'
-import { Account } from '../../interfaces'
-import { throwNewError } from '../../errors'
+// import { notImplemented } from '../../helpers'
+// import { Account } from '../../interfaces'
+// import { throwNewError } from '../../errors'
+import {
+  Models,
+  ChainFactory,
+  Helpers,
+  Chain,
+  ChainJsPlugin,
+  Crypto,
+  Errors,
+  Interfaces,
+} from '@open-rights-exchange/chainjs'
 import { AlgorandAccountStruct, AlgorandAddress, AlgorandPublicKey } from './models'
 import { AlgorandChainState } from './algoChainState'
 import { toAddressFromPublicKey } from './helpers/cryptoModelHelpers'
 import { isValidAlgorandAddress, isValidAlgorandPublicKey } from './helpers'
 
-export class AlgorandAccount implements Account {
+export class AlgorandAccount implements Interfaces.Account {
   private _account: AlgorandAccountStruct
 
   private _publicKey: AlgorandPublicKey
@@ -20,7 +30,7 @@ export class AlgorandAccount implements Account {
 
   /** Whether the account is currently unused and can be reused - possible in Algorand due to the "rekeying" feature */
   get canBeRecycled(): boolean {
-    return notImplemented()
+    return Helpers.notImplemented()
   }
 
   /** Algorand address */
@@ -83,19 +93,19 @@ export class AlgorandAccount implements Account {
 
   private assertHasAccount(): void {
     if (!this._account) {
-      throwNewError('Account not retrieved from chain')
+      Errors.throwNewError('Account not retrieved from chain')
     }
   }
 
   private assertValidAlgorandAddress(address: AlgorandAddress): void {
     if (!isValidAlgorandAddress(address)) {
-      throwNewError('Not a valid algorand address')
+      Errors.throwNewError('Not a valid algorand address')
     }
   }
 
   private assertValidAlgorandPublickey(publicKey: AlgorandPublicKey): void {
     if (!isValidAlgorandPublicKey(publicKey)) {
-      throwNewError('Not a valid algorand public key')
+      Errors.throwNewError('Not a valid algorand public key')
     }
   }
 }

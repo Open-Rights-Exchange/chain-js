@@ -4,8 +4,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, TokenTransferParams, TxExecutionPriority } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainActionType, ChainEndpoint, TokenTransferParams, TxExecutionPriority } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandActionAssetConfigParams,
   AlgorandChainActionType,
@@ -16,7 +17,9 @@ import {
   AlgorandActionAssetTransferParams,
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+// import { toChainEntityName } from '../../../helpers'
+
+
 
 require('dotenv').config()
 
@@ -111,12 +114,12 @@ const composeAcceptAssetParams: AlgorandActionAssetTransferParams = {
 }
 
 // use standard TokenTransfer action type
-const composeTokenTransferParams: TokenTransferParams = {
-  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
-  toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+const composeTokenTransferParams: Models.TokenTransferParams = {
+  fromAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
   amount: '0.002',
   memo: 'example',
-  contractName: toChainEntityName('12739610'),
+  contractName: Helpers.toChainEntityName('12739610'),
   symbol: toAlgorandSymbol('Demo1'),
   precision: 4,
 }
@@ -131,7 +134,7 @@ const testAppOptIn = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)

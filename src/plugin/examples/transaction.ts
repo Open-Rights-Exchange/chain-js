@@ -5,14 +5,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TxExecutionPriority, ConfirmType } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainEndpoint, ChainActionType, TxExecutionPriority, ConfirmType } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import { AlgorandAddress, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
 import { AlgorandTransaction } from '../algoTransaction'
 import { AlgorandChainState } from '../algoChainState'
-import { ChainAlgorandV1 } from '../ChainAlgorandV1'
-import { jsonParseAndRevive, sleep } from '../../../helpers'
+import ChainAlgorandV1 from '../ChainAlgorandV1'
+// import { jsonParseAndRevive, sleep } from '../../../helpers'
+
 
 require('dotenv').config()
 
@@ -63,7 +65,7 @@ const rawTransactionType2 = // has serialized UInt8Array
 async function run() {
   /** Create Algorand chain instance */
   const chainSettings = { defaultTransactionSettings: { expireSeconds: 100 } } // optional setting
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints, chainSettings)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints, chainSettings)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -71,13 +73,13 @@ async function run() {
   /** Compose and send transaction */
   const transaction = await algoTest.new.Transaction()
   // await transaction.setTransaction(jsonParseAndRevive(rawTransaction))
-  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(Models.ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   // transaction.setTransaction(action)
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])
   console.log('decomposed actions: ', decomposed)
-  const suggestedFee = await transaction.getSuggestedFee(TxExecutionPriority.Average)
+  const suggestedFee = await transaction.getSuggestedFee(Models.TxExecutionPriority.Average)
   console.log('suggestedFee: ', suggestedFee)
   await transaction.setDesiredFee(suggestedFee)
   await transaction.prepareToBeSigned()
@@ -85,7 +87,7 @@ async function run() {
   await transaction.sign([toAlgorandPrivateKey(env.ALGOTESTNET_testaccount_PRIVATE_KEY)])
   console.log('missing signatures: ', transaction.missingSignatures)
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.None)))
+    console.log('send response: %o', JSON.stringify(await transaction.send(Models.ConfirmType.None)))
     // console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
     // console.log('actual fee: ', await transaction.getActualCost()) // will throw if tx not yet on-chain e.g. If transaction.send uses ConfirmType.None
   } catch (err) {

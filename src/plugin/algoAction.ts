@@ -1,24 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 import * as algosdk from 'algosdk'
 import { Transaction as AlgoTransactionClass } from 'algosdk'
-import {
-  bigIntToUint8Array,
-  bufferToString,
-  byteArrayToHexString,
-  hasHexPrefix,
-  hexStringToByteArray,
-  isANumber,
-  isAString,
-  isAUint8Array,
-  isBase64EncodedAndNotUtf,
-  isHexString,
-  isNullOrEmpty,
-  jsonParseAndRevive,
-  removeHexPrefix,
-  toBuffer,
-  toBufferIfNeededFromAny,
-} from '../../helpers'
-import { throwNewError } from '../../errors'
+import { Helpers, Errors } from '@open-rights-exchange/chainjs'
 import {
   AlgorandTransactionOptions,
   AlgorandTxAction,
@@ -80,11 +63,11 @@ export class AlgorandActionHelper {
       | AlgorandRawTransactionMultisigStruct
       | algosdk.Transaction,
   ) {
-    if (isNullOrEmpty(actionParam)) {
-      throwNewError('Missing action')
+    if (Helpers.isNullOrEmpty(actionParam)) {
+      Errors.throwNewError('Missing action')
     }
     // Stringify & revive to reinstate Uint8Array objects
-    const action = jsonParseAndRevive(JSON.stringify(actionParam))
+    const action = Helpers.jsonParseAndRevive(JSON.stringify(actionParam))
     // TODO Algo - consider if any validation here is needed - should probably check .from when getting action
     // We cant check for .from here since we want to use action helper to add header values to a partial action
     // if (isNullOrEmpty(action.from)) {
@@ -112,7 +95,7 @@ export class AlgorandActionHelper {
   public get action(): AlgorandTxAction {
     const returnVal = {
       ...this.raw,
-      genesisHash: this.raw.genesisHash ? bufferToString(this.raw.genesisHash, 'base64') : undefined,
+      genesisHash: this.raw.genesisHash ? Helpers.bufferToString(this.raw.genesisHash, 'base64') : undefined,
       to: toAlgorandAddressFromRawStruct(this.raw.to),
       from: toAlgorandAddressFromRawStruct(this.raw.from),
       closeRemainderTo: toAlgorandAddressFromRawStruct(this.raw.closeRemainderTo),
@@ -123,23 +106,23 @@ export class AlgorandActionHelper {
       assetRevocationTarget: toAlgorandAddressFromRawStruct(this.raw.assetRevocationTarget),
       freezeAccount: toAlgorandAddressFromRawStruct(this.raw.freezeAccount),
       reKeyTo: toAlgorandAddressFromRawStruct(this.raw.reKeyTo),
-      appAccounts: !isNullOrEmpty(this.raw.appAccounts)
+      appAccounts: !Helpers.isNullOrEmpty(this.raw.appAccounts)
         ? this.raw.appAccounts.map(toAlgorandAddressFromRawStruct)
         : undefined,
-      appApprovalProgram: !isNullOrEmpty(this.raw.appApprovalProgram)
-        ? byteArrayToHexString(this.raw.appApprovalProgram)
+      appApprovalProgram: !Helpers.isNullOrEmpty(this.raw.appApprovalProgram)
+        ? Helpers.byteArrayToHexString(this.raw.appApprovalProgram)
         : undefined,
-      appClearProgram: !isNullOrEmpty(this.raw.appClearProgram)
-        ? byteArrayToHexString(this.raw.appClearProgram)
+      appClearProgram: !Helpers.isNullOrEmpty(this.raw.appClearProgram)
+        ? Helpers.byteArrayToHexString(this.raw.appClearProgram)
         : undefined,
       // raw appArgs is an array of UInt8Array - since we cant know what type to decode it to, we convert each to a hexstring - with '0x' prefix for clarity
-      appArgs: !isNullOrEmpty(this.raw.appArgs) ? this.decodeRawAppArgsToReadable(this.raw.appArgs) : undefined,
-      group: this.raw.group ? bufferToString(this.raw.group, 'base64') : undefined,
-      lease: !isNullOrEmpty(this.raw.lease) ? (algosdk.decodeObj(this.raw.lease) as any) : undefined,
-      note: !isNullOrEmpty(this.raw.note) ? (algosdk.decodeObj(this.raw.note) as any) : undefined,
-      selectionKey: this.raw.selectionKey ? bufferToString(this.raw.selectionKey) : undefined,
-      tag: this.raw.tag ? bufferToString(this.raw.tag) : undefined,
-      voteKey: this.raw.voteKey ? bufferToString(this.raw.voteKey) : undefined,
+      appArgs: !Helpers.isNullOrEmpty(this.raw.appArgs) ? this.decodeRawAppArgsToReadable(this.raw.appArgs) : undefined,
+      group: this.raw.group ? Helpers.bufferToString(this.raw.group) : undefined,
+      lease: !Helpers.isNullOrEmpty(this.raw.lease) ? (algosdk.decodeObj(this.raw.lease) as any) : undefined,
+      note: !Helpers.isNullOrEmpty(this.raw.note) ? (algosdk.decodeObj(this.raw.note) as any) : undefined,
+      selectionKey: this.raw.selectionKey ? Helpers.bufferToString(this.raw.selectionKey) : undefined,
+      tag: this.raw.tag ? Helpers.bufferToString(this.raw.tag) : undefined,
+      voteKey: this.raw.voteKey ? Helpers.bufferToString(this.raw.voteKey) : undefined,
     }
     this.deleteEmptyFields(returnVal)
     return returnVal
@@ -161,7 +144,9 @@ export class AlgorandActionHelper {
       to: toRawAddressFromAlgoAddr(action.to) || undefined,
       from: toRawAddressFromAlgoAddr(action.from) || undefined,
       closeRemainderTo: toRawAddressFromAlgoAddr(action.closeRemainderTo) || undefined,
-      appAccounts: !isNullOrEmpty(action.appAccounts) ? action.appAccounts.map(toRawAddressFromAlgoAddr) : undefined,
+      appAccounts: !Helpers.isNullOrEmpty(action.appAccounts)
+        ? action.appAccounts.map(toRawAddressFromAlgoAddr)
+        : undefined,
       assetManager: toRawAddressFromAlgoAddr(action.assetManager) || undefined,
       assetReserve: toRawAddressFromAlgoAddr(action.assetReserve) || undefined,
       assetFreeze: toRawAddressFromAlgoAddr(action.assetFreeze) || undefined,
@@ -219,12 +204,12 @@ export class AlgorandActionHelper {
   public get transactionHeaderParams(): AlgorandTxHeaderParams {
     const header: AlgorandTxHeaderParams = {
       genesisID: this.raw.genesisID,
-      genesisHash: bufferToString(this.raw.genesisHash, 'base64'),
+      genesisHash: Helpers.bufferToString(this.raw.genesisHash, 'base64'),
       firstRound: this.raw.firstRound,
       lastRound: this.raw.lastRound,
     }
-    if (!isNullOrEmpty(this.raw.fee)) header.fee = this.raw.fee
-    if (!isNullOrEmpty(this.raw.flatFee)) header.flatFee = this.raw.flatFee
+    if (!Helpers.isNullOrEmpty(this.raw.fee)) header.fee = this.raw.fee
+    if (!Helpers.isNullOrEmpty(this.raw.flatFee)) header.flatFee = this.raw.flatFee
     return header
   }
 
@@ -255,19 +240,20 @@ export class AlgorandActionHelper {
   private encodeFieldsForSdk(paramsIn: any) {
     const { appApprovalProgram, appArgs, appClearProgram, group, lease, note, selectionKey, tag, voteKey } = paramsIn
     const params: any = { ...paramsIn }
-    if (!isNullOrEmpty(appArgs)) params.appArgs = this.encodeAppArgsToRaw(appArgs)
-    if (!isNullOrEmpty(appApprovalProgram) && isHexString(appApprovalProgram)) {
-      params.appApprovalProgram = hexStringToByteArray(appApprovalProgram)
+    if (!Helpers.isNullOrEmpty(appArgs)) params.appArgs = this.encodeAppArgsToRaw(appArgs)
+    if (!Helpers.isNullOrEmpty(appApprovalProgram) && Helpers.isHexString(appApprovalProgram)) {
+      params.appApprovalProgram = Helpers.hexStringToByteArray(appApprovalProgram)
     }
-    if (!isNullOrEmpty(appClearProgram) && isHexString(appClearProgram)) {
-      params.appClearProgram = hexStringToByteArray(appClearProgram)
+    if (!Helpers.isNullOrEmpty(appClearProgram) && Helpers.isHexString(appClearProgram)) {
+      params.appClearProgram = Helpers.hexStringToByteArray(appClearProgram)
     }
-    if (!isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = toBufferIfNeededFromAny(group)
-    if (!isNullOrEmpty(lease) && !isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
-    if (!isNullOrEmpty(note) && !isAUint8Array(note)) params.note = algosdk.encodeObj(note)
-    if (!isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey)) params.selectionKey = toBuffer(selectionKey)
-    if (!isNullOrEmpty(tag) && !Buffer.isBuffer(tag)) params.tag = toBuffer(tag)
-    if (!isNullOrEmpty(voteKey) && !Buffer.isBuffer(voteKey)) params.voteKey = toBuffer(voteKey)
+    if (!Helpers.isNullOrEmpty(group) && !Buffer.isBuffer(group)) params.group = Helpers.toBuffer(group)
+    if (!Helpers.isNullOrEmpty(lease) && !Helpers.isAUint8Array(lease)) params.lease = algosdk.encodeObj(lease)
+    if (!Helpers.isNullOrEmpty(note) && !Helpers.isAUint8Array(note)) params.note = algosdk.encodeObj(note)
+    if (!Helpers.isNullOrEmpty(selectionKey) && !Buffer.isBuffer(selectionKey))
+      params.selectionKey = Helpers.toBuffer(selectionKey)
+    if (!Helpers.isNullOrEmpty(tag) && !Buffer.isBuffer(tag)) params.tag = Helpers.toBuffer(tag)
+    if (!Helpers.isNullOrEmpty(voteKey) && !Buffer.isBuffer(voteKey)) params.voteKey = Helpers.toBuffer(voteKey)
     return params
   }
 
@@ -279,7 +265,7 @@ export class AlgorandActionHelper {
   ) {
     const rawAction = this.raw
     rawAction.genesisID = rawAction.genesisID || chainTxParams.genesisID
-    rawAction.genesisHash = rawAction.genesisHash || toBuffer(chainTxParams.genesisHash, 'base64')
+    rawAction.genesisHash = rawAction.genesisHash || Helpers.toBuffer(chainTxParams.genesisHash, 'base64')
     rawAction.fee = rawAction.fee || chainTxParams.minFee || MINIMUM_TRANSACTION_FEE_FALLBACK
     rawAction.flatFee = true // since we're setting a fee, this will always be true - flatFee is just a hint to the AlgoSDK.Tx object which will set its own fee if this is not true
     // if firstRound and/or lastRound are missing, set them
@@ -304,19 +290,19 @@ export class AlgorandActionHelper {
   /** Remove fields from object that are undefined, null, or empty */
   private deleteEmptyFields(paramsIn: { [key: string]: any }) {
     const params = paramsIn
-    Object.keys(params).forEach(key => (isNullOrEmpty(params[key]) ? delete params[key] : {}))
+    Object.keys(params).forEach(key => (Helpers.isNullOrEmpty(params[key]) ? delete params[key] : {}))
   }
 
   /** whether action is the native chain 'raw' format */
   private isAlgorandTxAction(action: AlgorandTxAction | AlgorandTxActionRaw): boolean {
-    return isAString(action.from)
+    return Helpers.isAString(action.from)
   }
 
   /** whether action is the native chain 'raw' format */
   private isAlgorandTxActionRaw(action: any): boolean {
     const rawAction = action as AlgorandTxActionRaw
     const hasPublicKey = rawAction.from?.publicKey
-    return hasPublicKey && isAUint8Array(rawAction.from?.publicKey)
+    return hasPublicKey && Helpers.isAUint8Array(rawAction.from?.publicKey)
   }
 
   /** whether action is the native chain 'raw' and compressed format (get_obj_for_encoding) as defined here - https://github.com/algorand/js-algorand-sdk/blob/a5309ee57dddbf6f9db5f95dc8a82eb1ae03c326/src/transaction.js#L154 */
@@ -328,10 +314,10 @@ export class AlgorandActionHelper {
   private isAlgorandTxActionEncodedForSdk(action: any): boolean {
     return (
       !this.isAlgorandTxActionRaw(action) &&
-      (isAUint8Array(action.appApprovalProgram) ||
-        isAUint8Array(action.appClearProgram) ||
-        isAUint8Array(action.note) ||
-        isAUint8Array(action.lease) ||
+      (Helpers.isAUint8Array(action.appApprovalProgram) ||
+        Helpers.isAUint8Array(action.appClearProgram) ||
+        Helpers.isAUint8Array(action.note) ||
+        Helpers.isAUint8Array(action.lease) ||
         Buffer.isBuffer(action.group) ||
         Buffer.isBuffer(action.selectionKey) ||
         Buffer.isBuffer(action.tag) ||
@@ -345,11 +331,12 @@ export class AlgorandActionHelper {
   private encodeAppArgsToRaw(appArgs: (string | number | Uint8Array)[]): Uint8Array[] {
     if (!appArgs) return []
     const appArgsEncoded = appArgs.map((appArg: string | number | Uint8Array) => {
-      if (isAUint8Array(appArg)) return appArg as Uint8Array
-      if (hasHexPrefix(appArg)) return new Uint8Array(Buffer.from(removeHexPrefix(appArg as string), 'hex'))
-      if (isBase64EncodedAndNotUtf(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'base64'))
-      if (isAString(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'utf8'))
-      if (isANumber(appArg)) return bigIntToUint8Array(appArg as number) // TODO: Confirm this is the right conversion - can we use an existing function for this?
+      if (Helpers.isAUint8Array(appArg)) return appArg as Uint8Array
+      if (Helpers.hasHexPrefix(appArg))
+        return new Uint8Array(Buffer.from(Helpers.removeHexPrefix(appArg as string), 'hex'))
+      if (Helpers.isBase64EncodedAndNotUtf(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'base64'))
+      if (Helpers.isAString(appArg)) return new Uint8Array(Buffer.from(appArg as string, 'utf8'))
+      if (Helpers.isANumber(appArg)) return Helpers.bigIntToUint8Array(appArg as number) // TODO: Confirm this is the right conversion - can we use an existing function for this?
       return undefined
     })
     return appArgsEncoded || []
@@ -359,9 +346,9 @@ export class AlgorandActionHelper {
    *  Converts to unencoded AppArgs - array of hex encoded strings (with '0x' prefix)
    */
   private decodeRawAppArgsToReadable(appArgs: Uint8Array[]): string[] {
-    if (isNullOrEmpty(appArgs)) return undefined
+    if (Helpers.isNullOrEmpty(appArgs)) return undefined
     const readable: string[] = appArgs.map(arg => {
-      if (isAUint8Array(arg)) {
+      if (Helpers.isAUint8Array(arg)) {
         return `0x${Buffer.from(arg).toString('hex')}`
       }
       return undefined
@@ -371,7 +358,7 @@ export class AlgorandActionHelper {
 
   /** Returns the 'from' or 'snd' address for the transaction */
   get from(): AlgorandAddress {
-    if (isNullOrEmpty(this.raw.from)) return null
+    if (Helpers.isNullOrEmpty(this.raw.from)) return null
     return toAlgorandAddressFromRawStruct(this.raw.from)
   }
 }

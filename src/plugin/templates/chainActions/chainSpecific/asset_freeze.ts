@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
@@ -9,7 +10,7 @@ import {
   AlgorandActionAssetFreezeParams,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { isNullOrEmpty } from '../../../../../helpers'
+// import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes asset freeze action */
@@ -27,7 +28,7 @@ export const composeAction = async (
     freezeState,
     suggestedParams,
   )
-  if (!isNullOrEmpty(reKeyTo)) {
+  if (!Helpers.isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
   const actionHelper = new AlgorandActionHelper(composedAction)

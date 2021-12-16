@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
@@ -9,7 +10,7 @@ import {
   AlgorandKeyRegistrationParams,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { isNullOrEmpty } from '../../../../../helpers'
+// import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes key registration action */
@@ -26,7 +27,7 @@ export const composeAction = async (args: AlgorandKeyRegistrationParams, suggest
     voteKeyDilution,
     suggestedParams,
   )
-  if (!isNullOrEmpty(reKeyTo)) {
+  if (!Helpers.isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
   const actionHelper = new AlgorandActionHelper(composedAction)

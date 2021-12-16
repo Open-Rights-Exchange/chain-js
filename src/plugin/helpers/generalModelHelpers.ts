@@ -1,6 +1,8 @@
 import { isValidAddress } from 'algosdk'
 import * as base32 from 'hi-base32'
-import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
+// import { isNullOrEmpty, byteArrayToHexString } from '../../../helpers'
+import { Helpers } from '@open-rights-exchange/chainjs'
+
 import {
   AlgorandAddress,
   AlgorandAddressStruct,
@@ -13,7 +15,7 @@ import { ALGORAND_ADDRESS_BYTES_ONLY_LENGTH, ALGORAND_CHECKSUM_BYTE_LENGTH, PUBL
 
 /** A string - assumption is that it follows Algorand asset symbol convention */
 export function isValidAlgorandSymbol(str: AlgorandSymbol | string): str is AlgorandSymbol {
-  if (isNullOrEmpty(str)) return false
+  if (Helpers.isNullOrEmpty(str)) return false
   return true
 }
 
@@ -52,19 +54,19 @@ export function toAlgorandEntityName(value: string): AlgorandEntityName {
 
 /** Converts a publicKey (encoded as Uint8Array for chain) to an AlgorandAddres */
 export function toAlgorandAddressFromPublicKeyByteArray(publicKeyBuffer: Uint8Array): AlgorandAddress {
-  return toAddressFromPublicKey(toAlgorandPublicKey(byteArrayToHexString(publicKeyBuffer)))
+  return toAddressFromPublicKey(toAlgorandPublicKey(Helpers.byteArrayToHexString(publicKeyBuffer)))
 }
 
 /** Determines AlgorandAddress from AlgorandAddressStruct (using embedded publicKey) */
 export function toAlgorandAddressFromRawStruct(rawAddress: AlgorandAddressStruct): AlgorandAddress {
-  if (isNullOrEmpty(rawAddress)) return undefined
+  if (Helpers.isNullOrEmpty(rawAddress)) return undefined
   return toAlgorandAddressFromPublicKeyByteArray(rawAddress.publicKey)
 }
 
 // NOTE: copied most of this code from algosdk - address.decode
 /** converts an address (encoded as a Uint8Array array) to a hex string  */
 export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddressStruct {
-  if (isNullOrEmpty(address)) return null
+  if (Helpers.isNullOrEmpty(address)) return null
   const decoded = base32.decode.asBytes(address)
   const publicKey: Uint8Array = new Uint8Array(
     decoded.slice(0, ALGORAND_ADDRESS_BYTES_ONLY_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH),
@@ -79,7 +81,7 @@ export function toRawAddressFromAlgoAddr(address: AlgorandAddress): AlgorandAddr
 /** Returns publicKey for associated address */
 export function getPublicKeyForAddress(address: AlgorandAddress): AlgorandPublicKey {
   const rawAddress = toRawAddressFromAlgoAddr(address)
-  return toAlgorandPublicKey(byteArrayToHexString(rawAddress.publicKey))
+  return toAlgorandPublicKey(Helpers.byteArrayToHexString(rawAddress.publicKey))
 }
 
 /** Returns raw address for compressed transaction from address */

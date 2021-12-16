@@ -1,5 +1,4 @@
-import { notSupported } from '../../helpers'
-import { ChainActionType } from '../../models'
+import { Models, Helpers } from '@open-rights-exchange/chainjs'
 import { composeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { composeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { composeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -30,7 +29,9 @@ import { AlgorandActionHelper } from './algoAction'
 import { compileIfSourceCodeIfNeeded } from './helpers'
 
 // map a key name to a function that returns an object
-const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any } = {
+const ComposeAction: {
+  [key: string]: (args: any, suggestedParams: AlgorandTxHeaderParams) => any
+} = {
   // Standard actions
   TokenTransfer: TokenTransferTemplate,
   ValueTransfer: ValueTransferTemplate,
@@ -55,12 +56,12 @@ const ComposeAction: { [key: string]: (args: any, suggestedParams: AlgorandTxHea
 /** Compose an object for a chain contract action */
 export async function composeAction(
   chainState: AlgorandChainState,
-  chainActionType: ChainActionType | AlgorandChainActionType,
+  chainActionType: Models.ChainActionType | AlgorandChainActionType,
   args: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded,
 ): Promise<AlgorandTxActionSdkEncoded> {
   const composerFunction = ComposeAction[chainActionType as string]
   if (!composerFunction) {
-    notSupported(`ComposeAction:${chainActionType}`)
+    Helpers.notSupported(`ComposeAction:${chainActionType}`)
   }
 
   const action: AlgorandTxAction | AlgorandTxActionRaw | AlgorandTxActionSdkEncoded = {

@@ -6,8 +6,9 @@
 
 import fs from 'fs'
 import * as algosdk from 'algosdk'
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainActionType, ChainEndpoint, ConfirmType, TokenTransferParams } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandActionAppCreateParams,
   AlgorandActionAppMultiPurposeParams,
@@ -15,9 +16,11 @@ import {
   AlgorandChainActionType,
 } from '../models'
 import { toAlgorandPrivateKey, toAlgorandSymbol } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
-import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+// import { toChainEntityName } from '../../../helpers'
+import ChainAlgorandV1  from '../ChainAlgorandV1'
 import { composedAppCreate } from '../tests/mockups/composedActions'
+
+
 
 require('dotenv').config()
 
@@ -84,7 +87,7 @@ const sampleRawNoOPTrx = {
 }
 
 async function getAppIds() {
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -101,7 +104,7 @@ async function getAppIds() {
 async function run() {
   /** Create Algorand chain instance */
   
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints) as ChainAlgorandV1
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -143,7 +146,7 @@ async function run() {
   console.log('missing signatures: ', transaction.missingSignatures)
   console.log(transaction.rawTransaction)
   try {
-    console.log('send response: %o', JSON.stringify(await transaction.send(ConfirmType.After001)))
+    console.log('send response: %o', JSON.stringify(await transaction.send(Models.ConfirmType.After001)))
   } catch (err) {
     console.log(err)
   }

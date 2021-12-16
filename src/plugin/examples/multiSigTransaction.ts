@@ -4,11 +4,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainEndpoint, ChainActionType, ValueTransferParams } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import { AlgorandAddress, AlgorandMultisigOptions, AlgorandUnit, AlgorandValue } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+// import { toChainEntityName } from '../../../helpers'
+
+
 
 require('dotenv').config()
 
@@ -48,9 +51,9 @@ export const transactionOptions = {
   multisigOptions: transactionMultisigOptions,
 }
 
-const composeValueTransferParams: ValueTransferParams = {
-  fromAccountName: toChainEntityName('U7KCCCPAGTHL3IQGEG2SUTIKCZR55RUZZ4H2VCHAWSJ6AYT25KHGDLUD7A'),
-  toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+const composeValueTransferParams: Models.ValueTransferParams = {
+  fromAccountName: Helpers.toChainEntityName('U7KCCCPAGTHL3IQGEG2SUTIKCZR55RUZZ4H2VCHAWSJ6AYT25KHGDLUD7A'),
+  toAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
   amount: '1000000',
   symbol: AlgorandUnit.Microalgo,
   memo: 'Hello World',
@@ -58,14 +61,14 @@ const composeValueTransferParams: ValueTransferParams = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
   }
 
   const transaction = await algoTest.new.Transaction(transactionOptions)
-  const action = await algoTest.composeAction(ChainActionType.ValueTransfer, composeValueTransferParams)
+  const action = await algoTest.composeAction(Models.ChainActionType.ValueTransfer, composeValueTransferParams)
   transaction.actions = [action]
   console.log('transaction actions: ', transaction.actions[0])
   const decomposed = await algoTest.decomposeAction(transaction.actions[0])

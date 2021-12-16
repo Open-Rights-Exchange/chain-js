@@ -1,5 +1,6 @@
-import { toTokenValueString } from '../../../../../helpers'
-import { ActionDecomposeReturn, ChainActionType, TokenTransferParams } from '../../../../../models'
+// import { toTokenValueString } from '../../../../../helpers'
+// import { ActionDecomposeReturn, ChainActionType, TokenTransferParams } from '../../../../../models'
+import { Models, Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandSuggestedParams,
   AlgorandActionAssetTransferParams,
@@ -11,10 +12,10 @@ import {
   decomposeAction as algoAssetTransferDecomposeAction,
 } from '../chainSpecific/asset_transfer'
 
-export const composeAction = (params: TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
+export const composeAction = (params: Models.TokenTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
   const { amount: amountString, precision } = params
   // adjust string based on precicion e.g. '1.2' precision=4 => 12000
-  const amount = parseInt(toTokenValueString(amountString, 10, precision), 10)
+  const amount = parseInt(Helpers.toTokenValueString(amountString, 10, precision), 10)
 
   return algoAssetTransferComposeAction(
     {
@@ -28,7 +29,7 @@ export const composeAction = (params: TokenTransferParams, suggestedParams: Algo
   )
 }
 
-export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): Models.ActionDecomposeReturn => {
   const decomposed = algoAssetTransferDecomposeAction(action)
   if (decomposed) {
     const decomposedArgs = decomposed.args
@@ -42,7 +43,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
         contractName: decomposedArgs.assetIndex.toString(),
         symbol: null,
       },
-      chainActionType: ChainActionType.TokenTransfer,
+      chainActionType: Models.ChainActionType.TokenTransfer,
     }
   }
   return null

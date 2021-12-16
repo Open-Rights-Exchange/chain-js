@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandActionAppUpdateParams,
   AlgorandDecomposeReturn,
@@ -9,7 +10,7 @@ import {
   AlgorandTxActionRaw,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { isNullOrEmpty } from '../../../../../helpers'
+// import { isNullOrEmpty } from '../../../../../helpers'
 
 /** Composes a transaction that changes an application's approval and clear programs */
 export const composeAction = async (args: AlgorandActionAppUpdateParams, suggestedParams: AlgorandSuggestedParams) => {
@@ -41,7 +42,7 @@ export const composeAction = async (args: AlgorandActionAppUpdateParams, suggest
     lease,
     reKeyTo,
   )
-  if (!isNullOrEmpty(reKeyTo)) {
+  if (!Helpers.isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
   const actionHelper = new AlgorandActionHelper(composedAction)

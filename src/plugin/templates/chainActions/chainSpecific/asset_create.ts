@@ -1,5 +1,6 @@
 import * as algosdk from 'algosdk'
-import { isNullOrEmpty } from '../../../../../helpers'
+// import { isNullOrEmpty } from '../../../../../helpers'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
@@ -51,7 +52,7 @@ export const composeAction = async (
     assetMetadataHash,
     suggestedParams,
   )
-  if (!isNullOrEmpty(reKeyTo)) {
+  if (!Helpers.isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
   const actionHelper = new AlgorandActionHelper(composedAction)
@@ -64,7 +65,10 @@ export const decomposeAction = (
   const actionHelper = new AlgorandActionHelper(action)
   const actionParams = actionHelper.paramsOnly
   // Cant identify using only type (more than one action uses AssetConfig type) - must check params too
-  if (actionParams?.type === AlgorandTransactionTypeCode.AssetConfig && !isNullOrEmpty(actionParams?.assetName)) {
+  if (
+    actionParams?.type === AlgorandTransactionTypeCode.AssetConfig &&
+    !Helpers.isNullOrEmpty(actionParams?.assetName)
+  ) {
     const returnData = {
       ...actionParams,
     }

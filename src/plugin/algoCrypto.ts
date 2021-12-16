@@ -1,8 +1,15 @@
 /* eslint-disable new-cap */
 import * as algosdk from 'algosdk'
-import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
-import { Asymmetric, Ed25519Crypto } from '../../crypto'
-import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
+// import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
+// import { Asymmetric, Ed25519Crypto } from '../../crypto'
+// import { byteArrayToHexString, hexStringToByteArray } from '../../helpers'
+import {
+  Helpers,
+  Crypto,
+  CryptoAsymmetricHelpers,
+  CryptoHelpers,
+  CryptoAsymmetricModels,
+} from '@open-rights-exchange/chainjs'
 import {
   AlgoEncryptionOptions,
   AlgorandGeneratedAccountStruct,
@@ -11,19 +18,19 @@ import {
   AlgorandPublicKey,
   AlgorandSignature,
 } from './models'
-import * as ed25519Crypto from '../../crypto/ed25519Crypto'
+// import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
-import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
-import { AsymmetricScheme } from '../../crypto/asymmetricModels'
+// import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
+// import { AsymmetricScheme } from '../../crypto/asymmetricModels'
 
 /** Verifies that the value is a valid encrypted string */
-export function isSymEncryptedDataString(value: string): value is Ed25519Crypto.Ed25519EncryptedDataString {
-  return ed25519Crypto.isEd25519EncryptedDataString(value)
+export function isSymEncryptedDataString(value: string): value is Crypto.Ed25519Crypto.Ed25519EncryptedDataString {
+  return Crypto.Ed25519Crypto.isEd25519EncryptedDataString(value)
 }
 
 /** Ensures that the value confirms to a well-formed and encrypted string */
-export function toSymEncryptedDataString(value: any): Ed25519Crypto.Ed25519EncryptedDataString {
-  return ed25519Crypto.toEd25519EncryptedDataString(value)
+export function toSymEncryptedDataString(value: any): Crypto.Ed25519Crypto.Ed25519EncryptedDataString {
+  return Crypto.Ed25519Crypto.toEd25519EncryptedDataString(value)
 }
 
 /** Encrypts a string using a password and a nonce
@@ -33,9 +40,9 @@ export function encryptWithPassword(
   unencrypted: string,
   password: string,
   options: AlgoEncryptionOptions,
-): Ed25519Crypto.Ed25519EncryptedDataString {
-  const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
-  const encrypted = ed25519Crypto.encrypt(unencrypted, passwordKey)
+): Crypto.Ed25519Crypto.Ed25519EncryptedDataString {
+  const passwordKey = Crypto.Ed25519Crypto.calculatePasswordByteArray(password, options)
+  const encrypted = Crypto.Ed25519Crypto.encrypt(unencrypted, passwordKey)
   return toSymEncryptedDataString(encrypted)
 }
 
@@ -43,12 +50,12 @@ export function encryptWithPassword(
  * Nacl requires password to be in a 32 byte array format
  */
 export function decryptWithPassword(
-  encrypted: Ed25519Crypto.Ed25519EncryptedDataString | any,
+  encrypted: Crypto.Ed25519Crypto.Ed25519EncryptedDataString | any,
   password: string,
   options: AlgoEncryptionOptions,
 ): string {
-  const passwordKey = ed25519Crypto.calculatePasswordByteArray(password, options)
-  const decrypted = ed25519Crypto.decrypt(encrypted, passwordKey)
+  const passwordKey = Crypto.Ed25519Crypto.calculatePasswordByteArray(password, options)
+  const decrypted = Crypto.Ed25519Crypto.decrypt(encrypted, passwordKey)
   return decrypted
 }
 
@@ -57,32 +64,37 @@ export function decryptWithPassword(
 export async function encryptWithPublicKey(
   unencrypted: string,
   publicKey: AlgorandPublicKey,
-  options: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymmetricEncryptedDataString> {
+  options: Crypto.Asymmetric.EciesOptions,
+): Promise<Crypto.Asymmetric.AsymmetricEncryptedDataString> {
   const useOptions = {
     ...options,
-    curveType: Asymmetric.EciesCurveType.Ed25519,
-    scheme: AsymmetricScheme.ALGORAND_ASYMMETRIC_SCHEME_NAME,
+    curveType: Crypto.Asymmetric.EciesCurveType.Ed25519,
+    scheme: CryptoAsymmetricModels.AsymmetricScheme.ALGORAND_ASYMMETRIC_SCHEME_NAME,
   }
-  const response = Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
-  return Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
+  const response = Crypto.Asymmetric.encryptWithPublicKey(publicKey, unencrypted, useOptions)
+  return Crypto.Asymmetric.toAsymEncryptedDataString(JSON.stringify(response))
 }
 
 /** Decrypts the encrypted value using a private key
  * The encrypted value is a stringified JSON object
  * ... and must have been encrypted with the public key that matches the private ley provided */
 export async function decryptWithPrivateKey(
-  encrypted: Asymmetric.AsymmetricEncryptedDataString | Asymmetric.AsymmetricEncryptedData,
+  encrypted: Crypto.Asymmetric.AsymmetricEncryptedDataString | Crypto.Asymmetric.AsymmetricEncryptedData,
   privateKey: AlgorandPrivateKey,
-  options: Asymmetric.EciesOptions,
+  options: Crypto.Asymmetric.EciesOptions,
 ): Promise<string> {
-  const useOptions = { ...options, curveType: Asymmetric.EciesCurveType.Ed25519 }
+  const useOptions = {
+    ...options,
+    curveType: Crypto.Asymmetric.EciesCurveType.Ed25519,
+  }
   // nacl.sign compatible secretKey (how we generateAccount) returns secretkey as:
   // --> nacl.box compatible secretKey (how we do publickeyEncryption) + publickey
   // so we separate it and take the first half as our secretKey for encryption
   const privateKeyFragment = privateKey.slice(0, privateKey.length / 2)
-  const encryptedObject = ensureEncryptedValueIsObject(encrypted) as Asymmetric.AsymmetricEncryptedData
-  return Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyFragment, useOptions)
+  const encryptedObject = CryptoHelpers.ensureEncryptedValueIsObject(
+    encrypted,
+  ) as Crypto.Asymmetric.AsymmetricEncryptedData
+  return Crypto.Asymmetric.decryptWithPrivateKey(encryptedObject, privateKeyFragment, useOptions)
 }
 
 /** Encrypts a string using multiple assymmetric encryptions with multiple public keys - one after the other
@@ -93,10 +105,10 @@ export async function decryptWithPrivateKey(
 export async function encryptWithPublicKeys(
   unencrypted: string,
   publicKeys: AlgorandPublicKey[],
-  options?: Asymmetric.EciesOptions,
-): Promise<Asymmetric.AsymmetricEncryptedDataString> {
-  return Asymmetric.toAsymEncryptedDataString(
-    await AsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
+  options?: Crypto.Asymmetric.EciesOptions,
+): Promise<Crypto.Asymmetric.AsymmetricEncryptedDataString> {
+  return Crypto.Asymmetric.toAsymEncryptedDataString(
+    await CryptoAsymmetricHelpers.encryptWithPublicKeys(encryptWithPublicKey, unencrypted, publicKeys, options),
   )
 }
 
@@ -106,17 +118,20 @@ export async function encryptWithPublicKeys(
  *  Decrypts using privateKeys that match the publicKeys provided in encryptWithPublicKeys() - provide the privateKeys in same order
  *  The result is the decrypted string */
 export async function decryptWithPrivateKeys(
-  encrypted: Asymmetric.AsymmetricEncryptedDataString,
+  encrypted: Crypto.Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: AlgorandPrivateKey[],
   options?: any,
 ): Promise<string> {
-  return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
+  return CryptoAsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
 }
 
 /** Signs a string with a private key
  *  Returns signature as a Buffer from a UInt8Array */
 export function sign(data: string, privateKey: AlgorandPrivateKey | string): AlgorandSignature {
-  const signature = ed25519Crypto.sign(hexStringToByteArray(data), hexStringToByteArray(privateKey))
+  const signature = Crypto.Ed25519Crypto.sign(
+    Helpers.hexStringToByteArray(data),
+    Helpers.hexStringToByteArray(privateKey),
+  )
   return toAlgorandSignatureFromRawSig(signature)
 }
 
@@ -139,10 +154,10 @@ function encryptAccountPrivateKeysIfNeeded(keys: AlgorandKeyPair, password: stri
 /** Gets the algorand keypair (public and private keys) for the account */
 export function getAlgorandKeyPairFromAccount(account: AlgorandGeneratedAccountStruct): AlgorandKeyPair {
   const { sk: privateKey } = account
-  const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
+  const { publicKey, secretKey } = Crypto.Ed25519Crypto.getKeyPairFromPrivateKey(privateKey)
   return {
-    publicKey: toAlgorandPublicKey(byteArrayToHexString(publicKey)),
-    privateKey: toAlgorandPrivateKey(byteArrayToHexString(secretKey)),
+    publicKey: toAlgorandPublicKey(Helpers.byteArrayToHexString(publicKey)),
+    privateKey: toAlgorandPrivateKey(Helpers.byteArrayToHexString(secretKey)),
   }
 }
 
@@ -155,10 +170,12 @@ export async function generateKeyPair(): Promise<AlgorandKeyPair> {
 
 /** Gets the algorand keypair (public and private keys) for the privateKey */
 export function getAlgorandKeyPairFromPrivateKey(privateKey: AlgorandPrivateKey): AlgorandKeyPair {
-  const { publicKey, secretKey } = ed25519Crypto.getKeyPairFromPrivateKey(hexStringToByteArray(privateKey))
+  const { publicKey, secretKey } = Crypto.Ed25519Crypto.getKeyPairFromPrivateKey(
+    Helpers.hexStringToByteArray(privateKey),
+  )
   return {
-    publicKey: toAlgorandPublicKey(byteArrayToHexString(publicKey)),
-    privateKey: toAlgorandPrivateKey(byteArrayToHexString(secretKey)),
+    publicKey: toAlgorandPublicKey(Helpers.byteArrayToHexString(publicKey)),
+    privateKey: toAlgorandPrivateKey(Helpers.byteArrayToHexString(secretKey)),
   }
 }
 
@@ -183,10 +200,10 @@ export function verifySignedWithPublicKey(
   publicKey: AlgorandPublicKey,
   signature: AlgorandSignature,
 ): boolean {
-  return ed25519Crypto.verify(
-    hexStringToByteArray(data),
-    hexStringToByteArray(publicKey),
-    hexStringToByteArray(signature),
+  return Crypto.Ed25519Crypto.verify(
+    Helpers.hexStringToByteArray(data),
+    Helpers.hexStringToByteArray(publicKey),
+    Helpers.hexStringToByteArray(signature),
   )
 }
 

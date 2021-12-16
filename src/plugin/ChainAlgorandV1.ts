@@ -1,7 +1,4 @@
-import { assertPluginTypeNotAlreadyInstalled, initializePlugin, notImplemented, notSupported } from '../../helpers'
-import { ChainType, ChainActionType, ChainEntityName, CryptoCurve, TransactionStatus } from '../../models'
-import { throwNewError } from '../../errors'
-import { Chain } from '../../interfaces'
+import { Models, Helpers, Chain, ChainJsPlugin, Crypto, Errors, Interfaces } from '@open-rights-exchange/chainjs'
 import {
   AlgorandAddress,
   AlgorandChainActionType,
@@ -37,10 +34,10 @@ import {
   toAlgorandPublicKey,
   toAlgorandSignature,
 } from './helpers'
-import { Asymmetric } from '../../crypto'
-import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
+// import { Asymmetric } from '../../crypto'
+// import { ChainJsPlugin, ChainJsPluginOptions } from '../../interfaces/plugin'
 
-class ChainAlgorandV1 implements Chain {
+class Plugin implements Chain {
   private _endpoints: AlgorandChainEndpoint[]
 
   private _settings: AlgorandChainSettings
@@ -82,11 +79,14 @@ class ChainAlgorandV1 implements Chain {
 
   /** Fetch data from an on-chain contract table */
   public fetchContractData = (): any => {
-    notImplemented()
+    Helpers.notImplemented()
   }
 
   /** Compose an object for a chain contract action */
-  public composeAction = async (actionType: ChainActionType | AlgorandChainActionType, args: any): Promise<any> => {
+  public composeAction = async (
+    actionType: Models.ChainActionType | AlgorandChainActionType,
+    args: any,
+  ): Promise<any> => {
     return composeAction(this._chainState, actionType, args)
   }
 
@@ -138,13 +138,15 @@ class ChainAlgorandV1 implements Chain {
    * A transaction that has enough fees will appear on the chain and quickly be confirmed
    * Until the transaction is processed by the chain, this function will throw a TxNotFoundOnChain chain error
    */
-  public async fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }> {
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: Models.TransactionStatus; transaction: any }> {
     return this._chainState.fetchTransaction(transactionId)
   }
 
   // --------- Chain crytography functions */
   /** Primary cryptography curve used by this chain */
-  cryptoCurve: CryptoCurve.Ed25519
+  cryptoCurve: Models.CryptoCurve.Ed25519
 
   /** Decrypts the encrypted value with a password, and using ed25519 algorithm and SHA512 hash function */
   decryptWithPassword = algoCrypto.decryptWithPassword
@@ -178,7 +180,7 @@ class ChainAlgorandV1 implements Chain {
 
   /** Returns a public key given a signature and the original data was signed */
   public getPublicKeyFromSignature = (): any => {
-    notSupported('public key cannot be determined from a signature for Algorand chain (ED25519 curve)')
+    Helpers.notSupported('public key cannot be determined from a signature for Algorand chain (ED25519 curve)')
   }
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
@@ -188,10 +190,10 @@ class ChainAlgorandV1 implements Chain {
   toSymEncryptedDataString = algoCrypto.toSymEncryptedDataString
 
   /** Verifies that the value is a valid, stringified JSON asymmetric encryption result */
-  isAsymEncryptedDataString = Asymmetric.isAsymEncryptedDataString
+  isAsymEncryptedDataString = Crypto.Asymmetric.isAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed stringified JSON encryption result */
-  toAsymEncryptedDataString = Asymmetric.toAsymEncryptedDataString
+  toAsymEncryptedDataString = Crypto.Asymmetric.toAsymEncryptedDataString
 
   /** Ensures that the value comforms to a well-formed private Key */
   public isValidPrivateKey = (value: string): boolean => {
@@ -227,22 +229,22 @@ class ChainAlgorandV1 implements Chain {
 
   /** Verifies that the value is a valid chain entity name (e.g. an account name) */
   public isValidEntityName = (): any => {
-    notImplemented()
+    Helpers.notImplemented()
   }
 
   /** Verifies that the value is a valid chain date */
   public isValidDate = (): any => {
-    notImplemented()
+    Helpers.notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed chain entity name (e.g. an account name) */
-  public toEntityName = (value: string): ChainEntityName => {
-    return toAlgorandAddress(value) as ChainEntityName
+  public toEntityName = (value: string): Models.ChainEntityName => {
+    return toAlgorandAddress(value) as Models.ChainEntityName
   }
 
   /** Ensures that the value comforms to a well-formed chain date string */
   public toDate = (): any => {
-    notImplemented()
+    Helpers.notImplemented()
   }
 
   /** Ensures that the value comforms to a well-formed public Key */
@@ -256,9 +258,11 @@ class ChainAlgorandV1 implements Chain {
 
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
   // eslint-disable-next-line class-methods-use-this
-  public get chainType(): ChainType {
-    return ChainType.AlgorandV1
+  public get chainType(): Models.ChainType {
+    return Models.ChainType.AlgorandV1
   }
+
+  public static chainType: Models.ChainType = Models.ChainType.AlgorandV1
 
   /** Returns chain plug-in name */
   // eslint-disable-next-line class-methods-use-this
@@ -300,28 +304,28 @@ class ChainAlgorandV1 implements Chain {
 
   /** Map error from chain into a well-known ChainError type */
   public mapChainError = (): any => {
-    notImplemented()
+    Helpers.notImplemented()
   }
 
   /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
     if (!this._chainState?.isConnected) {
-      throwNewError('Not connected to chain')
+      Errors.throwNewError('Not connected to chain')
     }
   }
 
   /** Install a plugin to this chain connection */
-  public async installPlugin(plugin: ChainJsPlugin, options?: ChainJsPluginOptions) {
+  public async installPlugin(plugin: ChainJsPlugin, options?: Interfaces.ChainJsPluginOptions) {
     this.assertValidPlugin(plugin)
     this._plugins = this._plugins || []
-    const newPlugin = await initializePlugin(this._chainState, plugin, options)
+    const newPlugin = await Helpers.initializePlugin(this._chainState, plugin, options)
     this._plugins.push(newPlugin)
   }
 
   /** rules to check tha plugin is well-formed and supported */
   private assertValidPlugin(plugin: ChainJsPlugin) {
     // TODO: check if plugin type is supported for this chain
-    assertPluginTypeNotAlreadyInstalled(plugin, this._plugins)
+    Helpers.assertPluginTypeNotAlreadyInstalled(plugin, this._plugins)
   }
 
   /** Access to underlying algoSdk
@@ -337,4 +341,4 @@ class ChainAlgorandV1 implements Chain {
   }
 }
 
-export { ChainAlgorandV1 }
+export default Plugin

@@ -1,4 +1,5 @@
-import { ActionDecomposeReturn, ChainActionType, ValueTransferParams } from '../../../../../models'
+// import { ActionDecomposeReturn, ChainActionType, ValueTransferParams } from '../../../../../models'
+import { Models } from '@open-rights-exchange/chainjs'
 import {
   AlgorandActionPaymentParams,
   AlgorandUnit,
@@ -13,7 +14,7 @@ import {
   decomposeAction as algoPaymentDecomposeAction,
 } from '../chainSpecific/payment'
 
-export const composeAction = (params: ValueTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
+export const composeAction = (params: Models.ValueTransferParams, suggestedParams: AlgorandSuggestedParams): any => {
   const { amount: amountString, symbol = DEFAULT_ALGO_UNIT } = params
   const amount = toMicroAlgo(amountString, symbol as AlgorandUnit)
   return algoPaymentComposeAction(
@@ -28,7 +29,7 @@ export const composeAction = (params: ValueTransferParams, suggestedParams: Algo
   )
 }
 
-export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): ActionDecomposeReturn => {
+export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw): Models.ActionDecomposeReturn => {
   const decomposed = algoPaymentDecomposeAction(action)
   if (decomposed) {
     const decomposedArgs = decomposed.args
@@ -42,7 +43,7 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
         contractName: null,
         symbol: AlgorandUnit.Algo, // the value is in microalgo, but the symbol name is 'algo'
       },
-      chainActionType: ChainActionType.ValueTransfer,
+      chainActionType: Models.ChainActionType.ValueTransfer,
     }
   }
   return null

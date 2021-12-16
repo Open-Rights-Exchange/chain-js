@@ -4,11 +4,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { sleep, toChainEntityName } from '../../../helpers'
-import { ChainError, ChainFactory, ChainType } from '../../../index'
+// import { sleep, toChainEntityName } from '../../../helpers'
+// import { ChainError, ChainFactory, ChainType } from '../../../index'
+import { Models, ChainFactory, Helpers, Errors } from '@open-rights-exchange/chainjs'
 import { toAlgorandSymbol } from '../helpers'
 import { decryptWithPassword, encryptWithPassword } from '../algoCrypto'
-import { ChainAlgorandV1 } from '../ChainAlgorandV1'
+import ChainAlgorandV1 from '../ChainAlgorandV1'
+
 
 require('dotenv').config()
 
@@ -30,7 +32,7 @@ const algoBetanetEndpoints = [{
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)
@@ -40,15 +42,15 @@ async function run() {
   console.log(
     'algo balance:',
     await algoTest.fetchBalance(
-      toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+      Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       toAlgorandSymbol('algo'),
     ),
   )
-  await sleep(1000) // dont hit chain api again too fast
+  await Helpers.sleep(1000) // dont hit chain api again too fast
   console.log(
     'asset balance for ID 10029482:',
     await algoTest.fetchBalance(
-      toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+      Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       toAlgorandSymbol('10029482'),
     ),
   )
@@ -63,13 +65,13 @@ async function run() {
 
   // map chain error
   try {
-    await sleep(1000) // dont hit chain api again too fast
+    await Helpers.sleep(1000) // dont hit chain api again too fast
     const txResponse = await algoTest.fetchTransaction('IELHXMRB5ZMWZGMRP6PEU2KQQGTRP5AIXBUAYCDWYF7GGC4QWGOQ')
     console.log('txResponse for txId:', txResponse)
     const { algoClient, algoClientIndexer } = algoTest as ChainAlgorandV1
     // const blockInfo = await algoClientIndexer.lookupBlock(99999999999).do() as any
   } catch (error) {
-    const chainError = (error as ChainError)
+    const chainError = (error as Errors.ChainError)
     console.log(`Chain Error Type: ${chainError.errorType} error:`, error)
   }
 }

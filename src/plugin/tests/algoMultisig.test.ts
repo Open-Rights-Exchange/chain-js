@@ -1,12 +1,14 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
 
-import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
-import { ChainFactory, ChainType } from '../../..'
+// import { jsonParseAndRevive, toChainEntityName } from '../../../helpers'
+// import { ChainFactory, ChainType } from '../../..'
+import { Models, PluginChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import { multisigChainSerialized } from './mockups/multisig'
-import { ChainActionType, ValueTransferParams } from '../../../models'
+// import { ChainActionType, ValueTransferParams } from '../../../models'
 import { determineMultiSigAddress, toAlgorandPrivateKey } from '../helpers'
 import { AlgorandTransaction } from '../algoTransaction'
 import { AlgorandMultisigOptions, AlgorandTransactionOptions } from '../models'
+import Plugin from '../ChainAlgorandV1'
 
 const childAcct1 = 'E4437CMRLC234HAGT4SRYTISZF3XQGZUT33Q27UDW7CDDYLXIXGD4UR7YA'
 const childAcct1Private =
@@ -33,13 +35,13 @@ describe('Test Algorand Multisig Transactions', () => {
       },
     },
   ]
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = PluginChainFactory([Plugin], Models.ChainType.AlgorandV1, algoTestnetEndpoints)
 
   it('setFromRaw() using chain serialized', async () => {
     await algoTest.connect()
     expect(algoTest.isConnected).toBeTruthy()
     const transaction = await algoTest.new.Transaction()
-    await transaction.setTransaction(jsonParseAndRevive(multisigChainSerialized))
+    await transaction.setTransaction(Helpers.jsonParseAndRevive(multisigChainSerialized))
     await transaction.prepareToBeSigned()
     await transaction.validate()
     expect(transaction.missingSignatures).toEqual([childAcct1, childAcct2, childAcct3])
@@ -52,9 +54,9 @@ describe('Test Algorand Multisig Transactions', () => {
   })
 
   it('set multisig payment action', async () => {
-    const valueTransferParams: ValueTransferParams = {
-      fromAccountName: toChainEntityName(multisigAddres),
-      toAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+    const valueTransferParams: Models.ValueTransferParams = {
+      fromAccountName: Helpers.toChainEntityName(multisigAddres),
+      toAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
       amount: '1',
     }
     const transactionMultisigOptions: AlgorandMultisigOptions = {
@@ -72,7 +74,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
 
     const transaction = (await algoTest.new.Transaction(transactionOptions)) as AlgorandTransaction
-    const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
+    const action = await algoTest.composeAction(Models.ChainActionType.ValueTransfer, valueTransferParams)
     transaction.actions = [action]
     await transaction.prepareToBeSigned()
     await transaction.validate()
@@ -88,9 +90,9 @@ describe('Test Algorand Multisig Transactions', () => {
   })
 
   it('from and multisigOptions mismatch', async () => {
-    const valueTransferParams: ValueTransferParams = {
-      fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
-      toAccountName: toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
+    const valueTransferParams: Models.ValueTransferParams = {
+      fromAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+      toAccountName: Helpers.toChainEntityName('CXNBI5GZJ3I5IKEUT73SHSTWRUQ3UVAYZBQ5RNLR5CM2LFFL7W7W5433DM'),
       amount: '1',
     }
     const transactionMultisigOptions: AlgorandMultisigOptions = {
@@ -107,7 +109,7 @@ describe('Test Algorand Multisig Transactions', () => {
     }
     const multisigAddress = determineMultiSigAddress(transactionMultisigOptions)
     const transaction = await algoTest.new.Transaction(transactionOptions)
-    const action = await algoTest.composeAction(ChainActionType.ValueTransfer, valueTransferParams)
+    const action = await algoTest.composeAction(Models.ChainActionType.ValueTransfer, valueTransferParams)
 
     expect(() => {
       transaction.actions = [action]

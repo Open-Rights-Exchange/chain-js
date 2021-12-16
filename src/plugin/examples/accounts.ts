@@ -4,9 +4,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainEndpoint } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import { toAlgorandPrivateKey, toAlgorandPublicKey } from '../helpers'
+
 
 require('dotenv').config()
 
@@ -48,7 +50,7 @@ export const createMultiSigAccountOptions = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)

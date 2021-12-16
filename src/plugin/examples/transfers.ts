@@ -6,12 +6,14 @@
 /* eslint-disable no-console */
 
 import * as algosdk from 'algosdk'
-import { ChainFactory, ChainType } from '../../../index'
-import { ChainEndpoint, ChainActionType, TokenTransferParams, ValueTransferParams } from '../../../models'
+// import { ChainFactory, ChainType } from '../../../index'
+// import { ChainEndpoint, ChainActionType, TokenTransferParams, ValueTransferParams } from '../../../models'
+import { Models, ChainFactory, Helpers } from '@open-rights-exchange/chainjs'
 import { AlgorandActionAssetTransferParams, AlgorandChainActionType, AlgorandActionPaymentParams, AlgorandTransactionOptions } from '../models'
 import { toAlgorandPrivateKey } from '../helpers'
-import { toChainEntityName } from '../../../helpers'
+// import { toChainEntityName } from '../../../helpers'
 import { AlgorandActionHelper } from '../algoAction'
+
 
 require('dotenv').config()
 
@@ -38,17 +40,17 @@ const algoBetanetEndpoints = [
 ]
 
 // Standard chainJS action types
-const composeValueTransferParams: Partial<ValueTransferParams> = {
-  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
-  toAccountName: toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
+const composeValueTransferParams: Partial<Models.ValueTransferParams> = {
+  fromAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: Helpers.toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
   amount: '10', // 10 microalgos
   symbol: 'microalgo', // or null
   memo: 'transfer memo',
 }
-const composeTokenTransferParams: Partial<TokenTransferParams> = {
-  contractName: toChainEntityName('10820019'),
-  fromAccountName: toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
-  toAccountName: toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
+const composeTokenTransferParams: Partial<Models.TokenTransferParams> = {
+  contractName: Helpers.toChainEntityName('10820019'),
+  fromAccountName: Helpers.toChainEntityName('VBS2IRDUN2E7FJGYEKQXUAQX3XWL6UNBJZZJHB7CJDMWHUKXAGSHU5NXNQ'),
+  toAccountName: Helpers.toChainEntityName('TF6PJW7VSEKD5AXYMUXF5YGMPDUWBJQRHH4PYJISFPXAMI27PGYHKLALDY'),
   amount: '1',
   precision: 0,
   symbol: null,
@@ -111,7 +113,7 @@ const payTxWithHeaders = {
 
 async function run() {
   /** Create Algorand chain instance */
-  const algoTest = new ChainFactory().create(ChainType.AlgorandV1, algoTestnetEndpoints)
+  const algoTest = new ChainFactory().create(Models.ChainType.AlgorandV1, algoTestnetEndpoints)
   await algoTest.connect()
   if (algoTest.isConnected) {
     console.log('Connected to %o', algoTest.chainId)

@@ -1,5 +1,6 @@
+import { Models } from '@open-rights-exchange/chainjs'
 import { AlgorandAddress } from './cryptoModels'
-import { ChainActionType } from '../../../models'
+// import { ChainActionType } from '../../../models'
 
 /** ChainJS action type names */
 export enum AlgorandChainActionType {
@@ -20,7 +21,7 @@ export enum AlgorandChainActionType {
 }
 
 export type AlgorandDecomposeReturn = {
-  chainActionType: ChainActionType | AlgorandChainActionType
+  chainActionType: Models.ChainActionType | AlgorandChainActionType
   args: any
   partial?: boolean
 }

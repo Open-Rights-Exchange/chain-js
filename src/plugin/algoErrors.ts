@@ -1,9 +1,10 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-restricted-syntax */
-import { RpcError } from 'eosjs'
-import { ChainError } from '../../errors'
-import { stringifySafe } from '../../helpers'
-import { ChainErrorType } from '../../models'
+// import { RpcError } from 'eosjs'
+// import { ChainError } from '../../errors'
+// import { stringifySafe } from '../../helpers'
+// import { ChainErrorType } from '../../models'
+import { Models, Helpers, Errors } from '@open-rights-exchange/chainjs'
 
 /**  subset of errors from EOS chain - https://github.com/EOSIO/eos/blob/master/libraries/chain/include/eosio/chain/exceptions.hpp
  * IMPORTANT: These are in order of importance
@@ -38,21 +39,23 @@ export const ChainErrorRegExs: { [key: string]: string } = {
 
 /**  Maps an Error object (thrown by a call to the chain) into a known set of errors
  *   RpcError is an eosjs structure that includes the 'json' property that has error details */
-export function mapChainError(error: RpcError | Error): ChainError {
+// export function mapChainError(error: RpcError | Error): ChainError {
+export function mapChainError(error: Error): Errors.ChainError {
   let errorSearchString
   let errorMessage
   let errorJson
-  let errorType = ChainErrorType.UnknownError
+  let errorType = Models.ChainErrorType.UnknownError
 
-  if (error instanceof RpcError) {
-    errorSearchString = `${error.name} ${error.message} ${stringifySafe(error.json)}` // includes the full body of the response from the HTTP request to the chain
-    errorMessage = `${stringifySafe(error.json)}`
-    errorJson = error.json
-  } else if (error instanceof Error) {
-    errorSearchString = `${stringifySafe(error)}`
+  // if (error instanceof RpcError) {
+  //   errorSearchString = `${error.name} ${error.message} ${stringifySafe(error.json)}` // includes the full body of the response from the HTTP request to the chain
+  //   errorMessage = `${stringifySafe(error.json)}`
+  //   errorJson = error.json
+  // } else if (error instanceof Error) {
+  if (error instanceof Error) {
+    errorSearchString = `${Helpers.stringifySafe(error)}`
     errorMessage = errorSearchString
   } else {
-    errorSearchString = stringifySafe(error)
+    errorSearchString = Helpers.stringifySafe(error)
     errorMessage = errorSearchString
   }
 
@@ -63,10 +66,10 @@ export function mapChainError(error: RpcError | Error): ChainError {
     const match = regexp.exec(errorSearchString)
     if (match) {
       // map the key name of the regEx to the ChainErrorType enum
-      errorType = (ChainErrorType as any)[errorKey] // map the key name to an enum with the same name (e.g. MiscChainError)
+      errorType = (Models.ChainErrorType as any)[errorKey] // map the key name to an enum with the same name (e.g. MiscChainError)
       break
     }
   }
 
-  return new ChainError(errorType, errorMessage, errorJson, error)
+  return new Errors.ChainError(errorType, errorMessage, errorJson, error)
 }

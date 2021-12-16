@@ -1,5 +1,6 @@
 import { Algodv2, Indexer } from 'algosdk'
-import { ChainSettingsCommunicationSettings, ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
+// import { ChainSettingsCommunicationSettings, ChainSymbolBrand, ModelsCryptoEd25519 } from '../../../models'
+import { Models } from '@open-rights-exchange/chainjs'
 import { AlgorandAddress, AlgorandKeyPair } from './cryptoModels'
 import { AlgorandChainTransactionParamsStruct } from './algoStructures'
 
@@ -42,7 +43,7 @@ export type AlgorandChainInfo = {
 /** Currently nothing is needed in algorand chain settings.
  * Once any such parameter is there, change the type from any to an object containing specific properties */
 export type AlgorandChainSettings = {
-  communicationSettings?: ChainSettingsCommunicationSettings
+  communicationSettings?: Models.ChainSettingsCommunicationSettings
   defaultTransactionSettings?: {
     expireSeconds?: number
     fee?: AlgorandValue
@@ -72,7 +73,7 @@ export type AlgorandGeneratedKeys = AlgorandKeyPair
 /**  Algorand new keys options including password and optional multisig parameters */
 export type AlgorandNewKeysOptions = {
   password: string
-  encryptionOptions?: ModelsCryptoEd25519.Ed25519PasswordEncryptionOptions
+  encryptionOptions?: Models.ModelsCryptoEd25519.Ed25519PasswordEncryptionOptions
 }
 
 /** Algorand value units */
@@ -83,4 +84,4 @@ export enum AlgorandUnit {
 
 /** Algorand general value type */
 export type AlgorandValue = string | number | Buffer | Uint8Array
-export type AlgorandSymbol = string & ChainSymbolBrand
+export type AlgorandSymbol = string & Models.ChainSymbolBrand

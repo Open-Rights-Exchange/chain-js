@@ -1,20 +1,5 @@
 import algosdk from 'algosdk'
-import {
-  ChainError,
-  rejectAwaitTransaction,
-  resolveAwaitTransaction,
-  throwAndLogError,
-  throwNewError,
-} from '../../errors'
-import { ChainState } from '../../interfaces/chainState'
-import {
-  ChainErrorDetailCode,
-  ChainErrorType,
-  ChainInfo,
-  ChainSettingsCommunicationSettings,
-  ConfirmType,
-  TransactionStatus,
-} from '../../models'
+import { Models, Helpers, Errors, Interfaces } from '@open-rights-exchange/chainjs'
 import {
   AlgorandAddress,
   AlgoClient,
@@ -29,7 +14,6 @@ import {
   AlgorandTxResult,
   AlgorandUnit,
 } from './models'
-import { getHeaderValueFromEndpoint, hexStringToByteArray, isNullOrEmpty, trimTrailingChars } from '../../helpers'
 import {
   ALGORAND_POST_CONTENT_TYPE,
   DEFAULT_BLOCKS_TO_CHECK,
@@ -41,7 +25,7 @@ import {
 import { toAlgo } from './helpers'
 import { mapChainError } from './algoErrors'
 
-export class AlgorandChainState implements ChainState {
+export class AlgorandChainState implements Interfaces.ChainState {
   private _activeEndpoint: AlgorandChainEndpoint
 
   private _chainInfo: AlgorandChainInfo
@@ -113,12 +97,12 @@ export class AlgorandChainState implements ChainState {
       await this.getChainInfo()
       this._isConnected = true
     } catch (error) {
-      throwAndLogError('Problem connecting to chain', 'chainConnectFailed', error)
+      Errors.throwAndLogError('Problem connecting to chain', 'chainConnectFailed', error)
     }
   }
 
   /** Retrieve lastest chain info including head block number and time */
-  public async getChainInfo(): Promise<ChainInfo> {
+  public async getChainInfo(): Promise<Models.ChainInfo> {
     // eslint-disable-next-line no-useless-catch
     try {
       // get details from getTransactionParams endpoint
@@ -211,7 +195,7 @@ export class AlgorandChainState implements ChainState {
   /** Confirm that we've connected to the chain - throw if not */
   public assertIsConnected(): void {
     if (!this._isConnected) {
-      throwNewError('Not connected to chain')
+      Errors.throwNewError('Not connected to chain')
     }
   }
 
@@ -222,7 +206,7 @@ export class AlgorandChainState implements ChainState {
     // eslint-disable-next-line no-useless-catch
     try {
       const { txId: transactionId } = await this._algoClient
-        .sendRawTransaction(hexStringToByteArray(signedTransaction))
+        .sendRawTransaction(Helpers.hexStringToByteArray(signedTransaction))
         .do()
       return transactionId
     } catch (error) {
@@ -246,25 +230,25 @@ export class AlgorandChainState implements ChainState {
   */
   async sendTransaction(
     signedTransaction: string,
-    waitForConfirm: ConfirmType = ConfirmType.None,
+    waitForConfirm: Models.ConfirmType = Models.ConfirmType.None,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    communicationSettings?: ChainSettingsCommunicationSettings,
+    communicationSettings?: Models.ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
-    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
-      throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
+    if (waitForConfirm !== Models.ConfirmType.None && waitForConfirm !== Models.ConfirmType.After001) {
+      Errors.throwNewError('Only ConfirmType.None or .After001 are currently supported for waitForConfirm parameters')
     }
     let sendResult: AlgorandTxResult
     let transactionId
     // eslint-disable-next-line no-useless-catch
     try {
-      const { txId } = await this._algoClient.sendRawTransaction(hexStringToByteArray(signedTransaction)).do()
+      const { txId } = await this._algoClient.sendRawTransaction(Helpers.hexStringToByteArray(signedTransaction)).do()
       transactionId = txId
     } catch (error) {
       const chainError = mapChainError(error)
       throw chainError
     }
 
-    if (waitForConfirm !== ConfirmType.None) {
+    if (waitForConfirm !== Models.ConfirmType.None) {
       // get the latest head block
       const { headBlockNumber: currentHeadBlock } = await this.getChainInfo()
       // Since it wont retrieve transaction response from algorand rpc (unlike EOS) it will automatically start with currentHeadBlock
@@ -283,9 +267,9 @@ export class AlgorandChainState implements ChainState {
 
   private async awaitTransaction(
     transactionResult: AlgorandTxResult,
-    waitForConfirm: ConfirmType,
+    waitForConfirm: Models.ConfirmType,
     startFromBlockNumber: number,
-    communicationSettings: ChainSettingsCommunicationSettings,
+    communicationSettings: Models.ChainSettingsCommunicationSettings,
   ): Promise<AlgorandTxResult> {
     // use default communicationSettings or whatever was passed-in in as chainSettings (via constructor)
     const useCommunicationSettings = communicationSettings ?? {
@@ -300,11 +284,11 @@ export class AlgorandChainState implements ChainState {
 
     const checkInterval = this.ensureMinIntervalRetry(checkIntervalSetting)
 
-    if (waitForConfirm !== ConfirmType.None && waitForConfirm !== ConfirmType.After001) {
-      throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
+    if (waitForConfirm !== Models.ConfirmType.None && waitForConfirm !== Models.ConfirmType.After001) {
+      Errors.throwNewError(`Specified ConfirmType ${waitForConfirm} not supported`)
     }
     if (!startFromBlockNumber || startFromBlockNumber <= 1) {
-      throwNewError('A valid number (greater than 1) must be provided for startFromBlockNumber param')
+      Errors.throwNewError('A valid number (greater than 1) must be provided for startFromBlockNumber param')
     }
     return new Promise((resolve, reject) => {
       const getBlockAttempt = 1
@@ -350,7 +334,7 @@ export class AlgorandChainState implements ChainState {
     transactionBlockNumberParam: number,
     transactionId: string,
     transactionResult: AlgorandTxResult,
-    waitForConfirm: ConfirmType,
+    waitForConfirm: Models.ConfirmType,
   ) {
     let transactionBlockNumber = transactionBlockNumberParam
     let nextGetBlockAttempt: number
@@ -363,7 +347,7 @@ export class AlgorandChainState implements ChainState {
       }
 
       transactionResponse = this.findBlockInTransaction(possibleTransactionBlock, transactionId)
-      if (!isNullOrEmpty(transactionResponse)) {
+      if (!Helpers.isNullOrEmpty(transactionResponse)) {
         transactionBlockNumber = possibleTransactionBlock.round
       }
       // check if we've met our limit rules
@@ -373,7 +357,7 @@ export class AlgorandChainState implements ChainState {
         // blocksToCheck,
       )
       if (hasReachedConfirmLevel) {
-        resolveAwaitTransaction(resolve, {
+        Errors.resolveAwaitTransaction(resolve, {
           chainResponse: transactionResponse,
           ...transactionResult,
         } as AlgorandTxResult)
@@ -382,12 +366,12 @@ export class AlgorandChainState implements ChainState {
       nextBlockNumToCheck = blockNumToCheck + 1
     } catch (error) {
       const mappedError = mapChainError(error)
-      if (mappedError.errorType === ChainErrorType.BlockDoesNotExist) {
+      if (mappedError.errorType === Models.ChainErrorType.BlockDoesNotExist) {
         // Try to read the specific block - up to getBlockAttempts times
         if (getBlockAttempt >= maxBlockReadAttempts) {
-          rejectAwaitTransaction(
+          Errors.rejectAwaitTransaction(
             reject,
-            ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
+            Models.ChainErrorDetailCode.MaxBlockReadAttemptsTimeout,
             `Await Transaction Failure: Failure to find a block, after ${getBlockAttempt} attempts to check block ${blockNumToCheck}.`,
             error,
           )
@@ -401,9 +385,9 @@ export class AlgorandChainState implements ChainState {
     }
 
     if (nextBlockNumToCheck && nextBlockNumToCheck > startFromBlockNumber + blocksToCheck) {
-      rejectAwaitTransaction(
+      Errors.rejectAwaitTransaction(
         reject,
-        ChainErrorDetailCode.ConfirmTransactionTimeout,
+        Models.ChainErrorDetailCode.ConfirmTransactionTimeout,
         `Await Transaction Timeout: Waited for ${blocksToCheck} blocks ~(${
           (checkInterval / 1000) * blocksToCheck
         } seconds) starting with block num: ${startFromBlockNumber}. This does not mean the transaction failed just that the transaction wasn't found in a block before timeout`,
@@ -436,24 +420,24 @@ export class AlgorandChainState implements ChainState {
   /** block has reached the confirmation level requested */
   hasReachedConfirmLevel = async (
     transactionBlockNumber: number,
-    waitForConfirm: ConfirmType,
+    waitForConfirm: Models.ConfirmType,
     // blocksToCheck: number, Will be added with other ConfirmTypes
   ): Promise<boolean> => {
     // check that we've reached the required number of confirms
     // let lastRound: number
     // let confirmNumber: number
     switch (waitForConfirm) {
-      case ConfirmType.None:
+      case Models.ConfirmType.None:
         return true
-      case ConfirmType.After001:
+      case Models.ConfirmType.After001:
         // confirmed at least once if in a block
         return !!transactionBlockNumber
-      case ConfirmType.After007:
+      case Models.ConfirmType.After007:
         throw new Error('Not Implemented')
-      case ConfirmType.After010:
+      case Models.ConfirmType.After010:
         throw new Error('Not Implemented')
       // ConfirmType.Final is not supported yet but a possible implementation is commented.
-      case ConfirmType.Final:
+      case Models.ConfirmType.Final:
         throw new Error('Not Implemented')
       //   // don't have a transactionBlockNumber yet
       //   if (!transactionBlockNumber) return false
@@ -495,7 +479,7 @@ export class AlgorandChainState implements ChainState {
     try {
       transaction = await this.algoClientIndexer.lookupTransactionByID(id).do()
     } catch (error) {
-      throw new ChainError(ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found', null, error)
+      throw new Errors.ChainError(Models.ChainErrorType.TxNotFoundOnChain, 'Transaction Not Found', null, error)
     }
     return transaction
   }
@@ -504,17 +488,19 @@ export class AlgorandChainState implements ChainState {
    * A transction that has enough fees will appear on the chain and quickly be confirmed
    * Until the transaction is processed by the chain, this function will throw a TxNotFoundOnChain chain error
    */
-  public async fetchTransaction(transactionId: string): Promise<{ status: TransactionStatus; transaction: any }> {
+  public async fetchTransaction(
+    transactionId: string,
+  ): Promise<{ status: Models.TransactionStatus; transaction: any }> {
     const transactionResponse = await this.getTransactionById(transactionId)
     // TODO: Type the transaction response - which wraps this unfinished type: AlgorandTxFromChain
     const { 'confirmed-round': confirmedRound, 'last-valid': lastValid } = transactionResponse.transaction
     const { 'current-round': currentRound } = transactionResponse
-    let status: TransactionStatus
+    let status: Models.TransactionStatus
     if (confirmedRound) {
-      status = TransactionStatus.Executed
+      status = Models.TransactionStatus.Executed
     } else {
       const isExpired = currentRound > lastValid
-      status = isExpired ? TransactionStatus.Dead : TransactionStatus.Pending
+      status = isExpired ? Models.TransactionStatus.Dead : Models.TransactionStatus.Pending
     }
     return { status, transaction: transactionResponse.transaction }
   }
@@ -532,15 +518,15 @@ export class AlgorandChainState implements ChainState {
 
   /** Checks for required header 'X-API_key' */
   private assertEndpointHasTokenHeader(): void {
-    if (!getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')) {
-      throwNewError('x-api-key header is required to call algorand endpoint')
+    if (!Helpers.getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')) {
+      Errors.throwNewError('x-api-key header is required to call algorand endpoint')
     }
   }
 
   private getAlgorandConnectionSettingsForEndpoint() {
-    const endpointUrl = new URL(trimTrailingChars(this.activeEndpoint?.url, '/'))
-    const indexerUrl = new URL(trimTrailingChars(this.activeEndpoint?.options?.indexerUrl, '/'))
-    const token = getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')
+    const endpointUrl = new URL(Helpers.trimTrailingChars(this.activeEndpoint?.url, '/'))
+    const indexerUrl = new URL(Helpers.trimTrailingChars(this.activeEndpoint?.options?.indexerUrl, '/'))
+    const token = Helpers.getHeaderValueFromEndpoint(this._activeEndpoint, 'x-api-key')
 
     return {
       url: endpointUrl,

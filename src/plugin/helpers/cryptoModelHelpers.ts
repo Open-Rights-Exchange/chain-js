@@ -1,17 +1,8 @@
 import * as base32 from 'hi-base32'
 import * as nacl from 'tweetnacl'
 import * as sha512 from 'js-sha512'
-import { throwNewError } from '../../../errors'
-import * as ed25519Crypto from '../../../crypto/ed25519Crypto'
-import {
-  byteArrayToHexString,
-  bufferToUint8Array,
-  hexStringToByteArray,
-  isABuffer,
-  isAString,
-  isAUint8Array,
-  isNullOrEmpty,
-} from '../../../helpers'
+
+import { Helpers, Crypto, Errors } from '@open-rights-exchange/chainjs'
 import {
   ALGORAND_ADDRESS_BYTES_ONLY_LENGTH,
   ALGORAND_CHECKSUM_BYTE_LENGTH,
@@ -36,17 +27,17 @@ export function genericHash(arr: Uint8Array) {
 
 export function isValidAlgorandPublicKey(value: string | AlgorandPublicKey): value is AlgorandPublicKey {
   if (!value) return false
-  return ed25519Crypto.isValidPublicKey(hexStringToByteArray(value))
+  return Crypto.Ed25519Crypto.isValidPublicKey(Helpers.hexStringToByteArray(value))
 }
 
 export function isValidAlgorandPrivateKey(value: string): value is AlgorandPrivateKey {
-  return ed25519Crypto.isValidPrivateKey(hexStringToByteArray(value))
+  return Crypto.Ed25519Crypto.isValidPrivateKey(Helpers.hexStringToByteArray(value))
 }
 
 // TODO: Improve validation rule for signature - check byte length of signature?
 export function isValidAlgorandSignature(signature: string): boolean {
-  if (isNullOrEmpty(signature)) return false
-  return isAUint8Array(hexStringToByteArray(signature))
+  if (Helpers.isNullOrEmpty(signature)) return false
+  return Helpers.isAUint8Array(Helpers.hexStringToByteArray(signature))
 }
 
 /** Accepts hex string checks if a valid algorand private key
@@ -80,7 +71,7 @@ export function toAlgorandSignature(value: string): AlgorandSignature {
 
 /** Computes algorand address from the algorand public key */
 export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAddress {
-  const rawPublicKey = hexStringToByteArray(publicKey)
+  const rawPublicKey = Helpers.hexStringToByteArray(publicKey)
   // compute checksum
   const checksum = genericHash(rawPublicKey).slice(
     nacl.sign.publicKeyLength - ALGORAND_CHECKSUM_BYTE_LENGTH,
@@ -94,7 +85,7 @@ export function toAddressFromPublicKey(publicKey: AlgorandPublicKey): AlgorandAd
 // note: copied from algosdk address.decode
 export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublicKey {
   const ADDRESS_MALFORMED_ERROR = 'address seems to be malformed'
-  if (!isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
+  if (!Helpers.isAString(address)) throw new Error(ADDRESS_MALFORMED_ERROR)
 
   // try to decode
   const decoded = base32.decode.asBytes(address)
@@ -103,29 +94,29 @@ export function toPublicKeyFromAddress(address: AlgorandAddress): AlgorandPublic
   if (decoded.length !== ALGORAND_ADDRESS_BYTES_ONLY_LENGTH) throw new Error(ADDRESS_MALFORMED_ERROR)
 
   const publicKey = new Uint8Array(decoded.slice(0, ALGORAND_ADDRESS_BYTES_ONLY_LENGTH - ALGORAND_CHECKSUM_BYTE_LENGTH))
-  return byteArrayToHexString(publicKey) as AlgorandPublicKey
+  return Helpers.byteArrayToHexString(publicKey) as AlgorandPublicKey
 }
 
 // convert a native signature (Uint8Array OR Buffer of Uint8Array) to Hexstring
 export function toAlgorandSignatureFromRawSig(rawSignature: Buffer | Uint8Array): AlgorandSignature {
-  if (isNullOrEmpty(rawSignature)) return null
+  if (Helpers.isNullOrEmpty(rawSignature)) return null
   let sigUint8 = rawSignature
-  if (isABuffer(rawSignature)) {
-    sigUint8 = bufferToUint8Array(rawSignature as Buffer)
+  if (Helpers.isABuffer(rawSignature)) {
+    sigUint8 = Helpers.bufferToUint8Array(rawSignature as Buffer)
   }
-  return toAlgorandSignature(byteArrayToHexString(sigUint8))
+  return toAlgorandSignature(Helpers.byteArrayToHexString(sigUint8))
 }
 
 // convert a native Uint8Array signature to Hexstring
 export function toRawSignatureFromAlgoSig(signature: AlgorandSignature): Uint8Array {
-  return hexStringToByteArray(signature)
+  return Helpers.hexStringToByteArray(signature)
 }
 
 /** Throws if signatures isn't properly formatted */
 export function assertValidSignatures(signatures: AlgorandSignature[]) {
   ;(signatures || []).forEach(sig => {
     if (!isValidAlgorandSignature(sig)) {
-      throwNewError(`Not a valid signature : ${sig}`, 'signature_invalid')
+      Errors.throwNewError(`Not a valid signature : ${sig}`, 'signature_invalid')
     }
   })
 }

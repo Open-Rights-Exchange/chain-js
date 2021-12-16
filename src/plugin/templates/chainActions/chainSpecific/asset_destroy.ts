@@ -1,4 +1,5 @@
 import * as algosdk from 'algosdk'
+import { Helpers } from '@open-rights-exchange/chainjs'
 import {
   AlgorandDecomposeReturn,
   AlgorandChainActionType,
@@ -9,7 +10,7 @@ import {
   AlgorandActionAssetDestroyParams,
 } from '../../../models'
 import { AlgorandActionHelper } from '../../../algoAction'
-import { isNullOrEmpty } from '../../../../../helpers'
+// import { isNullOrEmpty } from '../../../../../helpers'
 
 /**
  * Composes asset destroy action */
@@ -20,7 +21,7 @@ export const composeAction = async (
   const argsEncodedForSdk = new AlgorandActionHelper(args as AlgorandTxAction).actionEncodedForSdk
   const { from, note, assetIndex, reKeyTo } = argsEncodedForSdk
   const composedAction = algosdk.makeAssetDestroyTxnWithSuggestedParams(from, note, assetIndex, suggestedParams)
-  if (!isNullOrEmpty(reKeyTo)) {
+  if (!Helpers.isNullOrEmpty(reKeyTo)) {
     composedAction.addRekey(reKeyTo)
   }
   const actionHelper = new AlgorandActionHelper(composedAction)
@@ -33,11 +34,11 @@ export const decomposeAction = (action: AlgorandTxAction | AlgorandTxActionRaw):
   // Cant identify using only type (more than one action uses AssetConfig type) - must check params too
   if (
     actionParams?.type === AlgorandTransactionTypeCode.AssetConfig &&
-    isNullOrEmpty(actionParams?.assetManager) &&
-    isNullOrEmpty(actionParams?.assetReserve) &&
-    isNullOrEmpty(actionParams?.assetFreeze) &&
-    isNullOrEmpty(actionParams?.assetClawback) &&
-    isNullOrEmpty(actionParams?.assetName)
+    Helpers.isNullOrEmpty(actionParams?.assetManager) &&
+    Helpers.isNullOrEmpty(actionParams?.assetReserve) &&
+    Helpers.isNullOrEmpty(actionParams?.assetFreeze) &&
+    Helpers.isNullOrEmpty(actionParams?.assetClawback) &&
+    Helpers.isNullOrEmpty(actionParams?.assetName)
   ) {
     const returnData = {
       ...actionParams,

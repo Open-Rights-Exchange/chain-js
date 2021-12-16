@@ -1,5 +1,6 @@
+import { Helpers } from '@open-rights-exchange/chainjs'
 import { AlgorandTxAction, AlgorandTxActionRaw, AlgorandTxActionSdkEncoded, AlgorandDecomposeReturn } from './models'
-import { isNullOrEmpty } from '../../helpers'
+// import { isNullOrEmpty } from '../../helpers'
 import { decomposeAction as TokenTransferTemplate } from './templates/chainActions/standard/token_transfer'
 import { decomposeAction as ValueTransferTemplate } from './templates/chainActions/standard/value_transfer'
 import { decomposeAction as ApplicationClearTemplate } from './templates/chainActions/chainSpecific/application_clear'
@@ -61,5 +62,5 @@ export async function decomposeAction(
   )
 
   // return null and not an empty array if no matches
-  return !isNullOrEmpty(decomposedActions) ? decomposedActions : null
+  return !Helpers.isNullOrEmpty(decomposedActions) ? decomposedActions : null
 }
