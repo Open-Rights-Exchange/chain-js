@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { EthereumTransactionAction, EthereumAddress } from '../../../models'
 import { isNullOrEmptyEthereumValue } from '../../../helpers'
 import { ChainActionType, ActionDecomposeReturn } from '../../../../../models'
-import { toChainEntityName } from '../../../../../helpers'
+import { ensureHexPrefix, toChainEntityName } from '../../../../../helpers'
 
 export interface EthTransferParams {
   value: string
@@ -16,7 +16,7 @@ export const composeAction = (params: EthTransferParams) => {
   return {
     from,
     to,
-    value: new BN(value, 10), // must be a hex '0x' string or BN
+    value: ensureHexPrefix(new BN(value, 10).toString('hex')), // must be a hex '0x' string or BN
   }
 }
 
