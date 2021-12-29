@@ -1,5 +1,4 @@
 // How to use fetch mocks - https://www.npmjs.com/package/jest-fetch-mock
-import BN from 'bn.js'
 import { composeAction } from '../ethCompose'
 import { ChainActionType } from '../../../models'
 import {
@@ -19,7 +18,7 @@ describe('Compose Chain Actions', () => {
   it('creates eth transfer action object', async () => {
     const expAction = {
       to: '0x27105356F6C1ede0e92020e6225E46DC1F496b81',
-      value: new BN(10, 10), // number 10 (in decimal)
+      value: '0xa', // number 10 (in decimal)
     }
 
     const args = {
