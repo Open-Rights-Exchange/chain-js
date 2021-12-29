@@ -7,6 +7,7 @@ import {
   decomposeAction as ethTransferDecomposeAction,
   EthTransferParams,
 } from '../chainSpecific/eth_transfer'
+import { toTokenValueString } from '../../../../../helpers'
 
 /** Sends ETH (in units of Wei) */
 export const composeAction = (params: ValueTransferParams) => {
@@ -26,7 +27,7 @@ export const decomposeAction = (action: EthereumTransactionAction): ActionDecomp
     const decomposedArgs = decomposed.args
     return {
       args: {
-        amount: decomposedArgs.value,
+        amount: toTokenValueString(decomposedArgs.value, 10, 0), // convert back to decimal from hex (in Wei)
         fromAccountName: decomposedArgs.from,
         toAccountName: decomposedArgs.to,
         symbol: EthUnit.Wei,
