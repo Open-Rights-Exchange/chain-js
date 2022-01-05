@@ -9,7 +9,7 @@ import { isHexString, removeEmptyValuesInJsonObject } from '../../helpers'
 import { toEosPublicKey } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
-import { AsymmetricScheme } from '../../crypto/asymmetricModels'
+import { AsymmetricEncryptedData, AsymmetricScheme } from '../../crypto/asymmetricModels'
 
 const { Keygen } = require('eosjs-keygen')
 
@@ -102,7 +102,7 @@ export async function decryptWithPrivateKeys(
   encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: EosPublicKey[],
   options?: any,
-): Promise<string> {
+): Promise<{ decrypted: string; remaining: AsymmetricEncryptedData[] }> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
 }
 

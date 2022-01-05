@@ -19,6 +19,7 @@ import {
   TransactionOptions,
   TransactionStatus,
 } from '../models'
+import { AsymmetricEncryptedData } from '../crypto/asymmetricModels'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
@@ -115,7 +116,7 @@ export interface Chain {
     encrypted: Asymmetric.AsymmetricEncryptedDataString,
     privateKeys: PrivateKey[],
     options?: any,
-  ): Promise<string>
+  ): Promise<{ decrypted: string; remaining: AsymmetricEncryptedData[] }>
   /** Generates and returns a new public/private key pair */
   generateKeyPair(): Promise<KeyPair>
   /** Returns a public key given a signature and the original data was signed */
