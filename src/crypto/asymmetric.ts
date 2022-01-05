@@ -64,7 +64,7 @@ export function emptyBufferForIv(symmetricCypherType: SymmetricCypherType) {
 export function isAsymEncryptedDataString(value: string): value is AsymmetricEncryptedDataString {
   if (!isAString(value)) return false
   // this is an oversimplified check just to prevent assigning a wrong string
-  return value.match(/^(?=.*\bpublicKey\b)(?=.*\bephemPublicKey\b)(?=.*\bciphertext\b)(?=.*\bmac\b).*$/is) !== null
+  return value.match(/^(?=.*\bpublicKey\b)(?=.*\bephemPublicKey\b)(?=.*\b)(?=.*\bmac\b).*$/is) !== null
 }
 
 /** Ensures that the value comforms to a well-formed, stringified JSON Encrypted Object */

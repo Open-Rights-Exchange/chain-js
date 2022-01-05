@@ -14,7 +14,7 @@ import {
 import * as ed25519Crypto from '../../crypto/ed25519Crypto'
 import { toAlgorandPrivateKey, toAlgorandPublicKey, toAlgorandSignatureFromRawSig } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
-import { AsymmetricScheme } from '../../crypto/asymmetricModels'
+import { AsymmetricEncryptedData, AsymmetricScheme } from '../../crypto/asymmetricModels'
 
 /** Verifies that the value is a valid encrypted string */
 export function isSymEncryptedDataString(value: string): value is Ed25519Crypto.Ed25519EncryptedDataString {
@@ -109,7 +109,7 @@ export async function decryptWithPrivateKeys(
   encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: AlgorandPrivateKey[],
   options?: any,
-): Promise<string> {
+): Promise<{ decrypted: string; remaining: AsymmetricEncryptedData[] }> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
 }
 
