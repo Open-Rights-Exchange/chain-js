@@ -24,7 +24,7 @@ import {
 import { toEthBuffer, toEthereumAddress, toEthereumPublicKey, toEthereumSignatureNative } from './helpers'
 import { ensureEncryptedValueIsObject } from '../../crypto/genericCryptoHelpers'
 import * as AsymmetricHelpers from '../../crypto/asymmetricHelpers'
-import { AsymmetricScheme } from '../../crypto/asymmetricModels'
+import { AsymmetricEncryptedData, AsymmetricScheme } from '../../crypto/asymmetricModels'
 
 // eslint-disable-next-line prefer-destructuring
 export const defaultIter = AesCrypto.defaultIter
@@ -127,7 +127,7 @@ export async function decryptWithPrivateKeys(
   encrypted: Asymmetric.AsymmetricEncryptedDataString,
   privateKeys: EthereumPublicKey[],
   options?: any,
-): Promise<string> {
+): Promise<{ decrypted: string; remaining: AsymmetricEncryptedData[] }> {
   return AsymmetricHelpers.decryptWithPrivateKeys(decryptWithPrivateKey, encrypted, privateKeys, options)
 }
 
