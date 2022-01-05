@@ -108,10 +108,11 @@ export interface Chain {
     publicKeys: PublicKey[],
     options?: any,
   ): Promise<Asymmetric.AsymmetricEncryptedDataString>
-  /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string
-   *  each pass uses a private keys from privateKeys array param
-   *  put the keys in the same order as public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
-   *  The result is the decrypted string */
+  /** Unwraps an object produced by encryptWithPublicKeys() - resulting in the original ecrypted string (or the remaining encrypted payload)
+   *  each pass uses a private keys from privateKeys array - in the order appearing in the array - in same order of public keys provided to encryptWithPublicKeys() - they will be applied in the right (reverse) order
+   *  If only some of the private keys are provided, if most be the last n keys (provided in same order as when encrypted) e.g. [key3, key4] where key1, key2 will be used later to finish decrypting the remaining payload
+   *  Returns:    decrypted - If all keys were provided. The result is the original string that was encrypted
+   *           OR remaining - If only some of the private keys provided. Returns array of encrypted blobs that are remaining after unwrapping with the private keys provided */
   decryptWithPrivateKeys(
     encrypted: Asymmetric.AsymmetricEncryptedDataString,
     privateKeys: PrivateKey[],
