@@ -23,7 +23,6 @@ import { AsymmetricEncryptedData } from '../crypto/asymmetricModels'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
-  // new(endpoints: ChainEndpoint[], settings?: any): Chain;
   /** Return unique chain ID string */
   chainId: string
   /** Retrieve lastest chain info including head block number and time */
