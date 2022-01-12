@@ -13,6 +13,7 @@ import {
   getFirstAuthorizationIfOnlyOneExists,
   toEosEntityNameOrNull,
   toEosPublicKeyOrNull,
+  EosAssetHelper,
 } from '../../../helpers'
 
 const actionName = 'newaccount'
@@ -38,76 +39,87 @@ export const composeAction = ({
   stakeNetQuantity,
   stakeCpuQuantity,
   transfer,
-}: CreateAccountNativeParams): EosActionStruct[] => [
-  {
-    account: toEosEntityName('eosio'),
-    name: actionName,
-    authorization: [
-      {
-        actor: creatorAccountName,
-        permission: creatorPermission,
-      },
-    ],
-    data: {
-      creator: creatorAccountName,
-      name: accountName,
-      owner: {
-        threshold: 1,
-        keys: [
-          {
-            key: publicKeyOwner,
-            weight: 1,
-          },
-        ],
-        accounts: Array<any>(),
-        waits: Array<any>(),
-      },
-      active: {
-        threshold: 1,
-        keys: [
-          {
-            key: publicKeyActive,
-            weight: 1,
-          },
-        ],
-        accounts: Array<any>(),
-        waits: Array<any>(),
+}: CreateAccountNativeParams): EosActionStruct[] => {
+  const actions: EosActionStruct[] = [
+    {
+      account: toEosEntityName('eosio'),
+      name: actionName,
+      authorization: [
+        {
+          actor: creatorAccountName,
+          permission: creatorPermission,
+        },
+      ],
+      data: {
+        creator: creatorAccountName,
+        name: accountName,
+        owner: {
+          threshold: 1,
+          keys: [
+            {
+              key: publicKeyOwner,
+              weight: 1,
+            },
+          ],
+          accounts: Array<any>(),
+          waits: Array<any>(),
+        },
+        active: {
+          threshold: 1,
+          keys: [
+            {
+              key: publicKeyActive,
+              weight: 1,
+            },
+          ],
+          accounts: Array<any>(),
+          waits: Array<any>(),
+        },
       },
     },
-  },
-  {
-    account: toEosEntityName('eosio'),
-    name: 'buyrambytes',
-    authorization: [
-      {
-        actor: creatorAccountName,
-        permission: creatorPermission,
+    {
+      account: toEosEntityName('eosio'),
+      name: 'buyrambytes',
+      authorization: [
+        {
+          actor: creatorAccountName,
+          permission: creatorPermission,
+        },
+      ],
+      data: {
+        payer: creatorAccountName,
+        receiver: accountName,
+        bytes: ramBytes,
       },
-    ],
-    data: {
-      payer: creatorAccountName,
-      receiver: accountName,
-      bytes: ramBytes,
     },
-  },
-  {
-    account: toEosEntityName('eosio'),
-    name: 'delegatebw',
-    authorization: [
-      {
-        actor: creatorAccountName,
-        permission: creatorPermission,
+  ]
+
+  // add delegatebw action to stake resources (if non-zero)
+  const { amount: netAmount } = new EosAssetHelper(null, null, stakeNetQuantity)
+  const { amount: cpuAmount } = new EosAssetHelper(null, null, stakeCpuQuantity)
+  if (parseFloat(netAmount) !== 0 || parseFloat(cpuAmount) !== 0) {
+    // Note: Float won't handle high precision numbers (which shouldnt be a problem with EOS)
+    actions.push({
+      account: toEosEntityName('eosio'),
+      name: 'delegatebw',
+      authorization: [
+        {
+          actor: creatorAccountName,
+          permission: creatorPermission,
+        },
+      ],
+      data: {
+        from: creatorAccountName,
+        receiver: accountName,
+        stake_net_quantity: stakeNetQuantity,
+        stake_cpu_quantity: stakeCpuQuantity,
+        transfer,
       },
-    ],
-    data: {
-      from: creatorAccountName,
-      receiver: accountName,
-      stake_net_quantity: stakeNetQuantity,
-      stake_cpu_quantity: stakeCpuQuantity,
-      transfer,
-    },
-  },
-]
+    })
+  }
+
+  return actions
+}
 
 export const decomposeAction = (action: EosActionStruct): EosDecomposeReturn => {
   const { name, data, authorization } = action
