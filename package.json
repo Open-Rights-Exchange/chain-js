@@ -1,8 +1,10 @@
 {
-  "name": "@open-rights-exchange/chainjs",
-  "version": "3.4.1",
+  "name": "@open-rights-exchange/chain-js",
+  "version": "4.0.0",
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
-  "main": "./dist/index.js",
+  "license": "MIT",
+  "author": "Open Rights Exchange",
+  "main": "./dist/src/index.js",
   "scripts": {
     "build": "rm -rf dist/* && ./node_modules/.bin/tsc --build tsconfig.json",
     "lint": "./node_modules/.bin/eslint src",
@@ -15,7 +17,6 @@
     "type": "git",
     "url": "git+https://github.com/TeamAikon/chain-js.git"
   },
-  "author": "AIKON",
   "bugs": {
     "url": "https://github.com/TeamAikon/chain-js/issues"
   },
