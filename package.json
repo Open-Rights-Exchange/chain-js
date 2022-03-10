@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Open Rights Exchange",
   "main": "./dist/src/index.js",
+  "sideEffects": false,
   "scripts": {
     "build": "rm -rf dist/* && ./node_modules/.bin/tsc --build tsconfig.json",
     "lint": "./node_modules/.bin/eslint src",
@@ -36,8 +37,11 @@
     "jest": "^24.9.0",
     "prettier": "^2.4.1",
     "ts-jest": "^24.2.0",
+    "ts-loader": "^9.2.7",
     "ts-node": "^10.2.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "@aikon/sjcl": "^0.1.8",
