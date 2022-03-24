@@ -1,0 +1,17 @@
+<html>
+  <head>
+      <script type="text/javascript" src="../../dist/lib.js"></script>
+      <script>
+        var go = function() {
+          console.log("Try callig a Helper Function from ChainJS")
+          console.log("chain_js.Helpers.isHexString(\"4974277320776f726b696e6721\")")
+          console.log(chain_js.Helpers.isHexString("4974277320776f726b696e6721"))
+          console.log(chain_js.Models.ChainType.EosV2)
+        }
+      </script>
+  </head>
+<body>
+This test HTML file loads the Chain-JS module (as built by Webpack 5).<br /> Clicking the "Test" button bellow run a basic function in the library.<br /> See the console for output.<br />
+<button onclick="go()">Test</button>
+</body>
+</html>
