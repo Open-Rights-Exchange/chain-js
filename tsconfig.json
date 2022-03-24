@@ -8,14 +8,14 @@
       "es2017",
       "dom"
     ],
-    "module": "CommonJS",
+    "module": "es6",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "dist",
     "skipLibCheck": true,
     "sourceMap": true,
-    "target": "es5",
+    "target": "es6",
     "baseUrl": "./",
     "paths": {
     },
@@ -32,5 +32,5 @@
   "include": [
     "./src/**/*.js",
     "./src/**/*.ts"
-  ]
+, "src/xx1.xx"  ]
 }
