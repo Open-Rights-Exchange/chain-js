@@ -74,7 +74,11 @@ const clientConfig = {
       "net": false,
       "tls": false
     }
-  },
+  }
+  // ,
+  // tempConfig.plugins = [
+  //   ,
+  // ]
 };
 
 
@@ -90,18 +94,24 @@ const devProd = (tempConfig) => {
     };
     tempConfig.devtool = false;
     //tempConfig.plugins = [new BundleAnalyzerPlugin({analyzerPort: 5000})]
-    tempConfig.plugins = [
-      new webpack.ProvidePlugin({
-        Buffer: ['buffer', 'Buffer'],
-      }),
-    ]
   }
+
+
   return tempConfig;
 };
 
 var _serverConfig = devProd(serverConfig);
 var _clientConfig = devProd(clientConfig);
-// console.log(_serverConfig)
+
+// Add the buffer plugin when we're doing a UMD build. 
+_clientConfig.plugins.push(
+  new webpack.ProvidePlugin({
+    Buffer: ['buffer', 'Buffer'],
+  })
+)
+
+
+//console.log(_serverConfig)
 //console.log(_clientConfig)
 module.exports = () => [
   //devProd(_serverConfig),
