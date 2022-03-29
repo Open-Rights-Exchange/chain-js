@@ -45,7 +45,7 @@ const clientConfig = {
   target: 'web', // <=== can be omitted as default is 'web'
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'lib.js',
+    filename: 'chain-js-umd.js',
     library: { 
       name :'chain_js',
       type: 'umd'

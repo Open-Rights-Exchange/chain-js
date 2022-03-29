@@ -1,17 +1,86 @@
 <html>
   <head>
-      <script type="text/javascript" src="../../dist/lib.js"></script>
+      <script type="text/javascript" src="../../dist/chain-js-umd.js"></script>
+      <script type="text/javascript" src="../../dist/chain-js-plugin-eos-umd.js"></script>
       <script>
-        var go = function() {
-          console.log("Try callig a Helper Function from ChainJS")
-          console.log("chain_js.Helpers.isHexString(\"4974277320776f726b696e6721\")")
-          console.log(chain_js.Helpers.isHexString("4974277320776f726b696e6721"))
-          console.log(chain_js.Models.ChainType.EosV2)
+        var runTxn = async function(config) {
+
+          // console.log("Try callig a Helper Function from ChainJS")
+          // console.log("chain_js.Helpers.isHexString(\"4974277320776f726b696e6721\")")
+          // console.log(chain_js.Helpers.isHexString("4974277320776f726b696e6721"))
+          // console.log(chain_js.Models.ChainType.EosV2)
+
+          var configObj = JSON.parse(config);
+
+          var chainType = configObj.chainType;
+          var endpoints = configObj.endpoints
+          var chainSettings  = configObj.chainSettings
+          var fromAccountName = configObj.fromAccountName
+          var toAccountName = configObj.toAccountName
+          var symbol = configObj.symbol
+          var permission = configObj.permission
+          var privateKeys = configObj.privateKeys
+          var transferAmount = configObj.transferAmount
+          var precision = configObj.precision
+
+          //PluginChainFactory
+          var EOSPlugin = chain_js_plugin_eos.Plugin;
+         
+          var chain = chain_js.PluginChainFactory([EOSPlugin],chainType,endpoints,{})
+  
+          console.log("chain.isConnected before calling chain.connect()")
+          console.log(chain.isConnected);
+
+          await chain.connect()
+
+          console.log("chain.isConnected after calling chain.connect()")
+          console.log(chain.isConnected);
+
+          var sendTokenTx = await chain.new.Transaction()
+          var action = await chain.composeAction(chain_js.Models.ChainActionType.ValueTransfer,
+          {
+            fromAccountName,
+            toAccountName,
+            amount: transferAmount,
+            symbol,
+            memo: 'Test',
+            permission,
+            precision
+          });
+
+          sendTokenTx.actions = [action];
+          
+          await sendTokenTx.prepareToBeSigned()
+          await sendTokenTx.validate()
+          await sendTokenTx.sign(privateKeys);
+
+          var result =  await sendTokenTx.send();
+
+          console.log('transactionId:', result.transactionId)
+          console.log('hasAllRequiredSignatures:', sendTokenTx.hasAllRequiredSignatures)
+          console.log('actions:', JSON.stringify(sendTokenTx.actions))
+          console.log('header:', sendTokenTx.header)
+          console.log('signatures:', sendTokenTx.signatures)
+
         }
       </script>
   </head>
 <body>
 This test HTML file loads the Chain-JS module (as built by Webpack 5).<br /> Clicking the "Test" button bellow run a basic function in the library.<br /> See the console for output.<br />
-<button onclick="go()">Test</button>
+<textarea id="config" cols="60" rows="20">
+  {
+    "chainType": "eos",
+    "endpoints":  [{"url" : "https://jungle3.cryptolions.io:443"}],          
+    "fromAccountName" : "codeoflight1",
+    "toAccountName": "codeoflight2",
+    "chainSettings": {},
+    "symbol":  "EOS",
+    "permission": "active",
+    "privateKeys": ["{YourPrivateKeyHere}"],
+    "transferAmount": "0.0001",
+    "precision": 4
+}
+</textarea>
+<button onclick="runTxn(document.getElementById('config').value)">Test</button>
 </body>
 </html>
