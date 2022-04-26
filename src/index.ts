@@ -10,6 +10,7 @@ import * as CryptoHelpers from './crypto/genericCryptoHelpers'
 import * as CryptoAsymmetricModels from './crypto/asymmetricModels'
 import * as CryptoAsymmetricHelpers from './crypto/asymmetricHelpers'
 import * as PluginInterfaces from './interfaces/plugins/multisig'
+import { encryptWithPublicKey, toAsymEncryptedDataString } from './crypto/asymmetric'
 
 const { ChainType } = Models
 
@@ -34,6 +35,8 @@ export {
   CryptoAsymmetricHelpers,
   PluginChainFactory,
   PluginInterfaces,
+  encryptWithPublicKey,
+  toAsymEncryptedDataString,
 }
 
 // Note the code using chain specific helpers will also break
