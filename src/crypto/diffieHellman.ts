@@ -1,9 +1,12 @@
 import crypto, { ECDHKeyFormat } from 'crypto'
 import ed2Curve from 'ed2curve'
 import nacl from 'tweetnacl'
-import { encodeBase64 } from 'tweetnacl-util'
+import pkg from 'tweetnacl-util'
 import { throwNewError } from '../errors'
 import { EciesCurveType } from './asymmetricModels'
+
+// tweetnacl-util is a commonjs module so need to be imported this way for named imports to work
+const { encodeBase64 } = pkg
 
 function assertPublicKeyBufferLengthValid(publicKey: Buffer, functionName: string) {
   if (!(publicKey.length === 65 || publicKey.length === 33)) {

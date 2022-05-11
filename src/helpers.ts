@@ -1,12 +1,15 @@
 import { BigNumber } from 'ethers'
 import BigNumberJs from 'bignumber.js'
 import BN from 'bn.js'
-import { parse, stringify } from 'flatted'
+import pkg from 'flatted'
 import { sha256 } from 'js-sha256'
 import { DEFAULT_TOKEN_PRECISION, TRANSACTION_ENCODING } from './constants'
 import { ChainState } from './interfaces/chainState'
 import { ChainJsPlugin, ChainJsPluginOptions } from './interfaces/plugin'
 import { ChainEntityName, IndexedObject, ChainEndpoint } from './models'
+
+// flatted is a commonjs module so need to be imported this way for named imports to work
+const { parse, stringify } = pkg
 
 export function isAString(value: any) {
   if (!value) {
