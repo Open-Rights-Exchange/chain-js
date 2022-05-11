@@ -59,6 +59,7 @@ export type ValueTransferParams = {
   fromAccountName?: ChainEntityName
   toAccountName: ChainEntityName
   amount: string
+  precision?: number
   symbol?: ChainSymbol | string
   memo?: string
   permission?: ChainEntityName
