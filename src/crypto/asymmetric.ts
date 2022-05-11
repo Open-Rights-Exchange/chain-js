@@ -1,7 +1,7 @@
 // This code from https://github.com/bin-y/standard-ecies
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
-import crypto from 'crypto'
-import { ecdsaSign, ecdsaVerify } from 'secp256k1'
+import * as crypto from 'crypto'
+import pkg from 'secp256k1'
 import {
   byteArrayToHexString,
   createSha256Hash,
@@ -34,6 +34,9 @@ import {
 } from './asymmetricModels'
 import { PrivateKey, PublicKey, Signature } from '../models'
 import { getAsymSchemeGenerator } from './asymmetricSchemes/asymmetricSchemeGetter'
+
+// secp256k1 is a commonjs module so need to be imported this way for named imports to work
+const { ecdsaSign, ecdsaVerify } = pkg
 
 export * from './asymmetricModels'
 

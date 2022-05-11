@@ -1,7 +1,7 @@
 // This code from https://github.com/bin-y/standard-ecies
 // Implemention of ECIES specified in https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme
 
-import crypto from 'crypto'
+import { CipherGCMTypes as crypto_CipherGCMTypes } from 'crypto'
 
 /** data to encrypt (or result of decrypt) */
 export type Unencrypted = string | NodeJS.ArrayBufferView
@@ -23,7 +23,7 @@ export enum SymmetricCypherType {
 
 export type ECDHKeyFormat = 'compressed' | 'uncompressed' | 'hybrid'
 export type CipherGCMTypes =
-  | crypto.CipherGCMTypes // cipher types supported by Node (depends on version of Node)
+  | crypto_CipherGCMTypes // cipher types supported by Node (depends on version of Node)
   | SymmetricCypherType.Aes128Ecb
   | SymmetricCypherType.Sha256
   | SymmetricCypherType.Aes256Ctr
