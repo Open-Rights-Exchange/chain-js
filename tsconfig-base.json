@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": "src",
+        "esModuleInterop": true,
+        "inlineSourceMap": false,
+        "lib": ["DOM", "esnext"],
+        //"lib": ["esnext"],
+        "listEmittedFiles": false,
+        "listFiles": false,
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "pretty": true,
+        "resolveJsonModule": true,
+        // "rootDir": "src",
+        // "strict": true,
+        "traceResolution": false,
+        "types": ["node", "jest"],
+        "composite": true,
+        "declaration": true,
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "alwaysStrict": true,
+        "downlevelIteration": true,
+        "noImplicitAny": true,
+        "paths":
+        {
+            "@open-rights-exchange/chain-js":
+            [
+                "../chain-js/src"
+            ]
+        },
+    },
+    "compileOnSave": false,
+    "exclude": ["node_modules", "dist"],
+    "include": ["src"]
+}
