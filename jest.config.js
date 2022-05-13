@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   automock: false,
   roots: [
     '<rootDir>/src/tests',

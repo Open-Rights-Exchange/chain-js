@@ -4,19 +4,27 @@
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "license": "MIT",
   "author": "Open Rights Exchange",
-  "main": "./dist/src/index.js",
+  "main": "dist/cjs/src/index.js",
+  "module": "dist/mjs/src/index.js",
+  "types": "dist/mjs/src/index.d.ts",
   "sideEffects": false,
-  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/mjs/src/index.js",
+      "require": "./dist/cjs/src/index.js"
+    }
+  },
   "scripts": {
     "webpack": "webpack --mode=production --node-env=production",
     "webpack:dev": "webpack --mode=development",
-    "build": "rm -rf dist/* && ./node_modules/.bin/tsc --build tsconfig.json",
+    "_build": "rm -rf dist/* && ./node_modules/.bin/tsc --build tsconfig.json",
     "lint": "./node_modules/.bin/eslint src",
     "lint-fix": "./node_modules/.bin/eslint src --fix",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "test": "jest --runInBand --coverage --detectOpenHandles",
-    "localpublish": "zalc publish && zalc push"
+    "localpublish": "zalc publish && zalc push",
+    "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup"
   },
   "repository": {
     "type": "git",
