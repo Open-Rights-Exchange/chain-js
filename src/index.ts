@@ -1,4 +1,4 @@
-import { ChainFactory, PluginChainFactory } from './chainFactory'
+import { PluginChainFactory } from './chainFactory'
 import { ChainError, throwNewError } from './errors'
 import { Account, Chain, CreateAccount, Transaction, ChainJsPlugin, ChainJsPluginOptions } from './interfaces'
 import * as Crypto from './crypto'
@@ -19,7 +19,6 @@ export {
   Chain,
   ChainError,
   throwNewError,
-  ChainFactory,
   ChainType,
   CreateAccount,
   Crypto,
