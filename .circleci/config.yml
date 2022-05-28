@@ -78,4 +78,4 @@ workflows:
             # ignore any commit on any branch by default
             branches:
               only: 
-                - plugin-breakout
+                - master
