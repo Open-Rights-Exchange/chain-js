@@ -8,8 +8,6 @@ import { EciesOptions, AsymmetricScheme, SymmetricCypherType } from '../asymmetr
 import { decryptWithPrivateKey, encryptWithPublicKey } from '../asymmetric'
 import { Asymmetric } from '..'
 
-require('dotenv').config()
-
 /** This example demonstrates how to create a custom scheme to generate the ciper key and mac key for an asym encryption
  *  There is some variability in how someone would contruct these keys (e.g. compressed vs uncompressed public key)
  *  By creating a customHashGenerator() and/or customMacGenerator function, we can control the approach

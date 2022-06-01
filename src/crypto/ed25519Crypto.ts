@@ -1,6 +1,6 @@
 import nacl from 'tweetnacl'
 import scrypt from 'scrypt-async'
-import { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
+import pkg from 'tweetnacl-util'
 import { isAString, isNullOrEmpty, hexStringToByteArray, byteArrayToHexString } from '../helpers'
 import {
   Ed25519KeyPair,
@@ -10,6 +10,9 @@ import {
   Ed25519PublicKey,
   Ed25519Signature,
 } from './ed25519CryptoModels'
+
+// tweetnacl-util is a commonjs module so need to be imported this way for named imports to work
+const { decodeUTF8, encodeUTF8, encodeBase64, decodeBase64 } = pkg
 
 export * from './ed25519CryptoModels'
 
