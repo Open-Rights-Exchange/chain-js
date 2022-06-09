@@ -1,4 +1,4 @@
-/** Transaction options used when contructing a trnasaction header */
+/** Transaction options used when contructing a transaction header */
 export type TransactionOptions = any
 
 /** Transaction receipt returned from chain after submitting the transaction */
@@ -41,4 +41,16 @@ export enum TransactionStatus {
   Executed = 'executed',
   Dead = 'dead',
   Pending = 'pending',
+}
+
+export enum TransactionExpirationType {
+  None = 'none',
+  Window = 'window',
+  Deadline = 'deadline',
+}
+
+export type TransactionSupportedExpirationOptions = {
+  transactionsExpirationType: TransactionExpirationType
+  maxFutureSeconds?: number
+  maxWindowOfSeconds?: number
 }
