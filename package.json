@@ -1,12 +1,12 @@
 {
   "name": "@open-rights-exchange/chain-js",
-  "version": "4.2.0",
+  "version": "4.4.0",
   "description": "Javascript helper library providing plug-in interfaces to multiple block chains.",
   "license": "MIT",
   "author": "Open Rights Exchange",
   "main": "dist/cjs/src/index.js",
-  "module": "dist/mjs/src/index.js",
-  "types": "dist/mjs/src/index.d.ts",
+  "_module": "dist/mjs/src/index.js",
+  "_types": "dist/mjs/src/index.d.ts",
   "sideEffects": false,
   "scripts": {
     "webpack": "webpack --mode=production --node-env=production",
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/open-rights-exchange/chain-js#readme",
   "devDependencies": {
+    "@types/bn.js": "^5.1.0",
     "@types/jest": "^27.0.2",
     "@types/node": "^13.1.0",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
@@ -57,7 +58,6 @@
     "@types/scrypt-async": "^1.3.1",
     "bignumber.js": "^9.0.0",
     "bn.js": "^5.1.2",
-    "contract-proxy-kit": "^3.0.0",
     "ed2curve": "^0.3.0",
     "ethers": "^5.1.4",
     "flatted": "^2.0.1",
