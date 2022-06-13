@@ -1,8 +1,7 @@
-
 export enum EstimationType {
   Exact = 'exact',
   Estimate = 'estimate',
-  Partial = 'partial'
+  Partial = 'partial',
 }
 
 export type AccountResources = {
