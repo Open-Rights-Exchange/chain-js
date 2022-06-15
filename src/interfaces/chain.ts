@@ -18,7 +18,7 @@ import {
   Signature,
   TransactionOptions,
   TransactionStatus,
-  TransactionSupportedExpirationOptions
+  TransactionSupportedExpirationOptions,
 } from '../models'
 import { AsymmetricEncryptedData } from '../crypto/asymmetricModels'
 
