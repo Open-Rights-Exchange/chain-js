@@ -18,6 +18,7 @@ import {
   Signature,
   TransactionOptions,
   TransactionStatus,
+  TransactionSupportedExpirationOptions
 } from '../models'
 import { AsymmetricEncryptedData } from '../crypto/asymmetricModels'
 
@@ -43,6 +44,8 @@ export interface Chain {
   composeAction(chainActionType: any, args: any): Promise<any>
   /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
   decomposeAction(action: any): Promise<{ chainActionType: any; args: any; partial?: boolean }[]>
+  /** Returns the supported expiration option metadata */
+  expirationSupportedOptions: TransactionSupportedExpirationOptions
   /** Fetch balance for token (or native chain asset)
    * If no value is provided for contract, some chains use the default token contract
    * Returns a string to allow for large numbers */
