@@ -1,4 +1,4 @@
-import { ChainEntityName, PublicKey } from '../models'
+import { AccountResources, ChainEntityName, PublicKey } from '../models'
 
 /**
  * The Account interface declares the operations that all concrete (chain)account classes must implement
@@ -26,4 +26,6 @@ export interface Account {
   supportsRecycling: boolean
   /** JSON representation of account data */
   toJson(): any
+  /** The resources that an account currently has available */
+  resources: AccountResources
 }
