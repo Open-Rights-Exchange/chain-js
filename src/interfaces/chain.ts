@@ -16,6 +16,7 @@ import {
   PrivateKey,
   PublicKey,
   Signature,
+  TransactionExpirationOptions,
   TransactionOptions,
   TransactionStatus,
 } from '../models'
@@ -43,6 +44,8 @@ export interface Chain {
   composeAction(chainActionType: any, args: any): Promise<any>
   /** Decompose a transaction action to determine its standard action type (if any) and retrieve its data */
   decomposeAction(action: any): Promise<{ chainActionType: any; args: any; partial?: boolean }[]>
+  /** Transaction expiration constraints */
+  transactionExpirationOptions: TransactionExpirationOptions
   /** Fetch balance for token (or native chain asset)
    * If no value is provided for contract, some chains use the default token contract
    * Returns a string to allow for large numbers */
@@ -136,6 +139,8 @@ export interface Chain {
   signMessage(data: string | Buffer, privateKey: PrivateKey): any
   /** Whether chain supports ability to get a publicKey from a signature */
   supportsGetPublicKeyFromSignature: boolean
+  /** Whether the chain supports resources */
+  supportsResources: boolean
   /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
    * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
   verifySignedMessage(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean

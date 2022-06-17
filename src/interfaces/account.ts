@@ -1,4 +1,4 @@
-import { ChainEntityName, PublicKey } from '../models'
+import { AccountResources, ChainEntityName, PublicKey } from '../models'
 
 /**
  * The Account interface declares the operations that all concrete (chain)account classes must implement
@@ -19,6 +19,8 @@ export interface Account {
   /** Sets the account name and associated address/public keys.
    * For some chains, loads the account from chain and populates this account object */
   load(accountName?: string): Promise<void>
+  /** The resources that an account currently has available (throws if chain.supportsResources = false) */
+  resources: AccountResources
   /** Whether chain requires/supports account creation/registration
    * Ex: EOS requires account creation before calling contracts */
   supportsOnChainAccountRegistry: boolean
