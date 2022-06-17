@@ -72,3 +72,13 @@ export type ChainSettings = any
 
 /** Generic type for accessing an object by a key e.g. myObject[myKey] = ... */
 export type IndexedObject = { [key: string]: any }
+
+/** How completely the resources have been estimated */
+export enum ResourceEstimationType {
+  /** The resources returned are the deterministic and complete */
+  Exact = 'exact',
+  /** The resources returned are estimated or averaged */
+  Estimate = 'estimate',
+  /** Only some calculatable values are returned - the rest is null */
+  Partial = 'partial',
+}

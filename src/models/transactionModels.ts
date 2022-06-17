@@ -1,3 +1,5 @@
+import { ResourceEstimationType } from './generalModels'
+
 /** Transaction options used when contructing a transaction header */
 export type TransactionOptions = any
 
@@ -12,7 +14,11 @@ export type TransactionChainResponse = any
 export type TransactionId = string
 
 /** Resouces required for transaction */
-export type TransactionResources = any
+export type TransactionResources = {
+  [key: string]: any
+  /** How completely the resources have been estimated */
+  estimationType: ResourceEstimationType
+}
 
 /** Cost required for transaction */
 export type TransactionCost = any
@@ -43,14 +49,22 @@ export enum TransactionStatus {
   Pending = 'pending',
 }
 
+/** Type of expiration constraint */
 export enum TransactionExpirationType {
+  /** No expiration constraint */
   None = 'none',
+  /** transaction is only valid between a start block and end block - the start and end are usually a limited number of blocks or seconds apart */
   Window = 'window',
+  /** transaction will expire at a number of blocks or seconds in the future */
   Deadline = 'deadline',
 }
 
-export type TransactionSupportedExpirationOptions = {
+/** Transaction expiration constraints */
+export type TransactionExpirationOptions = {
+  /** Type of expiration constraint */
   transactionsExpirationType: TransactionExpirationType
+  /** the maximum number of seconds that a transaction can valid for from now (limits how far in future is valid) */
   maxFutureSeconds?: number
-  maxWindowOfSeconds?: number
+  /** the maximum width between the start block and end block (in seconds) */
+  maxWindowSeconds?: number
 }

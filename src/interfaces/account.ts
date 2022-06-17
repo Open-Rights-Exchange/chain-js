@@ -19,6 +19,8 @@ export interface Account {
   /** Sets the account name and associated address/public keys.
    * For some chains, loads the account from chain and populates this account object */
   load(accountName?: string): Promise<void>
+  /** The resources that an account currently has available (throws if chain.supportsResources = false) */
+  resources: AccountResources
   /** Whether chain requires/supports account creation/registration
    * Ex: EOS requires account creation before calling contracts */
   supportsOnChainAccountRegistry: boolean
@@ -26,6 +28,4 @@ export interface Account {
   supportsRecycling: boolean
   /** JSON representation of account data */
   toJson(): any
-  /** The resources that an account currently has available */
-  resources: AccountResources
 }
