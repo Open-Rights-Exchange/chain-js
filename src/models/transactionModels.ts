@@ -68,3 +68,10 @@ export type TransactionExpirationOptions = {
   /** the maximum width between the start block and end block (in seconds) */
   maxWindowSeconds?: number
 }
+
+/** Transaction fee multipliers */
+export type TransactionFeePriorityMultipliers = {
+  slow: number
+  average: number
+  fast: number
+}
