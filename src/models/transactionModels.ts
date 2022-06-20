@@ -71,7 +71,5 @@ export type TransactionExpirationOptions = {
 
 /** Transaction fee multipliers */
 export type TransactionFeePriorityMultipliers = {
-  slow: number
-  average: number
-  fast: number
+  [key in TxExecutionPriority]: number
 }
