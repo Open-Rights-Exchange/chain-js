@@ -52,8 +52,6 @@ export interface Transaction {
   signBuffer: any
   /** Whether the chain allow a pending transaction to be cancelled */
   supportsCancel: boolean
-  /** Whether the chain uses fees for transactions */
-  supportsFee: boolean
   /** Whether the chain supports signing a transactions using a multi-signature account */
   supportsMultisigTransaction: boolean
   /** Returns transaction hash that can be used to query the transaction on chain
@@ -79,8 +77,6 @@ export interface Transaction {
   /** Internally creates Raw Transaction data.
    *  Requires at least one action set. Must be called before sign() */
   prepareToBeSigned(): Promise<void>
-  /** Whether a transaction requires chain resources to execute */
-  supportsResources: boolean
   /** Gets estimated cost in chain specific units to execute this transaction (at current chain rates) */
   resourcesRequired(): Promise<TransactionResources>
   /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) */

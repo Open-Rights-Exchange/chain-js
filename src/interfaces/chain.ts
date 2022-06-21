@@ -137,6 +137,8 @@ export interface Chain {
   sign(data: string | Buffer, privateKey: PrivateKey): any
   /** Signs data as a message using private key (first appending additional required data if any) */
   signMessage(data: string | Buffer, privateKey: PrivateKey): any
+  /** Whether the chain uses fees for transactions */
+  supportsFee: boolean
   /** Whether chain supports ability to get a publicKey from a signature */
   supportsGetPublicKeyFromSignature: boolean
   /** Whether the chain supports resources */
