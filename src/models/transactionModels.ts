@@ -62,7 +62,7 @@ export enum TransactionExpirationType {
 /** Transaction expiration constraints */
 export type TransactionExpirationOptions = {
   /** Type of expiration constraint */
-  transactionsExpirationType: TransactionExpirationType
+  transactionExpirationType: TransactionExpirationType
   /** the maximum number of seconds that a transaction can valid for from now (limits how far in future is valid) */
   maxFutureSeconds?: number
   /** the maximum width between the start block and end block (in seconds) */
