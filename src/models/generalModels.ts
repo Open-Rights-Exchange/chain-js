@@ -79,6 +79,4 @@ export enum ResourceEstimationType {
   Exact = 'exact',
   /** The resources returned are estimated or averaged */
   Estimate = 'estimate',
-  /** Only some calculatable values are returned - the rest is null */
-  Partial = 'partial',
 }
