@@ -74,7 +74,7 @@ More chain plug-ins will be coming soon. You can also build a plug-in to support
 
 Just install the chainjs library to get started
 ```bash
- $ yarn add @open-rights-exchange/chainjs
+ $ yarn add @open-rights-exchange/chain-js
 ```
 
 To run ts files (and examples), use ts-node (with the --files option to include local customTypes)
