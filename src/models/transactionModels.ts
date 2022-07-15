@@ -73,3 +73,8 @@ export type TransactionExpirationOptions = {
 export type TransactionFeePriorityMultipliers = {
   [key in TxExecutionPriority]: number
 }
+
+export type ActualCost = {
+  fee?: any
+  resources?: any
+}

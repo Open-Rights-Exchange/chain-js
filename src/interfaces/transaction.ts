@@ -1,4 +1,5 @@
 import {
+  ActualCost,
   ConfirmType,
   PrivateKey,
   PublicKey,
@@ -57,6 +58,7 @@ export interface Transaction {
   /** Returns transaction hash that can be used to query the transaction on chain
    *  Cannot be called before signing the transaction */
   transactionId: string
+  actualCost: ActualCost
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */
