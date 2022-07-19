@@ -1,4 +1,5 @@
 import {
+  ActualCost,
   ConfirmType,
   PrivateKey,
   PublicKey,
@@ -57,6 +58,9 @@ export interface Transaction {
   /** Returns transaction hash that can be used to query the transaction on chain
    *  Cannot be called before signing the transaction */
   transactionId: string
+  /** Cost that is paid after transaction has executed on chain
+   * Return format is up to chain's supported fee/resources structure */
+  actualCost: ActualCost
   /** Add an action to the array of attached actions.
    *  Can't add action if any signatures are attached
    *  since it would invalidate existing signatures. */
@@ -68,10 +72,6 @@ export interface Transaction {
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
-  /** Cost that is paid after transaction has executed on chain
-   * Return format is string of chain's default native currency unit
-   * Throws if transaction not found on-chain */
-  getActualCost(): Promise<string>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.
