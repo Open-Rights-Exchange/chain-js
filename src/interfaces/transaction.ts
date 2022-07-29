@@ -67,11 +67,15 @@ export interface Transaction {
   addAction(action: any, asFirstAction?: boolean): void
   /** Add a signature to the set of attached signatures. Automatically de-duplicates values. */
   addSignatures(signature: Signature[]): Promise<void>
+  /** Date (and time) transaction expires - not supported by all chains */
+  expiresOn(): Promise<Date>
   /** Whether there is an attached signature for the publicKey for the authorization (e.g. account/permission)
    *  May need to call chain (async) to fetch publicKey(s) for authorization(s) */
   hasSignatureForAuthorization?(authorization: any): Promise<boolean>
   /** Whether there is an attached signature for the provided publicKey */
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
+  /** Whether the transaction has expired - not supported by all chains */
+  isExpired(): Promise<boolean>
   /** Get the suggested fee for this transaction */
   getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
   /** Internally creates Raw Transaction data.
@@ -96,4 +100,6 @@ export interface Transaction {
   /** Verifies that all accounts and permisison for actions exist on chain.
    *  Throws if any problems */
   validate(): Promise<void>
+  /** Date (and time) when transaction can first be sent to the chain (before which the transaction will fail) - not supported by all chains */
+  validOn(): Promise<Date>
 }
