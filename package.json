@@ -16,7 +16,7 @@
     "lint-fix": "./node_modules/.bin/eslint src --fix",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
-    "test": "jest --runInBand --coverage --detectOpenHandles --maxWorkers=1",
+    "test": "jest --coverage --maxWorkers=1",
     "localpublish": "zalc publish && zalc push",
     "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && ./fixup"
   },
