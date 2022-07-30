@@ -20,8 +20,8 @@ export type TransactionResources = {
   estimationType: ResourceEstimationType
 }
 
-/** Cost required for transaction */
-export type TransactionCost = any
+/** Fee required for transaction */
+export type TransactionFee = any
 
 /** Transaction fee priority */
 export enum TxExecutionPriority {
