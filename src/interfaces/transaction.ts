@@ -3,8 +3,8 @@ import {
   ConfirmType,
   PrivateKey,
   PublicKey,
+  ResourceEstimationType,
   Signature,
-  TransactionCost,
   TransactionOptions,
   TransactionResources,
   TransactionResult,
@@ -76,15 +76,15 @@ export interface Transaction {
   hasSignatureForPublicKey(publicKey: PublicKey): boolean
   /** Whether the transaction has expired - not supported by all chains */
   isExpired(): Promise<boolean>
-  /** Get the suggested fee for this transaction */
-  getSuggestedFee(priority: TxExecutionPriority): Promise<TransactionCost>
+  /** Get the suggested fee for this transaction - feeStringified is a stringified JSON object */
+  getSuggestedFee(priority: TxExecutionPriority): Promise<{ estimationType: ResourceEstimationType, feeStringified: string}>
   /** Internally creates Raw Transaction data.
    *  Requires at least one action set. Must be called before sign() */
   prepareToBeSigned(): Promise<void>
   /** Gets estimated cost in chain specific units to execute this transaction (at current chain rates) */
   resourcesRequired(): Promise<TransactionResources>
-  /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) */
-  setDesiredFee(desiredFee: TransactionCost, options?: any): Promise<void>
+  /** set the fee that you would like to pay (based on maxFeeIncreasePercentage) - desiredFeeStringified is a stringified JSON object */
+  setDesiredFee(desiredFeeStringified: string, options?: any): Promise<void>
   /** Set the body of the transaction using actions or raw transaction data
    *  This is one of the ways to set the actions for the transaction */
   setTransaction(transaction: any): Promise<void>
