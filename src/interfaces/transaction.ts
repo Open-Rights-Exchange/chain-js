@@ -77,7 +77,9 @@ export interface Transaction {
   /** Whether the transaction has expired - not supported by all chains */
   isExpired(): Promise<boolean>
   /** Get the suggested fee for this transaction - feeStringified is a stringified JSON object */
-  getSuggestedFee(priority: TxExecutionPriority): Promise<{ estimationType: ResourceEstimationType, feeStringified: string}>
+  getSuggestedFee(
+    priority: TxExecutionPriority,
+  ): Promise<{ estimationType: ResourceEstimationType; feeStringified: string }>
   /** Internally creates Raw Transaction data.
    *  Requires at least one action set. Must be called before sign() */
   prepareToBeSigned(): Promise<void>
