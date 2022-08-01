@@ -75,8 +75,10 @@ export type IndexedObject = { [key: string]: any }
 
 /** How completely the resources have been estimated */
 export enum ResourceEstimationType {
-  /** The resources returned are the deterministic and complete */
+  /** Resources are the deterministic and complete */
   Exact = 'exact',
-  /** The resources returned are estimated or averaged */
+  /** Resources are estimated or averaged */
   Estimate = 'estimate',
+  /** Resources could not be partially or completely estimated */
+  NotEstimateable = 'notEstimateable',
 }
