@@ -21,6 +21,7 @@ import {
   TransactionStatus,
 } from '../models'
 import { AsymmetricEncryptedData } from '../crypto/asymmetricModels'
+import { ChainState } from './chainState'
 
 /** The Chain interface declares the operations that all concrete chains must implement */
 export interface Chain {
@@ -28,6 +29,8 @@ export interface Chain {
   chainId: string
   /** Retrieve lastest chain info including head block number and time */
   chainInfo: ChainInfo
+  /** Retrieve lastest chain info including head block number and time */
+  chainState?: ChainState
   /** Returns last datetime chain info was retrieved */
   isConnected: boolean
   /** Returns chain type enum - resolves to chain family as a string e.g. 'eos' */
