@@ -29,7 +29,7 @@ export interface Chain {
   chainId: string
   /** Retrieve lastest chain info including head block number and time */
   chainInfo: ChainInfo
-  /** Retrieve lastest chain info including head block number and time */
+  /** Retrieve the current ChainState  */
   chainState?: ChainState
   /** Returns last datetime chain info was retrieved */
   isConnected: boolean
