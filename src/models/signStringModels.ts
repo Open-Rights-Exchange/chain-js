@@ -3,8 +3,7 @@ export type SignStringOptions = {
   signMethod: string
 }
 
-/** Transaction receipt returned from chain after submitting the transaction */
-/** It can contain fields like transaction id, transaction hash etc */
+/** Result of the signString transacion containing the signature and any other details the signer would like to return */
 export type SignStringSignResult = {
   signature: string
   details?: any
