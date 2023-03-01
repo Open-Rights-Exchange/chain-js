@@ -1,5 +1,6 @@
 import { ChainError } from '../errors'
 import { Transaction } from './transaction'
+import { SignString } from './signString'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import { Asymmetric, GenericCrypto } from '../crypto'
@@ -16,6 +17,7 @@ import {
   PrivateKey,
   PublicKey,
   Signature,
+  SignStringOptions,
   TransactionExpirationOptions,
   TransactionOptions,
   TransactionStatus,
@@ -73,6 +75,8 @@ export interface Chain {
     CreateAccount(options?: any): Promise<CreateAccount>
     /** Return a chain Transaction object used to compose and send transactions */
     Transaction(options?: TransactionOptions): Promise<Transaction>
+    /** Return a SignTransaction object used to sign structures other than transactions */
+    SignString(data: any, options?: SignStringOptions): Promise<SignString>
   }
 
   // Transaction functions
