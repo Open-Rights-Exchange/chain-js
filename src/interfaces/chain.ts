@@ -147,8 +147,8 @@ export interface Chain {
   supportsGetPublicKeyFromSignature: boolean
   /** Whether the chain supports resources */
   supportsResources: boolean
-  /** Whether the chain suppports ERC712 data type signature*/
-  supportsTypedDataSignature: boolean
+  /** Whether the chain's signMessage feature supports signing a typed data object (ex: ERC712 data type for Ethereum) */
+  supportsSignMessageTypedData: boolean
   /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
    * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
   verifySignedMessage(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
