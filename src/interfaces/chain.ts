@@ -1,5 +1,6 @@
 import { ChainError } from '../errors'
 import { Transaction } from './transaction'
+import { SignMessage } from './signMessage'
 import { CreateAccount } from './createAccount'
 import { Account } from './account'
 import { Asymmetric, GenericCrypto } from '../crypto'
@@ -16,6 +17,7 @@ import {
   PrivateKey,
   PublicKey,
   Signature,
+  SignMessageOptions,
   TransactionExpirationOptions,
   TransactionOptions,
   TransactionStatus,
@@ -73,6 +75,8 @@ export interface Chain {
     CreateAccount(options?: any): Promise<CreateAccount>
     /** Return a chain Transaction object used to compose and send transactions */
     Transaction(options?: TransactionOptions): Promise<Transaction>
+    /** Return a SignTransaction object used to sign structures other than transactions */
+    SignMessage(data: any, options?: SignMessageOptions): Promise<SignMessage>
   }
 
   // Transaction functions
@@ -143,6 +147,8 @@ export interface Chain {
   supportsGetPublicKeyFromSignature: boolean
   /** Whether the chain supports resources */
   supportsResources: boolean
+  /** Whether the chain's signMessage feature supports signing a typed data object (ex: ERC712 data type for Ethereum) */
+  supportsSignMessageTypedData: boolean
   /** Verify that a 'personal message' was signed using the given key (signed with the private key for the provided public key)
    * This differs from verifySignedWithPublicKey() because a message might include additional strings appended (as required by chain best-practices) */
   verifySignedMessage(data: string | Buffer, publicKey: PublicKey, signature: Signature): boolean
